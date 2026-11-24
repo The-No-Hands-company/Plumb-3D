@@ -218,6 +218,17 @@ impl Material {
         }
     }
 
+    /// Evaluates base albedo color for lighting integration
+    pub fn albedo(&self, uv: Vec2, hit_pos: Vec3, normal: Vec3) -> Vec3 {
+        match self {
+            Material::Lambertian { albedo } => albedo.evaluate(uv, hit_pos, normal),
+            Material::Metal { albedo, .. } => albedo.evaluate(uv, hit_pos, normal),
+            Material::Dielectric { albedo, .. } => albedo.evaluate(uv, hit_pos, normal),
+            Material::Principled { base_color, .. } => base_color.evaluate(uv, hit_pos, normal),
+            Material::Emissive { .. } => Vec3::ZERO,
+        }
+    }
+
     pub fn is_emissive(&self) -> bool {
         match self {
             Material::Emissive { .. } => true,

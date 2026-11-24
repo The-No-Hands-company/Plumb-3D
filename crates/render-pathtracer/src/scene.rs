@@ -12,6 +12,9 @@ pub struct PathTracerScene {
     pub sun_direction: Option<Vec3>,
     pub sun_color: Vec3,
     pub sun_intensity: f32,
+    pub background_zenith: Option<Vec3>,
+    pub background_horizon: Option<Vec3>,
+    pub background_ground: Option<Vec3>,
 }
 
 impl PathTracerScene {
@@ -31,7 +34,18 @@ impl PathTracerScene {
             sun_direction: None,
             sun_color: Vec3::new(1.0, 0.95, 0.8),
             sun_intensity: 1.0,
+            background_zenith: None,
+            background_horizon: None,
+            background_ground: None,
         }
+    }
+
+    /// Sets custom background environment gradient (zenith, horizon, ground)
+    pub fn with_background(mut self, zenith: Vec3, horizon: Vec3, ground: Vec3) -> Self {
+        self.background_zenith = Some(zenith);
+        self.background_horizon = Some(horizon);
+        self.background_ground = Some(ground);
+        self
     }
 
     /// Sets the physical sun direction, color, and intensity for atmospheric sky evaluation.
@@ -149,10 +163,11 @@ impl PathTracerScene {
                         sun_direction = Some(if dir.length_squared() > 1e-4 { dir } else { Vec3::new(0.5, 0.8, 0.3).normalize() });
                         sun_color = *color;
                         sun_intensity = *intensity;
+                    } else {
+                        let light_mat = materials.len();
+                        materials.push(Material::Emissive { radiance: *color * (*intensity).max(1.0) });
+                        append_light_geometry(light_pos, *light_type, light_mat, &mut triangles);
                     }
-                    let light_mat = materials.len();
-                    materials.push(Material::Emissive { radiance: *color * (*intensity).max(1.0) });
-                    append_light_geometry(light_pos, *light_type, light_mat, &mut triangles);
                 }
                 _ => {}
             }
@@ -187,9 +202,9 @@ impl PathTracerScene {
     pub fn sky_radiance(&self, ray_dir: Vec3) -> Vec3 {
         let y = ray_dir.y.clamp(-1.0, 1.0);
         let t = 0.5 * (y + 1.0);
-        let zenith = Vec3::new(0.35, 0.55, 0.95) * 0.9;
-        let horizon = Vec3::new(0.85, 0.88, 0.95);
-        let ground = Vec3::new(0.18, 0.19, 0.22) * 0.5;
+        let zenith = self.background_zenith.unwrap_or(Vec3::new(0.35, 0.55, 0.95) * 0.9);
+        let horizon = self.background_horizon.unwrap_or(Vec3::new(0.85, 0.88, 0.95));
+        let ground = self.background_ground.unwrap_or(Vec3::new(0.18, 0.19, 0.22) * 0.5);
 
         let mut ambient = if y >= 0.0 {
             horizon * (1.0 - t) + zenith * t

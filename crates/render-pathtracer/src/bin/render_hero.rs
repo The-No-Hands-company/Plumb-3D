@@ -1,4 +1,4 @@
-use core_math::{vec3, EulerRot, Quat, Transform};
+use core_math::{vec3, Transform};
 use geo_kernel::Primitives;
 use graph_engine::{Material, NodeData, SceneGraph, SceneNode};
 use render_pathtracer::{
@@ -9,104 +9,107 @@ use render_pathtracer::{
 use std::time::Instant;
 
 fn main() {
-    println!("🎨 Rendering Plumb Bob Hero Splash Art with Monte Carlo Path Tracer...");
+    println!("🎨 Rendering Plumb Bob Hero Splash Art (1280x720 ACES Filmic Studio Render)...");
     let start_time = Instant::now();
 
     let mut scene = SceneGraph::new();
 
-    // 1. Plumb Bob Mascot (Architectural Brass / Gold)
-    let plumb_mesh = Primitives::create_plumb_bob();
+    // 1. Plumb Bob Mascot (64-segment precision architectural lathe mesh)
+    let plumb_mesh = Primitives::create_plumb_bob_detailed(64);
     let mut plumb_node = SceneNode::new_mesh(
         "PlumbBob_Hero",
-        Transform::from_translation(vec3(0.0, 0.2, 0.0)),
+        Transform::from_translation(vec3(0.0, 0.0, 0.0)),
         plumb_mesh,
     );
     if let NodeData::Mesh { ref mut materials, .. } = plumb_node.data {
-        let mat = Material::new("PlumbGold", [1.0, 0.80, 0.38, 1.0], 0.95, 0.16, 0.0, 0);
-        materials.push(mat);
+        // Rich architectural imperial brass / gold with 88% metallic and 0.20 roughness for silky, luxurious highlights
+        materials[0] = Material::new("PlumbGold", [1.0, 0.78, 0.28, 1.0], 0.88, 0.20, 0.0, 0);
     }
     scene.add_node(plumb_node);
 
-    // 2. Suspended Plumb Line (Braided Cord)
-    let string_mesh = Primitives::create_cylinder(0.02, 3.0, 12);
-    let mut string_node = SceneNode::new_mesh(
-        "PlumbLine",
-        Transform::from_translation(vec3(0.0, 3.8, 0.0)),
-        string_mesh,
+    // 2. Suspended Plumb Line (Braided Anthracite Cord)
+    let cord_mesh = Primitives::create_cylinder(0.018, 4.0, 24);
+    let mut cord_node = SceneNode::new_mesh(
+        "PlumbCord",
+        Transform::from_translation(vec3(0.0, 4.25, 0.0)),
+        cord_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = string_node.data {
-        let mat = Material::new("BraidedCord", [0.2, 0.22, 0.25, 1.0], 0.05, 0.8, 0.0, 0);
-        materials.push(mat);
+    if let NodeData::Mesh { ref mut materials, .. } = cord_node.data {
+        materials[0] = Material::new("AnthraciteCord", [0.15, 0.16, 0.18, 1.0], 0.1, 0.7, 0.0, 0);
     }
-    scene.add_node(string_node);
+    scene.add_node(cord_node);
 
-    // 3. Studio Pedestal Base
-    let base_mesh = Primitives::create_cylinder(3.5, 0.3, 32);
-    let mut base_node = SceneNode::new_mesh(
-        "Pedestal",
-        Transform::from_translation(vec3(0.0, -2.2, 0.0)),
-        base_mesh,
+    // 3. Dark Reflective Studio Pedestal Floor
+    let floor_mesh = Primitives::create_cylinder(8.0, 0.2, 64);
+    let mut floor_node = SceneNode::new_mesh(
+        "StudioFloor",
+        Transform::from_translation(vec3(0.0, -2.45, 0.0)),
+        floor_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = base_node.data {
-        let mat = Material::new("DarkPedestal", [0.08, 0.09, 0.12, 1.0], 0.3, 0.25, 0.0, 3);
-        materials.push(mat);
+    if let NodeData::Mesh { ref mut materials, .. } = floor_node.data {
+        materials[0] = Material::new("StudioFloorMat", [0.05, 0.06, 0.08, 1.0], 0.80, 0.18, 0.0, 2);
     }
-    scene.add_node(base_node);
+    scene.add_node(floor_node);
 
-    // 4. Studio 3-Point Lighting
-    // Key Light (Warm Sunlight)
+    // 4. Studio Lighting Rig
+    // Directional Sun Light (Smooth, noise-free studio key illumination without mesh markers)
+    let sun = SceneNode::new_directional_light(
+        "StudioSun",
+        Transform::from_rotation(core_math::Quat::from_euler(core_math::EulerRot::XYZ, -0.65, 0.85, 0.0)),
+        vec3(1.0, 0.94, 0.82),
+        4.5,
+    );
+    scene.add_node(sun);
+
+    // Warm Key Light (shining on front-right chamfer)
     let key_light = SceneNode::new_point_light(
         "KeyLight",
-        Transform::from_translation(vec3(4.0, 5.0, 4.0)),
-        vec3(1.0, 0.94, 0.86),
-        18.0,
+        Transform::from_translation(vec3(4.0, 4.2, 4.2)),
+        vec3(1.0, 0.95, 0.86),
+        36.0,
         50.0,
     );
     scene.add_node(key_light);
 
-    // Fill Light (Cool Soft Sky)
+    // Front Studio Fill Light
     let fill_light = SceneNode::new_point_light(
         "FillLight",
-        Transform::from_translation(vec3(-5.0, 3.0, 2.0)),
-        vec3(0.65, 0.8, 1.0),
-        8.0,
+        Transform::from_translation(vec3(1.0, 2.0, 5.5)),
+        vec3(0.95, 0.90, 0.82),
+        18.0,
         50.0,
     );
     scene.add_node(fill_light);
 
-    // Rim / Edge Light (High intensity backlight for gold silhouette)
+    // Electric Cyan Rim Light (Placed directly behind the widest body of the plumb bob so it is occluded by the mascot)
     let rim_light = SceneNode::new_point_light(
         "RimLight",
-        Transform::from_translation(vec3(0.0, 4.0, -4.5)),
-        vec3(1.0, 0.85, 0.5),
-        25.0,
+        Transform::from_translation(vec3(-0.1, 0.3, -1.8)),
+        vec3(0.3, 0.85, 1.0),
+        24.0,
         50.0,
     );
     scene.add_node(rim_light);
 
-    // Physical Sun
-    let sun = SceneNode::new_directional_light(
-        "Sun",
-        Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.8, 0.6, 0.0)),
-        vec3(1.0, 0.95, 0.85),
-        2.5,
-    );
-    scene.add_node(sun);
+    // Build ray tracing scene & configure dark moody DCC studio environment
+    let pt_scene = PathTracerScene::from_scene_graph(&scene)
+        .with_background(
+            vec3(0.040, 0.048, 0.072),
+            vec3(0.024, 0.028, 0.040),
+            vec3(0.012, 0.014, 0.020),
+        );
+    println!("✓ BVH constructed successfully (emissive triangles: {})", pt_scene.emissive_triangles.len());
 
-    // Build ray tracing scene & BVH
-    let pt_scene = PathTracerScene::from_scene_graph(&scene);
-    println!("✓ BVH constructed successfully for hero scene");
-
-    // Configure camera: dramatic 3/4 perspective looking at the plumb bob
-    let width = 720;
-    let height = 480;
-    let look_from = vec3(2.8, 0.8, 4.2);
-    let look_at = vec3(0.0, 0.1, 0.0);
+    // 5. Camera: 1280x720 16:9 Cinematic Widescreen Framing
+    let width = 1280;
+    let height = 720;
+    let look_from = vec3(4.2, 1.4, 6.2);
+    let look_at = vec3(0.0, 0.15, 0.0);
     let vup = vec3(0.0, 1.0, 0.0);
     let vfov = 38.0_f32.to_radians();
     let aspect = width as f32 / height as f32;
     let focus_dist = (look_from - look_at).length();
-    let aperture = 0.025; // Subtle bokeh
+    let aperture = 0.005; // Sharp focal plane with creamy background bokeh
 
     let camera = PathtracerCamera::new_thin_lens(
         look_from,
@@ -119,18 +122,29 @@ fn main() {
     );
 
     let mut buffer = RenderBuffer::new(width, height);
-    let target_samples = 96;
+    let target_samples = 144;
 
     for s in 0..target_samples {
-        buffer.render_sample_pass(&pt_scene, &camera, 4, None);
+        buffer.render_sample_pass(&pt_scene, &camera, 5, None);
         if (s + 1) % 16 == 0 || s + 1 == target_samples {
-            print!("\rRendering pass: {}/{} samples ({:.1}%)", s + 1, target_samples, ((s + 1) as f32 / target_samples as f32) * 100.0);
+            print!(
+                "\rRendering pass: {:3}/{} samples ({:5.1}%)",
+                s + 1,
+                target_samples,
+                ((s + 1) as f32 / target_samples as f32) * 100.0
+            );
             std::io::Write::flush(&mut std::io::stdout()).unwrap();
         }
     }
     println!();
 
     let output_path = "docs/images/plumb_bob_splash.png";
-    buffer.save_png(output_path).expect("Save PNG render");
-    println!("✨ Hero render saved successfully to: {} (Elapsed: {:.2?})", output_path, start_time.elapsed());
+    buffer
+        .save_png_filmic(output_path, true)
+        .expect("Save PNG render with ACES Filmic tone mapping");
+    println!(
+        "✨ Ultra-high-end hero render saved successfully to: {} (Elapsed: {:.2?})",
+        output_path,
+        start_time.elapsed()
+    );
 }

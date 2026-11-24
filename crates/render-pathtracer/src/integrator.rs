@@ -59,10 +59,15 @@ pub fn trace_path(
                         let light_mat = &scene.materials[light_tri.material_id % scene.materials.len()];
                         let light_emission = light_mat.emission();
 
-                        // Geometry term: G = cos_theta * cos_light / dist_sq
+                        // Geometry term: G = cos_theta * cos_light / dist_sq weighted by triangle area
+                        let edge1 = light_tri.v1 - light_tri.v0;
+                        let edge2 = light_tri.v2 - light_tri.v0;
+                        let area = 0.5 * edge1.cross(edge2).length();
+
                         let g = (cos_theta * cos_light / dist_sq.max(1e-4)).min(2.0);
                         let light_pdf = 1.0 / scene.emissive_triangles.len() as f32;
-                        accumulated_radiance += throughput * light_emission * g / light_pdf.max(1e-4);
+                        let albedo = material.albedo(hit.uv, hit.position, hit.normal);
+                        accumulated_radiance += throughput * albedo * light_emission * (g * area) / light_pdf.max(1e-4);
                     }
                 }
             }

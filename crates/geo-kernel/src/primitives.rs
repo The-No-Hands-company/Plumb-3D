@@ -514,8 +514,13 @@ impl Primitives {
     /// Create the signature mascot primitive for Plumb 3D: a high-precision architectural Plumb Bob.
     /// Features an ornamental suspension finial, brass knurled collar, conical body, and precision needle tip.
     pub fn create_plumb_bob() -> Mesh {
+        Self::create_plumb_bob_detailed(24)
+    }
+
+    /// Create high-precision Plumb Bob mascot with custom circumferential tessellation.
+    pub fn create_plumb_bob_detailed(segments: usize) -> Mesh {
         let mut mesh = Mesh::new();
-        let segments = 24usize;
+        let segments = segments.max(8);
         let profile: &[(f32, f32)] = &[
             (0.00, 2.30),  // Top finial peak (North pole)
             (0.12, 2.22),  // Suspension eye ring top

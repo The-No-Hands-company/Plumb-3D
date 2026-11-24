@@ -115,6 +115,15 @@ impl RenderBuffer {
 
     /// Converts the floating-point radiance buffer into an sRGB 8-bit RGBA image
     pub fn to_rgba8(&self) -> Vec<u8> {
+        self.to_rgba8_internal(false)
+    }
+
+    /// Converts using ACES Filmic tone mapping for rich cinematic contrast and highlights
+    pub fn to_rgba8_filmic(&self) -> Vec<u8> {
+        self.to_rgba8_internal(true)
+    }
+
+    fn to_rgba8_internal(&self, filmic: bool) -> Vec<u8> {
         let size = (self.width * self.height) as usize;
         let mut bytes = Vec::with_capacity(size * 4);
 
@@ -127,8 +136,19 @@ impl RenderBuffer {
         for &radiance in &self.accumulated_radiance {
             let color = radiance * inv_samples;
 
-            // Reinhard tone mapping: c / (1 + c)
-            let mapped = color / (Vec3::ONE + color);
+            let mapped = if filmic {
+                // ACES Filmic tone mapping curve (Krzysztof Narkowicz)
+                let a = 2.51_f32;
+                let b = 0.03_f32;
+                let c = 2.43_f32;
+                let d = 0.59_f32;
+                let e = 0.14_f32;
+                ((color * (a * color + b)) / (color * (c * color + d) + e))
+                    .clamp(Vec3::ZERO, Vec3::ONE)
+            } else {
+                // Reinhard tone mapping: c / (1 + c)
+                color / (Vec3::ONE + color)
+            };
 
             // sRGB gamma correction (approx 2.2)
             let gamma = 1.0 / 2.2;
@@ -147,7 +167,12 @@ impl RenderBuffer {
 
     /// Saves the current render buffer to a PNG file on disk
     pub fn save_png(&self, path: &str) -> Result<(), String> {
-        let rgba = self.to_rgba8();
+        self.save_png_filmic(path, false)
+    }
+
+    /// Saves the current render buffer using ACES filmic tone mapping
+    pub fn save_png_filmic(&self, path: &str, filmic: bool) -> Result<(), String> {
+        let rgba = self.to_rgba8_internal(filmic);
         image::save_buffer(
             path,
             &rgba,
