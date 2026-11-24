@@ -33,16 +33,16 @@ fn main() {
         pt_scene.emissive_triangles.len()
     );
 
-    // 3. Cinematic 16:9 Camera (1280x720)
-    let width = 1280;
-    let height = 720;
+    // 3. Cinematic Ultrawide Banner Camera (1600x480, 3.33:1 panoramic aspect ratio)
+    let width = 1600;
+    let height = 480;
     let look_from = camera_state.eye_position();
     let look_at = camera_state.target;
     let vup = vec3(0.0, 1.0, 0.0);
     let vfov = camera_state.fov_y;
     let aspect = width as f32 / height as f32;
     let focus_dist = (look_from - look_at).length();
-    let aperture = 0.012; // Architectural camera aperture for soft subtle DoF
+    let aperture = 0.008; // Crisp architectural depth across wide panoramic frame
 
     let camera = PathtracerCamera::new_thin_lens(
         look_from,

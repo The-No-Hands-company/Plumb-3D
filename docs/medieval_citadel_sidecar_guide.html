@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plumb 3D — Medieval Citadel Sidecar Modeling Guide</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --bg: #0c0e12;
+      --panel: #14171f;
+      --panel-hover: #1b202b;
+      --border: #232a38;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --gold: #e2b357;
+      --gold-glow: rgba(226, 179, 87, 0.25);
+      --cyan: #38bdf8;
+      --amber: #fbbf24;
+      --moon: #93c5fd;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .keycap {
+      background: #1f2533;
+      border: 1px solid #374151;
+      border-bottom: 2px solid #111827;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #f8fafc;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+    .copyable {
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .copyable:hover {
+      background-color: rgba(226, 179, 87, 0.18);
+      color: #fef08a;
+    }
+    .task-item.completed span.task-text {
+      text-decoration: line-through;
+      color: #64748b;
+    }
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      display: inline-block;
+      vertical-align: middle;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #262f40; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3b465c; }
+  </style>
+</head>
+<body class="p-4 md:p-6 max-w-6xl mx-auto antialiased">
+
+  <!-- Sticky Top HUD / Progress Tracker -->
+  <aside aria-label="Workflow progress" class="sticky top-2 z-50 bg-[#14171fe6] backdrop-blur-md border border-[var(--border)] rounded-xl p-3 mb-6 shadow-2xl flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-3 h-3 rounded-full bg-[#e2b357] animate-pulse"></div>
+      <div>
+        <span class="text-xs font-mono font-bold tracking-widest text-[#e2b357] uppercase">PLUMB 3D SIDECAR HUD</span>
+        <h1 class="text-sm font-bold text-slate-200">Medieval Citadel & Fortress Masterclass</h1>
+      </div>
+    </div>
+
+    <!-- Progress Meter -->
+    <div class="flex items-center gap-3">
+      <div class="w-36 md:w-48 bg-[#0f1218] rounded-full h-2.5 overflow-hidden border border-slate-700">
+        <div id="progress-bar" class="bg-gradient-to-r from-amber-500 to-yellow-300 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+      <span id="progress-text" class="text-xs font-mono font-bold text-amber-400">0%</span>
+      <button onclick="resetChecklist()" class="text-[11px] text-slate-400 hover:text-slate-200 bg-[#1d222e] px-2 py-1 rounded border border-slate-700 hover:border-slate-500 transition">Reset</button>
+    </div>
+  </aside>
+
+  <!-- Navigation Anchor Tabs -->
+  <nav class="flex flex-wrap gap-2 mb-6">
+    <a href="#sec-overview" class="px-3 py-1.5 rounded-lg bg-[#181d26] hover:bg-[#222836] border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition">🏰 Overview</a>
+    <a href="#sec-keep" class="px-3 py-1.5 rounded-lg bg-[#181d26] hover:bg-[#222836] border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition">1. Keep Tower</a>
+    <a href="#sec-fortifications" class="px-3 py-1.5 rounded-lg bg-[#181d26] hover:bg-[#222836] border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition">2. Walls & Gates</a>
+    <a href="#sec-materials" class="px-3 py-1.5 rounded-lg bg-[#181d26] hover:bg-[#222836] border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition">3. Materials</a>
+    <a href="#sec-lighting" class="px-3 py-1.5 rounded-lg bg-[#181d26] hover:bg-[#222836] border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition">4. Lighting Rig</a>
+    <a href="#sec-camera" class="px-3 py-1.5 rounded-lg bg-[#181d26] hover:bg-[#222836] border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition">5. Camera</a>
+    <a href="#sec-render" class="px-3 py-1.5 rounded-lg bg-[#181d26] hover:bg-[#222836] border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition">6. Render & LookDev</a>
+  </nav>
+
+  <!-- Quick Copy Toast Notification -->
+  <div id="copy-toast" class="fixed bottom-6 right-6 bg-amber-400 text-black text-xs font-bold px-3 py-2 rounded-lg shadow-xl opacity-0 pointer-events-none transition-opacity duration-200 z-50">
+    Copied to clipboard!
+  </div>
+
+  <!-- SECTION: OVERVIEW & BLUEPRINT -->
+  <section id="sec-overview" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 mb-6 shadow-xl">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 border-b border-slate-800 pb-4">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span>🏰 Fortress Architectural Hierarchy</span>
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">Click any value in the guide to copy directly to your clipboard for quick input into Plumb 3D.</p>
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-slate-400">Mode:</span>
+        <span class="keycap">Tab</span> <span class="text-slate-300">Edit / Object</span>
+        <span class="text-slate-400 ml-2">Quick Search:</span>
+        <span class="keycap">F3</span>
+      </div>
+    </div>
+
+    <!-- ASCII Diagram Card -->
+    <pre class="bg-[#0b0e14] p-4 rounded-xl font-mono text-xs text-amber-200 border border-slate-800 overflow-x-auto leading-relaxed">
+                  / \          &lt;-- Conical Timber Roof (Cone r:3.4 h:3.5) &amp; Iron Finial
+                 /   \
+               |---|---|---|   &lt;-- Crenellated Parapet (16 Segments: 8 Merlons, 8 Insets)
+              ===============  &lt;-- Machicolation Flared Ring (Cylinder r:3.2 h:0.8)
+                 |       |
+      ===========| Keep  |=========== &lt;-- Curtain Rampart Walls (Cube s:7.0, 5.0, 1.4)
+     / Bastion   | Tower | Gatehouse \
+    +------------+-------+------------+ &lt;-- Battered Talus Base Plinth (Cylinder r:3.2 h:2.0)
+   ===================================== &lt;-- Courtyard Cobblestone Ground (r:22.0 h:0.3)
+    </pre>
+  </section>
+
+  <!-- SECTION 1: KEEP DONJON TOWER -->
+  <section id="sec-keep" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 mb-6 shadow-xl">
+    <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-4 border-b border-slate-800 pb-3">
+      <span class="w-6 h-6 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-mono font-bold">1</span>
+      Donjon Keep Tower (Step-by-Step)
+    </h2>
+
+    <div class="space-y-4">
+      <!-- Step 1.1 -->
+      <div class="task-item bg-[#0d1017] p-4 rounded-xl border border-slate-800 flex items-start gap-3">
+        <input type="checkbox" id="task-1" onchange="updateProgress()" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 bg-slate-900 border-slate-700">
+        <div class="flex-1 text-sm">
+          <label for="task-1" class="font-semibold text-slate-200 cursor-pointer task-text">1.1 Battered Talus Plinth Base</label>
+          <p class="text-xs text-slate-400 mt-1">Menu: <code class="text-amber-300">Add Primitive -&gt; Cylinder</code></p>
+          <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Radius: <span class="text-amber-400 font-bold copyable" onclick="copyVal('3.2')">3.2 m</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Height: <span class="text-amber-400 font-bold copyable" onclick="copyVal('2.0')">2.0 m</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Segments: <span class="text-amber-400 font-bold copyable" onclick="copyVal('24')">24</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Pos Y: <span class="text-amber-400 font-bold copyable" onclick="copyVal('1.0')">1.0 m</span></div>
+          </div>
+          <div class="mt-2 text-xs text-slate-400">Outliner Rename: <span class="text-slate-200 font-mono font-bold copyable bg-[#181d26] px-1.5 py-0.5 rounded" onclick="copyVal('Keep_Talus_Base')">Keep_Talus_Base</span></div>
+        </div>
+      </div>
+
+      <!-- Step 1.2 -->
+      <div class="task-item bg-[#0d1017] p-4 rounded-xl border border-slate-800 flex items-start gap-3">
+        <input type="checkbox" id="task-2" onchange="updateProgress()" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 bg-slate-900 border-slate-700">
+        <div class="flex-1 text-sm">
+          <label for="task-2" class="font-semibold text-slate-200 cursor-pointer task-text">1.2 Main Tower Shaft &amp; Modifier Stack</label>
+          <p class="text-xs text-slate-400 mt-1">Menu: <code class="text-amber-300">Add Primitive -&gt; Cylinder</code></p>
+          <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Radius: <span class="text-amber-400 font-bold copyable" onclick="copyVal('2.6')">2.6 m</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Height: <span class="text-amber-400 font-bold copyable" onclick="copyVal('7.5')">7.5 m</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Segments: <span class="text-amber-400 font-bold copyable" onclick="copyVal('24')">24</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Pos Y: <span class="text-amber-400 font-bold copyable" onclick="copyVal('5.75')">5.75 m</span></div>
+          </div>
+          <div class="mt-2 text-xs text-slate-400">Outliner Rename: <span class="text-slate-200 font-mono font-bold copyable bg-[#181d26] px-1.5 py-0.5 rounded" onclick="copyVal('Keep_Main_Tower')">Keep_Main_Tower</span></div>
+          <div class="mt-2 bg-[#17202e] border border-cyan-800/40 p-2.5 rounded-lg text-xs text-cyan-200">
+            <strong>Modifier Stack:</strong> Switch to Modifiers tab (<span class="keycap">Wrench</span>) -&gt; Click <code class="text-amber-300 font-bold">+ Bevel</code>.
+            Set Width to <span class="font-mono font-bold text-amber-400 copyable" onclick="copyVal('0.05')">0.05 m</span>, Segments: <span class="font-mono font-bold text-amber-400">2</span>. Catches real light reflections on corners.
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 1.3 -->
+      <div class="task-item bg-[#0d1017] p-4 rounded-xl border border-slate-800 flex items-start gap-3">
+        <input type="checkbox" id="task-3" onchange="updateProgress()" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 bg-slate-900 border-slate-700">
+        <div class="flex-1 text-sm">
+          <label for="task-3" class="font-semibold text-slate-200 cursor-pointer task-text">1.3 Norman Machicolation Flared Ring (Corbels)</label>
+          <p class="text-xs text-slate-400 mt-1">Menu: <code class="text-amber-300">Add Primitive -&gt; Cylinder</code></p>
+          <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Radius: <span class="text-amber-400 font-bold copyable" onclick="copyVal('3.2')">3.2 m</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Height: <span class="text-amber-400 font-bold copyable" onclick="copyVal('0.8')">0.8 m</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Segments: <span class="text-amber-400 font-bold copyable" onclick="copyVal('24')">24</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Pos Y: <span class="text-amber-400 font-bold copyable" onclick="copyVal('9.8')">9.8 m</span></div>
+          </div>
+          <div class="mt-2 text-xs text-slate-400">Outliner Rename: <span class="text-slate-200 font-mono font-bold copyable bg-[#181d26] px-1.5 py-0.5 rounded" onclick="copyVal('Keep_Machicolation_Ring')">Keep_Machicolation_Ring</span></div>
+        </div>
+      </div>
+
+      <!-- Step 1.4 -->
+      <div class="task-item bg-[#0d1017] p-4 rounded-xl border border-slate-800 flex items-start gap-3">
+        <input type="checkbox" id="task-4" onchange="updateProgress()" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 bg-slate-900 border-slate-700">
+        <div class="flex-1 text-sm">
+          <label for="task-4" class="font-semibold text-slate-200 cursor-pointer task-text">1.4 Crenellated Parapet &amp; Battlements Walkway</label>
+          <p class="text-xs text-slate-400 mt-1">Cylinder Primitive: Radius <code class="text-amber-400">3.25 m</code>, Height <code class="text-amber-400">0.9 m</code>, Segments <code class="text-amber-400 font-bold">16</code>, Pos Y: <code class="text-amber-400">10.65 m</code>. Name: <code class="text-slate-300">Keep_Crenels_Parapet</code>.</p>
+          <div class="mt-2 bg-[#121622] p-3 rounded-lg border border-slate-800 text-xs space-y-1.5">
+            <div class="text-amber-300 font-semibold">Modeling Operations (Edit Mode):</div>
+            <div>1. Press <span class="keycap">Tab</span> (Edit Mode), then <span class="keycap">3</span> (Face Select).</div>
+            <div>2. Select top disk face, press <span class="keycap">I</span> (Inset) and drag inward <span class="font-mono font-bold text-amber-400 copyable" onclick="copyVal('0.45')">0.45 m</span>.</div>
+            <div>3. Press <span class="keycap">E</span> (Extrude) and move downward <span class="font-mono font-bold text-amber-400 copyable" onclick="copyVal('-0.7')">-0.7 m</span> for the sunken walkway.</div>
+            <div>4. Select 8 alternating faces along top rim with <span class="keycap">Shift+LMB</span>. Press <span class="keycap">E</span> and extrude up <span class="font-mono font-bold text-amber-400 copyable" onclick="copyVal('0.5')">0.5 m</span> to form merlons!</div>
+            <div>5. Press <span class="keycap">Tab</span> to return to Object Mode.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 1.5 -->
+      <div class="task-item bg-[#0d1017] p-4 rounded-xl border border-slate-800 flex items-start gap-3">
+        <input type="checkbox" id="task-5" onchange="updateProgress()" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 bg-slate-900 border-slate-700">
+        <div class="flex-1 text-sm">
+          <label for="task-5" class="font-semibold text-slate-200 cursor-pointer task-text">1.5 Conical Timber Watchtower Roof &amp; Finial</label>
+          <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div class="bg-[#181d26] p-2.5 rounded border border-slate-800">
+              <span class="font-bold text-slate-200">Cone (Roof):</span> <span class="font-mono copyable text-slate-300" onclick="copyVal('Keep_Timber_Roof')">Keep_Timber_Roof</span><br>
+              Radius: <span class="text-amber-400 font-mono copyable" onclick="copyVal('3.4')">3.4 m</span> | Height: <span class="text-amber-400 font-mono copyable" onclick="copyVal('3.5')">3.5 m</span> | Pos Y: <span class="text-amber-400 font-mono copyable" onclick="copyVal('12.8')">12.8 m</span>
+            </div>
+            <div class="bg-[#181d26] p-2.5 rounded border border-slate-800">
+              <span class="font-bold text-slate-200">Cylinder (Finial):</span> <span class="font-mono copyable text-slate-300" onclick="copyVal('Roof_Iron_Finial')">Roof_Iron_Finial</span><br>
+              Radius: <span class="text-amber-400 font-mono copyable" onclick="copyVal('0.04')">0.04 m</span> | Height: <span class="text-amber-400 font-mono copyable" onclick="copyVal('1.2')">1.2 m</span> | Pos Y: <span class="text-amber-400 font-mono copyable" onclick="copyVal('15.0')">15.0 m</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: FORTIFICATIONS & ARCHITECTURE -->
+  <section id="sec-fortifications" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 mb-6 shadow-xl">
+    <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-4 border-b border-slate-800 pb-3">
+      <span class="w-6 h-6 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-mono font-bold">2</span>
+      Walls, Gatehouse &amp; Courtyard
+    </h2>
+
+    <div class="space-y-4">
+      <!-- Step 2.1 -->
+      <div class="task-item bg-[#0d1017] p-4 rounded-xl border border-slate-800 flex items-start gap-3">
+        <input type="checkbox" id="task-6" onchange="updateProgress()" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 bg-slate-900 border-slate-700">
+        <div class="flex-1 text-sm">
+          <label for="task-6" class="font-semibold text-slate-200 cursor-pointer task-text">2.1 West &amp; East Defensive Curtain Rampart Walls</label>
+          <p class="text-xs text-slate-400 mt-1">Add Cube, scale, and place flanking walls on both sides.</p>
+          <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">
+              <span class="text-slate-300 font-bold">Curtain_Wall_West:</span><br>
+              Pos: <span class="text-amber-400 copyable" onclick="copyVal('-5.5, 2.5, 0.0')">-5.5, 2.5, 0.0</span><br>
+              Scale: <span class="text-amber-400 copyable" onclick="copyVal('7.0, 5.0, 1.4')">7.0, 5.0, 1.4</span>
+            </div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">
+              <span class="text-slate-300 font-bold">Curtain_Wall_East:</span><br>
+              Pos: <span class="text-amber-400 copyable" onclick="copyVal('5.5, 2.5, 0.0')">5.5, 2.5, 0.0</span><br>
+              Scale: <span class="text-amber-400 copyable" onclick="copyVal('7.0, 5.0, 1.4')">7.0, 5.0, 1.4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2.2 -->
+      <div class="task-item bg-[#0d1017] p-4 rounded-xl border border-slate-800 flex items-start gap-3">
+        <input type="checkbox" id="task-7" onchange="updateProgress()" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 bg-slate-900 border-slate-700">
+        <div class="flex-1 text-sm">
+          <label for="task-7" class="font-semibold text-slate-200 cursor-pointer task-text">2.2 Corner Bastion Flanker Turret</label>
+          <p class="text-xs text-slate-400 mt-1">Add Cylinder at Eastern rampart terminus.</p>
+          <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Radius: <span class="text-amber-400 copyable" onclick="copyVal('1.8')">1.8 m</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Height: <span class="text-amber-400 copyable" onclick="copyVal('6.5')">6.5 m</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Segments: <span class="text-amber-400 copyable" onclick="copyVal('20')">20</span></div>
+            <div class="bg-[#181d26] p-2 rounded border border-slate-800">Pos: <span class="text-amber-400 copyable" onclick="copyVal('9.2, 3.25, 0.0')">9.2, 3.25, 0.0</span></div>
+          </div>
+          <div class="mt-2 text-xs text-slate-400">Rename: <span class="text-slate-200 font-mono font-bold copyable bg-[#181d26] px-1.5 py-0.5 rounded" onclick="copyVal('Bastion_East_Turret')">Bastion_East_Turret</span></div>
+        </div>
+      </div>
+
+      <!-- Step 2.3 -->
+      <div class="task-item bg-[#0d1017] p-4 rounded-xl border border-slate-800 flex items-start gap-3">
+        <input type="checkbox" id="task-8" onchange="updateProgress()" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 bg-slate-900 border-slate-700">
+        <div class="flex-1 text-sm">
+          <label for="task-8" class="font-semibold text-slate-200 cursor-pointer task-text">2.3 Fortified Gatehouse Arch &amp; Portcullis Grille</label>
+          <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+            <div class="bg-[#181d26] p-2.5 rounded border border-slate-800">
+              <span class="text-slate-200 font-bold">Gatehouse_Archway (Cube):</span><br>
+              Pos: <span class="text-amber-400 copyable" onclick="copyVal('0.0, 2.2, 3.0')">0.0, 2.2, 3.0</span><br>
+              Scale: <span class="text-amber-400 copyable" onclick="copyVal('3.6, 4.4, 1.8')">3.6, 4.4, 1.8</span>
+            </div>
+            <div class="bg-[#181d26] p-2.5 rounded border border-slate-800">
+              <span class="text-slate-200 font-bold">Portcullis_Iron_Grille (Cube):</span><br>
+              Pos: <span class="text-amber-400 copyable" onclick="copyVal('0.0, 1.8, 3.8')">0.0, 1.8, 3.8</span><br>
+              Scale: <span class="text-amber-400 copyable" onclick="copyVal('1.8, 3.2, 0.15')">1.8, 3.2, 0.15</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2.4 -->
+      <div class="task-item bg-[#0d1017] p-4 rounded-xl border border-slate-800 flex items-start gap-3">
+        <input type="checkbox" id="task-9" onchange="updateProgress()" class="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 bg-slate-900 border-slate-700">
+        <div class="flex-1 text-sm">
+          <label for="task-9" class="font-semibold text-slate-200 cursor-pointer task-text">2.4 Courtyard Cobblestone Ground &amp; Torch Sconces</label>
+          <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+            <div class="bg-[#181d26] p-2.5 rounded border border-slate-800">
+              <span class="text-slate-200 font-bold">Citadel_Courtyard_Ground:</span><br>
+              Radius: <span class="text-amber-400 copyable" onclick="copyVal('22.0')">22.0 m</span> | Height: <span class="text-amber-400 copyable" onclick="copyVal('0.3')">0.3 m</span><br>
+              Pos Y: <span class="text-amber-400 copyable" onclick="copyVal('-0.15')">-0.15 m</span> | Segments: <span class="text-amber-400">48</span>
+            </div>
+            <div class="bg-[#181d26] p-2.5 rounded border border-slate-800">
+              <span class="text-slate-200 font-bold">Torches (Cylinders r:0.12, h:0.35):</span><br>
+              Left: <span class="text-amber-400 copyable" onclick="copyVal('-2.1, 2.8, 4.0')">-2.1, 2.8, 4.0</span> (<span class="text-slate-400">Torch_Sconce_Gate_L</span>)<br>
+              Right: <span class="text-amber-400 copyable" onclick="copyVal('2.1, 2.8, 4.0')">2.1, 2.8, 4.0</span> (<span class="text-slate-400">Torch_Sconce_Gate_R</span>)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: MATERIALS -->
+  <section id="sec-materials" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 mb-6 shadow-xl">
+    <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-4 border-b border-slate-800 pb-3">
+      <span class="w-6 h-6 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-mono font-bold">3</span>
+      PBR Shading &amp; Materials Palette
+    </h2>
+    <p class="text-xs text-slate-400 mb-4">Select each object and adjust the values in the <strong>Inspector -&gt; Material Slots</strong> panel.</p>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border border-slate-800 rounded-xl overflow-hidden font-mono">
+        <thead class="bg-[#181d26] text-slate-300 border-b border-slate-800 uppercase tracking-wider">
+          <tr>
+            <th class="p-3">Material</th>
+            <th class="p-3">Color Swatch &amp; RGB</th>
+            <th class="p-3">Metallic</th>
+            <th class="p-3">Roughness</th>
+            <th class="p-3">Emission</th>
+            <th class="p-3">Pattern</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800 text-slate-300 bg-[#0d1017]">
+          <tr>
+            <td class="p-3 font-bold text-white">WeatheredGranite</td>
+            <td class="p-3"><span class="swatch" style="background:#6b707a"></span> <span class="copyable ml-1" onclick="copyVal('0.42, 0.44, 0.48')">[0.42, 0.44, 0.48]</span></td>
+            <td class="p-3 text-amber-400 copyable" onclick="copyVal('0.15')">0.15</td>
+            <td class="p-3 text-amber-400 copyable" onclick="copyVal('0.82')">0.82</td>
+            <td class="p-3 text-slate-500">0.0</td>
+            <td class="p-3 text-cyan-300">Grid (Micro-Stone)</td>
+          </tr>
+          <tr>
+            <td class="p-3 font-bold text-white">FortressDarkOak</td>
+            <td class="p-3"><span class="swatch" style="background:#3d2919"></span> <span class="copyable ml-1" onclick="copyVal('0.24, 0.16, 0.10')">[0.24, 0.16, 0.10]</span></td>
+            <td class="p-3 text-amber-400 copyable" onclick="copyVal('0.05')">0.05</td>
+            <td class="p-3 text-amber-400 copyable" onclick="copyVal('0.68')">0.68</td>
+            <td class="p-3 text-slate-500">0.0</td>
+            <td class="p-3 text-slate-400">Constant</td>
+          </tr>
+          <tr>
+            <td class="p-3 font-bold text-white">ForgedSteel</td>
+            <td class="p-3"><span class="swatch" style="background:#2e3038"></span> <span class="copyable ml-1" onclick="copyVal('0.18, 0.19, 0.22')">[0.18, 0.19, 0.22]</span></td>
+            <td class="p-3 text-amber-400 copyable" onclick="copyVal('0.92')">0.92</td>
+            <td class="p-3 text-amber-400 copyable" onclick="copyVal('0.35')">0.35</td>
+            <td class="p-3 text-slate-500">0.0</td>
+            <td class="p-3 text-slate-400">Constant</td>
+          </tr>
+          <tr>
+            <td class="p-3 font-bold text-white">CourtyardCobble</td>
+            <td class="p-3"><span class="swatch" style="background:#1f2126"></span> <span class="copyable ml-1" onclick="copyVal('0.12, 0.13, 0.15')">[0.12, 0.13, 0.15]</span></td>
+            <td class="p-3 text-amber-400 copyable" onclick="copyVal('0.20')">0.20</td>
+            <td class="p-3 text-amber-400 copyable" onclick="copyVal('0.75')">0.75</td>
+            <td class="p-3 text-slate-500">0.0</td>
+            <td class="p-3 text-cyan-300">Grid</td>
+          </tr>
+          <tr class="bg-amber-950/20">
+            <td class="p-3 font-bold text-amber-300">TorchFlame</td>
+            <td class="p-3"><span class="swatch" style="background:#ffa62e"></span> <span class="copyable ml-1 font-bold text-amber-400" onclick="copyVal('1.00, 0.65, 0.18')">[1.00, 0.65, 0.18]</span></td>
+            <td class="p-3 text-slate-500">0.00</td>
+            <td class="p-3 text-slate-500">0.00</td>
+            <td class="p-3 text-amber-400 font-bold copyable" onclick="copyVal('6.0')">6.0 (Glow)</td>
+            <td class="p-3 text-slate-400">Constant</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 4: LIGHTING RIG -->
+  <section id="sec-lighting" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 mb-6 shadow-xl">
+    <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-4 border-b border-slate-800 pb-3">
+      <span class="w-6 h-6 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-mono font-bold">4</span>
+      Cinematic 4-Point Lighting Rig
+    </h2>
+    <p class="text-xs text-slate-400 mb-4">Add these light sources via <strong>Add Light -&gt; Directional / Point Light</strong>:</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+      <div class="bg-[#0d1017] p-4 rounded-xl border border-slate-800">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-blue-300 text-sm">1. Moonlight_Key (Directional)</span>
+          <span class="swatch" style="background:#8cb7f2"></span>
+        </div>
+        <div class="text-slate-400 space-y-1">
+          <div>Rotation: <span class="text-amber-400 copyable" onclick="copyVal('-37, 48, 0')">-37°, 48°, 0°</span></div>
+          <div>Color RGB: <span class="text-blue-300 copyable" onclick="copyVal('0.55, 0.72, 0.95')">[0.55, 0.72, 0.95] (Cold Sapphire)</span></div>
+          <div>Intensity: <span class="text-amber-400 font-bold copyable" onclick="copyVal('2.8')">2.8</span></div>
+        </div>
+      </div>
+
+      <div class="bg-[#0d1017] p-4 rounded-xl border border-slate-800">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-amber-400 text-sm">2. Torch_Light_Left (Point)</span>
+          <span class="swatch" style="background:#ffa633"></span>
+        </div>
+        <div class="text-slate-400 space-y-1">
+          <div>Position: <span class="text-amber-400 copyable" onclick="copyVal('-2.1, 3.2, 4.2')">-2.1, 3.2, 4.2</span></div>
+          <div>Color RGB: <span class="text-amber-300 copyable" onclick="copyVal('1.00, 0.65, 0.20')">[1.00, 0.65, 0.20] (Fire Amber)</span></div>
+          <div>Intensity: <span class="text-amber-400 font-bold copyable" onclick="copyVal('24.0')">24.0</span> | Radius: <span class="text-amber-400 copyable" onclick="copyVal('22.0')">22.0 m</span></div>
+        </div>
+      </div>
+
+      <div class="bg-[#0d1017] p-4 rounded-xl border border-slate-800">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-amber-400 text-sm">3. Torch_Light_Right (Point)</span>
+          <span class="swatch" style="background:#ffa633"></span>
+        </div>
+        <div class="text-slate-400 space-y-1">
+          <div>Position: <span class="text-amber-400 copyable" onclick="copyVal('2.1, 3.2, 4.2')">2.1, 3.2, 4.2</span></div>
+          <div>Color RGB: <span class="text-amber-300 copyable" onclick="copyVal('1.00, 0.65, 0.20')">[1.00, 0.65, 0.20]</span></div>
+          <div>Intensity: <span class="text-amber-400 font-bold copyable" onclick="copyVal('24.0')">24.0</span> | Radius: <span class="text-amber-400 copyable" onclick="copyVal('22.0')">22.0 m</span></div>
+        </div>
+      </div>
+
+      <div class="bg-[#0d1017] p-4 rounded-xl border border-slate-800">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-indigo-300 text-sm">4. Sky_Ambient_Fill (Point)</span>
+          <span class="swatch" style="background:#4d6ba6"></span>
+        </div>
+        <div class="text-slate-400 space-y-1">
+          <div>Position: <span class="text-amber-400 copyable" onclick="copyVal('0.0, 16.0, 0.0')">0.0, 16.0, 0.0</span></div>
+          <div>Color RGB: <span class="text-indigo-300 copyable" onclick="copyVal('0.30, 0.42, 0.65')">[0.30, 0.42, 0.65] (Twilight)</span></div>
+          <div>Intensity: <span class="text-amber-400 font-bold copyable" onclick="copyVal('10.0')">10.0</span> | Radius: <span class="text-amber-400 copyable" onclick="copyVal('60.0')">60.0 m</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: CAMERA -->
+  <section id="sec-camera" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 mb-6 shadow-xl">
+    <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-4 border-b border-slate-800 pb-3">
+      <span class="w-6 h-6 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-mono font-bold">5</span>
+      Hero Camera Framing &amp; Composition
+    </h2>
+
+    <div class="bg-[#0d1017] p-4 rounded-xl border border-slate-800 text-xs font-mono">
+      <p class="text-slate-300 mb-3 font-sans">Aim the camera to a low-angle three-quarters heroic view looking upward toward the tower roof:</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="bg-[#181d26] p-2.5 rounded border border-slate-800">
+          Target: <span class="text-amber-400 copyable" onclick="copyVal('0.0, 5.0, 0.0')">0.0, 5.0, 0.0</span>
+        </div>
+        <div class="bg-[#181d26] p-2.5 rounded border border-slate-800">
+          Distance: <span class="text-amber-400 copyable" onclick="copyVal('22.0')">22.0 m</span>
+        </div>
+        <div class="bg-[#181d26] p-2.5 rounded border border-slate-800">
+          Pitch Angle: <span class="text-amber-400 copyable" onclick="copyVal('0.22')">0.22 rad (~12°)</span>
+        </div>
+        <div class="bg-[#181d26] p-2.5 rounded border border-slate-800">
+          Yaw Angle: <span class="text-amber-400 copyable" onclick="copyVal('0.65')">0.65 rad (~37°)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 6: RENDER & LOOKDEV -->
+  <section id="sec-render" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 mb-12 shadow-xl">
+    <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-4 border-b border-slate-800 pb-3">
+      <span class="w-6 h-6 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-mono font-bold">6</span>
+      Production Render (F12) &amp; LookDev Settings
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+      <!-- Quality -->
+      <div class="bg-[#0d1017] p-4 rounded-xl border border-slate-800 space-y-2">
+        <div class="font-bold text-amber-300 text-sm font-sans">Quality &amp; Sampler</div>
+        <div>Resolution: <span class="text-slate-200">1920x1080 (1080p) or 2560x1440</span></div>
+        <div>Target Samples: <span class="text-amber-400 font-bold copyable" onclick="copyVal('128')">128</span> (Clean shadows)</div>
+        <div>Max Ray Depth: <span class="text-amber-400 font-bold copyable" onclick="copyVal('6')">6</span> bounces</div>
+        <div>Camera Aperture: <span class="text-amber-400 font-bold copyable" onclick="copyVal('0.012')">0.012</span> (Subtle DoF)</div>
+      </div>
+
+      <!-- Post-Production LookDev -->
+      <div class="bg-[#0d1017] p-4 rounded-xl border border-slate-800 space-y-2">
+        <div class="font-bold text-amber-300 text-sm font-sans">✨ Post-Production Compositor</div>
+        <div>Enable Post-Processing: <span class="text-green-400 font-bold">[X] Checked</span></div>
+        <div>Bloom Glow: <span class="text-green-400 font-bold">[X] Checked</span></div>
+        <div>Bloom Intensity: <span class="text-amber-400 font-bold copyable" onclick="copyVal('0.42')">0.42</span> | Threshold: <span class="text-amber-400 font-bold copyable" onclick="copyVal('1.05')">1.05</span></div>
+        <div>Vignette Intensity: <span class="text-amber-400 font-bold copyable" onclick="copyVal('0.32')">0.32</span></div>
+        <div>Exposure EV: <span class="text-amber-400 font-bold copyable" onclick="copyVal('1.15')">1.15</span> | Contrast: <span class="text-amber-400 font-bold copyable" onclick="copyVal('1.12')">1.12</span></div>
+        <div>Saturation: <span class="text-amber-400 font-bold copyable" onclick="copyVal('1.18')">1.18</span></div>
+        <div>ACES Filmic Tone Mapping: <span class="text-green-400 font-bold">[X] Checked</span></div>
+      </div>
+    </div>
+
+    <div class="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-200 flex items-center justify-between">
+      <span>Ready to render? Press <span class="keycap">F12</span>, verify LookDev sliders match above, and click <strong>Start Render (Progressive)</strong>!</span>
+    </div>
+  </section>
+
+  <!-- Interactive JavaScript -->
+  <script>
+    function copyVal(str) {
+      navigator.clipboard.writeText(str).then(() => {
+        const toast = document.getElementById('copy-toast');
+        toast.innerText = 'Copied "' + str + '" to clipboard!';
+        toast.classList.remove('opacity-0');
+        setTimeout(() => toast.classList.add('opacity-0'), 1800);
+      });
+    }
+
+    function updateProgress() {
+      const checkboxes = document.querySelectorAll('.task-item input[type="checkbox"]');
+      let checkedCount = 0;
+      checkboxes.forEach((cb, idx) => {
+        const taskItem = cb.closest('.task-item');
+        if (cb.checked) {
+          checkedCount++;
+          taskItem.classList.add('completed');
+          localStorage.setItem('citadel_task_' + idx, '1');
+        } else {
+          taskItem.classList.remove('completed');
+          localStorage.removeItem('citadel_task_' + idx);
+        }
+      });
+      const pct = Math.round((checkedCount / checkboxes.length) * 100);
+      document.getElementById('progress-bar').style.width = pct + '%';
+      document.getElementById('progress-text').innerText = pct + '%';
+    }
+
+    function resetChecklist() {
+      const checkboxes = document.querySelectorAll('.task-item input[type="checkbox"]');
+      checkboxes.forEach((cb, idx) => {
+        cb.checked = false;
+        cb.closest('.task-item').classList.remove('completed');
+        localStorage.removeItem('citadel_task_' + idx);
+      });
+      updateProgress();
+    }
+
+    // Restore saved progress on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const checkboxes = document.querySelectorAll('.task-item input[type="checkbox"]');
+      checkboxes.forEach((cb, idx) => {
+        if (localStorage.getItem('citadel_task_' + idx) === '1') {
+          cb.checked = true;
+          cb.closest('.task-item').classList.add('completed');
+        }
+      });
+      updateProgress();
+    });
+  </script>
+</body>
+</html>

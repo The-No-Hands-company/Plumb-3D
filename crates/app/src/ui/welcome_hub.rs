@@ -88,9 +88,28 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
         .show(&ctx, |ui| {
             // Hero Splash Artwork Banner (Rendered with Plumb 3D Monte Carlo Path Tracer)
             if let Some(ref splash_tex) = state.welcome_hub.splash_texture {
+                let banner_size = egui::vec2(628.0, 190.0);
+                let tex_size = splash_tex.size_vec2();
+                let img_aspect = (tex_size.x / tex_size.y.max(1.0)).max(0.01);
+                let target_aspect = banner_size.x / banner_size.y;
+
+                let uv_rect = if img_aspect < target_aspect {
+                    // Image is taller than banner: crop top/bottom to fill width edge-to-edge
+                    let uv_h = img_aspect / target_aspect;
+                    let uv_y0 = (1.0 - uv_h) * 0.5;
+                    egui::Rect::from_min_max(egui::pos2(0.0, uv_y0), egui::pos2(1.0, uv_y0 + uv_h))
+                } else {
+                    // Image is wider than banner: crop left/right to fill height
+                    let uv_w = target_aspect / img_aspect;
+                    let uv_x0 = (1.0 - uv_w) * 0.5;
+                    egui::Rect::from_min_max(egui::pos2(uv_x0, 0.0), egui::pos2(uv_x0 + uv_w, 1.0))
+                };
+
                 ui.add(
                     egui::Image::new(splash_tex)
-                        .fit_to_exact_size(egui::vec2(628.0, 180.0))
+                        .uv(uv_rect)
+                        .maintain_aspect_ratio(false)
+                        .fit_to_exact_size(banner_size)
                         .rounding(egui::Rounding::same(6.0)),
                 );
                 ui.add_space(2.0);
