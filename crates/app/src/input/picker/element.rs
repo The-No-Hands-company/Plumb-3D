@@ -56,9 +56,10 @@ impl AppState {
             if let Some(sel_id) = self.selected_node {
                 if let Some(node) = self.scene.nodes.get(sel_id) {
                     if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                        let occlude = !self.show_wireframe;
                         match self.sub_element_level {
                             SubElementLevel::Vertex => {
-                                if let Some(vk) = base_mesh.pick_vertex(&ray, &node.world_matrix, 0.25) {
+                                if let Some(vk) = base_mesh.pick_vertex_occluded(&ray, &node.world_matrix, 0.25, occlude) {
                                     if self.shift_pressed {
                                         if !self.selected_vertices.remove(&vk) {
                                             self.selected_vertices.insert(vk);
@@ -71,7 +72,7 @@ impl AppState {
                                 }
                             }
                             SubElementLevel::Edge => {
-                                if let Some(ek) = base_mesh.pick_edge(&ray, &node.world_matrix, 0.2) {
+                                if let Some(ek) = base_mesh.pick_edge_occluded(&ray, &node.world_matrix, 0.2, occlude) {
                                     if self.alt_pressed {
                                         // Blender Alt+Click: Edge Loop selection
                                         let loop_edges = base_mesh.select_edge_loop(ek);
@@ -93,7 +94,7 @@ impl AppState {
                                 }
                             }
                             SubElementLevel::Face => {
-                                if let Some(hit) = base_mesh.raycast(&ray, &node.world_matrix) {
+                                if let Some(hit) = base_mesh.raycast_backface_culled(&ray, &node.world_matrix, occlude) {
                                     let fk = hit.face_key;
                                     if self.alt_pressed {
                                         // Blender Alt+Click: Face Loop / Ring selection

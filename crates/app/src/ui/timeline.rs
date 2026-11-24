@@ -95,6 +95,18 @@ pub fn draw_status_bar(state: &mut AppState) {
                 } else {
                     ui.label("No selection (Click in viewport to select)");
                 }
+
+                if let Some(ref display) = state.autosave.last_autosave_display {
+                    ui.separator();
+                    ui.label(egui::RichText::new(format!("💾 Auto: {}", display)).size(11.0).color(egui::Color32::from_rgb(140, 160, 190)));
+                }
+
+                if let Some((ref msg, time)) = state.status_toast {
+                    if time.elapsed().as_secs() < 5 {
+                        ui.separator();
+                        ui.label(egui::RichText::new(msg).strong().color(egui::Color32::from_rgb(226, 179, 87)));
+                    }
+                }
             });
         });
 

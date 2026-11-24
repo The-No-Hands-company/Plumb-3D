@@ -1,215 +1,268 @@
 use core_math::Transform;
 use geo_kernel::Mesh;
 use graph_engine::{NodeData, SceneNode};
+use std::path::Path;
 
 use super::UiActions;
 use crate::state::AppState;
 
 pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
-    // Handle Plumb Native Binary Project (.plmb) Export
+    // 1. Save Plumb Project (.plmb)
     if actions.export_plmb {
-        if let Some(sel_id) = state.selected_node {
-            if let Some(node) = state.scene.nodes.get(sel_id) {
-                if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                    let plmb_bytes = base_mesh.to_plmb(&node.name);
-                    let file_path = format!("{}.plmb", node.name);
-                    let _ = std::fs::write(&file_path, plmb_bytes);
-                    println!("Exported Plumb 3D Native Binary to: {}", file_path);
+        if let Some(ref path) = state.project_file_path.clone() {
+            save_current_project_to(state, path);
+        } else {
+            actions.export_plmb_as = true;
+        }
+    }
+
+    // 2. Save Plumb Project As (.plmb) with native OS file dialog
+    if actions.export_plmb_as {
+        let default_name = get_active_model_name(state);
+        if let Some(path) = rfd::FileDialog::new()
+            .add_filter("Plumb 3D Project (*.plmb)", &["plmb"])
+            .set_file_name(&format!("{}.plmb", default_name))
+            .save_file()
+        {
+            save_current_project_to(state, &path);
+            state.project_file_path = Some(path);
+        }
+    }
+
+    // 3. Open Plumb Project (.plmb) with native OS file dialog
+    if actions.trigger_open_plmb {
+        if let Some(path) = rfd::FileDialog::new()
+            .add_filter("Plumb 3D Project (*.plmb)", &["plmb"])
+            .pick_file()
+        {
+            if let Ok(bytes) = std::fs::read(&path) {
+                if let Ok((imported_mesh, meta)) = Mesh::from_plmb(&bytes) {
+                    state.scene.nodes.clear();
+                    state.gpu_mesh_cache.clear();
+                    state.selected_vertices.clear();
+                    state.selected_edges.clear();
+                    state.selected_faces.clear();
+
+                    let node_name = if !meta.model_name.is_empty() {
+                        meta.model_name
+                    } else {
+                        path.file_stem().and_then(|s| s.to_str()).unwrap_or("PlumbModel").to_string()
+                    };
+
+                    let id = state.scene.add_node(SceneNode::new_mesh(
+                        node_name,
+                        Transform::IDENTITY,
+                        imported_mesh,
+                    ));
+                    state.selected_node = Some(id);
+                    state.project_file_path = Some(path.clone());
+                    state.sync_gpu_meshes();
+                    state.set_status_message(format!("📂 Opened project: {}", path.display()));
                 }
             }
         }
     }
 
-    // Handle glTF 2.0 Export
+    // 4. Universal Import 3D Model Dialog
+    if actions.trigger_import_dialog {
+        if let Some(path) = rfd::FileDialog::new()
+            .add_filter(
+                "Supported 3D Models (*.plmb, *.obj, *.stl, *.ply, *.gltf)",
+                &["plmb", "obj", "stl", "ply", "gltf"],
+            )
+            .pick_file()
+        {
+            import_model_from_file(state, &path);
+        }
+    }
+
+    // 5. Handle glTF 2.0 Export with native file dialog
     if actions.export_gltf {
-        if let Some(sel_id) = state.selected_node {
-            if let Some(node) = state.scene.nodes.get(sel_id) {
-                if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                    let gltf_content = base_mesh.to_gltf(&node.name);
-                    let file_path = format!("{}.gltf", node.name);
-                    let _ = std::fs::write(&file_path, gltf_content);
-                    println!("Exported glTF 2.0 to: {}", file_path);
-                }
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("glTF 2.0 (*.gltf)", &["gltf"])
+                .set_file_name(&format!("{}.gltf", name))
+                .save_file()
+            {
+                let content = mesh.to_gltf(&name);
+                let _ = std::fs::write(&path, content);
+                state.set_status_message(format!("🌐 Exported glTF to: {}", path.display()));
             }
         }
     }
 
-    // Handle OBJ Export
+    // 6. Handle OBJ Export with native file dialog
     if actions.export_obj {
-        if let Some(sel_id) = state.selected_node {
-            if let Some(node) = state.scene.nodes.get(sel_id) {
-                if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                    let obj_content = base_mesh.to_obj(&node.name);
-                    let file_path = format!("{}.obj", node.name);
-                    let _ = std::fs::write(&file_path, obj_content);
-                    println!("Exported OBJ to: {}", file_path);
-                }
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Wavefront OBJ (*.obj)", &["obj"])
+                .set_file_name(&format!("{}.obj", name))
+                .save_file()
+            {
+                let content = mesh.to_obj(&name);
+                let _ = std::fs::write(&path, content);
+                state.set_status_message(format!("📦 Exported OBJ to: {}", path.display()));
             }
         }
     }
 
-    // Handle STL Export (Standard 3D Printing / Stereolithography)
+    // 7. Handle STL Export (3D Printing) with native file dialog
     if actions.export_stl {
-        if let Some(sel_id) = state.selected_node {
-            if let Some(node) = state.scene.nodes.get(sel_id) {
-                if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                    let stl_bytes = base_mesh.to_stl_binary();
-                    let file_path = format!("{}.stl", node.name);
-                    let _ = std::fs::write(&file_path, stl_bytes);
-                    println!("Exported Binary STL to: {}", file_path);
-                }
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Stereolithography 3D Print (*.stl)", &["stl"])
+                .set_file_name(&format!("{}.stl", name))
+                .save_file()
+            {
+                let bytes = mesh.to_stl_binary();
+                let _ = std::fs::write(&path, bytes);
+                state.set_status_message(format!("🖨 Exported Binary STL to: {}", path.display()));
             }
         }
     }
 
-    // Handle PLY Export (Stanford Polygon File Format / Point Clouds)
+    // 8. Handle PLY Export with native file dialog
     if actions.export_ply {
-        if let Some(sel_id) = state.selected_node {
-            if let Some(node) = state.scene.nodes.get(sel_id) {
-                if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                    let ply_bytes = base_mesh.to_ply_binary();
-                    let file_path = format!("{}.ply", node.name);
-                    let _ = std::fs::write(&file_path, ply_bytes);
-                    println!("Exported Binary PLY to: {}", file_path);
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Stanford PLY (*.ply)", &["ply"])
+                .set_file_name(&format!("{}.ply", name))
+                .save_file()
+            {
+                let bytes = mesh.to_ply_binary();
+                let _ = std::fs::write(&path, bytes);
+                state.set_status_message(format!("☁ Exported Binary PLY to: {}", path.display()));
+            }
+        }
+    }
+
+    // In-memory imports (for programmatic samples or drag-and-drop bytes)
+    handle_direct_memory_imports(state, actions);
+}
+
+fn save_current_project_to(state: &mut AppState, path: &Path) {
+    if let Some((name, mesh)) = get_active_mesh(state) {
+        let bytes = mesh.to_plmb(&name);
+        if std::fs::write(path, bytes).is_ok() {
+            state.set_status_message(format!("💾 Saved project to: {}", path.display()));
+        }
+    }
+}
+
+fn get_active_mesh(state: &AppState) -> Option<(String, Mesh)> {
+    if let Some(sel_id) = state.selected_node {
+        if let Some(node) = state.scene.nodes.get(sel_id) {
+            if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                return Some((node.name.clone(), base_mesh.clone()));
+            }
+        }
+    }
+    state.scene.nodes.values().find_map(|node| {
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            Some((node.name.clone(), base_mesh.clone()))
+        } else {
+            None
+        }
+    })
+}
+
+fn get_active_model_name(state: &AppState) -> String {
+    if let Some(sel_id) = state.selected_node {
+        if let Some(node) = state.scene.nodes.get(sel_id) {
+            return node.name.clone();
+        }
+    }
+    "PlumbModel".to_string()
+}
+
+pub fn import_model_from_file(state: &mut AppState, path: &Path) {
+    let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("").to_lowercase();
+    let file_stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("ImportedMesh");
+
+    match ext.as_str() {
+        "plmb" => {
+            if let Ok(bytes) = std::fs::read(path) {
+                if let Ok((mesh, meta)) = Mesh::from_plmb(&bytes) {
+                    insert_mesh_into_scene(state, &meta.model_name, mesh);
+                    state.set_status_message(format!("📂 Loaded .plmb: {}", path.display()));
                 }
             }
         }
+        "obj" => {
+            if let Ok(src) = std::fs::read_to_string(path) {
+                if let Ok(mesh) = Mesh::from_obj(&src) {
+                    insert_mesh_into_scene(state, file_stem, mesh);
+                    state.set_status_message(format!("📦 Imported OBJ: {}", path.display()));
+                }
+            }
+        }
+        "stl" => {
+            if let Ok(bytes) = std::fs::read(path) {
+                if let Ok(mesh) = Mesh::from_stl(&bytes) {
+                    insert_mesh_into_scene(state, file_stem, mesh);
+                    state.set_status_message(format!("🖨 Imported STL: {}", path.display()));
+                }
+            }
+        }
+        "ply" => {
+            if let Ok(bytes) = std::fs::read(path) {
+                if let Ok(mesh) = Mesh::from_ply(&bytes) {
+                    insert_mesh_into_scene(state, file_stem, mesh);
+                    state.set_status_message(format!("☁ Imported PLY: {}", path.display()));
+                }
+            }
+        }
+        "gltf" => {
+            if let Ok(src) = std::fs::read_to_string(path) {
+                if let Ok(mesh) = Mesh::from_gltf(&src) {
+                    insert_mesh_into_scene(state, file_stem, mesh);
+                    state.set_status_message(format!("🌐 Imported glTF: {}", path.display()));
+                }
+            }
+        }
+        _ => {
+            state.set_status_message(format!("⚠ Unsupported file format: .{}", ext));
+        }
     }
+}
 
-    // Handle OBJ Import
+fn insert_mesh_into_scene(state: &mut AppState, name: &str, mesh: Mesh) {
+    state.selected_vertices.clear();
+    state.selected_edges.clear();
+    state.selected_faces.clear();
+    let id = state.scene.add_node(SceneNode::new_mesh(
+        name,
+        Transform::IDENTITY,
+        mesh,
+    ));
+    state.selected_node = Some(id);
+    state.sync_gpu_meshes();
+}
+
+fn handle_direct_memory_imports(state: &mut AppState, actions: &mut UiActions) {
     if let Some(obj_src) = actions.import_obj_text.take() {
-        if let Ok(imported_mesh) = Mesh::from_obj(&obj_src) {
-            state.selected_vertices.clear();
-            state.selected_edges.clear();
-            state.selected_faces.clear();
-            if let Some(first_v) = imported_mesh.vertices.keys().next() {
-                state.selected_vertices.insert(first_v);
-            }
-            if let Some(first_e) = imported_mesh.edges.keys().next() {
-                state.selected_edges.insert(first_e);
-            }
-            if let Some(first_f) = imported_mesh.faces.keys().next() {
-                state.selected_faces.insert(first_f);
-            }
-            let id = state.scene.add_node(SceneNode::new_mesh(
-                "ImportedMesh",
-                Transform::IDENTITY,
-                imported_mesh,
-            ));
-            state.selected_node = Some(id);
-            state.object_colors.insert(id, [0.65, 0.75, 0.85]);
-            state.object_materials.insert(id, [0.0, 0.5, 0.0, 0.0]);
+        if let Ok(mesh) = Mesh::from_obj(&obj_src) {
+            insert_mesh_into_scene(state, "ImportedOBJ", mesh);
         }
     }
-
-    // Handle glTF Import
     if let Some(gltf_json) = actions.import_gltf_text.take() {
-        if let Ok(imported_mesh) = Mesh::from_gltf(&gltf_json) {
-            state.selected_vertices.clear();
-            state.selected_edges.clear();
-            state.selected_faces.clear();
-            if let Some(first_v) = imported_mesh.vertices.keys().next() {
-                state.selected_vertices.insert(first_v);
-            }
-            if let Some(first_e) = imported_mesh.edges.keys().next() {
-                state.selected_edges.insert(first_e);
-            }
-            if let Some(first_f) = imported_mesh.faces.keys().next() {
-                state.selected_faces.insert(first_f);
-            }
-            let id = state.scene.add_node(SceneNode::new_mesh(
-                "ImportedGLTF",
-                Transform::IDENTITY,
-                imported_mesh,
-            ));
-            state.selected_node = Some(id);
-            state.object_colors.insert(id, [0.85, 0.75, 0.65]);
-            state.object_materials.insert(id, [0.0, 0.5, 0.0, 0.0]);
+        if let Ok(mesh) = Mesh::from_gltf(&gltf_json) {
+            insert_mesh_into_scene(state, "ImportedGLTF", mesh);
         }
     }
-
-    // Handle STL Import
     if let Some(stl_data) = actions.import_stl_bytes.take() {
-        if let Ok(imported_mesh) = Mesh::from_stl(&stl_data) {
-            state.selected_vertices.clear();
-            state.selected_edges.clear();
-            state.selected_faces.clear();
-            if let Some(first_v) = imported_mesh.vertices.keys().next() {
-                state.selected_vertices.insert(first_v);
-            }
-            if let Some(first_e) = imported_mesh.edges.keys().next() {
-                state.selected_edges.insert(first_e);
-            }
-            if let Some(first_f) = imported_mesh.faces.keys().next() {
-                state.selected_faces.insert(first_f);
-            }
-            let id = state.scene.add_node(SceneNode::new_mesh(
-                "ImportedSTL",
-                Transform::IDENTITY,
-                imported_mesh,
-            ));
-            state.selected_node = Some(id);
-            state.object_colors.insert(id, [0.75, 0.85, 0.70]);
-            state.object_materials.insert(id, [0.0, 0.4, 0.0, 0.0]);
+        if let Ok(mesh) = Mesh::from_stl(&stl_data) {
+            insert_mesh_into_scene(state, "ImportedSTL", mesh);
         }
     }
-
-    // Handle PLY Import
     if let Some(ply_data) = actions.import_ply_bytes.take() {
-        if let Ok(imported_mesh) = Mesh::from_ply(&ply_data) {
-            state.selected_vertices.clear();
-            state.selected_edges.clear();
-            state.selected_faces.clear();
-            if let Some(first_v) = imported_mesh.vertices.keys().next() {
-                state.selected_vertices.insert(first_v);
-            }
-            if let Some(first_e) = imported_mesh.edges.keys().next() {
-                state.selected_edges.insert(first_e);
-            }
-            if let Some(first_f) = imported_mesh.faces.keys().next() {
-                state.selected_faces.insert(first_f);
-            }
-            let id = state.scene.add_node(SceneNode::new_mesh(
-                "ImportedPLY",
-                Transform::IDENTITY,
-                imported_mesh,
-            ));
-            state.selected_node = Some(id);
-            state.object_colors.insert(id, [0.90, 0.70, 0.85]);
-            state.object_materials.insert(id, [0.0, 0.5, 0.0, 0.0]);
+        if let Ok(mesh) = Mesh::from_ply(&ply_data) {
+            insert_mesh_into_scene(state, "ImportedPLY", mesh);
         }
     }
-
-    // Handle Plumb Native Binary Project (.plmb) Import
     if let Some(plmb_data) = actions.import_plmb_bytes.take() {
-        if let Ok((imported_mesh, meta)) = Mesh::from_plmb(&plmb_data) {
-            state.selected_vertices.clear();
-            state.selected_edges.clear();
-            state.selected_faces.clear();
-            if let Some(first_v) = imported_mesh.vertices.keys().next() {
-                state.selected_vertices.insert(first_v);
-            }
-            if let Some(first_e) = imported_mesh.edges.keys().next() {
-                state.selected_edges.insert(first_e);
-            }
-            if let Some(first_f) = imported_mesh.faces.keys().next() {
-                state.selected_faces.insert(first_f);
-            }
-            let node_name = if !meta.model_name.is_empty() {
-                meta.model_name
-            } else {
-                "PlumbModel".to_string()
-            };
-            let id = state.scene.add_node(SceneNode::new_mesh(
-                node_name,
-                Transform::IDENTITY,
-                imported_mesh,
-            ));
-            state.selected_node = Some(id);
-            state.object_colors.insert(id, [0.85, 0.70, 0.40]);
-            state.object_materials.insert(id, [0.0, 0.35, 0.0, 0.0]);
-            println!("Loaded .plmb project (Version {}) with {} verts, {} faces",
-                meta.version.to_string(), meta.vertex_count, meta.face_count);
+        if let Ok((mesh, meta)) = Mesh::from_plmb(&plmb_data) {
+            insert_mesh_into_scene(state, &meta.model_name, mesh);
         }
     }
 }

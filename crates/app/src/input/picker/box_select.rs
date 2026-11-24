@@ -32,6 +32,19 @@ impl AppState {
                             SubElementLevel::Vertex => {
                                 for (vk, v) in &base_mesh.vertices {
                                     let p_world = node.world_matrix.transform_point3(v.position);
+
+                                    if !self.show_wireframe {
+                                        let view_dir = p_world - self.camera.eye_position();
+                                        let has_front = base_mesh.vertex_faces(vk).iter().any(|&fk| {
+                                            base_mesh.faces.get(fk).map_or(false, |f| {
+                                                node.world_matrix.transform_vector3(f.normal).dot(view_dir) < 0.0
+                                            })
+                                        });
+                                        if !has_front {
+                                            continue;
+                                        }
+                                    }
+
                                     if let Some(sp) = self.camera.world_to_screen(p_world, width, height) {
                                         if sp.x >= min_x && sp.x <= max_x && sp.y >= min_y && sp.y <= max_y {
                                             if subtract {
@@ -50,6 +63,22 @@ impl AppState {
                                     let p1 = base_mesh.vertices[he.target].position;
                                     let mid = (p0 + p1) * 0.5;
                                     let p_world = node.world_matrix.transform_point3(mid);
+
+                                    if !self.show_wireframe {
+                                        let view_dir = p_world - self.camera.eye_position();
+                                        let f_left = he.face;
+                                        let f_right = base_mesh.half_edges.get(he.twin).and_then(|th| th.face);
+                                        let left_front = f_left.and_then(|fk| base_mesh.faces.get(fk)).map_or(false, |f| {
+                                            node.world_matrix.transform_vector3(f.normal).dot(view_dir) < 0.0
+                                        });
+                                        let right_front = f_right.and_then(|fk| base_mesh.faces.get(fk)).map_or(false, |f| {
+                                            node.world_matrix.transform_vector3(f.normal).dot(view_dir) < 0.0
+                                        });
+                                        if !left_front && !right_front {
+                                            continue;
+                                        }
+                                    }
+
                                     if let Some(sp) = self.camera.world_to_screen(p_world, width, height) {
                                         if sp.x >= min_x && sp.x <= max_x && sp.y >= min_y && sp.y <= max_y {
                                             if subtract {
@@ -62,7 +91,7 @@ impl AppState {
                                 }
                             }
                             SubElementLevel::Face => {
-                                for (fk, _) in &base_mesh.faces {
+                                for (fk, face) in &base_mesh.faces {
                                     let vks = base_mesh.face_vertices(fk);
                                     if !vks.is_empty() {
                                         let mut sum = Vec3::ZERO;
@@ -71,6 +100,15 @@ impl AppState {
                                         }
                                         let centroid = sum / vks.len() as f32;
                                         let p_world = node.world_matrix.transform_point3(centroid);
+
+                                        if !self.show_wireframe {
+                                            let world_normal = node.world_matrix.transform_vector3(face.normal);
+                                            let view_dir = p_world - self.camera.eye_position();
+                                            if world_normal.dot(view_dir) >= 0.0 {
+                                                continue; // Backface culled from box select
+                                            }
+                                        }
+
                                         if let Some(sp) = self.camera.world_to_screen(p_world, width, height) {
                                             if sp.x >= min_x && sp.x <= max_x && sp.y >= min_y && sp.y <= max_y {
                                                 if subtract {

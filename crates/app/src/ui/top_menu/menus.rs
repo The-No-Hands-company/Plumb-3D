@@ -27,29 +27,28 @@ pub fn draw_file_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
             ui.close_menu();
         }
         ui.separator();
-        if ui.button("💾 Save Plumb Project (.plmb)").clicked() {
+        if ui.button("💾 Save Project (Ctrl+S)").clicked() {
             actions.export_plmb = true;
             ui.close_menu();
         }
-        if ui.button("📂 Open Plumb Project (.plmb)").clicked() {
-            if let Some(sel_id) = state.selected_node {
-                if let Some(node) = state.scene.nodes.get(sel_id) {
-                    if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                        let sample = base_mesh.to_plmb(&format!("{}_clone", node.name));
-                        actions.import_plmb_bytes = Some(sample);
-                    }
-                }
-            } else {
-                let sample = Primitives::create_plumb_bob().to_plmb("PlumbBob_Project");
-                actions.import_plmb_bytes = Some(sample);
-            }
+        if ui.button("💾 Save Project As... (Ctrl+Shift+S)").clicked() {
+            actions.export_plmb_as = true;
             ui.close_menu();
         }
-        if ui.button("Export Active Mesh as glTF 2.0 (.gltf)").clicked() { actions.export_gltf = true; ui.close_menu(); }
-        if ui.button("Export Active Mesh as OBJ (.obj)").clicked() { actions.export_obj = true; ui.close_menu(); }
+        if ui.button("📂 Open Project... (Ctrl+O)").clicked() {
+            actions.trigger_open_plmb = true;
+            ui.close_menu();
+        }
+        if ui.button("📥 Import 3D Model... (plmb, obj, stl, ply, gltf)").clicked() {
+            actions.trigger_import_dialog = true;
+            ui.close_menu();
+        }
+        ui.separator();
         if ui.button("Export Active Mesh as STL for 3D Printing (.stl)").clicked() { actions.export_stl = true; ui.close_menu(); }
-        if ui.button("🖨 3D Print & CAD Quality Inspector...").clicked() { state.print_inspector.show_dialog = true; ui.close_menu(); }
+        if ui.button("Export Active Mesh as OBJ (.obj)").clicked() { actions.export_obj = true; ui.close_menu(); }
+        if ui.button("Export Active Mesh as glTF 2.0 (.gltf)").clicked() { actions.export_gltf = true; ui.close_menu(); }
         if ui.button("Export Active Mesh as PLY (.ply)").clicked() { actions.export_ply = true; ui.close_menu(); }
+        if ui.button("🖨 3D Print & CAD Quality Inspector...").clicked() { state.print_inspector.show_dialog = true; ui.close_menu(); }
         ui.separator();
         if ui.button("Import Sample glTF Cube").clicked() {
             let sample_gltf = Primitives::create_cube(2.0).to_gltf("ImportedCube");

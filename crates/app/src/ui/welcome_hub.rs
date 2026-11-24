@@ -135,6 +135,30 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                 });
             });
 
+            // Unsaved Session Crash Recovery Banner
+            if state.autosave.check_recovery_available().is_some() {
+                ui.add_space(4.0);
+                egui::Frame::none()
+                    .fill(egui::Color32::from_rgb(42, 34, 18))
+                    .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(226, 179, 87)))
+                    .rounding(egui::Rounding::same(6.0))
+                    .inner_margin(egui::Margin::symmetric(10.0, 6.0))
+                    .show(ui, |ui| {
+                        ui.horizontal(|ui| {
+                            ui.label(egui::RichText::new("💾 Unsaved Session Recovery Available").strong().color(egui::Color32::from_rgb(255, 215, 0)));
+                            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                if ui.button(egui::RichText::new("Restore Session").strong().color(egui::Color32::from_rgb(226, 179, 87))).clicked() {
+                                    let mut autosave = std::mem::take(&mut state.autosave);
+                                    let _ = autosave.restore_session(state);
+                                    state.autosave = autosave;
+                                    close = true;
+                                }
+                            });
+                        });
+                    });
+                ui.add_space(4.0);
+            }
+
             ui.add_space(8.0);
             ui.separator();
             ui.add_space(8.0);

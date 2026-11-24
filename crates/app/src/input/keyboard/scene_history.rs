@@ -10,6 +10,57 @@ use crate::types::{InteractionMode, SubElementLevel};
 
 pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool {
     match key_code {
+        KeyCode::KeyS if state.ctrl_pressed && state.shift_pressed => {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Plumb 3D Project (*.plmb)", &["plmb"])
+                .set_file_name("PlumbModel.plmb")
+                .save_file()
+            {
+                save_scene_to_path(state, &path);
+            }
+            state.window.request_redraw();
+            true
+        }
+        KeyCode::KeyS if state.ctrl_pressed => {
+            if let Some(ref path) = state.project_file_path.clone() {
+                save_scene_to_path(state, path);
+            } else if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Plumb 3D Project (*.plmb)", &["plmb"])
+                .set_file_name("PlumbModel.plmb")
+                .save_file()
+            {
+                save_scene_to_path(state, &path);
+            }
+            state.window.request_redraw();
+            true
+        }
+        KeyCode::KeyO if state.ctrl_pressed => {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Plumb 3D Project (*.plmb)", &["plmb"])
+                .pick_file()
+            {
+                if let Ok(bytes) = std::fs::read(&path) {
+                    if let Ok((mesh, meta)) = geo_kernel::Mesh::from_plmb(&bytes) {
+                        state.scene.nodes.clear();
+                        state.gpu_mesh_cache.clear();
+                        state.selected_vertices.clear();
+                        state.selected_edges.clear();
+                        state.selected_faces.clear();
+                        let id = state.scene.add_node(graph_engine::SceneNode::new_mesh(
+                            meta.model_name,
+                            Transform::IDENTITY,
+                            mesh,
+                        ));
+                        state.selected_node = Some(id);
+                        state.project_file_path = Some(path.clone());
+                        state.sync_gpu_meshes();
+                        state.set_status_message(format!("📂 Opened project: {}", path.display()));
+                    }
+                }
+            }
+            state.window.request_redraw();
+            true
+        }
         KeyCode::KeyZ => {
             let _ = state.history.undo(&mut state.scene);
             state.window.request_redraw();
@@ -216,5 +267,33 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
             true
         }
         _ => false,
+    }
+}
+
+fn save_scene_to_path(state: &mut AppState, path: &std::path::Path) {
+    let mesh_to_save = if let Some(sel_id) = state.selected_node {
+        state.scene.nodes.get(sel_id).and_then(|n| {
+            if let NodeData::Mesh { base_mesh, .. } = &n.data {
+                Some((n.name.clone(), base_mesh.clone()))
+            } else {
+                None
+            }
+        })
+    } else {
+        state.scene.nodes.values().find_map(|n| {
+            if let NodeData::Mesh { base_mesh, .. } = &n.data {
+                Some((n.name.clone(), base_mesh.clone()))
+            } else {
+                None
+            }
+        })
+    };
+
+    if let Some((name, mesh)) = mesh_to_save {
+        let bytes = mesh.to_plmb(&name);
+        if std::fs::write(path, bytes).is_ok() {
+            state.project_file_path = Some(path.to_path_buf());
+            state.set_status_message(format!("💾 Saved project to: {}", path.display()));
+        }
     }
 }

@@ -12,6 +12,7 @@
 //! - [`state`]: Global [`AppState`] representing scene graph, active tool, selection, and viewport configurations.
 //! - [`ui`]: Complete egui DCC interface (Top menu bar, ribbon header, outliner, inspector, UV editor, help manual, node editor).
 
+pub mod autosave;
 pub mod commands;
 pub mod input;
 pub mod live_pathtracer;
@@ -23,6 +24,7 @@ pub mod state;
 pub mod types;
 pub mod ui;
 
+pub use autosave::*;
 pub use commands::*;
 pub use input::*;
 pub use live_pathtracer::*;
@@ -87,6 +89,7 @@ impl ApplicationHandler for App {
 
         match event {
             WindowEvent::CloseRequested => {
+                state.autosave.mark_clean_exit();
                 event_loop.exit();
             }
             WindowEvent::Resized(physical_size) => {
@@ -119,6 +122,9 @@ impl ApplicationHandler for App {
                 input::handle_mouse_wheel(state, delta);
             }
             WindowEvent::RedrawRequested => {
+                let mut autosave = std::mem::take(&mut state.autosave);
+                autosave.update(state);
+                state.autosave = autosave;
                 state.render();
                 state.window.request_redraw();
             }

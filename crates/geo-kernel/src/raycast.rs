@@ -59,6 +59,11 @@ impl Mesh {
 
     /// Perform a high-performance raycast against polygon faces.
     pub fn raycast(&self, world_ray: &Ray, model_matrix: &Mat4) -> Option<RaycastHit> {
+        self.raycast_backface_culled(world_ray, model_matrix, false)
+    }
+
+    /// Perform a raycast with optional backface culling.
+    pub fn raycast_backface_culled(&self, world_ray: &Ray, model_matrix: &Mat4, cull_backfaces: bool) -> Option<RaycastHit> {
         let inv_model = model_matrix.inverse();
         let local_origin = inv_model.transform_point3(world_ray.origin);
         let local_dir = inv_model.transform_vector3(world_ray.direction).normalize();
@@ -73,6 +78,10 @@ impl Mesh {
         let mut min_dist = f32::INFINITY;
 
         for (f_key, face) in &self.faces {
+            if cull_backfaces && face.normal.dot(local_dir) >= 0.0 {
+                continue; // Backface culled
+            }
+
             let v_keys = self.face_vertices(f_key);
             if v_keys.len() < 3 {
                 continue;
@@ -111,9 +120,21 @@ impl Mesh {
 
     /// Pick the closest vertex to a 3D ray within a screen/world threshold
     pub fn pick_vertex(&self, world_ray: &Ray, model_matrix: &Mat4, max_distance: f32) -> Option<VertexKey> {
+        self.pick_vertex_occluded(world_ray, model_matrix, max_distance, false)
+    }
+
+    /// Pick the closest vertex with optional depth occlusion and backface culling.
+    pub fn pick_vertex_occluded(&self, world_ray: &Ray, model_matrix: &Mat4, max_distance: f32, occlude: bool) -> Option<VertexKey> {
         let inv_model = model_matrix.inverse();
         let local_origin = inv_model.transform_point3(world_ray.origin);
         let local_dir = inv_model.transform_vector3(world_ray.direction).normalize();
+
+        let max_allowed_dist = if occlude {
+            self.raycast_backface_culled(world_ray, model_matrix, true)
+                .map(|h| h.distance + 0.20)
+        } else {
+            None
+        };
 
         let mut closest_vk = None;
         let mut min_perp_dist = max_distance;
@@ -122,6 +143,25 @@ impl Mesh {
             let to_v = v.position - local_origin;
             let projection = to_v.dot(local_dir);
             if projection > 0.0 {
+                let p_world = model_matrix.transform_point3(v.position);
+                let world_dist = (p_world - world_ray.origin).length();
+
+                if let Some(surface_dist) = max_allowed_dist {
+                    if world_dist > surface_dist {
+                        continue; // Occluded by front surface
+                    }
+                }
+
+                if occlude {
+                    // Ensure vertex belongs to at least one front-facing polygon
+                    let has_front_face = self.vertex_faces(vk).iter().any(|&fk| {
+                        self.faces.get(fk).map_or(false, |f| f.normal.dot(local_dir) < 0.0)
+                    });
+                    if !has_front_face {
+                        continue;
+                    }
+                }
+
                 let closest_pt_on_ray = local_origin + local_dir * projection;
                 let perp_dist = (v.position - closest_pt_on_ray).length();
                 if perp_dist < min_perp_dist {
@@ -136,9 +176,21 @@ impl Mesh {
 
     /// Pick the closest edge to a 3D ray within a distance threshold
     pub fn pick_edge(&self, world_ray: &Ray, model_matrix: &Mat4, max_distance: f32) -> Option<EdgeKey> {
+        self.pick_edge_occluded(world_ray, model_matrix, max_distance, false)
+    }
+
+    /// Pick the closest edge with optional depth occlusion and backface culling.
+    pub fn pick_edge_occluded(&self, world_ray: &Ray, model_matrix: &Mat4, max_distance: f32, occlude: bool) -> Option<EdgeKey> {
         let inv_model = model_matrix.inverse();
         let local_origin = inv_model.transform_point3(world_ray.origin);
         let local_dir = inv_model.transform_vector3(world_ray.direction).normalize();
+
+        let max_allowed_dist = if occlude {
+            self.raycast_backface_culled(world_ray, model_matrix, true)
+                .map(|h| h.distance + 0.20)
+        } else {
+            None
+        };
 
         let mut closest_ek = None;
         let mut min_dist = max_distance;
@@ -152,6 +204,27 @@ impl Mesh {
             let to_mid = mid - local_origin;
             let proj = to_mid.dot(local_dir);
             if proj > 0.0 {
+                let mid_world = model_matrix.transform_point3(mid);
+                let world_dist = (mid_world - world_ray.origin).length();
+
+                if let Some(surface_dist) = max_allowed_dist {
+                    if world_dist > surface_dist {
+                        continue; // Occluded by front surface
+                    }
+                }
+
+                if occlude {
+                    // Check if either adjacent face of this edge is front-facing
+                    let f_left = he.face;
+                    let f_right = self.half_edges.get(he.twin).and_then(|th| th.face);
+                    let left_front = f_left.and_then(|fk| self.faces.get(fk)).map_or(false, |f| f.normal.dot(local_dir) < 0.0);
+                    let right_front = f_right.and_then(|fk| self.faces.get(fk)).map_or(false, |f| f.normal.dot(local_dir) < 0.0);
+
+                    if !left_front && !right_front {
+                        continue; // Both faces back-facing
+                    }
+                }
+
                 let pt_on_ray = local_origin + local_dir * proj;
                 let dist = (mid - pt_on_ray).length();
                 if dist < min_dist {

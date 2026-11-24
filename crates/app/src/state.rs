@@ -200,9 +200,7 @@ pub struct AppState {
     pub is_panning: bool,
 
     // Direct modeling parameters
-    pub extrude_distance: f32,
-    pub bevel_offset: f32,
-    pub bevel_inset: f32,
+    pub extrude_distance: f32, pub bevel_offset: f32, pub bevel_inset: f32,
     pub loop_cut_ratio: f32,
     pub inset_factor: f32,
     pub inset_individual: bool,
@@ -229,8 +227,7 @@ pub struct AppState {
 
     // Animation & Keyframe Timeline (Maya / Blender Style)
     pub animation: AnimationManager,
-    pub timeline_expanded: bool,
-    pub timeline_mode: TimelineViewMode,
+    pub timeline_expanded: bool, pub timeline_mode: TimelineViewMode,
     pub fcurve_show_tx: bool, pub fcurve_show_ty: bool, pub fcurve_show_tz: bool,
     pub fcurve_show_sx: bool, pub fcurve_show_sy: bool, pub fcurve_show_sz: bool,
     pub fcurve_show_rot: bool, pub fcurve_val_min: f32, pub fcurve_val_max: f32,
@@ -304,6 +301,9 @@ pub struct AppState {
     pub egui_ctx: egui::Context,
     pub egui_state: egui_winit::State,
     pub egui_renderer: egui_wgpu::Renderer,
+    pub project_file_path: Option<std::path::PathBuf>,
+    pub autosave: crate::autosave::AutosaveManager,
+    pub status_toast: Option<(String, Instant)>,
 
     // Timing
     pub last_frame_time: Instant,
@@ -606,12 +606,19 @@ impl AppState {
             egui_ctx,
             egui_state,
             egui_renderer,
+            project_file_path: None,
+            autosave: crate::autosave::AutosaveManager::default(),
+            status_toast: None,
             last_frame_time: Instant::now(),
             fps: 60.0,
         };
 
         app_state.sync_gpu_meshes();
         app_state
+    }
+
+    pub fn set_status_message(&mut self, msg: impl Into<String>) {
+        self.status_toast = Some((msg.into(), Instant::now()));
     }
 
     pub fn set_theme(&mut self, theme: crate::ui::theme::ThemePreset) {
