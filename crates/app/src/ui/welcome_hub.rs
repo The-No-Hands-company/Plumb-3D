@@ -282,15 +282,8 @@ pub fn apply_project_template(state: &mut AppState, template: ProjectTemplate) {
             state.inspector_tab = InspectorTab::Tools;
         }
         ProjectTemplate::CastleTower => {
-            let tower = Primitives::create_cylinder(2.0, 6.0, 16);
-            let node = SceneNode::new_mesh("CastleTowerBase", Transform::IDENTITY, tower);
-            let id = state.scene.add_node(node);
-            state.selected_node = Some(id);
-            state.interaction_mode = InteractionMode::Edit;
-            state.sub_element_level = SubElementLevel::Face;
-            state.viewport_shading = ViewportShadingMode::Studio;
-            state.show_wireframe = true;
-            state.inspector_tab = InspectorTab::Modifiers;
+            crate::scenes::build_medieval_citadel_scene(state);
+            return;
         }
     }
 

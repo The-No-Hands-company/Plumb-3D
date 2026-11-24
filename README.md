@@ -2,9 +2,9 @@
 
 <div align="center">
 
-![Plumb Bob Mascot Hero Shot](docs/images/plumb_bob_splash.png)
+![Medieval Citadel Hero Production Render](docs/images/castle_citadel_hero.png)
 
-*Architectural Plumb Bob mascot rendered with Plumb 3D's pure-Rust Monte Carlo Path Tracer.*
+*Architectural Medieval Citadel & Fortress modeled in Plumb 3D with parametric modifier stacks, PBR materials, torchlight illumination, and rendered with the pure-Rust Monte Carlo Path Tracer + Post-Production LookDev pipeline (Bloom, Vignette, ACES Filmic Tone Mapping).*
 
 </div>
 
@@ -23,6 +23,9 @@ Inspired by the precision modeling workflows of **Plasticity**, the topological 
 
 ### Real-Time Modeling Viewport & Workspace Navigation
 ![Plumb 3D Modeling Viewport](docs/images/plumb_3d_viewport.jpg)
+
+### Signature Plumb Bob Mascot Studio Render
+![Plumb Bob Mascot Hero Shot](docs/images/plumb_bob_splash.png)
 
 </div>
 
@@ -92,12 +95,13 @@ Inspired by the precision modeling workflows of **Plasticity**, the topological 
   - Studio MatCaps, flat shading, PBR preview, infinite anti-aliased ground grid.
   - Interactive 6-Axis navigation orbit sphere (`+X`, `-X`, `+Y`, `-Y`, `+Z`, `-Z`).
   - Professional 3D Transform Gizmos: 3D cones for translation, smooth rings for rotation, cubes for scaling, and planar drag tiles ($XY, XZ, YZ$).
-- **Offline Production Path Tracer (`render-pathtracer`)**:
+- **Offline Production Path Tracer & Post-Processing (`render-pathtracer`)**:
   - Multi-threaded CPU Monte Carlo path tracing engine powered by **Rayon**.
   - Surface Area Heuristic (SAH) Bounding Volume Hierarchy ($O(\log N)$ BVH).
   - Cook-Torrance Microfacet specular BRDF, Lambertian diffuse, dielectric Fresnel glass transmission, and metallic reflections.
   - Thin-lens physical optical camera with concentric disk aperture sampling for realistic optical depth-of-field bokeh.
-  - F12 progressive render accumulation window with PNG export.
+  - **Built-in Post-Production LookDev Compositor**: Multi-pass separable Gaussian Bloom glow, corner vignette falloff, saturation/contrast curve color grading, and ACES Filmic tone mapping.
+  - `F12` progressive render accumulation window with real-time post-processing adjustments and PNG export.
 
 ### 7. CAD, 3D Printing & Point Cloud Interchange
 - **STL (ASCII & Binary)**: Watertight export for Cura, PrusaSlicer, and Bambu Studio.

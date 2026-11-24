@@ -182,4 +182,32 @@ impl RenderBuffer {
         )
         .map_err(|e| format!("Failed to save render to {}: {}", path, e))
     }
+
+    /// Converts using full post-production pipeline (bloom, vignette, color grading, ACES filmic)
+    pub fn to_rgba8_post_processed(&self, settings: &crate::post_process::PostProcessSettings) -> Vec<u8> {
+        crate::post_process::apply_post_processing(
+            &self.accumulated_radiance,
+            self.width,
+            self.height,
+            self.samples_rendered,
+            settings,
+        )
+    }
+
+    /// Saves the current render buffer with post-processing to a PNG file on disk
+    pub fn save_png_post_processed(
+        &self,
+        path: &str,
+        settings: &crate::post_process::PostProcessSettings,
+    ) -> Result<(), String> {
+        let rgba = self.to_rgba8_post_processed(settings);
+        image::save_buffer(
+            path,
+            &rgba,
+            self.width,
+            self.height,
+            image::ExtendedColorType::Rgba8,
+        )
+        .map_err(|e| format!("Failed to save render to {}: {}", path, e))
+    }
 }

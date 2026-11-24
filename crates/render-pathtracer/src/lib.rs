@@ -19,6 +19,7 @@ pub mod bvh;
 pub mod camera;
 pub mod integrator;
 pub mod material;
+pub mod post_process;
 pub mod renderer;
 pub mod scene;
 
@@ -30,5 +31,6 @@ pub use bvh::{BvhNode, RayHit, Triangle};
 pub use camera::PathtracerCamera;
 pub use integrator::trace_path;
 pub use material::{BsdfSample, Material};
+pub use post_process::{apply_post_processing, PostProcessSettings};
 pub use renderer::{RenderBuffer, RenderSettings};
 pub use scene::PathTracerScene;

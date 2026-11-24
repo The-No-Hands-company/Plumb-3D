@@ -91,6 +91,7 @@ pub struct ProductionRenderState {
     pub focus_distance: f32,
     pub studio_light_intensity: f32,
     pub sky_intensity: f32,
+    pub post_process: render_pathtracer::PostProcessSettings,
 }
 
 impl Default for ProductionRenderState {
@@ -122,6 +123,7 @@ impl Default for ProductionRenderState {
             focus_distance: 5.0,
             studio_light_intensity: 12.0,
             sky_intensity: 1.0,
+            post_process: render_pathtracer::PostProcessSettings::default(),
         }
     }
 }

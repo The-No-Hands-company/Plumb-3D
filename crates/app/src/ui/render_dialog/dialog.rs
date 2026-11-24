@@ -171,6 +171,45 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
             }
         });
 
+    ui.add_space(4.0);
+
+    // Post-Production & LookDev (VFB Compositor)
+    egui::CollapsingHeader::new("✨ Post-Production & LookDev")
+        .default_open(true)
+        .show(ui, |ui| {
+            ui.checkbox(&mut state.production_render.post_process.enabled, "Enable Post-Processing");
+            if state.production_render.post_process.enabled {
+                ui.checkbox(&mut state.production_render.post_process.bloom_enabled, "Optical Bloom / Glow");
+                if state.production_render.post_process.bloom_enabled {
+                    ui.horizontal(|ui| {
+                        ui.label("Bloom Int:");
+                        ui.add(egui::Slider::new(&mut state.production_render.post_process.bloom_intensity, 0.0..=1.0));
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Threshold:");
+                        ui.add(egui::Slider::new(&mut state.production_render.post_process.bloom_threshold, 0.5..=3.0));
+                    });
+                }
+                ui.horizontal(|ui| {
+                    ui.label("Vignette:");
+                    ui.add(egui::Slider::new(&mut state.production_render.post_process.vignette_intensity, 0.0..=0.8));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Exposure EV:");
+                    ui.add(egui::Slider::new(&mut state.production_render.post_process.exposure, 0.2..=3.0));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Contrast:");
+                    ui.add(egui::Slider::new(&mut state.production_render.post_process.contrast, 0.7..=1.5));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Saturation:");
+                    ui.add(egui::Slider::new(&mut state.production_render.post_process.saturation, 0.0..=2.0));
+                });
+                ui.checkbox(&mut state.production_render.post_process.filmic_tonemap, "ACES Filmic Tone Mapping");
+            }
+        });
+
     ui.add_space(10.0);
 
     // Render Action Buttons
@@ -230,7 +269,12 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
             if ui.add_enabled(can_save, egui::Button::new("💾 Save Image as PNG")).clicked() {
                 if let Some(buf) = &state.production_render.buffer {
                     let path = state.production_render.export_path.clone();
-                    match buf.save_png(&path) {
+                    let res = if state.production_render.post_process.enabled {
+                        buf.save_png_post_processed(&path, &state.production_render.post_process)
+                    } else {
+                        buf.save_png_filmic(&path, true)
+                    };
+                    match res {
                         Ok(()) => {
                             state.production_render.status_message = format!("Saved successfully to {}", path);
                         }
@@ -367,8 +411,12 @@ fn step_progressive_render(state: &mut AppState) {
                 state.production_render.total_elapsed_secs = start.elapsed().as_secs_f32();
             }
 
-            // Update egui texture with current accumulating radiance
-            let rgba = buffer.to_rgba8();
+            // Update egui texture with current accumulating radiance and post-production
+            let rgba = if state.production_render.post_process.enabled {
+                buffer.to_rgba8_post_processed(&state.production_render.post_process)
+            } else {
+                buffer.to_rgba8_filmic()
+            };
             let color_image = egui::ColorImage::from_rgba_unmultiplied(
                 [buffer.width as usize, buffer.height as usize],
                 &rgba,
