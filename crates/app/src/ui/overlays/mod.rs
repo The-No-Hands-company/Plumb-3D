@@ -1,0 +1,19 @@
+pub mod camera_gate;
+pub mod hud;
+pub mod mesh_features;
+pub mod modals;
+pub mod operator_panel;
+pub mod tools;
+
+use crate::state::AppState;
+
+pub fn draw_overlays(state: &mut AppState) {
+    crate::live_pathtracer::step_live_viewport_pathtracer(state);
+    crate::live_pathtracer::render_live_pathtracer_overlay(state);
+    camera_gate::render(state);
+    tools::render(state);
+    modals::render(state);
+    operator_panel::render(state);
+    mesh_features::render(state);
+    hud::render(state);
+}

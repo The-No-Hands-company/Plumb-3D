@@ -1,0 +1,13 @@
+[package]
+name = "render-viewport"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+core-math = { workspace = true }
+geo-kernel = { workspace = true }
+wgpu = { workspace = true }
+bytemuck = { workspace = true }
+log = { workspace = true }
+pollster = { workspace = true }
+image = { workspace = true }

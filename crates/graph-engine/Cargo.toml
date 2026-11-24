@@ -1,0 +1,13 @@
+[package]
+name = "graph-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+core-math = { workspace = true }
+geo-kernel = { workspace = true }
+slotmap = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+log = { workspace = true }
+rayon = { workspace = true }

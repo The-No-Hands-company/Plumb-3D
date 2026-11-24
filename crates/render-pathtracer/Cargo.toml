@@ -1,0 +1,12 @@
+[package]
+name = "render-pathtracer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+core-math = { workspace = true }
+geo-kernel = { workspace = true }
+graph-engine = { workspace = true }
+rayon = { workspace = true }
+image = { workspace = true }
+log = { workspace = true }

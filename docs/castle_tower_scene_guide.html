@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plumb 3D — Medieval Castle Citadel Architectural Guide</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181b21;
+      --card-hover: #20242c;
+      --border: #2c323f;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #e2b357;
+      --accent-glow: rgba(226, 179, 87, 0.2);
+      --stone: #64748b;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .badge {
+      background: rgba(226, 179, 87, 0.15);
+      color: #f1c40f;
+      border: 1px solid rgba(226, 179, 87, 0.3);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .keycap {
+      background: #232731;
+      border: 1px solid #3e4657;
+      border-bottom: 2px solid #1a1e27;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #f8fafc;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+  </style>
+</head>
+<body class="p-6 max-w-5xl mx-auto antialiased">
+
+  <!-- Header Banner -->
+  <header class="mb-8 border-b border-[var(--border)] pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div>
+      <div class="flex items-center gap-3">
+        <span class="text-3xl font-black tracking-widest text-[#e2b357] uppercase font-mono">PLUMB 3D</span>
+        <span class="text-xs bg-[#2a2f3d] text-slate-300 px-2 py-0.5 rounded border border-slate-600 font-mono">CAD / DCC HYBRID</span>
+      </div>
+      <h1 class="text-2xl font-bold mt-1 text-slate-100">Medieval Castle Tower & Citadel Architectural Masterclass</h1>
+      <p class="text-sm text-slate-400 mt-1">Authentic Norman & Edwardian defensive fortification modeling guide.</p>
+    </div>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 flex items-center gap-4 shadow-lg">
+      <div class="text-right">
+        <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Scene Progress</div>
+        <div id="progress-text" class="text-lg font-bold text-[#e2b357]">0 / 8 Steps</div>
+      </div>
+      <div class="w-12 h-12 relative flex items-center justify-center">
+        <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+          <path class="text-slate-700" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path id="progress-circle" class="text-[#e2b357] transition-all duration-300" stroke-dasharray="0, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+        <span id="progress-pct" class="absolute text-[11px] font-bold">0%</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Architectural Cross Section Diagram -->
+  <section class="mb-8 bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-md">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold flex items-center gap-2 text-slate-100">
+        <svg class="w-5 h-5 text-[#e2b357]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Defensive Parapet & Walkway Architectural Blueprint
+      </h2>
+      <span class="text-xs text-slate-400 font-mono">Norman Defensive Topology</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+      <!-- Cross Section SVG -->
+      <div class="md:col-span-2 bg-[#101318] rounded-lg p-4 border border-slate-800 flex justify-center">
+        <svg viewBox="0 0 540 260" class="w-full max-w-lg h-auto">
+          <!-- Grid Background lines -->
+          <line x1="20" y1="210" x2="520" y2="210" stroke="#252c38" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="20" y1="130" x2="520" y2="130" stroke="#252c38" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="20" y1="50" x2="520" y2="50" stroke="#252c38" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="270" y1="20" x2="270" y2="240" stroke="#334155" stroke-width="1" stroke-dasharray="6,4"/>
+
+          <!-- Tower Shaft Silhouette -->
+          <polygon points="120,230 140,110 400,110 420,230" fill="#1e2530" stroke="#475569" stroke-width="1.5"/>
+
+          <!-- Corbel Machicolation Flare -->
+          <polygon points="140,110 120,70 420,70 400,110" fill="#2d3748" stroke="#64748b" stroke-width="1.5"/>
+
+          <!-- Battlements / Merlons -->
+          <!-- Left Merlon -->
+          <rect x="120" y="20" width="30" height="50" fill="#3b4657" stroke="#94a3b8" stroke-width="1.5"/>
+          <!-- Middle Merlons -->
+          <rect x="190" y="20" width="30" height="50" fill="#3b4657" stroke="#94a3b8" stroke-width="1.5"/>
+          <rect x="320" y="20" width="30" height="50" fill="#3b4657" stroke="#94a3b8" stroke-width="1.5"/>
+          <!-- Right Merlon -->
+          <rect x="390" y="20" width="30" height="50" fill="#3b4657" stroke="#94a3b8" stroke-width="1.5"/>
+
+          <!-- Sunken Walkway Floor (y = 2.2m) -->
+          <rect x="150" y="100" width="240" height="15" fill="#e2b357" fill-opacity="0.25" stroke="#e2b357" stroke-width="1.5" stroke-dasharray="2,2"/>
+
+          <!-- Central Tower Core Roof -->
+          <rect x="220" y="70" width="100" height="40" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+
+          <!-- Arrow and Dimension Annotations -->
+          <!-- Merlon Height: 0.5m -->
+          <line x1="105" y1="20" x2="105" y2="70" stroke="#f1c40f" stroke-width="1.5"/>
+          <text x="75" y="48" fill="#f1c40f" font-size="11" font-family="monospace">0.5m</text>
+
+          <!-- Outer Parapet Wall: 0.3m -->
+          <line x1="120" y1="12" x2="150" y2="12" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="122" y="8" fill="#38bdf8" font-size="11" font-family="monospace">0.3m</text>
+
+          <!-- Walkway Trench: 0.8m wide, 0.8m deep -->
+          <line x1="150" y1="125" x2="220" y2="125" stroke="#4ade80" stroke-width="1.5"/>
+          <text x="165" y="140" fill="#4ade80" font-size="11" font-family="monospace">0.8m wide</text>
+
+          <line x1="150" y1="70" x2="150" y2="100" stroke="#e2b357" stroke-width="1.5"/>
+          <text x="155" y="88" fill="#e2b357" font-size="11" font-family="monospace">-0.8m depth</text>
+
+          <!-- Central Core: r = 0.9m -->
+          <text x="235" y="94" fill="#cbd5e1" font-size="11" font-family="monospace">Core (r=0.9m)</text>
+
+          <!-- Battered Base Callout -->
+          <text x="170" y="248" fill="#a78bfa" font-size="11" font-family="monospace">Battered Base Plinth (+15% Flare)</text>
+        </svg>
+      </div>
+
+      <!-- Dimension Breakdown Table -->
+      <div class="space-y-3 text-xs">
+        <div class="border-l-2 border-[#38bdf8] pl-3 py-1 bg-[#151922] rounded-r">
+          <span class="font-bold text-[#38bdf8] block">1. Outer Wall Collar</span>
+          <span class="text-slate-300">Thickness: <strong class="text-white">0.30 m</strong></span>
+          <p class="text-slate-400 mt-0.5">Creates defensive stone breastwork protecting patrol archers.</p>
+        </div>
+        <div class="border-l-2 border-[#4ade80] pl-3 py-1 bg-[#151922] rounded-r">
+          <span class="font-bold text-[#4ade80] block">2. Sunken Walkway Ring</span>
+          <span class="text-slate-300">Width: <strong class="text-white">0.80 m</strong> | Depth: <strong class="text-white">-0.80 m</strong></span>
+          <p class="text-slate-400 mt-0.5">Annular patrol trench sunk into tower cap between outer wall and roof.</p>
+        </div>
+        <div class="border-l-2 border-[#f1c40f] pl-3 py-1 bg-[#151922] rounded-r">
+          <span class="font-bold text-[#f1c40f] block">3. Merlons (Crenels)</span>
+          <span class="text-slate-300">Height: <strong class="text-white">0.50 m</strong> | Alternating 8x</span>
+          <p class="text-slate-400 mt-0.5">Upward stone teeth with arrow embrasures between them.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step-by-Step Modeling Checklist -->
+  <section class="space-y-4 mb-10">
+    <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+      <span class="w-6 h-6 rounded-full bg-[#e2b357] text-slate-900 flex items-center justify-center font-black text-xs">8</span>
+      Interactive Step-by-Step Modeling Guide
+    </h2>
+
+    <!-- Step 1 -->
+    <div class="step-card bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all" data-step="1">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="step1" class="step-checkbox mt-1 w-5 h-5 rounded accent-[#e2b357] cursor-pointer">
+          <div>
+            <label for="step1" class="font-bold text-slate-100 cursor-pointer text-base">Step 1: Add Cylinder Base Primitive</label>
+            <p class="text-sm text-slate-400 mt-1">Clear your scene with <span class="keycap">File</span> &rarr; <span class="keycap">New Scene</span>. Click <span class="badge">Add Primitive</span> &rarr; <span class="badge">Cylinder</span> in the top ribbon header.</p>
+            <div class="mt-2 text-xs text-slate-300 bg-[#12151c] p-2.5 rounded border border-slate-800 flex items-center gap-4">
+              <span><strong>Radius:</strong> 2.0 m</span>
+              <span><strong>Height:</strong> 6.0 m</span>
+              <span><strong>Segments:</strong> 16 (or 24)</span>
+            </div>
+          </div>
+        </div>
+        <span class="keycap">Object Mode</span>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all" data-step="2">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="step2" class="step-checkbox mt-1 w-5 h-5 rounded accent-[#e2b357] cursor-pointer">
+          <div>
+            <label for="step2" class="font-bold text-slate-100 cursor-pointer text-base">Step 2: Enter Edit Mode & Select Top Cap</label>
+            <p class="text-sm text-slate-400 mt-1">Press <span class="keycap">Tab</span> to switch to <strong>Edit Mode</strong>. Press <span class="keycap">3</span> to enter <strong>Face Select Mode</strong>. Click the top circular circular cap face of the cylinder.</p>
+          </div>
+        </div>
+        <span class="keycap">Face Mode (3)</span>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step-card bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all" data-step="3">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="step3" class="step-checkbox mt-1 w-5 h-5 rounded accent-[#e2b357] cursor-pointer">
+          <div>
+            <label for="step3" class="font-bold text-slate-100 cursor-pointer text-base">Step 3: Outer Parapet Wall Inset (0.3m)</label>
+            <p class="text-sm text-slate-400 mt-1">Press <span class="keycap">I</span> for Inset. Type <span class="badge">0.3</span> in the operator panel (or drag inward to 0.3m thickness). Press <span class="keycap">Enter</span> or click to confirm.</p>
+            <p class="text-xs text-slate-400 mt-1 italic">Notice this creates the outer stone wall collar at the outer boundary ($r = 2.0\text{m} \to 1.7\text{m}$).</p>
+          </div>
+        </div>
+        <span class="keycap">I (Inset)</span>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step-card bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all" data-step="4">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="step4" class="step-checkbox mt-1 w-5 h-5 rounded accent-[#e2b357] cursor-pointer">
+          <div>
+            <label for="step4" class="font-bold text-slate-100 cursor-pointer text-base">Step 4: Walkway Inner Boundary Inset (0.8m)</label>
+            <p class="text-sm text-slate-400 mt-1">With the newly inset central face automatically selected, press <span class="keycap">I</span> again. Type <span class="badge">0.8</span> in the operator panel to define the walkway width (0.8m) and central tower roof. Confirm.</p>
+            <p class="text-xs text-emerald-400 mt-1">&check; You now have an annular walkway ring sandwiched between the outer wall and inner roof!</p>
+          </div>
+        </div>
+        <span class="keycap">I (Inset)</span>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step-card bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all" data-step="5">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="step5" class="step-checkbox mt-1 w-5 h-5 rounded accent-[#e2b357] cursor-pointer">
+          <div>
+            <label for="step5" class="font-bold text-slate-100 cursor-pointer text-base">Step 5: Sinking the Walkway Loop Trench (-0.8m)</label>
+            <p class="text-sm text-slate-400 mt-1">Hold <span class="keycap">Alt</span> and click on an edge of the walkway ring (or <span class="keycap">Shift</span>-click the circular ring faces) to select all 16 ring quads. Press <span class="keycap">E</span> for Extrude, move the cursor down and enter <span class="badge">-0.8</span>. Confirm.</p>
+            <p class="text-xs text-amber-300 mt-1">&star; The walkway sinks safely into the tower shaft, protected by the parapet breastwork!</p>
+          </div>
+        </div>
+        <span class="keycap">E (Extrude)</span>
+      </div>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="step-card bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all" data-step="6">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="step6" class="step-checkbox mt-1 w-5 h-5 rounded accent-[#e2b357] cursor-pointer">
+          <div>
+            <label for="step6" class="font-bold text-slate-100 cursor-pointer text-base">Step 6: Battlements / Merlons Extrusion</label>
+            <p class="text-sm text-slate-400 mt-1">Select alternating faces around the top outer rim wall (skip 1 quad between each selection for 8 symmetrical teeth). Press <span class="keycap">E</span> and enter <span class="badge">0.5</span> to extrude the crenel blocks upward around the perimeter.</p>
+          </div>
+        </div>
+        <span class="keycap">E &rarr; 0.5m</span>
+      </div>
+    </div>
+
+    <!-- Step 7 -->
+    <div class="step-card bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all" data-step="7">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="step7" class="step-checkbox mt-1 w-5 h-5 rounded accent-[#e2b357] cursor-pointer">
+          <div>
+            <label for="step7" class="font-bold text-slate-100 cursor-pointer text-base">Step 7: Battered Base & Corbelled Machicolations</label>
+            <p class="text-sm text-slate-400 mt-1"><strong>Plinth Flare:</strong> Select the bottom vertices of the cylinder, press <span class="keycap">S</span>, and scale outwards by <span class="badge">1.15x</span> to give the base massive defensive weight.<br>
+            <strong>Corbels:</strong> Select the ring of faces right under the top rim, press <span class="keycap">Alt+E</span> (Extrude Normals) &rarr; <span class="badge">0.2m</span> to create overhanging brackets.</p>
+          </div>
+        </div>
+        <span class="keycap">S / Alt+E</span>
+      </div>
+    </div>
+
+    <!-- Step 8 -->
+    <div class="step-card bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all" data-step="8">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="step8" class="step-checkbox mt-1 w-5 h-5 rounded accent-[#e2b357] cursor-pointer">
+          <div>
+            <label for="step8" class="font-bold text-slate-100 cursor-pointer text-base">Step 8: Stone Masonry Shading & Cavity Lookdev</label>
+            <p class="text-sm text-slate-400 mt-1">In Inspector, go to the <strong>🎨 Shading</strong> tab. Set <strong>Base Color</strong> to warm granite slate <span class="badge">#5C5954</span>, <strong>Roughness</strong> to <span class="badge">0.85</span>, and <strong>Metallic</strong> to <span class="badge">0.0</span>. In the top Viewport Shading menu, enable <span class="badge">Cavity Shading</span> to accentuate masonry crevices.</p>
+          </div>
+        </div>
+        <span class="keycap">Shading Tab</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Expanding into an Entire Citadel Scene -->
+  <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-md mb-8">
+    <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2 mb-4">
+      <svg class="w-5 h-5 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+      Blueprint: Expanding the Tower into a Complete Fortified Citadel
+    </h2>
+    <p class="text-sm text-slate-400 mb-6">Once your first tower is complete, duplicate and connect elements to construct an entire fortified castle compound:</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Curtain Walls -->
+      <div class="bg-[#12151c] p-4 rounded-lg border border-slate-800">
+        <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+          <span class="text-[#38bdf8]">🏰 1. Curtain Walls & Ramparts</span>
+        </h3>
+        <p class="text-xs text-slate-400 mt-1">Duplicate your completed tower across the 4 corners of your citadel perimeter with <span class="keycap">Shift+D</span> (Duplicate Object). Connect them using stretched Cube primitives with identical top parapet insets to create continuous archer walkways along the entire castle walls.</p>
+      </div>
+
+      <!-- Gatehouse & Portcullis -->
+      <div class="bg-[#12151c] p-4 rounded-lg border border-slate-800">
+        <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+          <span class="text-[#f1c40f]">🗝 2. Gatehouse & Arch Tunnel</span>
+        </h3>
+        <p class="text-xs text-slate-400 mt-1">Place two towers closely together. Bridge the gap with a central block and carve a round archway using a Cylinder with <span class="badge">Boolean Difference</span> (or <span class="badge">Knife Project</span>). Extrude a thin grid iron portcullis inside.</p>
+      </div>
+
+      <!-- Arrow Slit Embrasures -->
+      <div class="bg-[#12151c] p-4 rounded-lg border border-slate-800">
+        <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+          <span class="text-[#e2b357]">🎯 3. Arrow Slits (Cross Loops)</span>
+        </h3>
+        <p class="text-xs text-slate-400 mt-1">Use Loop Cut (<span class="keycap">Ctrl+R</span>) on the cylinder shaft. Inset a pair of narrow vertical faces, press <span class="keycap">E</span>, and extrude inward into the tower interior to form authentic archer loops.</p>
+      </div>
+
+      <!-- Courtyard & Lighting Lookdev -->
+      <div class="bg-[#12151c] p-4 rounded-lg border border-slate-800">
+        <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+          <span class="text-[#a78bfa]">☀️ 4. Sunlight & Path Tracing</span>
+        </h3>
+        <p class="text-xs text-slate-400 mt-1">Add a low-angle golden Directional Light (Sun) to cast long merlon shadows across the courtyard. Press <span class="keycap">F12</span> to launch the <strong>Production Path Tracer</strong> with soft contact shadows and atmospheric sky dome bounce!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Keyboard Shortcuts Quick Reference -->
+  <footer class="border-t border-[var(--border)] pt-4 text-xs text-slate-500 flex flex-wrap justify-between items-center gap-2">
+    <div><strong>Plumb 3D Keybinds:</strong> <span class="keycap">Tab</span> Mode Toggle &bull; <span class="keycap">1/2/3</span> Vert/Edge/Face &bull; <span class="keycap">I</span> Inset &bull; <span class="keycap">E</span> Extrude &bull; <span class="keycap">Ctrl+Z</span> Undo &bull; <span class="keycap">F12</span> Render</div>
+    <div>Drafted in <em>Plumb 3D Architectural CAD Studio</em></div>
+  </footer>
+
+  <script>
+    const checkboxes = document.querySelectorAll('.step-checkbox');
+    const progressText = document.getElementById('progress-text');
+    const progressCircle = document.getElementById('progress-circle');
+    const progressPct = document.getElementById('progress-pct');
+
+    function updateProgress() {
+      let completed = 0;
+      checkboxes.forEach(cb => {
+        const card = cb.closest('.step-card');
+        if (cb.checked) {
+          completed++;
+          card.classList.add('border-emerald-500/50', 'bg-emerald-950/10');
+        } else {
+          card.classList.remove('border-emerald-500/50', 'bg-emerald-950/10');
+        }
+      });
+
+      const total = checkboxes.length;
+      const pct = Math.round((completed / total) * 100);
+      progressText.textContent = `${completed} / ${total} Steps`;
+      progressPct.textContent = `${pct}%`;
+      progressCircle.setAttribute('stroke-dasharray', `${pct}, 100`);
+      localStorage.setItem('plumb_castle_steps', JSON.stringify([...checkboxes].map(c => c.checked)));
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener('change', updateProgress));
+
+    // Restore saved state
+    try {
+      const saved = JSON.parse(localStorage.getItem('plumb_castle_steps'));
+      if (saved && Array.isArray(saved)) {
+        checkboxes.forEach((cb, idx) => {
+          if (saved[idx]) cb.checked = true;
+        });
+      }
+    } catch(e) {}
+    updateProgress();
+  </script>
+</body>
+</html>
