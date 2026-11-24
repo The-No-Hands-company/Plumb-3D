@@ -8,6 +8,7 @@ members = [
     "crates/render-viewport",
     "crates/app",
 ]
+default-members = ["crates/app"]
 resolver = "2"
 
 [workspace.dependencies]
