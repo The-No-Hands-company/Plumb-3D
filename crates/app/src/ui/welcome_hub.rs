@@ -8,10 +8,21 @@ use crate::types::*;
 use crate::ui::actions::UiActions;
 
 /// Runtime state for the Interactive Welcome & Quick-Start Hub.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct WelcomeHubState {
     pub show_dialog: bool,
     pub dont_show_on_startup: bool,
+    pub splash_texture: Option<egui::TextureHandle>,
+}
+
+impl std::fmt::Debug for WelcomeHubState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("WelcomeHubState")
+            .field("show_dialog", &self.show_dialog)
+            .field("dont_show_on_startup", &self.dont_show_on_startup)
+            .field("has_splash_texture", &self.splash_texture.is_some())
+            .finish()
+    }
 }
 
 impl Default for WelcomeHubState {
@@ -19,9 +30,12 @@ impl Default for WelcomeHubState {
         Self {
             show_dialog: true,
             dont_show_on_startup: false,
+            splash_texture: None,
         }
     }
 }
+
+static SPLASH_BYTES: &[u8] = include_bytes!("../../../../docs/images/plumb_bob_splash.png");
 
 /// Project starter template identifier.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -43,9 +57,25 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
     let mut close = false;
     let mut selected_template = None;
 
+    // Lazily load splash artwork texture on first render
+    if state.welcome_hub.splash_texture.is_none() {
+        if let Ok(img) = image::load_from_memory(SPLASH_BYTES) {
+            let rgba = img.to_rgba8();
+            let color_img = egui::ColorImage::from_rgba_unmultiplied(
+                [rgba.width() as usize, rgba.height() as usize],
+                &rgba,
+            );
+            state.welcome_hub.splash_texture = Some(ctx.load_texture(
+                "plumb_splash_hero_tex",
+                color_img,
+                egui::TextureOptions::LINEAR,
+            ));
+        }
+    }
+
     egui::Window::new("Plumb 3D — Welcome & Quick-Start Hub")
         .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
-        .fixed_size(egui::vec2(640.0, 480.0))
+        .fixed_size(egui::vec2(660.0, 660.0))
         .collapsible(false)
         .resizable(false)
         .frame(
@@ -56,6 +86,16 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                 .inner_margin(egui::Margin::same(16.0)),
         )
         .show(&ctx, |ui| {
+            // Hero Splash Artwork Banner (Rendered with Plumb 3D Monte Carlo Path Tracer)
+            if let Some(ref splash_tex) = state.welcome_hub.splash_texture {
+                ui.add(
+                    egui::Image::new(splash_tex)
+                        .fit_to_exact_size(egui::vec2(628.0, 160.0))
+                        .rounding(egui::Rounding::same(6.0)),
+                );
+                ui.add_space(6.0);
+            }
+
             // Header Banner
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {

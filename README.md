@@ -1,8 +1,30 @@
 # Plumb 3D
 
+<div align="center">
+
+![Plumb Bob Mascot Hero Shot](docs/images/plumb_bob_splash.png)
+
+*Architectural Plumb Bob mascot rendered with Plumb 3D's pure-Rust Monte Carlo Path Tracer.*
+
+</div>
+
 A next-generation, high-performance 3D modeling, procedural generation, animation, and rendering suite engineered entirely in **100% Safe, Pure Rust**.
 
 Inspired by the precision modeling workflows of **Plasticity**, the topological power of **Blender**, the hierarchical DAG and constraint rigging of **Autodesk Maya**, and the parametric modifier stack of **Autodesk 3ds Max**, Plumb 3D delivers a unified, zero-C/C++-dependency platform for artists, engineers, and technical directors.
+
+---
+
+## Screenshots & Interface
+
+<div align="center">
+
+### Interactive Welcome & Quick-Start Hub (`F2`)
+![Plumb 3D Welcome Hub](docs/images/plumb_3d_welcome_hub.jpg)
+
+### Real-Time Modeling Viewport & Workspace Navigation
+![Plumb 3D Modeling Viewport](docs/images/plumb_3d_viewport.jpg)
+
+</div>
 
 ---
 
