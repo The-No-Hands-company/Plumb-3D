@@ -35,7 +35,7 @@ impl Default for WelcomeHubState {
     }
 }
 
-static SPLASH_BYTES: &[u8] = include_bytes!("../../../../docs/images/plumb_bob_splash.png");
+static SPLASH_BYTES: &[u8] = include_bytes!("../../../../docs/images/castle_citadel_hero.png");
 
 /// Project starter template identifier.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -75,7 +75,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
 
     egui::Window::new("Plumb 3D — Welcome & Quick-Start Hub")
         .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
-        .fixed_size(egui::vec2(660.0, 660.0))
+        .fixed_size(egui::vec2(660.0, 680.0))
         .collapsible(false)
         .resizable(false)
         .frame(
@@ -90,10 +90,17 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
             if let Some(ref splash_tex) = state.welcome_hub.splash_texture {
                 ui.add(
                     egui::Image::new(splash_tex)
-                        .fit_to_exact_size(egui::vec2(628.0, 160.0))
+                        .fit_to_exact_size(egui::vec2(628.0, 180.0))
                         .rounding(egui::Rounding::same(6.0)),
                 );
-                ui.add_space(6.0);
+                ui.add_space(2.0);
+                ui.label(
+                    egui::RichText::new("🏰 Medieval Citadel & Fortress • Plumb 3D v1.0.0 Official Release Splash Artwork")
+                        .size(10.0)
+                        .italics()
+                        .color(egui::Color32::from_rgb(130, 140, 160)),
+                );
+                ui.add_space(4.0);
             }
 
             // Header Banner
