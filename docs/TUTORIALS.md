@@ -7,6 +7,7 @@ Welcome to the **DCC Suite Beginner Tutorials**! This guide contains 7 comprehen
 ## Table of Tutorials
 1. [Tutorial 1: Sci-Fi Cargo Crate (Hard-Surface Box Modeling)](#tutorial-1-sci-fi-cargo-crate-hard-surface-box-modeling)
 2. [Tutorial 2: Medieval Castle Tower (Architectural Modeling)](#tutorial-2-medieval-castle-tower-architectural-modeling)
+   - 🏰 **[Full Masterclass: Medieval Citadel & Fortress Architectural Scene](CITADEL_TUTORIAL.md)** (Multi-mesh fortress, lighting rig, PBR materials, and LookDev rendering)
 3. [Tutorial 3: Alien Creature Bust (Organic Digital Sculpting)](#tutorial-3-alien-creature-bust-organic-digital-sculpting)
 4. [Tutorial 4: Industrial Pipe & Conduit Harness (Spline Curves)](#tutorial-4-industrial-pipe--conduit-harness-spline-curves)
 5. [Tutorial 5: Procedural Sci-Fi City (Visual Geometry Nodes)](#tutorial-5-procedural-sci-fi-city-visual-geometry-nodes)
