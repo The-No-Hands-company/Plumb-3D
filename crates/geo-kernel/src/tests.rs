@@ -167,6 +167,22 @@
     }
 
     #[test]
+    fn test_hard_surface_boolean_intersecting_cut() {
+        let cube_a = Primitives::create_cube(2.0); // [-1, 1]
+        let mut cutter = Primitives::create_cube(1.0); // [-0.5, 0.5]
+        for v in cutter.vertices.values_mut() {
+            v.position.x += 0.8;
+        }
+
+        let pocket = cube_a.boolean(&cutter, BooleanOp::Difference).expect("Boolean cut should succeed");
+        assert!(pocket.face_count() >= 6, "Carved mesh should have faces from cut");
+        assert!(pocket.vertex_count() >= 8, "Carved mesh should have vertices");
+
+        let union_res = cube_a.boolean(&cutter, BooleanOp::Union).expect("Boolean union should succeed");
+        assert!(union_res.face_count() >= 6, "Union mesh should have faces");
+    }
+
+    #[test]
     fn test_mirror_modifier() {
         let cube = Primitives::create_cube(2.0);
         let mirror = MirrorModifier::new(MirrorAxis::X);

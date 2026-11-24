@@ -96,10 +96,71 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
         if ui.selectable_label(state.show_grid, "🌐 Grid").clicked() {
             state.show_grid = !state.show_grid;
         }
-        let snap_text = if state.snap_enabled { "🧲 Snap: ON" } else { "🧲 Snap" };
+        let snap_text = if state.snap_enabled {
+            match state.snap_target {
+                SnapTarget::Vertex => "🧲 Snap (V)",
+                SnapTarget::EdgeMidpoint => "🧲 Edge",
+                SnapTarget::FaceCenter => "🧲 Face",
+                SnapTarget::Grid => "🧲 Grid",
+            }
+        } else {
+            "🧲 Snap"
+        };
         if ui.selectable_label(state.snap_enabled, snap_text).clicked() {
             state.snap_enabled = !state.snap_enabled;
         }
+
+        // Quick snap target & grid step selector
+        egui::ComboBox::from_id_salt("quick_snap_selector")
+            .selected_text(match state.snap_target {
+                SnapTarget::Vertex => "📍 Vertex",
+                SnapTarget::EdgeMidpoint => "📏 Midpoint",
+                SnapTarget::FaceCenter => "▫ Face Center",
+                SnapTarget::Grid => match state.grid_snap_size {
+                    s if (s - 0.001).abs() < 1e-4 => "🌐 1mm",
+                    s if (s - 0.01).abs() < 1e-4 => "🌐 10mm",
+                    s if (s - 0.1).abs() < 1e-4 => "🌐 10cm",
+                    s if (s - 1.0).abs() < 1e-4 => "🌐 1m",
+                    _ => "🌐 Grid",
+                },
+            })
+            .width(80.0)
+            .show_ui(ui, |ui| {
+                if ui.selectable_label(state.snap_target == SnapTarget::Vertex, "📍 Vertex (V)").clicked() {
+                    state.snap_target = SnapTarget::Vertex;
+                    state.snap_enabled = true;
+                }
+                if ui.selectable_label(state.snap_target == SnapTarget::EdgeMidpoint, "📏 Edge Midpoint").clicked() {
+                    state.snap_target = SnapTarget::EdgeMidpoint;
+                    state.snap_enabled = true;
+                }
+                if ui.selectable_label(state.snap_target == SnapTarget::FaceCenter, "▫ Face Center").clicked() {
+                    state.snap_target = SnapTarget::FaceCenter;
+                    state.snap_enabled = true;
+                }
+                ui.separator();
+                ui.label(egui::RichText::new("Grid Increment").small().weak());
+                if ui.selectable_label(state.snap_target == SnapTarget::Grid && (state.grid_snap_size - 0.001).abs() < 1e-4, "🌐 1mm (0.001m)").clicked() {
+                    state.snap_target = SnapTarget::Grid;
+                    state.grid_snap_size = 0.001;
+                    state.snap_enabled = true;
+                }
+                if ui.selectable_label(state.snap_target == SnapTarget::Grid && (state.grid_snap_size - 0.01).abs() < 1e-4, "🌐 10mm (0.01m)").clicked() {
+                    state.snap_target = SnapTarget::Grid;
+                    state.grid_snap_size = 0.01;
+                    state.snap_enabled = true;
+                }
+                if ui.selectable_label(state.snap_target == SnapTarget::Grid && (state.grid_snap_size - 0.1).abs() < 1e-4, "🌐 10cm (0.1m)").clicked() {
+                    state.snap_target = SnapTarget::Grid;
+                    state.grid_snap_size = 0.1;
+                    state.snap_enabled = true;
+                }
+                if ui.selectable_label(state.snap_target == SnapTarget::Grid && (state.grid_snap_size - 1.0).abs() < 1e-4, "🌐 1m (1.0m)").clicked() {
+                    state.snap_target = SnapTarget::Grid;
+                    state.grid_snap_size = 1.0;
+                    state.snap_enabled = true;
+                }
+            });
 
         // Camera mode selector
         egui::ComboBox::from_id_salt("quick_camera_combo")

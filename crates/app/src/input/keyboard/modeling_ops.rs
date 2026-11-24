@@ -6,7 +6,7 @@ use winit::keyboard::KeyCode;
 
 use crate::commands::*;
 use crate::state::AppState;
-use crate::types::{CurveHandleSelection, InteractionMode, SubElementLevel};
+use crate::types::{CurveHandleSelection, InteractionMode, SnapTarget, SubElementLevel};
 
 pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
     match key_code {
@@ -247,6 +247,16 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                         state.window.request_redraw();
                     }
                 }
+            } else {
+                state.snap_enabled = !state.snap_enabled || state.snap_target != SnapTarget::Vertex;
+                state.snap_target = SnapTarget::Vertex;
+                let msg = if state.snap_enabled {
+                    "🧲 Precision Vertex Snapping (V): ON"
+                } else {
+                    "🧲 Precision Snapping: OFF"
+                };
+                state.set_status_message(msg);
+                state.window.request_redraw();
             }
             true
         }

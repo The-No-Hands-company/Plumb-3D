@@ -1,5 +1,5 @@
 use crate::state::AppState;
-use crate::types::TransformOrientation;
+use crate::types::{SnapTarget, TransformOrientation};
 use graph_engine::NodeId;
 use render_viewport::GizmoMode;
 
@@ -60,10 +60,37 @@ pub fn draw_transform_panel(ui: &mut egui::Ui, state: &mut AppState, sel_id: Nod
                 });
         });
         ui.horizontal(|ui| {
-            ui.checkbox(&mut state.snap_to_grid, "Grid Snap");
-            if state.snap_to_grid {
-                ui.add(egui::DragValue::new(&mut state.grid_snap_size).speed(0.05).range(0.01..=10.0));
+            ui.label("CAD Snapping:");
+            ui.checkbox(&mut state.snap_enabled, "Enable (Shift+Tab)");
+        });
+        if state.snap_enabled {
+            ui.horizontal(|ui| {
+                ui.label("Target:");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::Vertex, "📍 Vert (V)");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::EdgeMidpoint, "📏 Mid");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::FaceCenter, "▫ Face");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::Grid, "🌐 Grid");
+            });
+            if state.snap_target == SnapTarget::Grid {
+                ui.horizontal(|ui| {
+                    ui.label("Step:");
+                    if ui.selectable_label((state.grid_snap_size - 0.001).abs() < 1e-4, "1mm").clicked() {
+                        state.grid_snap_size = 0.001;
+                    }
+                    if ui.selectable_label((state.grid_snap_size - 0.01).abs() < 1e-4, "10mm").clicked() {
+                        state.grid_snap_size = 0.01;
+                    }
+                    if ui.selectable_label((state.grid_snap_size - 0.1).abs() < 1e-4, "10cm").clicked() {
+                        state.grid_snap_size = 0.1;
+                    }
+                    if ui.selectable_label((state.grid_snap_size - 1.0).abs() < 1e-4, "1m").clicked() {
+                        state.grid_snap_size = 1.0;
+                    }
+                    ui.add(egui::DragValue::new(&mut state.grid_snap_size).speed(0.01).range(0.001..=10.0).suffix("m"));
+                });
             }
+        }
+        ui.horizontal(|ui| {
             ui.checkbox(&mut state.snap_angle, "Angle Snap");
             if state.snap_angle {
                 ui.add(egui::DragValue::new(&mut state.angle_snap_degrees).speed(1.0).range(1.0..=180.0).suffix("°"));

@@ -237,11 +237,26 @@ pub fn handle_gizmo_drag(
         GizmoMode::Rotate => {
             let gizmo_orient = state.get_gizmo_orientation();
             let mut delta_rot = TransformGizmo::calculate_rotation_delta(axis, gizmo_orient, dx, dy);
-            if state.snap_angle && state.angle_snap_degrees > 1e-4 {
-                let step = state.angle_snap_degrees.to_radians();
+            let angle_snap_active = state.snap_angle || state.ctrl_pressed || state.shift_pressed;
+            if angle_snap_active {
+                let snap_deg = if state.ctrl_pressed && state.shift_pressed {
+                    90.0
+                } else if state.shift_pressed {
+                    45.0
+                } else if state.ctrl_pressed {
+                    15.0
+                } else {
+                    state.angle_snap_degrees.max(1.0)
+                };
+                let step = snap_deg.to_radians();
                 let (rot_axis, angle) = delta_rot.to_axis_angle();
                 let snapped_angle = (angle / step).round() * step;
                 delta_rot = Quat::from_axis_angle(rot_axis, snapped_angle);
+
+                let pivot = state.get_gizmo_world_position().unwrap_or(Vec3::ZERO);
+                state.last_snap_hit = Some((pivot, "Angle"));
+            } else {
+                state.last_snap_hit = None;
             }
             if state.interaction_mode == InteractionMode::Object || state.interaction_mode == InteractionMode::Pose {
                 if state.selected_nodes.len() > 1 {

@@ -207,6 +207,7 @@ pub fn render(state: &mut AppState) {
                 "Vertex" => (egui::Color32::from_rgb(0, 240, 255), egui::Color32::from_rgba_premultiplied(0, 180, 255, 40)),
                 "Edge Midpoint" => (egui::Color32::from_rgb(50, 255, 120), egui::Color32::from_rgba_premultiplied(50, 255, 120, 40)),
                 "Face Center" => (egui::Color32::from_rgb(255, 200, 50), egui::Color32::from_rgba_premultiplied(255, 200, 50, 40)),
+                "Angle" => (egui::Color32::from_rgb(255, 100, 220), egui::Color32::from_rgba_premultiplied(255, 100, 220, 40)),
                 _ => (egui::Color32::from_rgb(100, 160, 255), egui::Color32::from_rgba_premultiplied(100, 160, 255, 40)),
             };
 
@@ -231,7 +232,20 @@ pub fn render(state: &mut AppState) {
                 }
             }
 
-            let pill_text = format!("⌖ Snapped to {} ({:.2}, {:.2}, {:.2})", label, hit_pos.x, hit_pos.y, hit_pos.z);
+            let pill_text = if label == "Angle" {
+                let snap_step = if state.ctrl_pressed && state.shift_pressed {
+                    90.0
+                } else if state.shift_pressed {
+                    45.0
+                } else if state.ctrl_pressed {
+                    15.0
+                } else {
+                    state.angle_snap_degrees
+                };
+                format!("📐 Angle Snapped ({:.0}° step)", snap_step)
+            } else {
+                format!("⌖ Snapped to {} ({:.2}, {:.2}, {:.2})", label, hit_pos.x, hit_pos.y, hit_pos.z)
+            };
             let pill_pos = egui::pos2(center.x, center.y - 24.0);
             let pill_rect = egui::Rect::from_center_size(pill_pos, egui::vec2(pill_text.len() as f32 * 6.8 + 14.0, 20.0));
             painter.rect_filled(pill_rect, 4.0, egui::Color32::from_black_alpha(225));
