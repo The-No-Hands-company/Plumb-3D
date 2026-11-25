@@ -48,7 +48,7 @@ pub use plugin::{
     PlumbPluginType, PluginError, PLUMB_PLUGIN_API_VERSION, PLUMB_PLUGIN_MAGIC,
 };
 pub use analysis::MeshAnalysisReport;
-pub use mesh::{Edge, EdgeKey, Face, FaceKey, HalfEdge, HalfEdgeKey, Mesh, MeshError, Vertex, VertexGroup, VertexKey};
+pub use mesh::{Edge, EdgeKey, Face, FaceKey, HalfEdge, HalfEdgeKey, Mesh, MeshError, MeshManifoldReport, Vertex, VertexGroup, VertexKey};
 pub use primitives::{CapFillType, Primitives};
 pub use triangulation::{GpuVertex, RenderMesh, ShadingMode, SubMeshRange};
 pub use uv::ProjectionAxis;

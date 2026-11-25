@@ -60,6 +60,16 @@ impl AppState {
                         match self.sub_element_level {
                             SubElementLevel::Vertex => {
                                 if let Some(vk) = base_mesh.pick_vertex_occluded(&ray, &node.world_matrix, 0.25, occlude) {
+                                    if self.ctrl_pressed && self.selected_vertices.len() == 1 {
+                                        // Blender Ctrl+Click: Topological shortest path
+                                        let start = *self.selected_vertices.iter().next().unwrap();
+                                        if let Some(path) = base_mesh.shortest_path(start, vk) {
+                                            for p in path {
+                                                self.selected_vertices.insert(p);
+                                            }
+                                            return;
+                                        }
+                                    }
                                     if self.shift_pressed {
                                         if !self.selected_vertices.remove(&vk) {
                                             self.selected_vertices.insert(vk);
@@ -73,7 +83,16 @@ impl AppState {
                             }
                             SubElementLevel::Edge => {
                                 if let Some(ek) = base_mesh.pick_edge_occluded(&ray, &node.world_matrix, 0.2, occlude) {
-                                    if self.alt_pressed {
+                                    if self.alt_pressed && self.ctrl_pressed {
+                                        // Blender / Maya Ctrl+Alt+Click: Edge Ring selection
+                                        let ring_edges = base_mesh.select_edge_ring(ek);
+                                        if !self.shift_pressed {
+                                            self.selected_edges.clear();
+                                        }
+                                        for e in ring_edges {
+                                            self.selected_edges.insert(e);
+                                        }
+                                    } else if self.alt_pressed {
                                         // Blender Alt+Click: Edge Loop selection
                                         let loop_edges = base_mesh.select_edge_loop(ek);
                                         if !self.shift_pressed {
@@ -96,7 +115,16 @@ impl AppState {
                             SubElementLevel::Face => {
                                 if let Some(hit) = base_mesh.raycast_backface_culled(&ray, &node.world_matrix, occlude) {
                                     let fk = hit.face_key;
-                                    if self.alt_pressed {
+                                    if self.alt_pressed && self.ctrl_pressed {
+                                        // CAD / Blender Ctrl+Alt+Click: Coplanar faces
+                                        let coplanar = base_mesh.select_coplanar_faces(fk, 1.5);
+                                        if !self.shift_pressed {
+                                            self.selected_faces.clear();
+                                        }
+                                        for f in coplanar {
+                                            self.selected_faces.insert(f);
+                                        }
+                                    } else if self.alt_pressed {
                                         // Blender Alt+Click: Face Loop / Ring selection
                                         let loop_faces = base_mesh.select_face_loop(fk);
                                         if !self.shift_pressed {

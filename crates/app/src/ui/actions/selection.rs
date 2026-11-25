@@ -80,20 +80,7 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
                                 state.selected_vertices = base_mesh.grow_vertex_selection(&state.selected_vertices);
                             }
                             SubElementLevel::Edge => {
-                                let mut new_edges = state.selected_edges.clone();
-                                for &ek in &state.selected_edges {
-                                    if let Some(e) = base_mesh.edges.get(ek) {
-                                        let he = &base_mesh.half_edges[e.half_edge];
-                                        for &v_key in &[he.origin, he.target] {
-                                            if let Some(v) = base_mesh.vertices.get(v_key) {
-                                                for &v_he in &v.half_edges {
-                                                    new_edges.insert(base_mesh.half_edges[v_he].edge);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                state.selected_edges = new_edges;
+                                state.selected_edges = base_mesh.grow_edge_selection(&state.selected_edges);
                             }
                             SubElementLevel::Face => {
                                 state.selected_faces = base_mesh.grow_face_selection(&state.selected_faces);
@@ -115,18 +102,7 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
                                 state.selected_vertices = base_mesh.shrink_vertex_selection(&state.selected_vertices);
                             }
                             SubElementLevel::Edge => {
-                                let mut kept = HashSet::new();
-                                for &ek in &state.selected_edges {
-                                    if let Some(e) = base_mesh.edges.get(ek) {
-                                        let he = &base_mesh.half_edges[e.half_edge];
-                                        let both_selected = base_mesh.vertices.contains_key(he.origin)
-                                            && base_mesh.vertices.contains_key(he.target);
-                                        if both_selected {
-                                            kept.insert(ek);
-                                        }
-                                    }
-                                }
-                                state.selected_edges = kept;
+                                state.selected_edges = base_mesh.shrink_edge_selection(&state.selected_edges);
                             }
                             SubElementLevel::Face => {
                                 state.selected_faces = base_mesh.shrink_face_selection(&state.selected_faces);

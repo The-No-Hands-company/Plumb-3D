@@ -686,7 +686,15 @@
         let ring_edges = plane.select_edge_ring(first_edge);
         assert!(!ring_edges.is_empty());
 
-        // Selection growing and shrinking
+        // Cylinder edge loop and edge ring verification
+        let cyl = Primitives::create_cylinder(1.0, 2.0, 16);
+        let cyl_edge = cyl.edges.keys().next().unwrap();
+        let cyl_loop = cyl.select_edge_loop(cyl_edge);
+        assert!(!cyl_loop.is_empty());
+        let cyl_ring = cyl.select_edge_ring(cyl_edge);
+        assert!(!cyl_ring.is_empty());
+
+        // Selection growing and shrinking - Vertices
         let first_v = plane.vertices.keys().next().unwrap();
         let mut initial_verts = std::collections::HashSet::new();
         initial_verts.insert(first_v);
@@ -697,13 +705,39 @@
         let shrunk_verts = plane.shrink_vertex_selection(&grown_verts);
         assert!(shrunk_verts.len() < grown_verts.len());
 
-        // Face selection growing
+        // Selection growing and shrinking - Edges
+        let mut initial_edges = std::collections::HashSet::new();
+        initial_edges.insert(first_edge);
+        let grown_edges = plane.grow_edge_selection(&initial_edges);
+        assert!(grown_edges.len() > initial_edges.len());
+        let shrunk_edges = plane.shrink_edge_selection(&grown_edges);
+        assert!(shrunk_edges.len() < grown_edges.len());
+
+        // Face selection growing and shrinking
         let first_f = plane.faces.keys().next().unwrap();
         let mut initial_faces = std::collections::HashSet::new();
         initial_faces.insert(first_f);
 
         let grown_faces = plane.grow_face_selection(&initial_faces);
         assert!(grown_faces.len() > initial_faces.len());
+        let shrunk_faces = plane.shrink_face_selection(&grown_faces);
+        assert!(shrunk_faces.len() < grown_faces.len());
+
+        // Coplanar face selection on plane (all faces share Y normal)
+        let coplanar = plane.select_coplanar_faces(first_f, 1.0);
+        assert_eq!(coplanar.len(), plane.faces.len());
+
+        // Manifold report on plane vs cube
+        let plane_report = plane.check_manifold();
+        assert!(!plane_report.is_watertight);
+        assert!(plane_report.boundary_edge_count > 0);
+
+        let cube = Primitives::create_cube(2.0);
+        let cube_report = cube.check_manifold();
+        assert!(cube_report.is_watertight);
+        assert!(cube_report.is_2_manifold);
+        assert_eq!(cube_report.boundary_edge_count, 0);
+        assert_eq!(cube_report.euler_characteristic, 2);
     }
 
     #[test]

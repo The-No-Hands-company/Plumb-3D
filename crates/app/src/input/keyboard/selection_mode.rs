@@ -108,20 +108,7 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
                                     state.selected_vertices = base_mesh.grow_vertex_selection(&state.selected_vertices);
                                 }
                                 SubElementLevel::Edge => {
-                                    let mut new_edges = state.selected_edges.clone();
-                                    for &ek in &state.selected_edges {
-                                        if let Some(e) = base_mesh.edges.get(ek) {
-                                            let he = &base_mesh.half_edges[e.half_edge];
-                                            for &v_key in &[he.origin, he.target] {
-                                                if let Some(v) = base_mesh.vertices.get(v_key) {
-                                                    for &v_he in &v.half_edges {
-                                                        new_edges.insert(base_mesh.half_edges[v_he].edge);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    state.selected_edges = new_edges;
+                                    state.selected_edges = base_mesh.grow_edge_selection(&state.selected_edges);
                                 }
                                 SubElementLevel::Face => {
                                     state.selected_faces = base_mesh.grow_face_selection(&state.selected_faces);
@@ -144,17 +131,7 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
                                     state.selected_vertices = base_mesh.shrink_vertex_selection(&state.selected_vertices);
                                 }
                                 SubElementLevel::Edge => {
-                                    let mut kept = HashSet::new();
-                                    for &ek in &state.selected_edges {
-                                        if let Some(e) = base_mesh.edges.get(ek) {
-                                            let he = &base_mesh.half_edges[e.half_edge];
-                                            let both = base_mesh.vertices.contains_key(he.origin) && base_mesh.vertices.contains_key(he.target);
-                                            if both {
-                                                kept.insert(ek);
-                                            }
-                                        }
-                                    }
-                                    state.selected_edges = kept;
+                                    state.selected_edges = base_mesh.shrink_edge_selection(&state.selected_edges);
                                 }
                                 SubElementLevel::Face => {
                                     state.selected_faces = base_mesh.shrink_face_selection(&state.selected_faces);
@@ -185,18 +162,52 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
                     state.window.request_redraw();
                     return true;
                 }
-            } else if state.interaction_mode == InteractionMode::Edit && state.sub_element_level == SubElementLevel::Edge {
+            } else if state.interaction_mode == InteractionMode::Edit {
                 if let Some(sel_id) = state.selected_node {
                     if let Some(node) = state.scene.nodes.get(sel_id) {
                         if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                            let mut full_loop = HashSet::new();
-                            for &ek in &state.selected_edges {
-                                for edge in base_mesh.select_edge_loop(ek) {
-                                    full_loop.insert(edge);
+                            match state.sub_element_level {
+                                SubElementLevel::Edge => {
+                                    let mut updated = HashSet::new();
+                                    for &ek in &state.selected_edges {
+                                        let edges = if state.alt_pressed {
+                                            base_mesh.select_edge_ring(ek)
+                                        } else {
+                                            base_mesh.select_edge_loop(ek)
+                                        };
+                                        for edge in edges {
+                                            updated.insert(edge);
+                                        }
+                                    }
+                                    if !updated.is_empty() {
+                                        state.selected_edges = updated;
+                                    }
                                 }
-                            }
-                            if !full_loop.is_empty() {
-                                state.selected_edges = full_loop;
+                                SubElementLevel::Face => {
+                                    let mut updated = HashSet::new();
+                                    for &fk in &state.selected_faces {
+                                        let faces = if state.alt_pressed {
+                                            base_mesh.select_coplanar_faces(fk, 1.5)
+                                        } else {
+                                            base_mesh.select_linked(fk)
+                                        };
+                                        for face in faces {
+                                            updated.insert(face);
+                                        }
+                                    }
+                                    if !updated.is_empty() {
+                                        state.selected_faces = updated;
+                                    }
+                                }
+                                SubElementLevel::Vertex => {
+                                    let mut updated = state.selected_vertices.clone();
+                                    for &vk in &state.selected_vertices {
+                                        for neighbor in base_mesh.vertex_neighbors(vk) {
+                                            updated.insert(neighbor);
+                                        }
+                                    }
+                                    state.selected_vertices = updated;
+                                }
                             }
                         }
                     }

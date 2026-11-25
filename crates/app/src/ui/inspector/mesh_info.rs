@@ -25,6 +25,19 @@ pub fn draw_mesh_info(
         let center = base_mesh.bounding_center();
         ui.label(format!("Bounding Box: [{:.3}m × {:.3}m × {:.3}m]", dims.x, dims.y, dims.z));
         ui.label(format!("Geometric Center: [{:.3}, {:.3}, {:.3}]", center.x, center.y, center.z));
+
+        // 2-Manifold Topology Health Report
+        let report = base_mesh.check_manifold();
+        ui.horizontal(|ui| {
+            if report.is_watertight {
+                ui.label(egui::RichText::new("🟢 Watertight Solid").color(egui::Color32::from_rgb(100, 220, 140)));
+            } else {
+                ui.label(egui::RichText::new(format!("🟠 Open Shell ({} Holes)", report.boundary_edge_count)).color(egui::Color32::from_rgb(255, 170, 80)));
+            }
+            ui.separator();
+            ui.label(format!("Euler χ: {} | Genus: {}", report.euler_characteristic, report.genus));
+        });
+
         ui.separator();
 
         // Interactive Sub-Element CAD Caliper / Tape Measure
@@ -82,6 +95,29 @@ pub fn draw_mesh_info(
                         ui.label(format!("Vertical Rise (ΔY): {:.4} m", dy));
                     });
                 }
+            } else if selected_edges.len() == 2 {
+                let e_keys: Vec<_> = selected_edges.iter().copied().collect();
+                if let (Some(e0), Some(e1)) = (base_mesh.edges.get(e_keys[0]), base_mesh.edges.get(e_keys[1])) {
+                    let he0 = &base_mesh.half_edges[e0.half_edge];
+                    let p0a = base_mesh.vertices[he0.origin].position;
+                    let p0b = base_mesh.vertices[he0.target].position;
+                    let mid0 = (p0a + p0b) * 0.5;
+                    let dir0 = (p0b - p0a).normalize_or_zero();
+
+                    let he1 = &base_mesh.half_edges[e1.half_edge];
+                    let p1a = base_mesh.vertices[he1.origin].position;
+                    let p1b = base_mesh.vertices[he1.target].position;
+                    let mid1 = (p1a + p1b) * 0.5;
+                    let dir1 = (p1b - p1a).normalize_or_zero();
+
+                    let angle_deg = dir0.dot(dir1).clamp(-1.0, 1.0).acos().to_degrees();
+                    let midpoint_dist = (mid1 - mid0).length();
+
+                    ui.group(|ui| {
+                        ui.label(egui::RichText::new(format!("📐 Edge Angle: {:.2}°", angle_deg)).strong().color(egui::Color32::from_rgb(130, 200, 255)));
+                        ui.label(format!("Midpoint Distance: {:.4} m", midpoint_dist));
+                    });
+                }
             } else if selected_faces.len() == 1 {
                 let fk = *selected_faces.iter().next().unwrap();
                 if let Some(face) = base_mesh.faces.get(fk) {
@@ -108,8 +144,36 @@ pub fn draw_mesh_info(
                         ui.label(format!("Surface Normal: [{:.2}, {:.2}, {:.2}]", face.normal.x, face.normal.y, face.normal.z));
                     });
                 }
+            } else if selected_faces.len() == 2 {
+                let f_keys: Vec<_> = selected_faces.iter().copied().collect();
+                if let (Some(f0), Some(f1)) = (base_mesh.faces.get(f_keys[0]), base_mesh.faces.get(f_keys[1])) {
+                    let dot = f0.normal.dot(f1.normal).clamp(-1.0, 1.0);
+                    let dihedral_deg = dot.acos().to_degrees();
+                    ui.group(|ui| {
+                        ui.label(egui::RichText::new(format!("📐 Dihedral Angle: {:.2}°", dihedral_deg)).strong().color(egui::Color32::from_rgb(255, 200, 120)));
+                        ui.label(format!("Normal 1: [{:.2}, {:.2}, {:.2}]", f0.normal.x, f0.normal.y, f0.normal.z));
+                        ui.label(format!("Normal 2: [{:.2}, {:.2}, {:.2}]", f1.normal.x, f1.normal.y, f1.normal.z));
+                    });
+                }
+            } else if selected_faces.len() > 2 {
+                let mut total_area = 0.0_f32;
+                for &fk in selected_faces {
+                    let v_keys = base_mesh.face_vertices(fk);
+                    if v_keys.len() >= 3 {
+                        let p0 = base_mesh.vertices[v_keys[0]].position;
+                        for i in 1..(v_keys.len() - 1) {
+                            let p1 = base_mesh.vertices[v_keys[i]].position;
+                            let p2 = base_mesh.vertices[v_keys[i + 1]].position;
+                            total_area += ((p1 - p0).cross(p2 - p0)).length() * 0.5;
+                        }
+                    }
+                }
+                ui.group(|ui| {
+                    ui.label(egui::RichText::new(format!("⬡ Total Selection Area: {:.4} m²", total_area)).strong().color(egui::Color32::from_rgb(255, 180, 100)));
+                    ui.label(format!("Selected Faces Count: {}", selected_faces.len()));
+                });
             } else {
-                ui.label(egui::RichText::new("Select 2 vertices, 1 edge, or 1 face to measure precision CAD dimensions.").italics().color(egui::Color32::GRAY));
+                ui.label(egui::RichText::new("Select 2 vertices, 1-2 edges, or 1+ faces to measure precision CAD dimensions.").italics().color(egui::Color32::GRAY));
             }
         }
     });
@@ -135,5 +199,12 @@ mod tests {
         let p1 = cube.vertices[v1].position;
         let dist = (p1 - p0).length();
         assert!(dist > 0.0);
+
+        // Check manifold report on cube
+        let report = cube.check_manifold();
+        assert!(report.is_watertight);
+        assert!(report.is_2_manifold);
+        assert_eq!(report.euler_characteristic, 2);
+        assert_eq!(report.genus, 0);
     }
 }
