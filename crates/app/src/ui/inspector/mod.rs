@@ -20,6 +20,7 @@ pub use vertex_groups::draw_vertex_groups_panel;
 
 use crate::state::AppState;
 use crate::ui::actions::UiActions;
+use crate::ui::workspaces::WorkspaceTemplate;
 use graph_engine::{NodeData, NodeId};
 
 pub fn draw_inspector(state: &mut AppState, actions: &mut UiActions) {
@@ -84,7 +85,7 @@ pub fn draw_inspector(state: &mut AppState, actions: &mut UiActions) {
                 }
                 ui.separator();
 
-                // Modern Pill Tab Bar
+                // Modern Pill Tab Bar - strictly context-isolated to active workspace
                 ui.horizontal_wrapped(|ui| {
                     if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Transform, "📍 Node").clicked() {
                         state.inspector_tab = crate::types::InspectorTab::Transform;
@@ -95,14 +96,27 @@ pub fn draw_inspector(state: &mut AppState, actions: &mut UiActions) {
                     if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Materials, "🎨 Shading").clicked() {
                         state.inspector_tab = crate::types::InspectorTab::Materials;
                     }
-                    if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Tools, "🛠 Tools").clicked() {
-                        state.inspector_tab = crate::types::InspectorTab::Tools;
+
+                    // Context-Isolated Tools Tab
+                    if state.current_workspace != WorkspaceTemplate::Animation {
+                        let tool_label = match state.current_workspace {
+                            WorkspaceTemplate::Sculpting => "🎨 Brushes",
+                            WorkspaceTemplate::UvRetopo => "🗺 UV Tools",
+                            _ => "🛠 Tools",
+                        };
+                        if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Tools, tool_label).clicked() {
+                            state.inspector_tab = crate::types::InspectorTab::Tools;
+                        }
                     }
-                    if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Constraints, "🔗 Rigging").clicked() {
-                        state.inspector_tab = crate::types::InspectorTab::Constraints;
-                    }
-                    if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Physics, "⚛ Physics").clicked() {
-                        state.inspector_tab = crate::types::InspectorTab::Physics;
+
+                    // Context-Isolated: Rigging & Physics ONLY appear in Animation workspace!
+                    if state.current_workspace == WorkspaceTemplate::Animation {
+                        if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Constraints, "🔗 Rigging").clicked() {
+                            state.inspector_tab = crate::types::InspectorTab::Constraints;
+                        }
+                        if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Physics, "⚛ Physics").clicked() {
+                            state.inspector_tab = crate::types::InspectorTab::Physics;
+                        }
                     }
                 });
                 ui.separator();

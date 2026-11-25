@@ -3,6 +3,7 @@ use geo_kernel::Mesh;
 
 use crate::state::AppState;
 use crate::types::*;
+use crate::ui::workspaces::WorkspaceTemplate;
 
 pub fn render(state: &mut AppState) {
     // 1. Render Marquee / Box Selection Overlay
@@ -377,8 +378,10 @@ pub fn render(state: &mut AppState) {
                             if ui.button("📐").on_hover_text("Align Objects (Alt+A)").clicked() {
                                 state.show_align_dialog = !state.show_align_dialog;
                             }
-                            if ui.selectable_label(state.interaction_mode == InteractionMode::Sculpt, "🖌").on_hover_text("Sculpt Brush").clicked() {
-                                state.interaction_mode = InteractionMode::Sculpt;
+                            if state.current_workspace == WorkspaceTemplate::Sculpting || state.interaction_mode == InteractionMode::Sculpt {
+                                if ui.selectable_label(state.interaction_mode == InteractionMode::Sculpt, "🖌").on_hover_text("Sculpt Brush").clicked() {
+                                    state.interaction_mode = InteractionMode::Sculpt;
+                                }
                             }
                             if ui.selectable_label(state.curve_pen_active, "✒").on_hover_text("Bézier Curve Pen Tool (P)").clicked() {
                                 state.curve_pen_active = !state.curve_pen_active;

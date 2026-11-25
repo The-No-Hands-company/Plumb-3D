@@ -5,6 +5,7 @@ use render_viewport::{CameraProjection, GizmoMode};
 use crate::state::AppState;
 use crate::types::*;
 use crate::ui::actions::UiActions;
+use crate::ui::workspaces::WorkspaceTemplate;
 
 pub fn draw_status_bar(state: &mut AppState) {
         egui::TopBottomPanel::bottom("bottom_status_bar").show(&state.egui_ctx, |ui| {
@@ -115,7 +116,7 @@ pub fn draw_status_bar(state: &mut AppState) {
 }
 
 pub fn draw_timeline(state: &mut AppState, _actions: &mut UiActions) {
-        if state.timeline_expanded {
+    if state.timeline_expanded && state.current_workspace == WorkspaceTemplate::Animation {
             let timeline_height = match state.timeline_mode {
                 TimelineViewMode::DopeSheet => 68.0,
                 TimelineViewMode::FCurve => 210.0,

@@ -60,6 +60,10 @@ impl WorkspaceTemplate {
 
 /// Applies a declarative workspace template to the active application state.
 pub fn apply_workspace(state: &mut AppState, workspace: WorkspaceTemplate) {
+    state.current_workspace = workspace;
+    if workspace != WorkspaceTemplate::Animation && (state.inspector_tab == InspectorTab::Constraints || state.inspector_tab == InspectorTab::Physics) {
+        state.inspector_tab = InspectorTab::Transform;
+    }
     match workspace {
         WorkspaceTemplate::General => {
             state.interaction_mode = InteractionMode::Object;

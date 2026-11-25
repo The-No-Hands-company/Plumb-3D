@@ -3,6 +3,7 @@ use render_viewport::{GizmoMode, TransformOrientation, ViewportShadingMode};
 
 use crate::state::AppState;
 use crate::types::*;
+use crate::ui::workspaces::WorkspaceTemplate;
 
 /// Dedicated Viewport Ribbon Header Bar (Blender 4.x / Plasticity / Unreal Engine layout)
 pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
@@ -15,8 +16,10 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
         if ui.selectable_label(state.interaction_mode == InteractionMode::Edit, "✏ Edit").clicked() {
             state.interaction_mode = InteractionMode::Edit;
         }
-        if ui.selectable_label(state.interaction_mode == InteractionMode::Sculpt, "🎨 Sculpt").clicked() {
-            state.interaction_mode = InteractionMode::Sculpt;
+        if state.current_workspace == WorkspaceTemplate::Sculpting || state.interaction_mode == InteractionMode::Sculpt {
+            if ui.selectable_label(state.interaction_mode == InteractionMode::Sculpt, "🎨 Sculpt").clicked() {
+                state.interaction_mode = InteractionMode::Sculpt;
+            }
         }
         if ui.selectable_label(state.interaction_mode == InteractionMode::CurveEdit, "〰 Curve").clicked() {
             state.interaction_mode = InteractionMode::CurveEdit;

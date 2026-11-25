@@ -555,7 +555,7 @@ impl AppState {
             spin_angle_degrees: 360.0, spin_steps: 12, clean_min_edge_len: 0.001, clean_min_area: 1e-5,
             cap_holes_triangulate: false, grid_fill_span_count: 2,
             animation: AnimationManager::new(),
-            timeline_expanded: true,
+            timeline_expanded: false,
             timeline_mode: TimelineViewMode::default(),
             fcurve_show_tx: true, fcurve_show_ty: true, fcurve_show_tz: true,
             fcurve_show_sx: false, fcurve_show_sy: false, fcurve_show_sz: false,
