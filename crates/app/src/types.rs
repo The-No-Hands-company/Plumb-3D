@@ -113,6 +113,11 @@ pub enum LastOperatorInfo {
         node_id: graph_engine::NodeId,
         params: PrimitiveParams,
     },
+    Bridge {
+        edges: Vec<geo_kernel::EdgeKey>,
+        twist: i32,
+        cuts: usize,
+    },
 }
 
 /// Parametric definitions for live primitive adjustment in the F9 operator panel.

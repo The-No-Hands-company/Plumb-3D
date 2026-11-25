@@ -14,8 +14,28 @@ pub fn commit(state: &mut AppState) {
             for i in 0..state.knife_points.len() - 1 {
                 let (p_start, _, f_start) = state.knife_points[i];
                 let (p_end, _, f_end) = state.knife_points[i + 1];
-                if f_start == f_end {
-                    cuts.push((f_start, p_start, p_end));
+                let common_face = if f_start == f_end {
+                    Some(f_start)
+                } else if let Some(node) = state.scene.nodes.get(sel_id) {
+                    if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                        let p_start_faces = match p_start {
+                            CutPoint::Vertex(vk) => base_mesh.vertex_faces(vk),
+                            CutPoint::Edge(ek, _) => base_mesh.edge_faces(ek),
+                        };
+                        let p_end_faces = match p_end {
+                            CutPoint::Vertex(vk) => base_mesh.vertex_faces(vk),
+                            CutPoint::Edge(ek, _) => base_mesh.edge_faces(ek),
+                        };
+                        p_start_faces.into_iter().find(|fk| p_end_faces.contains(fk))
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
+
+                if let Some(fk) = common_face {
+                    cuts.push((fk, p_start, p_end));
                 }
             }
             if !cuts.is_empty() {

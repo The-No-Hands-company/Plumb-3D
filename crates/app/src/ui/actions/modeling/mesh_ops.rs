@@ -256,6 +256,30 @@ pub fn handle_mesh_ops_actions(state: &mut AppState, actions: &mut UiActions) {
         }
     }
 
+    // Handle Bridge Edge Loops
+    if actions.trigger_bridge_edge_loops {
+        if let Some(sel_id) = state.selected_node {
+            let edges: Vec<EdgeKey> = state.selected_edges.iter().copied().collect();
+            let cmd = Box::new(BridgeEdgeLoopsCommand::from_edges(
+                sel_id,
+                edges.clone(),
+                0,
+                0,
+            ));
+            if let Err(e) = state.history.execute(cmd, &mut state.scene) {
+                eprintln!("Bridge edge loops failed: {}", e);
+            } else {
+                state.last_operator = Some(crate::types::LastOperatorInfo::Bridge {
+                    edges,
+                    twist: 0,
+                    cuts: 0,
+                });
+                state.show_last_operator_panel = true;
+                state.selected_edges.clear();
+            }
+        }
+    }
+
     // Handle Shortest Path Selection (Dijkstra)
     if actions.trigger_shortest_path {
         if let Some(sel_id) = state.selected_node {

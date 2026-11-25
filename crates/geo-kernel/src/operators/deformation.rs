@@ -60,8 +60,47 @@ impl Mesh {
                     continue;
                 }
 
-                // If we have 2 or more rail neighbors, choose neighbor based on sign of t
-                let target_neighbor = if rail_neighbors.len() >= 2 {
+                // Determine transverse reference direction across the sliding edge loop
+                let mut loop_tangent = Vec3::ZERO;
+                for &he_k in &v.half_edges {
+                    let he = &self.half_edges[he_k];
+                    if excluded_edges.contains(&he.edge) {
+                        let other_vk = if he.origin == vk { he.target } else { he.origin };
+                        if let Some(other_v) = self.vertices.get(other_vk) {
+                            let dir = (other_v.position - v.position).normalize_or_zero();
+                            if loop_tangent == Vec3::ZERO {
+                                loop_tangent = dir;
+                            } else {
+                                loop_tangent = (loop_tangent - dir).normalize_or_zero();
+                            }
+                        }
+                    }
+                }
+
+                let transverse = v.normal.cross(loop_tangent).normalize_or_zero();
+
+                // Select target neighbor consistently aligned with the transverse direction
+                let target_neighbor = if rail_neighbors.len() >= 2 && transverse.length_squared() > 1e-4 {
+                    if t >= 0.0 {
+                        *rail_neighbors
+                            .iter()
+                            .max_by(|&&a, &&b| {
+                                let da = (self.vertices[a].position - v.position).dot(transverse);
+                                let db = (self.vertices[b].position - v.position).dot(transverse);
+                                da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
+                            })
+                            .unwrap()
+                    } else {
+                        *rail_neighbors
+                            .iter()
+                            .min_by(|&&a, &&b| {
+                                let da = (self.vertices[a].position - v.position).dot(transverse);
+                                let db = (self.vertices[b].position - v.position).dot(transverse);
+                                da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
+                            })
+                            .unwrap()
+                    }
+                } else if rail_neighbors.len() >= 2 {
                     if t >= 0.0 {
                         rail_neighbors[0]
                     } else {

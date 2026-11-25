@@ -438,3 +438,48 @@ fn test_flip_and_recalculate_normals_commands() {
     }
 }
 
+#[test]
+fn test_bridge_edge_loops_command_execution_and_undo() {
+    let mut scene = SceneGraph::new();
+    let mut mesh = geo_kernel::Mesh::new();
+
+    // Loop A at Y = 0
+    let a0 = mesh.add_vertex(core_math::Vec3::new(-1.0, 0.0, -1.0));
+    let a1 = mesh.add_vertex(core_math::Vec3::new(1.0, 0.0, -1.0));
+    let a2 = mesh.add_vertex(core_math::Vec3::new(1.0, 0.0, 1.0));
+    let a3 = mesh.add_vertex(core_math::Vec3::new(-1.0, 0.0, 1.0));
+
+    // Loop B at Y = 2
+    let b0 = mesh.add_vertex(core_math::Vec3::new(-1.0, 2.0, -1.0));
+    let b1 = mesh.add_vertex(core_math::Vec3::new(1.0, 2.0, -1.0));
+    let b2 = mesh.add_vertex(core_math::Vec3::new(1.0, 2.0, 1.0));
+    let b3 = mesh.add_vertex(core_math::Vec3::new(-1.0, 2.0, 1.0));
+
+    let node_id = scene.add_node(SceneNode::new_mesh("TestBridge", Transform::IDENTITY, mesh));
+
+    let mut bridge_cmd = BridgeEdgeLoopsCommand::from_loops(
+        node_id,
+        vec![a0, a1, a2, a3],
+        vec![b0, b1, b2, b3],
+        0,
+        1, // 1 intermediate cut -> 2 rings of 4 quads = 8 quads
+    );
+
+    bridge_cmd.execute(&mut scene).expect("Bridge command should execute");
+    {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            assert_eq!(base_mesh.faces.len(), 8);
+        }
+    }
+
+    bridge_cmd.undo(&mut scene).expect("Bridge command should undo");
+    {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            assert_eq!(base_mesh.faces.len(), 0);
+        }
+    }
+}
+
+

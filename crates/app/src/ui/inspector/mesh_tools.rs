@@ -334,6 +334,9 @@ pub fn draw_mesh_tools_panel(
                                                 }
                                                 node.is_dirty = true;
                                             }
+                                            if ui.button("🌉 Bridge Loops").clicked() {
+                                                actions.trigger_bridge_edge_loops = true;
+                                            }
                                         });
                                     });
                                 }

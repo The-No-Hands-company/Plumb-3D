@@ -68,6 +68,7 @@ pub struct UiActions {
     pub trigger_spin: bool,
     pub trigger_cap_holes: bool,
     pub trigger_grid_fill: bool,
+    pub trigger_bridge_edge_loops: bool,
     pub trigger_shortest_path: bool,
     pub trigger_convert_curve: bool,
     pub trigger_extract_curve: bool,

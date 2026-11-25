@@ -239,9 +239,7 @@ impl Command for KnifeCutCommand {
                     self.old_mesh = Some(base_mesh.clone());
                 }
                 for &(face_key, start, end) in &self.cuts {
-                    if base_mesh.faces.contains_key(face_key) {
-                        let _ = base_mesh.knife_cut(face_key, start, end);
-                    }
+                    let _ = base_mesh.knife_cut(face_key, start, end);
                 }
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);

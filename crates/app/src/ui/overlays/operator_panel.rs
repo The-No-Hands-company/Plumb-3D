@@ -1,4 +1,6 @@
-use crate::commands::{BevelEdgeCommand, ExtrudeCommand, InsetCommand, LoopCutCommand};
+use crate::commands::{
+    BevelEdgeCommand, BridgeEdgeLoopsCommand, ExtrudeCommand, InsetCommand, LoopCutCommand,
+};
 use crate::state::AppState;
 use crate::types::{LastOperatorInfo, PrimitiveParams};
 
@@ -18,6 +20,7 @@ pub fn render(state: &mut AppState) {
         LastOperatorInfo::Extrude { .. } => "Extrude Faces",
         LastOperatorInfo::Bevel { .. } => "Bevel Edges",
         LastOperatorInfo::LoopCut { .. } => "Loop Cut",
+        LastOperatorInfo::Bridge { .. } => "Bridge Edge Loops",
         LastOperatorInfo::AddPrimitive { params, .. } => params.name(),
     };
 
@@ -136,6 +139,24 @@ pub fn render(state: &mut AppState) {
                             });
                             if changed {
                                 updated_op = Some(LastOperatorInfo::LoopCut { edge, num_cuts, factor });
+                            }
+                        }
+                        LastOperatorInfo::Bridge { edges, mut twist, mut cuts } => {
+                            let mut changed = false;
+                            ui.horizontal(|ui| {
+                                ui.label("Twist:");
+                                if ui.add(egui::DragValue::new(&mut twist).range(-16..=16)).changed() {
+                                    changed = true;
+                                }
+                            });
+                            ui.horizontal(|ui| {
+                                ui.label("Cuts:");
+                                if ui.add(egui::DragValue::new(&mut cuts).range(0..=16)).changed() {
+                                    changed = true;
+                                }
+                            });
+                            if changed {
+                                updated_op = Some(LastOperatorInfo::Bridge { edges, twist, cuts });
                             }
                         }
                         LastOperatorInfo::AddPrimitive { node_id, params } => {
@@ -341,6 +362,18 @@ pub fn render(state: &mut AppState) {
                     });
                     let _ = state.history.execute(cmd, &mut state.scene);
                     state.last_operator = Some(new_op);
+                }
+                LastOperatorInfo::Bridge { edges, twist, cuts } => {
+                    if state.history.undo(&mut state.scene).is_ok() {
+                        let cmd = Box::new(BridgeEdgeLoopsCommand::from_edges(
+                            sel_id,
+                            edges.clone(),
+                            *twist,
+                            *cuts,
+                        ));
+                        let _ = state.history.execute(cmd, &mut state.scene);
+                        state.last_operator = Some(new_op);
+                    }
                 }
                 LastOperatorInfo::AddPrimitive { node_id, params } => {
                     if let Some(node) = state.scene.nodes.get_mut(*node_id) {

@@ -253,6 +253,10 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                                 actions.trigger_dissolve_edge = true;
                                 close_menu = true;
                             }
+                            if ui.button("🌉 Bridge Edge Loops").clicked() {
+                                actions.trigger_bridge_edge_loops = true;
+                                close_menu = true;
+                            }
                             ui.separator();
                         }
 
