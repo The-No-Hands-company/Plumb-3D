@@ -2,6 +2,26 @@ use crate::mesh::{EdgeKey, FaceKey, Mesh, MeshError, VertexKey};
 use core_math::Vec3;
 use std::collections::{HashMap, HashSet};
 
+/// Cross-section profile for bevel and fillet operations (Rhino / Plasticity / Blender style)
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum BevelProfile {
+    /// Natural circular/crowned fillet with tension S in [0.0, 1.0].
+    /// S = 0.5: Exact circular arc (standard round)
+    /// S < 0.5: Flat chamfer / tight mechanical bevel
+    /// S > 0.5: Crowned / puffed fillet
+    Round(f32),
+    /// Architectural stepped / moulding rebate
+    Stepped,
+    /// Concave / inverted fillet
+    Concave,
+}
+
+impl Default for BevelProfile {
+    fn default() -> Self {
+        Self::Round(0.5)
+    }
+}
+
 
 impl Mesh {
     pub fn bevel_face(
@@ -79,6 +99,17 @@ impl Mesh {
         width: f32,
         segments: usize,
     ) -> Result<Vec<FaceKey>, MeshError> {
+        self.bevel_edge_with_profile(edge_key, width, segments, BevelProfile::default())
+    }
+
+    /// Bevel an edge with parametric profiles (Round with tension, Stepped, Concave).
+    pub fn bevel_edge_with_profile(
+        &mut self,
+        edge_key: EdgeKey,
+        width: f32,
+        segments: usize,
+        profile: BevelProfile,
+    ) -> Result<Vec<FaceKey>, MeshError> {
         let seg_count = segments.max(1);
         let edge = self
             .edges
@@ -114,10 +145,25 @@ impl Mesh {
 
         let outward_dir = -(perp1 + perp2).normalize_or_zero();
 
+        let bump_factor = match profile {
+            BevelProfile::Round(tension) => tension.clamp(0.0, 1.0) * 0.828,
+            BevelProfile::Concave => -0.414,
+            BevelProfile::Stepped => 0.0,
+        };
+
         for i in 0..=seg_count {
             let t = i as f32 / seg_count as f32;
             let bump = if seg_count > 1 {
-                outward_dir * (width * 0.414 * (t * std::f32::consts::PI).sin())
+                match profile {
+                    BevelProfile::Stepped => {
+                        if i % 2 == 1 {
+                            outward_dir * (width * 0.25)
+                        } else {
+                            Vec3::ZERO
+                        }
+                    }
+                    _ => outward_dir * (width * bump_factor * (t * std::f32::consts::PI).sin()),
+                }
             } else {
                 Vec3::ZERO
             };
@@ -340,12 +386,23 @@ impl Mesh {
         width: f32,
         segments: usize,
     ) -> Result<Vec<FaceKey>, MeshError> {
+        self.bevel_edges_miter_profile(edges_to_bevel, width, segments, BevelProfile::default())
+    }
+
+    /// Bevel multiple edges simultaneously with custom profiles and multi-edge corner miter patches.
+    pub fn bevel_edges_miter_profile(
+        &mut self,
+        edges_to_bevel: &[EdgeKey],
+        width: f32,
+        segments: usize,
+        profile: BevelProfile,
+    ) -> Result<Vec<FaceKey>, MeshError> {
         if edges_to_bevel.is_empty() || width <= 0.0 {
             return Ok(Vec::new());
         }
 
         if edges_to_bevel.len() == 1 {
-            return self.bevel_edge_with_segments(edges_to_bevel[0], width, segments);
+            return self.bevel_edge_with_profile(edges_to_bevel[0], width, segments, profile);
         }
 
         let seg_count = segments.max(1);
@@ -380,7 +437,7 @@ impl Mesh {
                     let v0 = self.half_edges[h1].origin;
                     let v1 = self.half_edges[h1].target;
                     if !corner_junctions.contains(&v0) && !corner_junctions.contains(&v1) {
-                        if let Ok(faces) = self.bevel_edge_with_segments(ek, width, seg_count) {
+                        if let Ok(faces) = self.bevel_edge_with_profile(ek, width, seg_count, profile) {
                             created_faces.extend(faces);
                         }
                     }
@@ -388,7 +445,7 @@ impl Mesh {
             }
         } else {
             for &ek in edges_to_bevel {
-                if let Ok(faces) = self.bevel_edge_with_segments(ek, width, seg_count) {
+                if let Ok(faces) = self.bevel_edge_with_profile(ek, width, seg_count, profile) {
                     created_faces.extend(faces);
                 }
             }
@@ -422,5 +479,24 @@ mod tests {
         assert!(!miter_faces.is_empty());
         assert!(cube.validate().is_ok());
         assert_eq!(cube.faces.len(), 8);
+    }
+
+    #[test]
+    fn test_bevel_profiles_tension_and_concave() {
+        let mut cube = Primitives::create_cube(2.0);
+        let edge = cube.edges.keys().next().unwrap();
+        let faces_crowned = cube
+            .bevel_edge_with_profile(edge, 0.2, 3, BevelProfile::Round(0.85))
+            .expect("crowned round bevel");
+        assert_eq!(faces_crowned.len(), 3);
+        assert!(cube.validate().is_ok());
+
+        let mut cube2 = Primitives::create_cube(2.0);
+        let edge2 = cube2.edges.keys().next().unwrap();
+        let faces_concave = cube2
+            .bevel_edge_with_profile(edge2, 0.2, 3, BevelProfile::Concave)
+            .expect("concave fillet");
+        assert_eq!(faces_concave.len(), 3);
+        assert!(cube2.validate().is_ok());
     }
 }

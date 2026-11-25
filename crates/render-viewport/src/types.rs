@@ -10,6 +10,7 @@ pub enum ViewportShadingMode {
     MatCapClay,
     MatCapChrome,
     NormalInspection,
+    Zebra,
     Pbr,
     Rendered,
 }
@@ -22,6 +23,7 @@ impl ViewportShadingMode {
             Self::MatCapClay => 2.0,
             Self::MatCapChrome => 3.0,
             Self::NormalInspection => 4.0,
+            Self::Zebra => 6.0,
             Self::Pbr | Self::Rendered => 5.0,
         }
     }

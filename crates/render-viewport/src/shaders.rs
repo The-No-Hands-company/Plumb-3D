@@ -24,33 +24,17 @@ struct LightsUniform {
     light_count: vec4<u32>, // x = count, yzw = padding
 };
 
-@group(0) @binding(0)
-var<uniform> camera: CameraUniform;
-
-@group(1) @binding(0)
-var<uniform> object: ModelUniform;
-
-@group(2) @binding(0)
-var<uniform> scene_lights: LightsUniform;
-@group(2) @binding(1)
-var shadow_texture: texture_depth_2d;
-@group(2) @binding(2)
-var shadow_sampler: sampler_comparison;
-
-@group(3) @binding(0)
-var albedo_tex: texture_2d<f32>;
-@group(3) @binding(1)
-var albedo_samp: sampler;
-
-@group(3) @binding(2)
-var normal_tex: texture_2d<f32>;
-@group(3) @binding(3)
-var normal_samp: sampler;
-
-@group(3) @binding(4)
-var rm_tex: texture_2d<f32>;
-@group(3) @binding(5)
-var rm_samp: sampler;
+@group(0) @binding(0) var<uniform> camera: CameraUniform;
+@group(1) @binding(0) var<uniform> object: ModelUniform;
+@group(2) @binding(0) var<uniform> scene_lights: LightsUniform;
+@group(2) @binding(1) var shadow_texture: texture_depth_2d;
+@group(2) @binding(2) var shadow_sampler: sampler_comparison;
+@group(3) @binding(0) var albedo_tex: texture_2d<f32>;
+@group(3) @binding(1) var albedo_samp: sampler;
+@group(3) @binding(2) var normal_tex: texture_2d<f32>;
+@group(3) @binding(3) var normal_samp: sampler;
+@group(3) @binding(4) var rm_tex: texture_2d<f32>;
+@group(3) @binding(5) var rm_samp: sampler;
 
 struct VertexInput {
     @location(0) position: vec3<f32>,
@@ -390,8 +374,17 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         let high_dot = max(dot(r, normalize(vec3<f32>(0.5, 0.8, 0.3))), 0.0);
         let sun = pow(high_dot, 64.0) * vec3<f32>(1.0, 1.0, 1.0);
         let fresnel = pow(1.0 - max(nz, 0.0), 4.0) * 0.3;
-
         return vec4<f32>(apply_tonemapping(env + sun + vec3<f32>(fresnel), normal, exposure, tonemap_mode, cavity), in.color.a);
+    }
+
+    // Shading Mode 6: Zebra Curvature & Reflection Lines (Class-A Surfacing)
+    if (mode == 6u) {
+        let r = reflect(-view_dir, normal);
+        let stripe = sin(r.y * 48.0) * 0.5 + 0.5;
+        let s_val = smoothstep(0.42, 0.58, stripe);
+        let zebra_col = mix(vec3<f32>(0.04, 0.04, 0.04), vec3<f32>(0.96, 0.96, 0.96), s_val);
+        let fresnel = pow(1.0 - max(nz, 0.0), 3.0) * 0.2;
+        return vec4<f32>(apply_tonemapping(zebra_col + vec3<f32>(fresnel), normal, exposure, tonemap_mode, cavity), in.color.a);
     }
 
     // Default Shading Mode 0: Three-point Studio Lighting (or active dynamic scene lights)

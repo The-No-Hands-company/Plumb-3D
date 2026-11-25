@@ -408,6 +408,7 @@ pub fn draw_shading_menu(state: &mut AppState, ui: &mut egui::Ui) {
         ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MatCapClay, "MatCap Clay (Form)");
         ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MatCapChrome, "MatCap Chrome (Reflection)");
         ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::NormalInspection, "Normal Vector Inspection");
+        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Zebra, "🦓 Zebra Surfacing (Class-A Reflection)");
         ui.separator();
         ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Rendered, "☀ Rendered (Live Path Tracer)");
     });

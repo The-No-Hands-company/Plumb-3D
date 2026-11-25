@@ -12,6 +12,7 @@ pub fn commit(state: &mut AppState) {
         let factor = state.inset_modal_factor;
         let individual = state.inset_modal_individual;
         let thickness = state.inset_modal_thickness;
+        let depth = state.inset_modal_depth;
         let initial_radius = state.inset_modal_initial_radius;
         if !faces.is_empty() {
             let cmd = Box::new(InsetCommand {
@@ -24,12 +25,30 @@ pub fn commit(state: &mut AppState) {
             });
             let _ = state.history.execute(cmd, &mut state.scene);
             state.last_operator = Some(LastOperatorInfo::Inset {
-                faces,
+                faces: faces.clone(),
                 thickness,
                 factor,
                 individual,
                 initial_radius,
             });
+
+            // If Step-Bore depth is set (Ctrl held during Inset), push/extrude the inner face
+            if depth.abs() > 1e-4 {
+                if let Some(node) = state.scene.nodes.get(sel_id) {
+                    if let graph_engine::NodeData::Mesh { base_mesh, .. } = &node.data {
+                        if let Some(last_fk) = base_mesh.faces.keys().last() {
+                            let extrude_cmd = Box::new(crate::commands::ExtrudeCommand {
+                                node_id: sel_id,
+                                faces: vec![last_fk],
+                                distance: -depth,
+                                old_mesh: None,
+                            });
+                            let _ = state.history.execute(extrude_cmd, &mut state.scene);
+                        }
+                    }
+                }
+            }
+
             if let Some(node) = state.scene.nodes.get(sel_id) {
                 if let graph_engine::NodeData::Mesh { base_mesh, .. } = &node.data {
                     state.selected_faces.clear();
@@ -42,12 +61,14 @@ pub fn commit(state: &mut AppState) {
     }
     state.modal_numeric_buffer.clear();
     state.inset_modal_active = false;
+    state.inset_modal_depth = 0.0;
     state.window.request_redraw();
 }
 
 pub fn cancel(state: &mut AppState) {
     state.modal_numeric_buffer.clear();
     state.inset_modal_active = false;
+    state.inset_modal_depth = 0.0;
     state.window.request_redraw();
 }
 
@@ -70,9 +91,15 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
     if !state.inset_modal_active {
         return false;
     }
-    let dx = (state.inset_modal_start_mouse.0 - position.x) as f32;
-    state.inset_modal_factor = (0.8 + dx * 0.003).clamp(0.01, 0.99);
-    state.inset_modal_thickness = (1.0 - state.inset_modal_factor) * state.inset_modal_initial_radius;
+    if state.ctrl_pressed {
+        // Holding Ctrl adjusts Step-Bore push depth into the mesh
+        let dy = (position.y - state.inset_modal_start_mouse.1) as f32;
+        state.inset_modal_depth = dy * 0.005;
+    } else {
+        let dx = (state.inset_modal_start_mouse.0 - position.x) as f32;
+        state.inset_modal_factor = (0.8 + dx * 0.003).clamp(0.01, 0.99);
+        state.inset_modal_thickness = (1.0 - state.inset_modal_factor) * state.inset_modal_initial_radius;
+    }
     state.modal_numeric_buffer.clear();
     state.last_mouse_pos = Some((position.x, position.y));
     state.window.request_redraw();

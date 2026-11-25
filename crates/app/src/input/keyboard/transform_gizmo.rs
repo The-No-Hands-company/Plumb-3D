@@ -18,6 +18,10 @@ pub fn handle_transform_gizmo_key(state: &mut AppState, key_code: KeyCode) -> bo
             state.window.request_redraw();
             true
         }
+        KeyCode::KeyX if state.alt_pressed => {
+            crate::commands::workplane::symmetrize_active(state);
+            true
+        }
         KeyCode::KeyE if state.interaction_mode == InteractionMode::Object || state.interaction_mode == InteractionMode::Pose => {
             state.gizmo.mode = GizmoMode::Rotate;
             state.window.request_redraw();

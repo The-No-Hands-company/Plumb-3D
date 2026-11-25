@@ -47,3 +47,44 @@ pub fn toggle_workplane_align(state: &mut AppState) {
     state.set_status_message("Workplane activated at Center (Alt+W to reset)");
     state.window.request_redraw();
 }
+
+/// Symmetrizes and bisect-welds the selected mesh across the active CAD workplane or local X-axis (MeshMachine / HardOps Alt+X).
+pub fn symmetrize_active(state: &mut AppState) {
+    let sel_id = match state.selected_node {
+        Some(id) => id,
+        None => {
+            state.set_status_message("Select an object to symmetrize (Alt+X)");
+            return;
+        }
+    };
+
+    let (plane_origin, plane_normal) = if state.workplane.is_active {
+        // Transform world workplane into node local space
+        if let Some(node) = state.scene.nodes.get(sel_id) {
+            let inv_mat = node.local_transform.to_matrix().inverse();
+            let local_orig = inv_mat.transform_point3(state.workplane.origin);
+            let local_norm = (node.local_transform.rotation.conjugate() * state.workplane.normal).normalize_or_zero();
+            (local_orig, local_norm)
+        } else {
+            (Vec3::ZERO, Vec3::X)
+        }
+    } else {
+        (Vec3::ZERO, Vec3::X)
+    };
+
+    if let Some(node) = state.scene.nodes.get_mut(sel_id) {
+        if let NodeData::Mesh { base_mesh, .. } = &mut node.data {
+            if let Ok(()) = base_mesh.symmetrize_plane(plane_origin, plane_normal) {
+                state.sync_gpu_meshes();
+                state.scene.mark_dirty(sel_id);
+                state.set_status_message(if state.workplane.is_active {
+                    "Symmetrized & Welded across CAD Workplane (Alt+X)! (Ctrl+Z to Undo)"
+                } else {
+                    "Symmetrized & Welded across X-Axis (Alt+X)! (Ctrl+Z to Undo)"
+                });
+            }
+        }
+    }
+
+    state.window.request_redraw();
+}

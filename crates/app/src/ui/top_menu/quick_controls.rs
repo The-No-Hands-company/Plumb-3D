@@ -79,6 +79,7 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
                 ViewportShadingMode::MatCapClay => "MatCap Clay",
                 ViewportShadingMode::MatCapChrome => "MatCap Chrome",
                 ViewportShadingMode::NormalInspection => "Normals Inspection",
+                ViewportShadingMode::Zebra => "🦓 Zebra Surfacing",
                 ViewportShadingMode::Rendered => "☀ Rendered (Cycles)",
             })
             .show_ui(ui, |ui| {
@@ -88,6 +89,7 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
                 ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MatCapClay, "MatCap Clay");
                 ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MatCapChrome, "MatCap Chrome");
                 ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::NormalInspection, "Normals Inspection");
+                ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Zebra, "🦓 Zebra Surfacing (Class-A)");
                 ui.separator();
                 ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Rendered, "☀ Rendered (Live Path Tracer)");
             });
@@ -102,6 +104,9 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
         let wp_label = if state.workplane.is_active { "📐 Plane (Active)" } else { "📐 Plane" };
         if ui.selectable_label(state.workplane.is_active, wp_label).on_hover_text("Align CAD Workplane to Face (Alt+W)").clicked() {
             crate::commands::workplane::toggle_workplane_align(state);
+        }
+        if ui.button("🪞 Sym").on_hover_text("Symmetrize & Bisect-Weld across Workplane (Alt+X)").clicked() {
+            crate::commands::workplane::symmetrize_active(state);
         }
         let snap_text = if state.snap_enabled {
             match state.snap_target {

@@ -415,6 +415,24 @@ pub fn render(state: &mut AppState) {
                             for i in 0..pts.len() {
                                 painter.line_segment([pts[i], pts[(i + 1) % pts.len()]], egui::Stroke::new(2.5_f32, egui::Color32::from_rgb(255, 180, 0)));
                             }
+
+                            if state.inset_modal_depth.abs() > 0.001 {
+                                let norm = node.world_matrix.transform_vector3(base_mesh.faces[fk].normal).normalize_or_zero();
+                                let recessed_pts: Vec<egui::Pos2> = fverts.iter().filter_map(|&vk| {
+                                    let orig = base_mesh.vertices[vk].position;
+                                    let inset_pos = c + (orig - c) * state.inset_modal_factor;
+                                    let w = node.world_matrix.transform_point3(inset_pos) - norm * state.inset_modal_depth;
+                                    state.camera.world_to_screen(w, width, height).map(|s| egui::pos2(s.x, s.y))
+                                }).collect();
+
+                                if recessed_pts.len() == pts.len() {
+                                    let bore_color = egui::Color32::from_rgb(255, 120, 20);
+                                    for i in 0..pts.len() {
+                                        painter.line_segment([recessed_pts[i], recessed_pts[(i + 1) % pts.len()]], egui::Stroke::new(1.5_f32, bore_color));
+                                        painter.line_segment([pts[i], recessed_pts[i]], egui::Stroke::new(1.0_f32, bore_color));
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -451,6 +469,10 @@ pub fn render(state: &mut AppState) {
                                 state.modal_numeric_buffer.clear();
                             }
                             if ui.checkbox(&mut state.inset_modal_individual, "Individual (I)").changed() {
+                                state.window.request_redraw();
+                            }
+                            ui.label("Depth (Ctrl):");
+                            if ui.add(egui::DragValue::new(&mut state.inset_modal_depth).speed(0.01).suffix(" m")).changed() {
                                 state.window.request_redraw();
                             }
                             if !state.modal_numeric_buffer.is_empty() {
