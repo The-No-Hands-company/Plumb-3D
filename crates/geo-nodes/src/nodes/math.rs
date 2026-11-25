@@ -59,7 +59,7 @@ impl GeoNodeOp for MathNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let a = inputs.get(0).map(|v| v.as_float()).unwrap_or(0.0);
+        let a = inputs.first().map(|v| v.as_float()).unwrap_or(0.0);
         let b = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.0);
 
         let res = match self.operation {
@@ -138,7 +138,7 @@ impl GeoNodeOp for VectorMathNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let a = inputs.get(0).map(|v| v.as_vec3()).unwrap_or(Vec3::ZERO);
+        let a = inputs.first().map(|v| v.as_vec3()).unwrap_or(Vec3::ZERO);
         let b = inputs.get(1).map(|v| v.as_vec3()).unwrap_or(Vec3::ZERO);
 
         let (vec_res, val_res) = match self.operation {
@@ -184,7 +184,7 @@ impl GeoNodeOp for CombineXyzNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let x = inputs.get(0).map(|v| v.as_float()).unwrap_or(0.0);
+        let x = inputs.first().map(|v| v.as_float()).unwrap_or(0.0);
         let y = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.0);
         let z = inputs.get(2).map(|v| v.as_float()).unwrap_or(0.0);
         Ok(vec![SocketValue::Vector3(Vec3::new(x, y, z))])
@@ -220,7 +220,7 @@ impl GeoNodeOp for SeparateXyzNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let v = inputs.get(0).map(|val| val.as_vec3()).unwrap_or(Vec3::ZERO);
+        let v = inputs.first().map(|val| val.as_vec3()).unwrap_or(Vec3::ZERO);
         Ok(vec![
             SocketValue::Float(v.x),
             SocketValue::Float(v.y),

@@ -132,6 +132,7 @@ fn has_matching_child(scene: &SceneGraph, node_id: NodeId, filter: &str) -> bool
     false
 }
 
+#[allow(clippy::too_many_arguments)]
 fn draw_outliner_tree_node(
     ui: &mut egui::Ui,
     scene: &SceneGraph,

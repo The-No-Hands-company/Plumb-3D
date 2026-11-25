@@ -84,8 +84,7 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
                         }
                     }
 
-                    if min_v_dist < 0.15 && closest_vert.is_some() {
-                        let vk = closest_vert.unwrap();
+                    if let (true, Some(vk)) = (min_v_dist < 0.15, closest_vert) {
                         let world_v = node.world_matrix.transform_point3(base_mesh.vertices[vk].position);
                         state.knife_hovered_hit = Some((CutPoint::Vertex(vk), world_v, hit.face_key));
                     } else {

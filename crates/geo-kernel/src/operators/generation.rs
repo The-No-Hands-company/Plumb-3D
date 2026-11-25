@@ -80,7 +80,7 @@ impl Mesh {
         let target_faces: Vec<FaceKey> = if faces_to_triangulate.is_empty() {
             self.faces.keys().collect()
         } else {
-            faces_to_triangulate.iter().copied().collect()
+            faces_to_triangulate.to_vec()
         };
 
         let mut faces_to_split: Vec<(FaceKey, Vec<[VertexKey; 3]>)> = Vec::new();
@@ -504,7 +504,7 @@ impl Mesh {
         span_count: usize,
     ) -> Result<Vec<FaceKey>, MeshError> {
         let n = boundary_loop.len();
-        if n < 4 || n % 2 != 0 {
+        if n < 4 || !n.is_multiple_of(2) {
             return Err(MeshError::DegenerateFace(n));
         }
 

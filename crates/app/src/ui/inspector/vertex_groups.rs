@@ -18,11 +18,10 @@ pub fn draw_vertex_groups_panel(
         if let NodeData::Mesh { base_mesh, .. } = &mut node.data {
                             ui.horizontal(|ui| {
                                 ui.text_edit_singleline(&mut new_name);
-                                if ui.button("+ Add Group").clicked() {
-                                    if !new_name.is_empty() {
+                                if ui.button("+ Add Group").clicked()
+                                    && !new_name.is_empty() {
                                         base_mesh.add_vertex_group(new_name.clone());
                                     }
-                                }
                             });
 
                             if !base_mesh.vertex_groups.is_empty() {

@@ -145,11 +145,10 @@ impl AppState {
                     let proj = to_pos.dot(ray.direction);
                     if proj > 0.0 {
                         let perp_dist_sq = to_pos.length_squared() - proj * proj;
-                        if perp_dist_sq <= 0.45 * 0.45 {
-                            if closest_hit.is_none() || proj < closest_hit.unwrap().2 {
+                        if perp_dist_sq <= 0.45 * 0.45
+                            && (closest_hit.is_none() || proj < closest_hit.unwrap().2) {
                                 closest_hit = Some((node_id, None, proj));
                             }
-                        }
                     }
                 }
                 NodeData::Joint { length, radius } => {
@@ -162,11 +161,10 @@ impl AppState {
                         if proj > 0.0 {
                             let perp_dist_sq = to_pt.length_squared() - proj * proj;
                             let threshold = (radius * 1.5).max(0.25);
-                            if perp_dist_sq <= threshold * threshold {
-                                if closest_hit.is_none() || proj < closest_hit.unwrap().2 {
+                            if perp_dist_sq <= threshold * threshold
+                                && (closest_hit.is_none() || proj < closest_hit.unwrap().2) {
                                     closest_hit = Some((node_id, None, proj));
                                 }
-                            }
                         }
                     }
                 }
@@ -177,11 +175,10 @@ impl AppState {
                         let proj = to_pt.dot(ray.direction);
                         if proj > 0.0 {
                             let perp_dist_sq = to_pt.length_squared() - proj * proj;
-                            if perp_dist_sq <= 0.3 * 0.3 {
-                                if closest_hit.is_none() || proj < closest_hit.unwrap().2 {
+                            if perp_dist_sq <= 0.3 * 0.3
+                                && (closest_hit.is_none() || proj < closest_hit.unwrap().2) {
                                     closest_hit = Some((node_id, None, proj));
                                 }
-                            }
                         }
                     }
                 }

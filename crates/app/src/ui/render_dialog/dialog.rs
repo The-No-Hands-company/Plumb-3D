@@ -64,13 +64,12 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
                         ResolutionPreset::Qhd1440p,
                         ResolutionPreset::Custom,
                     ] {
-                        if ui.selectable_value(&mut state.production_render.resolution_preset, preset, preset.label()).clicked() {
-                            if preset != ResolutionPreset::Custom {
+                        if ui.selectable_value(&mut state.production_render.resolution_preset, preset, preset.label()).clicked()
+                            && preset != ResolutionPreset::Custom {
                                 let (w, h) = preset.dimensions();
                                 state.production_render.settings.width = w;
                                 state.production_render.settings.height = h;
                             }
-                        }
                     }
                 });
 
@@ -106,11 +105,10 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
                         SamplePreset::Ultra512,
                         SamplePreset::Custom,
                     ] {
-                        if ui.selectable_value(&mut state.production_render.sample_preset, preset, preset.label()).clicked() {
-                            if preset != SamplePreset::Custom {
+                        if ui.selectable_value(&mut state.production_render.sample_preset, preset, preset.label()).clicked()
+                            && preset != SamplePreset::Custom {
                                 state.production_render.settings.target_samples = preset.target_samples();
                             }
-                        }
                     }
                 });
 
@@ -265,7 +263,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
                 ui.label("Path:");
                 ui.text_edit_singleline(&mut state.production_render.export_path);
             });
-            let can_save = state.production_render.buffer.as_ref().map_or(false, |b| b.samples_rendered > 0);
+            let can_save = state.production_render.buffer.as_ref().is_some_and(|b| b.samples_rendered > 0);
             if ui.add_enabled(can_save, egui::Button::new("💾 Save Image as PNG")).clicked() {
                 if let Some(buf) = &state.production_render.buffer {
                     let path = state.production_render.export_path.clone();
@@ -339,8 +337,7 @@ pub fn start_production_render(state: &mut AppState) {
     };
     let focus_dist = state.production_render.focus_distance;
 
-    let camera = if state.production_render.use_scene_camera && state.active_camera_node.is_some() {
-        let cam_id = state.active_camera_node.unwrap();
+    let camera = if let (true, Some(cam_id)) = (state.production_render.use_scene_camera, state.active_camera_node) {
         if let Some(cam_node) = state.scene.nodes.get(cam_id) {
             let look_from = cam_node.world_matrix.transform_point3(Vec3::ZERO);
             let look_dir = -cam_node.world_matrix.transform_vector3(Vec3::Z).normalize_or_zero();

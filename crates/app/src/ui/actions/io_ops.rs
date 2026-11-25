@@ -21,7 +21,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         let default_name = get_active_model_name(state);
         if let Some(path) = rfd::FileDialog::new()
             .add_filter("Plumb 3D Project (*.plmb)", &["plmb"])
-            .set_file_name(&format!("{}.plmb", default_name))
+            .set_file_name(format!("{}.plmb", default_name))
             .save_file()
         {
             save_current_project_to(state, &path);
@@ -81,7 +81,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         if let Some((name, mesh)) = get_active_mesh(state) {
             if let Some(path) = rfd::FileDialog::new()
                 .add_filter("glTF 2.0 (*.gltf)", &["gltf"])
-                .set_file_name(&format!("{}.gltf", name))
+                .set_file_name(format!("{}.gltf", name))
                 .save_file()
             {
                 let content = mesh.to_gltf(&name);
@@ -96,7 +96,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         if let Some((name, mesh)) = get_active_mesh(state) {
             if let Some(path) = rfd::FileDialog::new()
                 .add_filter("Wavefront OBJ (*.obj)", &["obj"])
-                .set_file_name(&format!("{}.obj", name))
+                .set_file_name(format!("{}.obj", name))
                 .save_file()
             {
                 let content = mesh.to_obj(&name);
@@ -111,7 +111,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         if let Some((name, mesh)) = get_active_mesh(state) {
             if let Some(path) = rfd::FileDialog::new()
                 .add_filter("Stereolithography 3D Print (*.stl)", &["stl"])
-                .set_file_name(&format!("{}.stl", name))
+                .set_file_name(format!("{}.stl", name))
                 .save_file()
             {
                 let bytes = mesh.to_stl_binary();
@@ -126,7 +126,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         if let Some((name, mesh)) = get_active_mesh(state) {
             if let Some(path) = rfd::FileDialog::new()
                 .add_filter("Stanford PLY (*.ply)", &["ply"])
-                .set_file_name(&format!("{}.ply", name))
+                .set_file_name(format!("{}.ply", name))
                 .save_file()
             {
                 let bytes = mesh.to_ply_binary();

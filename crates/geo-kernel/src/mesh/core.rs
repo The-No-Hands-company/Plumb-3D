@@ -286,12 +286,7 @@ impl Mesh {
     /// Find an existing half-edge directed from `origin` to `target`.
     pub fn find_half_edge(&self, origin: VertexKey, target: VertexKey) -> Option<HalfEdgeKey> {
         let v = self.vertices.get(origin)?;
-        for &he_key in &v.half_edges {
-            if self.half_edges[he_key].target == target {
-                return Some(he_key);
-            }
-        }
-        None
+        (&v.half_edges).into_iter().find(|&&he_key| self.half_edges[he_key].target == target).copied()
     }
 
     /// Calculate face normal using Newell's method for arbitrary N-gons.
@@ -495,7 +490,7 @@ impl Mesh {
 
     /// Gets whether an edge is marked as a UV seam.
     pub fn is_edge_seam(&self, edge_key: EdgeKey) -> bool {
-        self.edges.get(edge_key).map_or(false, |e| e.is_seam)
+        self.edges.get(edge_key).is_some_and(|e| e.is_seam)
     }
 
     /// Mark or unmark a list of edges as UV seams.

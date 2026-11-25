@@ -76,7 +76,7 @@ pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
     // Handle Precision CAD / Plasticity-style Loft Curves
     if actions.trigger_loft_curves {
         let curve_ids: Vec<_> = state.selected_nodes.iter().copied().filter(|&id| {
-            state.scene.nodes.get(id).map_or(false, |n| matches!(n.data, NodeData::Curve { .. }))
+            state.scene.nodes.get(id).is_some_and(|n| matches!(n.data, NodeData::Curve { .. }))
         }).collect();
         if curve_ids.len() >= 2 {
             let cmd = Box::new(crate::commands::LoftCurvesCommand {

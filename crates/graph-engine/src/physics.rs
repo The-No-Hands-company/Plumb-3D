@@ -391,7 +391,7 @@ impl PhysicsWorld {
 
         for frame in start_frame..=end_frame {
             let f = frame as f32;
-            for (&node_id, _) in &self.bodies {
+            for &node_id in self.bodies.keys() {
                 if let Some(node) = scene.nodes.get(node_id) {
                     anim_manager.insert_keyframe(
                         node_id,

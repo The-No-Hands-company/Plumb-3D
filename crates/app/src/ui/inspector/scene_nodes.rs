@@ -300,11 +300,10 @@ pub fn draw_scene_nodes_panel(
                                                     if ui.button("Subdivide").on_hover_text("Insert knot between this and next").clicked() {
                                                         knot_to_subdivide = Some(sel_k);
                                                     }
-                                                    if points_count > 2 {
-                                                        if ui.button("Delete (X)").clicked() {
+                                                    if points_count > 2
+                                                        && ui.button("Delete (X)").clicked() {
                                                             knot_to_remove = Some(sel_k);
                                                         }
-                                                    }
                                                 });
                                             });
                                         }

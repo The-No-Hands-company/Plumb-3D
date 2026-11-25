@@ -107,15 +107,11 @@ impl GeoNodeOp for DisplaceGeometryNode {
 
 /// Entry socket node representing the base geometry fed into a procedural modifier graph.
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub struct GroupInputNode {
     pub input_mesh: Option<geo_kernel::Mesh>,
 }
 
-impl Default for GroupInputNode {
-    fn default() -> Self {
-        Self { input_mesh: None }
-    }
-}
 
 impl GeoNodeOp for GroupInputNode {
     fn name(&self) -> &str {

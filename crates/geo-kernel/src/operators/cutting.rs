@@ -38,7 +38,7 @@ impl Mesh {
                                    cap_edges: &mut Vec<(VertexKey, VertexKey)>|
          -> PolyVert {
             let key = if u < v { (u, v) } else { (v, u) };
-            if !cut_cache.contains_key(&key) {
+            if let std::collections::hash_map::Entry::Vacant(e) = cut_cache.entry(key) {
                 let t = ((-d_u) / (d_v - d_u)).clamp(0.0001, 0.9999);
                 let pos_u = mesh.vertices[u].position;
                 let pos_v = mesh.vertices[v].position;
@@ -46,7 +46,7 @@ impl Mesh {
                 let uv_v = mesh.vertices[v].uv;
                 let cut_pos = pos_u + (pos_v - pos_u) * t;
                 let cut_uv = uv_u + (uv_v - uv_u) * t;
-                cut_cache.insert(key, (cut_pos, cut_uv));
+                e.insert((cut_pos, cut_uv));
                 cap_edges.push(key);
             }
             PolyVert::Cut(key.0, key.1)

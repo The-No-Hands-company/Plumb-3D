@@ -204,9 +204,7 @@ impl BvhNode {
 
     /// Intersects a ray against the BVH tree, finding the closest hit
     pub fn intersect(&self, ray: &Ray, t_min: f32, mut t_max: f32) -> Option<RayHit> {
-        if self.aabb().intersects_ray(ray).is_none() {
-            return None;
-        }
+        self.aabb().intersects_ray(ray)?;
 
         match self {
             BvhNode::Leaf { triangles, .. } => {

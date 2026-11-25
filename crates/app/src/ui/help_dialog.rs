@@ -62,6 +62,7 @@ pub fn draw_help_dialog(state: &mut AppState) {
     state.show_help_dialog = open;
 }
 
+#[allow(clippy::type_complexity)]
 fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
     ui.heading("🎓 Beginner 3D Modeling Tutorials");
     ui.label("Hands-on, step-by-step walkthroughs to teach you how to build various styles of 3D models from scratch.");

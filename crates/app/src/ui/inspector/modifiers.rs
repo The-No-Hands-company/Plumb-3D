@@ -186,11 +186,10 @@ pub fn draw_modifiers_panel(
                                                 .selected_text(cur_target)
                                                 .show_ui(ui, |ui| {
                                                     for (_, mname) in available_mesh_ids {
-                                                        if mname != node_name {
-                                                            if ui.selectable_label(bool_mod.target_node_name.as_deref() == Some(mname.as_str()), mname).clicked() {
+                                                        if mname != node_name
+                                                            && ui.selectable_label(bool_mod.target_node_name.as_deref() == Some(mname.as_str()), mname).clicked() {
                                                                 bool_mod.target_node_name = Some(mname.clone());
                                                             }
-                                                        }
                                                     }
                                                 });
                                         });
@@ -275,11 +274,10 @@ pub fn draw_modifiers_panel(
                                                 .selected_text(cur_target)
                                                 .show_ui(ui, |ui| {
                                                     for (_, mname) in available_mesh_ids {
-                                                        if mname != node_name {
-                                                            if ui.selectable_label(shrink_mod.target_node_name.as_deref() == Some(mname.as_str()), mname).clicked() {
+                                                        if mname != node_name
+                                                            && ui.selectable_label(shrink_mod.target_node_name.as_deref() == Some(mname.as_str()), mname).clicked() {
                                                                 shrink_mod.target_node_name = Some(mname.clone());
                                                             }
-                                                        }
                                                     }
                                                 });
                                         });
@@ -536,11 +534,10 @@ pub fn draw_modifiers_panel(
                                                     }
                                                 }
                                                 ui.label(format!("{}:", target.name));
-                                                if ui.add(egui::Slider::new(&mut target.weight, 0.0..=1.0).text("Weight")).changed() {
-                                                    if has_key {
+                                                if ui.add(egui::Slider::new(&mut target.weight, 0.0..=1.0).text("Weight")).changed()
+                                                    && has_key {
                                                         animation.insert_scalar_keyframe(sel_id, &channel_name, cur_frame, target.weight, InterpolationMode::Linear);
                                                     }
-                                                }
                                                 if ui.small_button("✖").clicked() {
                                                     target_to_remove = Some(t_idx);
                                                 }
@@ -564,11 +561,10 @@ pub fn draw_modifiers_panel(
                                     }
                                 });
                             }
-                            if !modifier_stack.modifiers().is_empty() {
-                                if ui.button("Collapse All Modifiers").on_hover_text("Bake entire stack into base mesh").clicked() {
+                            if !modifier_stack.modifiers().is_empty()
+                                && ui.button("Collapse All Modifiers").on_hover_text("Bake entire stack into base mesh").clicked() {
                                     actions.collapse_modifiers = true;
                                 }
-                            }
                         }
     }
 }

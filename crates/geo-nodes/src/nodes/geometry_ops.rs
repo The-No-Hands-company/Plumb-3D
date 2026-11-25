@@ -29,7 +29,7 @@ impl GeoNodeOp for TransformGeometryNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let Some(mut mesh) = inputs.get(0).and_then(|v| v.as_geometry()).cloned() else {
+        let Some(mut mesh) = inputs.first().and_then(|v| v.as_geometry()).cloned() else {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 
@@ -89,7 +89,7 @@ impl GeoNodeOp for SubdivideNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let Some(mesh) = inputs.get(0).and_then(|v| v.as_geometry()).cloned() else {
+        let Some(mesh) = inputs.first().and_then(|v| v.as_geometry()).cloned() else {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 
@@ -130,7 +130,7 @@ impl GeoNodeOp for ExtrudeNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let Some(mut mesh) = inputs.get(0).and_then(|v| v.as_geometry()).cloned() else {
+        let Some(mut mesh) = inputs.first().and_then(|v| v.as_geometry()).cloned() else {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 
@@ -176,7 +176,7 @@ impl GeoNodeOp for BooleanNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let Some(mesh_a) = inputs.get(0).and_then(|v| v.as_geometry()) else {
+        let Some(mesh_a) = inputs.first().and_then(|v| v.as_geometry()) else {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
         let Some(mesh_b) = inputs.get(1).and_then(|v| v.as_geometry()) else {
@@ -224,7 +224,7 @@ impl GeoNodeOp for SolidifyNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let Some(mesh) = inputs.get(0).and_then(|v| v.as_geometry()) else {
+        let Some(mesh) = inputs.first().and_then(|v| v.as_geometry()) else {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 
@@ -265,7 +265,7 @@ impl GeoNodeOp for DecimateNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let Some(mesh) = inputs.get(0).and_then(|v| v.as_geometry()) else {
+        let Some(mesh) = inputs.first().and_then(|v| v.as_geometry()) else {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 
@@ -305,7 +305,7 @@ impl GeoNodeOp for WeldNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let Some(mesh) = inputs.get(0).and_then(|v| v.as_geometry()) else {
+        let Some(mesh) = inputs.first().and_then(|v| v.as_geometry()) else {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 
@@ -345,7 +345,7 @@ impl GeoNodeOp for VoxelRemeshNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let Some(mesh) = inputs.get(0).and_then(|v| v.as_geometry()) else {
+        let Some(mesh) = inputs.first().and_then(|v| v.as_geometry()) else {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 

@@ -3,6 +3,9 @@ name = "render-pathtracer"
 version = "1.0.0"
 edition = "2021"
 
+[lints]
+workspace = true
+
 [dependencies]
 core-math = { workspace = true }
 geo-kernel = { workspace = true }

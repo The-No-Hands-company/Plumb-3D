@@ -169,11 +169,10 @@ pub fn draw_bake_dialog(state: &mut AppState) {
                 if ui.add_enabled(can_bake, egui::Button::new("🍳 Bake Texture")).clicked() {
                     trigger_bake = true;
                 }
-                if state.bake_state.last_baked_image.is_some() {
-                    if ui.button("💾 Export PNG...").clicked() {
+                if state.bake_state.last_baked_image.is_some()
+                    && ui.button("💾 Export PNG...").clicked() {
                         trigger_export = true;
                     }
-                }
             });
 
             ui.label(egui::RichText::new(&state.bake_state.status_message).italics().small());
@@ -183,7 +182,7 @@ pub fn draw_bake_dialog(state: &mut AppState) {
                 ui.separator();
                 ui.label("Baked Texture Preview:");
                 let avail = ui.available_size_before_wrap();
-                let side = avail.x.min(avail.y).max(180.0).min(320.0);
+                let side = avail.x.min(avail.y).clamp(180.0, 320.0);
                 ui.image((tex.id(), egui::vec2(side, side)));
             }
         });

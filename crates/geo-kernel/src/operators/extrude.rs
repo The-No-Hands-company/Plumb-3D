@@ -147,7 +147,7 @@ impl Mesh {
 
         // Count occurrences of undirected edges within the selected region
         let mut edge_counts: HashMap<(VertexKey, VertexKey), usize> = HashMap::new();
-        for (_, vks) in &face_vert_loops {
+        for vks in face_vert_loops.values() {
             let n = vks.len();
             for i in 0..n {
                 let v0 = vks[i];
@@ -159,7 +159,7 @@ impl Mesh {
 
         // Identify boundary directed edges (appear only once in the selected region)
         let mut boundary_directed_edges = Vec::new();
-        for (_, vks) in &face_vert_loops {
+        for vks in face_vert_loops.values() {
             let n = vks.len();
             for i in 0..n {
                 let v0 = vks[i];

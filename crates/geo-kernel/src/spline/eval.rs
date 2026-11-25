@@ -144,9 +144,7 @@ impl Spline {
     pub fn reverse(&mut self) {
         self.points.reverse();
         for pt in &mut self.points {
-            let tmp = pt.handle_in;
-            pt.handle_in = pt.handle_out;
-            pt.handle_out = tmp;
+            std::mem::swap(&mut pt.handle_in, &mut pt.handle_out);
         }
     }
 

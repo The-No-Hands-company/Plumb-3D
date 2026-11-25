@@ -70,9 +70,7 @@ impl Mesh {
         let local_ray = Ray::new(local_origin, local_dir);
 
         let aabb = self.compute_aabb();
-        if aabb.intersects_ray(&local_ray).is_none() {
-            return None;
-        }
+        aabb.intersects_ray(&local_ray)?;
 
         let mut closest_hit: Option<RaycastHit> = None;
         let mut min_dist = f32::INFINITY;
@@ -155,7 +153,7 @@ impl Mesh {
                 if occlude {
                     // Ensure vertex belongs to at least one front-facing polygon
                     let has_front_face = self.vertex_faces(vk).iter().any(|&fk| {
-                        self.faces.get(fk).map_or(false, |f| f.normal.dot(local_dir) < 0.0)
+                        self.faces.get(fk).is_some_and(|f| f.normal.dot(local_dir) < 0.0)
                     });
                     if !has_front_face {
                         continue;
@@ -217,8 +215,8 @@ impl Mesh {
                     // Check if either adjacent face of this edge is front-facing
                     let f_left = he.face;
                     let f_right = self.half_edges.get(he.twin).and_then(|th| th.face);
-                    let left_front = f_left.and_then(|fk| self.faces.get(fk)).map_or(false, |f| f.normal.dot(local_dir) < 0.0);
-                    let right_front = f_right.and_then(|fk| self.faces.get(fk)).map_or(false, |f| f.normal.dot(local_dir) < 0.0);
+                    let left_front = f_left.and_then(|fk| self.faces.get(fk)).is_some_and(|f| f.normal.dot(local_dir) < 0.0);
+                    let right_front = f_right.and_then(|fk| self.faces.get(fk)).is_some_and(|f| f.normal.dot(local_dir) < 0.0);
 
                     if !left_front && !right_front {
                         continue; // Both faces back-facing

@@ -1,4 +1,7 @@
 /target
+/dist
+*.tar.gz
+*.sha256
 **/*.rs.bk
 .DS_Store
 *.swp

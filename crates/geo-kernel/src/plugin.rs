@@ -224,19 +224,19 @@ impl PlumbMeshBuffer {
     /// Must only be called once on buffers created by [`PlumbMeshBuffer::from_mesh`].
     pub unsafe fn free_buffer(self) {
         if !self.positions.is_null() {
-            let _ = Box::from_raw(std::slice::from_raw_parts_mut(self.positions, self.vertex_count as usize * 3));
+            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(self.positions, self.vertex_count as usize * 3));
         }
         if !self.normals.is_null() {
-            let _ = Box::from_raw(std::slice::from_raw_parts_mut(self.normals, self.vertex_count as usize * 3));
+            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(self.normals, self.vertex_count as usize * 3));
         }
         if !self.uvs.is_null() {
-            let _ = Box::from_raw(std::slice::from_raw_parts_mut(self.uvs, self.vertex_count as usize * 2));
+            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(self.uvs, self.vertex_count as usize * 2));
         }
         if !self.face_vertex_counts.is_null() {
-            let _ = Box::from_raw(std::slice::from_raw_parts_mut(self.face_vertex_counts, self.face_count as usize));
+            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(self.face_vertex_counts, self.face_count as usize));
         }
         if !self.face_vertex_indices.is_null() {
-            let _ = Box::from_raw(std::slice::from_raw_parts_mut(self.face_vertex_indices, self.total_indices as usize));
+            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(self.face_vertex_indices, self.total_indices as usize));
         }
     }
 }

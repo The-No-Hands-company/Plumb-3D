@@ -46,9 +46,7 @@ impl RenderBuffer {
     }
 
     pub fn clear(&mut self) {
-        for p in &mut self.accumulated_radiance {
-            *p = Vec3::ZERO;
-        }
+        self.accumulated_radiance.fill(Vec3::ZERO);
         self.samples_rendered = 0;
     }
 

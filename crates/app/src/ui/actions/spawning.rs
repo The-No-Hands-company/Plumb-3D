@@ -73,7 +73,7 @@ pub fn handle_spawning(state: &mut AppState, actions: &mut UiActions) {
         let name = format!("Bone_{}", joint_count + 1);
         let child_node = SceneNode::new_joint(name, child_trans, (length * 0.8).max(0.5), 0.1);
         let child_id = state.scene.add_node(child_node);
-        let _ = state.scene.set_parent(child_id, Some(parent_joint_id));
+        state.scene.set_parent(child_id, Some(parent_joint_id));
         state.selected_node = Some(child_id);
         state.scene.update_transforms();
     }
@@ -118,7 +118,7 @@ pub fn handle_spawning(state: &mut AppState, actions: &mut UiActions) {
         let group_name = format!("Group_{}", group_count + 1);
         let group_id = state.scene.add_node(SceneNode::new_transform(group_name, Transform::IDENTITY));
         if let Some(sel_id) = state.selected_node {
-            let _ = state.scene.set_parent(sel_id, Some(group_id));
+            state.scene.set_parent(sel_id, Some(group_id));
         }
         state.selected_node = Some(group_id);
     }

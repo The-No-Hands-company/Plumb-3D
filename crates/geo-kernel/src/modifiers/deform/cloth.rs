@@ -91,7 +91,7 @@ impl ClothModifier {
                 mesh.vertex_groups
                     .iter()
                     .find(|g| &g.name == group_name)
-                    .map_or(false, |g| g.get_weight(vk) >= 0.9)
+                    .is_some_and(|g| g.get_weight(vk) >= 0.9)
             } else {
                 false
             };

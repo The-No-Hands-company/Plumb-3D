@@ -28,7 +28,7 @@ impl GeoNodeOp for JoinGeometryNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let geom_a = inputs.get(0).and_then(|v| v.as_geometry());
+        let geom_a = inputs.first().and_then(|v| v.as_geometry());
         let geom_b = inputs.get(1).and_then(|v| v.as_geometry());
 
         let result = match (geom_a, geom_b) {
@@ -76,8 +76,7 @@ impl GeoNodeOp for MeshToPointsNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let mesh = inputs
-            .get(0)
+        let mesh = inputs.first()
             .and_then(|v| v.as_geometry())
             .ok_or_else(|| NodeGraphError::ExecutionError("Mesh to Points requires valid input mesh".into()))?;
 
@@ -127,8 +126,7 @@ impl GeoNodeOp for SetMaterialNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let mesh = inputs
-            .get(0)
+        let mesh = inputs.first()
             .and_then(|v| v.as_geometry())
             .ok_or_else(|| NodeGraphError::ExecutionError("Set Material requires input geometry".into()))?;
 

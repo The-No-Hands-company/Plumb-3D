@@ -206,7 +206,7 @@ impl SceneGraph {
                     if let Some(skin) = modifier.as_skin_mut() {
                         for bone in &mut skin.bones {
                             if let Some(&new_wm) = joint_world_transforms.get(&bone.name) {
-                                if (bone.current_world_matrix - new_wm).abs_diff_eq(Mat4::ZERO, 1e-4) == false {
+                                if !(bone.current_world_matrix - new_wm).abs_diff_eq(Mat4::ZERO, 1e-4) {
                                     bone.current_world_matrix = new_wm;
                                     modified = true;
                                 }

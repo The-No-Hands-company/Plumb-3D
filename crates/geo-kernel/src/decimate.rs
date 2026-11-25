@@ -242,12 +242,11 @@ pub fn decimate_mesh(input: &Mesh, ratio: f32) -> Result<Mesh, MeshError> {
             let np2 = if t2 == root0 || t2 == root1 { cand.target_pos } else { positions[t2] };
             let new_norm = (np1 - np0).cross(np2 - np0);
 
-            if old_norm.length() > 1e-6 && new_norm.length() > 1e-6 {
-                if old_norm.dot(new_norm) <= 0.0 {
+            if old_norm.length() > 1e-6 && new_norm.length() > 1e-6
+                && old_norm.dot(new_norm) <= 0.0 {
                     causes_flip = true;
                     break;
                 }
-            }
         }
 
         if causes_flip {

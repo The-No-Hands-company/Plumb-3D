@@ -3,6 +3,9 @@ name = "core-math"
 version = "1.0.0"
 edition = "2021"
 
+[lints]
+workspace = true
+
 [dependencies]
 glam = { workspace = true }
 bytemuck = { workspace = true }

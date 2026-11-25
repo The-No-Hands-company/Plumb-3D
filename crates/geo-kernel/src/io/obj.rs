@@ -37,7 +37,7 @@ impl Mesh {
             if v_keys.len() < 3 {
                 continue;
             }
-            out.push_str("f");
+            out.push('f');
             for &vk in &v_keys {
                 let v_idx = key_to_idx[&vk];
                 out.push_str(&format!(" {}/{}/{}", v_idx, v_idx, v_idx));

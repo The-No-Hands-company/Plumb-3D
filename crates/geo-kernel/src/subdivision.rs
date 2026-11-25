@@ -56,7 +56,7 @@ impl CatmullClarkModifier {
             let v1 = he.target;
             let pair = if v0 < v1 { (v0, v1) } else { (v1, v0) };
 
-            if !edge_point_vks.contains_key(&pair) {
+            edge_point_vks.entry(pair).or_insert_with(|| {
                 let p0 = mesh.vertices[v0].position;
                 let p1 = mesh.vertices[v1].position;
                 let uv0 = mesh.vertices[v0].uv;
@@ -80,8 +80,8 @@ impl CatmullClarkModifier {
                 };
 
                 let edge_vk = sub.add_vertex_with_uv(edge_pos, edge_uv);
-                edge_point_vks.insert(pair, edge_vk);
-            }
+                edge_vk
+            });
         }
 
         // 3. Calculate Smoothed Vertex Points:

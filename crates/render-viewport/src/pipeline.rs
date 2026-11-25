@@ -148,7 +148,7 @@ pub fn create_shadow_pipeline(
         vertex: wgpu::VertexState {
             module: &shader,
             entry_point: "vs_main",
-            buffers: &[vertex_layout.clone()],
+            buffers: std::slice::from_ref(vertex_layout),
             compilation_options: Default::default(),
         },
         fragment: None,
@@ -298,7 +298,7 @@ pub fn create_mesh_pipeline(
         vertex: wgpu::VertexState {
             module: &shader,
             entry_point: "vs_main",
-            buffers: &[vertex_layout.clone()],
+            buffers: std::slice::from_ref(vertex_layout),
             compilation_options: Default::default(),
         },
         fragment: Some(wgpu::FragmentState {
@@ -358,7 +358,7 @@ pub fn create_wireframe_pipeline(
         vertex: wgpu::VertexState {
             module: &shader,
             entry_point: "vs_main",
-            buffers: &[vertex_layout.clone()],
+            buffers: std::slice::from_ref(vertex_layout),
             compilation_options: Default::default(),
         },
         fragment: Some(wgpu::FragmentState {
@@ -418,7 +418,7 @@ pub fn create_gizmo_pipeline(
         vertex: wgpu::VertexState {
             module: &shader,
             entry_point: "vs_main",
-            buffers: &[vertex_layout.clone()],
+            buffers: std::slice::from_ref(vertex_layout),
             compilation_options: Default::default(),
         },
         fragment: Some(wgpu::FragmentState {

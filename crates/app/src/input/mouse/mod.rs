@@ -32,8 +32,8 @@ pub fn handle_mouse_input(state: &mut AppState, button: MouseButton, is_pressed:
             state.show_context_menu = false;
             state.is_panning = is_pressed;
         }
-        MouseButton::Right => {
-            if is_pressed {
+        MouseButton::Right
+            if is_pressed => {
                 if let Some((x, y)) = state.last_mouse_pos {
                     if state.interaction_mode == InteractionMode::Object || state.selected_node.is_none() {
                         state.pick_at_screen_pos(x, y);
@@ -43,7 +43,6 @@ pub fn handle_mouse_input(state: &mut AppState, button: MouseButton, is_pressed:
                     state.window.request_redraw();
                 }
             }
-        }
         _ => {}
     }
 }

@@ -171,7 +171,7 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
             if state.ctrl_pressed {
                 // Plasticity / Rhino: Ctrl+L: Loft Selected Curves
                 let curve_ids: Vec<_> = state.selected_nodes.iter().copied().filter(|&id| {
-                    state.scene.nodes.get(id).map_or(false, |n| matches!(n.data, NodeData::Curve { .. }))
+                    state.scene.nodes.get(id).is_some_and(|n| matches!(n.data, NodeData::Curve { .. }))
                 }).collect();
                 if curve_ids.len() >= 2 {
                     let cmd = Box::new(crate::commands::LoftCurvesCommand {

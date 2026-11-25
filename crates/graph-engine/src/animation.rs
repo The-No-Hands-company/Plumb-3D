@@ -358,19 +358,17 @@ impl AnimationManager {
         // Evaluate scalar tracks (e.g. morph targets, shape keys)
         for ((node_id, channel), track) in &self.scalar_tracks {
             if let Some(val) = track.evaluate(frame) {
-                if channel.starts_with("morph:") {
-                    let target_name = &channel[6..];
+                if let Some(target_name) = channel.strip_prefix("morph:") {
                     if let Some(node) = scene.nodes.get_mut(*node_id) {
                         if let crate::NodeData::Mesh { modifier_stack, cached_render_mesh, .. } = &mut node.data {
                             for modifier in modifier_stack.modifiers_mut() {
                                 if let Some(morpher) = modifier.as_morpher_mut() {
                                     for t in &mut morpher.targets {
-                                        if t.name == target_name {
-                                            if (t.weight - val).abs() > 1e-4 {
+                                        if t.name == target_name
+                                            && (t.weight - val).abs() > 1e-4 {
                                                 t.weight = val;
                                                 *cached_render_mesh = None;
                                             }
-                                        }
                                     }
                                 }
                             }

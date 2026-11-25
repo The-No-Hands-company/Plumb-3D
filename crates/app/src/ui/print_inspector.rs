@@ -150,11 +150,10 @@ pub fn draw_print_inspector(state: &mut AppState) {
 
                 // 4. Action Buttons
                 ui.horizontal(|ui| {
-                    if !report.is_watertight {
-                        if ui.button("🛠 Auto-Fix for 3D Printing").on_hover_text("Cap holes, weld degenerates, and align outward normals").clicked() {
+                    if !report.is_watertight
+                        && ui.button("🛠 Auto-Fix for 3D Printing").on_hover_text("Cap holes, weld degenerates, and align outward normals").clicked() {
                             trigger_autofix = true;
                         }
-                    }
                     if ui.button("💾 Export Binary STL (.stl)").clicked() {
                         trigger_stl_export = true;
                     }

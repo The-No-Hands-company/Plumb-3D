@@ -251,10 +251,10 @@ impl Mesh {
 
             for &fk in &valid_faces {
                 for vk in self.face_vertices(fk) {
-                    if !old_to_new_v.contains_key(&vk) {
+                    if let std::collections::hash_map::Entry::Vacant(e) = old_to_new_v.entry(vk) {
                         let v = &self.vertices[vk];
                         let new_vk = rebuilt.add_vertex_with_uv(v.position, v.uv);
-                        old_to_new_v.insert(vk, new_vk);
+                        e.insert(new_vk);
                     }
                 }
             }

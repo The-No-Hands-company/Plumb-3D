@@ -19,6 +19,7 @@ pub struct SocketHit {
 }
 
 /// Renders a single visual node card. Returns any interaction events.
+#[allow(clippy::too_many_arguments)]
 pub fn draw_node_card(
     ui: &mut Ui,
     node_key: NodeKey,

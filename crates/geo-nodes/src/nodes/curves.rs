@@ -28,7 +28,7 @@ impl GeoNodeOp for SplineCircleNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let radius = inputs.get(0).map(|v| v.as_float()).unwrap_or(1.5).max(0.01);
+        let radius = inputs.first().map(|v| v.as_float()).unwrap_or(1.5).max(0.01);
         let pipe_radius = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.15).max(0.005);
         let res = inputs.get(2).map(|v| v.as_int()).unwrap_or(16).clamp(3, 64) as usize;
 
@@ -69,7 +69,7 @@ impl GeoNodeOp for SplineSpiralNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let radius = inputs.get(0).map(|v| v.as_float()).unwrap_or(1.0).max(0.01);
+        let radius = inputs.first().map(|v| v.as_float()).unwrap_or(1.0).max(0.01);
         let height = inputs.get(1).map(|v| v.as_float()).unwrap_or(3.0).max(0.01);
         let revs = inputs.get(2).map(|v| v.as_float()).unwrap_or(3.0).max(0.5);
         let pipe_r = inputs.get(3).map(|v| v.as_float()).unwrap_or(0.1).max(0.005);
@@ -109,7 +109,7 @@ impl GeoNodeOp for CurveFilletNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let radius = inputs.get(0).map(|v| v.as_float()).unwrap_or(0.3).max(0.001);
+        let radius = inputs.first().map(|v| v.as_float()).unwrap_or(0.3).max(0.001);
         let pipe_r = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.1).max(0.005);
 
         let p0 = geo_kernel::BezierPoint::sharp(Vec3::new(0.0, 0.0, 0.0));
@@ -153,7 +153,7 @@ impl GeoNodeOp for CurveRevolveNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let radius = inputs.get(0).map(|v| v.as_float()).unwrap_or(1.0).max(0.01);
+        let radius = inputs.first().map(|v| v.as_float()).unwrap_or(1.0).max(0.01);
         let height = inputs.get(1).map(|v| v.as_float()).unwrap_or(2.0).max(0.01);
         let segs = inputs.get(2).map(|v| v.as_int()).unwrap_or(16).clamp(3, 128) as u32;
         let angle = inputs.get(3).map(|v| v.as_float()).unwrap_or(360.0).clamp(1.0, 360.0);

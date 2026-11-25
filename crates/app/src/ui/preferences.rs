@@ -208,7 +208,7 @@ pub fn draw_preferences_dialog(state: &mut AppState) {
                     ui.add_space(10.0);
 
                     ui.label(egui::RichText::new("Hardware & Rendering").strong().size(13.0));
-                    ui.label(format!("Device: pure safe Rust + wgpu / WebGPU"));
+                    ui.label("Device: pure safe Rust + wgpu / WebGPU".to_string());
                     ui.label(format!("Cached Meshes in VRAM: {}", state.gpu_mesh_cache.len()));
                     ui.label(format!("Target FPS: 60.0 (Current: {:.0} FPS)", state.fps));
                 }

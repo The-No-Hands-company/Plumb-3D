@@ -67,10 +67,10 @@ impl Mesh {
         for &fk in faces_to_extract {
             if self.faces.contains_key(fk) {
                 for vk in self.face_vertices(fk) {
-                    if !self_to_extracted_v.contains_key(&vk) {
+                    if let std::collections::hash_map::Entry::Vacant(e) = self_to_extracted_v.entry(vk) {
                         let v = &self.vertices[vk];
                         let new_vk = extracted_mesh.add_vertex_with_uv(v.position, v.uv);
-                        self_to_extracted_v.insert(vk, new_vk);
+                        e.insert(new_vk);
                     }
                 }
             }
@@ -112,10 +112,10 @@ impl Mesh {
         for (fk, _) in &self.faces {
             if !extract_set.contains(&fk) {
                 for vk in self.face_vertices(fk) {
-                    if !old_to_new_v.contains_key(&vk) {
+                    if let std::collections::hash_map::Entry::Vacant(e) = old_to_new_v.entry(vk) {
                         let v = &self.vertices[vk];
                         let new_vk = remaining_mesh.add_vertex_with_uv(v.position, v.uv);
-                        old_to_new_v.insert(vk, new_vk);
+                        e.insert(new_vk);
                     }
                 }
             }
@@ -204,11 +204,11 @@ impl Mesh {
 
             for &fk in &comp {
                 for vk in self.face_vertices(fk) {
-                    if !old_to_new_v.contains_key(&vk) {
+                    old_to_new_v.entry(vk).or_insert_with(|| {
                         let v = &self.vertices[vk];
                         let new_vk = sub_mesh.add_vertex_with_uv(v.position, v.uv);
-                        old_to_new_v.insert(vk, new_vk);
-                    }
+                        new_vk
+                    });
                 }
             }
 
@@ -298,11 +298,11 @@ impl Mesh {
 
             for &fk in &faces {
                 for vk in self.face_vertices(fk) {
-                    if !old_to_new_v.contains_key(&vk) {
+                    old_to_new_v.entry(vk).or_insert_with(|| {
                         let v = &self.vertices[vk];
                         let new_vk = sub_mesh.add_vertex_with_uv(v.position, v.uv);
-                        old_to_new_v.insert(vk, new_vk);
-                    }
+                        new_vk
+                    });
                 }
             }
 

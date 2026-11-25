@@ -60,11 +60,10 @@ pub fn handle_animation_key(state: &mut AppState, key_code: KeyCode) -> bool {
             let mut next_k: Option<f32> = None;
             for track in state.animation.tracks.values() {
                 for f in track.keyframe_frames() {
-                    if f > cur + 0.05 {
-                        if next_k.is_none() || f < next_k.unwrap() {
+                    if f > cur + 0.05
+                        && (next_k.is_none() || f < next_k.unwrap()) {
                             next_k = Some(f);
                         }
-                    }
                 }
             }
             if let Some(target_f) = next_k {
@@ -81,11 +80,10 @@ pub fn handle_animation_key(state: &mut AppState, key_code: KeyCode) -> bool {
             let mut prev_k: Option<f32> = None;
             for track in state.animation.tracks.values() {
                 for f in track.keyframe_frames() {
-                    if f < cur - 0.05 {
-                        if prev_k.is_none() || f > prev_k.unwrap() {
+                    if f < cur - 0.05
+                        && (prev_k.is_none() || f > prev_k.unwrap()) {
                             prev_k = Some(f);
                         }
-                    }
                 }
             }
             if let Some(target_f) = prev_k {

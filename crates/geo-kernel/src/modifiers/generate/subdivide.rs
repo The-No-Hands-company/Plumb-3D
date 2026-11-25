@@ -37,7 +37,7 @@ impl SubdivideModifier {
             let v1 = he.target;
             let pair = if v0 < v1 { (v0, v1) } else { (v1, v0) };
 
-            if !edge_midpoints.contains_key(&pair) {
+            edge_midpoints.entry(pair).or_insert_with(|| {
                 let p0 = mesh.vertices[v0].position;
                 let p1 = mesh.vertices[v1].position;
                 let uv0 = mesh.vertices[v0].uv;
@@ -46,8 +46,8 @@ impl SubdivideModifier {
                 let mid_pos = (p0 + p1) * 0.5;
                 let mid_uv = (uv0 + uv1) * 0.5;
                 let mid_vk = sub.add_vertex_with_uv(mid_pos, mid_uv);
-                edge_midpoints.insert(pair, mid_vk);
-            }
+                mid_vk
+            });
         }
 
         // 3. For each face:

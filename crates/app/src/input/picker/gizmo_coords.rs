@@ -96,8 +96,8 @@ impl AppState {
             }
         }
 
-        if self.interaction_mode == InteractionMode::Object || self.interaction_mode == InteractionMode::Pose {
-            if self.selected_nodes.len() > 1 {
+        if (self.interaction_mode == InteractionMode::Object || self.interaction_mode == InteractionMode::Pose)
+            && self.selected_nodes.len() > 1 {
                 let mut sum = Vec3::ZERO;
                 let mut count = 0;
                 for &nid in &self.selected_nodes {
@@ -110,7 +110,6 @@ impl AppState {
                     return Some(sum / count as f32);
                 }
             }
-        }
 
         Some(node.world_matrix.transform_point3(Vec3::ZERO))
     }

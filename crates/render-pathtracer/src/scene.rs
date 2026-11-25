@@ -22,7 +22,7 @@ impl PathTracerScene {
         let emissive_triangles: Vec<Triangle> = triangles
             .iter()
             .copied()
-            .filter(|t| materials.get(t.material_id).map_or(false, |m| m.is_emissive()))
+            .filter(|t| materials.get(t.material_id).is_some_and(|m| m.is_emissive()))
             .collect();
 
         let bvh = BvhNode::build(triangles, 4);
@@ -174,7 +174,7 @@ impl PathTracerScene {
         }
 
         // Add soft ceiling area light if no emissive lights exist
-        let has_emissive = triangles.iter().any(|t| materials.get(t.material_id).map_or(false, |m| m.is_emissive()));
+        let has_emissive = triangles.iter().any(|t| materials.get(t.material_id).is_some_and(|m| m.is_emissive()));
         if !has_emissive {
             let light_y = 6.0_f32;
             let light_size = 2.0_f32;
@@ -238,7 +238,7 @@ fn append_render_mesh_triangles(
     triangles: &mut Vec<Triangle>,
 ) {
     let default_mat = *mat_map.first().unwrap_or(&0);
-    for chunk in render_mesh.indices.chunks_exact(3) {
+    for chunk in render_mesh.indices.as_chunks::<3>().0 {
         let i0 = chunk[0] as usize;
         let i1 = chunk[1] as usize;
         let i2 = chunk[2] as usize;
@@ -263,7 +263,7 @@ fn append_render_mesh_triangles(
         let uv1 = Vec2::from_slice(&v1.uv);
         let uv2 = Vec2::from_slice(&v2.uv);
 
-        let mat_id = mat_map.get(0).copied().unwrap_or(default_mat);
+        let mat_id = mat_map.first().copied().unwrap_or(default_mat);
         triangles.push(Triangle::new(p0, p1, p2, n0, n1, n2, uv0, uv1, uv2, mat_id));
     }
 }

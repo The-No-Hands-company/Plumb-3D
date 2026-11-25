@@ -137,7 +137,7 @@ impl SocketValue {
         match self {
             SocketValue::Int(i) => *i,
             SocketValue::Float(f) => *f as i64,
-            SocketValue::Boolean(b) => if *b { 1 } else { 0 },
+            SocketValue::Boolean(b) if *b => { 1 },
             _ => 0,
         }
     }

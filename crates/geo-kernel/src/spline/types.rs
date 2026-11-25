@@ -61,7 +61,7 @@ impl Spline {
     /// Constructs a smooth circular planar Bézier spline in the XZ plane.
     /// Uses 4 cubic Bézier segments with tangent handle length = radius * 4/3 * tan(PI / 8) ≈ 0.55228 * radius.
     pub fn circle(radius: f32, center: Vec3) -> Self {
-        let k = radius * 0.55228475; // Optimal circle approximation factor
+        let k = radius * 0.552_284_8; // Optimal circle approximation factor
         let points = vec![
             BezierPoint::new(
                 center + vec3(radius, 0.0, 0.0),

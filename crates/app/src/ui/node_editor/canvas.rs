@@ -189,7 +189,7 @@ pub fn draw_canvas(
 
     // Cancel cable connection if clicking empty space
     if pointer_clicked && canvas_state.connecting_from.is_some() {
-        let is_over_socket = pointer_pos.map_or(false, |pos| {
+        let is_over_socket = pointer_pos.is_some_and(|pos| {
             socket_hits.iter().any(|h| (h.screen_pos - pos).length() < 12.0)
         });
         if !is_over_socket {

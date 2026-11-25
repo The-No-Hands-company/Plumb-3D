@@ -83,7 +83,7 @@ impl Mesh {
         }
 
         // Face buffer: 1 byte count (3) + 3x i32 (indices) = 13 bytes
-        for chunk in render_mesh.indices.chunks_exact(3) {
+        for chunk in render_mesh.indices.as_chunks::<3>().0 {
             bytes.push(3u8);
             bytes.extend_from_slice(&(chunk[0] as i32).to_le_bytes());
             bytes.extend_from_slice(&(chunk[1] as i32).to_le_bytes());
@@ -131,7 +131,7 @@ impl Mesh {
         let mut num_faces = 0;
         let mut in_header = true;
 
-        while let Some(line) = lines.next() {
+        for line in lines.by_ref() {
             let line = line.trim();
             if line.starts_with("element vertex") {
                 num_verts = line.split_whitespace().nth(2).and_then(|s| s.parse().ok()).unwrap_or(0);

@@ -253,7 +253,7 @@ impl Mesh {
                 let he = &self.half_edges[he_key];
                 let is_chart_seam = self.edges[he.edge].is_seam;
                 let twin_face = self.half_edges[he.twin].face;
-                let is_outside = twin_face.map_or(true, |f| !chart_faces_set.contains(&f));
+                let is_outside = twin_face.is_none_or(|f| !chart_faces_set.contains(&f));
                 if is_chart_seam || is_outside {
                     boundary_hes.push(he_key);
                 }

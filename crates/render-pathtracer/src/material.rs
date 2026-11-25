@@ -125,7 +125,7 @@ impl TextureSource {
             }
             TextureSource::Marble { color_a, color_b, scale } => {
                 let p = uv * *scale;
-                let n = ((p.x * 12.9898 + p.y * 78.233).sin() * 43758.5453).fract().abs();
+                let n = ((p.x * 12.9898 + p.y * 78.233).sin() * 43_758.547).fract().abs();
                 let m = ((p.x + p.y + n * 2.0) * std::f32::consts::PI).sin() * 0.5 + 0.5;
                 *color_a * (1.0 - m * 0.7) + *color_b * (m * 0.7)
             }

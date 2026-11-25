@@ -311,7 +311,7 @@ impl Mesh {
                 }
             }
 
-            for tri in indices.chunks_exact(3) {
+            for tri in indices.as_chunks::<3>().0 {
                 let (i0, i1, i2) = (tri[0], tri[1], tri[2]);
                 if i0 < v_keys.len() && i1 < v_keys.len() && i2 < v_keys.len() {
                     let _ = mesh.add_face(&[v_keys[i0], v_keys[i1], v_keys[i2]]);
@@ -338,7 +338,7 @@ fn base64_decode(s: &str) -> Result<Vec<u8>, String> {
 
     let s_clean: String = s.chars().filter(|c| !c.is_whitespace()).collect();
     let bytes = s_clean.as_bytes();
-    if bytes.len() % 4 != 0 {
+    if !bytes.len().is_multiple_of(4) {
         return Err("Invalid base64 length".into());
     }
 
@@ -372,7 +372,7 @@ fn base64_decode(s: &str) -> Result<Vec<u8>, String> {
 
 fn base64_encode(data: &[u8]) -> String {
     const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let mut result = String::with_capacity((data.len() + 2) / 3 * 4);
+    let mut result = String::with_capacity(data.len().div_ceil(3) * 4);
     for chunk in data.chunks(3) {
         let b0 = chunk[0];
         let b1 = if chunk.len() > 1 { chunk[1] } else { 0 };

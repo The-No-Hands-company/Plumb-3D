@@ -45,8 +45,8 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
     }
 
     // Handle Invert Selection (Ctrl+I)
-    if actions.trigger_invert_selection {
-        if state.interaction_mode == InteractionMode::Edit {
+    if actions.trigger_invert_selection
+        && state.interaction_mode == InteractionMode::Edit {
             if let Some(sel_id) = state.selected_node {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -68,11 +68,10 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
                 }
             }
         }
-    }
 
     // Handle Grow Selection (+)
-    if actions.trigger_grow_selection {
-        if state.interaction_mode == InteractionMode::Edit {
+    if actions.trigger_grow_selection
+        && state.interaction_mode == InteractionMode::Edit {
             if let Some(sel_id) = state.selected_node {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -104,11 +103,10 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
                 }
             }
         }
-    }
 
     // Handle Shrink Selection (-)
-    if actions.trigger_shrink_selection {
-        if state.interaction_mode == InteractionMode::Edit {
+    if actions.trigger_shrink_selection
+        && state.interaction_mode == InteractionMode::Edit {
             if let Some(sel_id) = state.selected_node {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -138,11 +136,10 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
                 }
             }
         }
-    }
 
     // Handle Edge Loop Selection
-    if actions.trigger_edge_loop {
-        if state.interaction_mode == InteractionMode::Edit && state.sub_element_level == SubElementLevel::Edge {
+    if actions.trigger_edge_loop
+        && state.interaction_mode == InteractionMode::Edit && state.sub_element_level == SubElementLevel::Edge {
             if let Some(sel_id) = state.selected_node {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -159,11 +156,10 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
                 }
             }
         }
-    }
 
     // Handle Edge Ring Selection
-    if actions.trigger_edge_ring {
-        if state.interaction_mode == InteractionMode::Edit && state.sub_element_level == SubElementLevel::Edge {
+    if actions.trigger_edge_ring
+        && state.interaction_mode == InteractionMode::Edit && state.sub_element_level == SubElementLevel::Edge {
             if let Some(sel_id) = state.selected_node {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -180,5 +176,4 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
                 }
             }
         }
-    }
 }

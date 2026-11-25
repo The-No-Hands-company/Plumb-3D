@@ -9,7 +9,7 @@ impl Mesh {
         let mut out = String::new();
         out.push_str(&format!("solid {}\n", solid_name));
 
-        for chunk in render_mesh.indices.chunks_exact(3) {
+        for chunk in render_mesh.indices.as_chunks::<3>().0 {
             let v0 = &render_mesh.vertices[chunk[0] as usize];
             let v1 = &render_mesh.vertices[chunk[1] as usize];
             let v2 = &render_mesh.vertices[chunk[2] as usize];
@@ -51,7 +51,7 @@ impl Mesh {
         bytes.extend_from_slice(&tri_count.to_le_bytes());
 
         // Triangles
-        for chunk in render_mesh.indices.chunks_exact(3) {
+        for chunk in render_mesh.indices.as_chunks::<3>().0 {
             let v0 = &render_mesh.vertices[chunk[0] as usize];
             let v1 = &render_mesh.vertices[chunk[1] as usize];
             let v2 = &render_mesh.vertices[chunk[2] as usize];

@@ -254,12 +254,14 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
     scene.add_node(sky_fill);
 
     // 9. Camera framing
-    let mut camera = ViewportCamera::default();
-    camera.target = vec3(0.0, 5.0, 0.0);
-    camera.distance = 22.0;
-    camera.pitch = 0.22;
-    camera.yaw = 0.65;
-    camera.projection = CameraProjection::Perspective;
+    let camera = ViewportCamera {
+        target: vec3(0.0, 5.0, 0.0),
+        distance: 22.0,
+        pitch: 0.22,
+        yaw: 0.65,
+        projection: CameraProjection::Perspective,
+        ..Default::default()
+    };
 
     (scene, camera, hero_tower_id)
 }
