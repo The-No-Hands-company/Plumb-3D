@@ -5,6 +5,33 @@ use graph_engine::NodeData;
 
 pub fn handle_mouse_left_down(state: &mut AppState) {
     state.mouse_drag_distance = 0.0;
+    if state.push_pull_tool {
+        if let Some((mx, my)) = state.last_mouse_pos {
+            let ray = state.get_screen_ray(mx, my);
+            let mut face_hit = None;
+            if let Some(sel_id) = state.selected_node {
+                if let Some(node) = state.scene.nodes.get(sel_id) {
+                    if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                        if let Some(hit) = base_mesh.raycast(&ray, &node.world_matrix) {
+                            face_hit = Some(hit.face_key);
+                        }
+                    }
+                }
+            }
+            if let Some(fk) = face_hit {
+                state.selected_faces.clear();
+                state.selected_faces.insert(fk);
+                state.extrude_modal_active = true;
+                state.extrude_modal_distance = 0.0;
+                state.extrude_modal_faces = vec![fk];
+                state.extrude_modal_axis_constraint = None;
+                state.extrude_modal_start_mouse = (mx, my);
+                state.set_status_message("Direct Push-Pull: Drag along normal | LMB: Commit | Esc: Cancel");
+                state.window.request_redraw();
+                return;
+            }
+        }
+    }
     if state.curve_pen_active {
         if let Some((mx, my)) = state.last_mouse_pos {
             state.handle_curve_pen_click(mx, my);
@@ -108,6 +135,16 @@ pub fn handle_mouse_left_down(state: &mut AppState) {
 }
 
 pub fn handle_mouse_left_up(state: &mut AppState) {
+    if state.push_pull_tool && state.extrude_modal_active {
+        if state.extrude_modal_distance.abs() > 0.001 {
+            crate::modals::extrude::commit(state);
+            state.set_status_message("Direct Push-Pull Extrusion Applied! (Ctrl+Z to Undo)");
+        } else {
+            crate::modals::extrude::cancel(state);
+        }
+        state.window.request_redraw();
+        return;
+    }
     if state.is_sculpting {
         state.is_sculpting = false;
         if let (Some(old_m), Some(sel_id)) = (state.sculpt_stroke_start_mesh.take(), state.selected_node) {

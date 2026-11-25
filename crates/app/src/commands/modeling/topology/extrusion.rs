@@ -186,11 +186,7 @@ impl Command for BevelEdgeCommand {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                for &ek in &self.edges {
-                    if base_mesh.edges.contains_key(ek) {
-                        let _ = base_mesh.bevel_edge_with_segments(ek, self.width, self.segments);
-                    }
-                }
+                let _ = base_mesh.bevel_edges_miter(&self.edges, self.width, self.segments);
                 scene.mark_dirty(self.node_id);
                 Ok(())
             } else {

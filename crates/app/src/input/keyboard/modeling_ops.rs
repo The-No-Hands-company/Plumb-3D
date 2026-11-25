@@ -73,6 +73,15 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                         }
                     }
                 }
+            } else if state.shift_pressed {
+                state.push_pull_tool = !state.push_pull_tool;
+                state.set_status_message(if state.push_pull_tool {
+                    "Direct Push-Pull Active: Click and drag any face to extrude along normal"
+                } else {
+                    "Direct Push-Pull Disabled"
+                });
+                state.window.request_redraw();
+                return true;
             } else if state.interaction_mode == InteractionMode::Edit {
                 state.extrude_modal_active = !state.extrude_modal_active;
                 if state.extrude_modal_active {

@@ -81,6 +81,9 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
 }
 
 pub fn handle_mouse_wheel(state: &mut AppState, scroll: f32) -> bool {
+    if state.cutter_modal.is_some() {
+        return cutter::handle_mouse_wheel(state, scroll);
+    }
     if state.bevel_modal_active {
         return bevel::handle_mouse_wheel(state, scroll);
     }

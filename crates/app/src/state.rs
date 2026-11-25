@@ -94,6 +94,7 @@ pub struct AppState {
     pub extrude_modal_distance: f32,
     pub extrude_modal_faces: Vec<FaceKey>,
     pub extrude_modal_axis_constraint: Option<GizmoAxis>,
+    pub push_pull_tool: bool,
 
     // Interactive Bevel Modal (Blender Ctrl+B / Maya Bevel)
     pub bevel_modal_active: bool,
@@ -457,6 +458,7 @@ impl AppState {
             extrude_modal_distance: 0.0,
             extrude_modal_faces: Vec::new(),
             extrude_modal_axis_constraint: None,
+            push_pull_tool: false,
             bevel_modal_active: false,
             bevel_modal_start_mouse: (0.0, 0.0),
             bevel_modal_width: 0.15,

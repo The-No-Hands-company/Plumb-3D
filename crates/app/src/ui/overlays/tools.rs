@@ -385,7 +385,11 @@ pub fn render(state: &mut AppState) {
             egui::Id::new("cutter_overlay"),
         ));
 
-        let cutter_color = egui::Color32::from_rgb(255, 140, 20); // Bright BoxCutter Orange
+        let cutter_color = if cutter.is_ghost {
+            egui::Color32::from_rgb(0, 230, 255) // Cyan for Live Ghost Cutter
+        } else {
+            egui::Color32::from_rgb(255, 140, 20) // Bright BoxCutter Orange
+        };
 
         let min_u = cutter.start_uv.x.min(cutter.current_uv.x);
         let max_u = cutter.start_uv.x.max(cutter.current_uv.x);
@@ -412,6 +416,27 @@ pub fn render(state: &mut AppState) {
 
             for i in 0..4 {
                 painter.line_segment([pts[i], pts[(i + 1) % 4]], egui::Stroke::new(2.5_f32, cutter_color));
+            }
+
+            // Draw radial pattern preview if N > 1
+            if cutter.radial_count > 1 {
+                let n = cutter.radial_count;
+                let v0 = cutter.current_uv - cutter.start_uv;
+                for k in 1..n {
+                    let theta = (k as f32 / n as f32) * std::f32::consts::TAU;
+                    let cos_t = theta.cos();
+                    let sin_t = theta.sin();
+                    let rot_v = core_math::Vec2::new(v0.x * cos_t - v0.y * sin_t, v0.x * sin_t + v0.y * cos_t);
+                    let inst_center = cutter.start_uv + rot_v;
+                    let inst_p = cutter.workplane.uv_to_world(inst_center);
+                    if let Some(sc) = state.camera.world_to_screen(inst_p, width, height) {
+                        painter.circle_stroke(
+                            egui::pos2(sc.x, sc.y),
+                            8.0,
+                            egui::Stroke::new(1.5_f32, cutter_color),
+                        );
+                    }
+                }
             }
 
             if cutter.stage == crate::modals::cutter::CutterStage::ExtrudeDepth {
@@ -444,10 +469,20 @@ pub fn render(state: &mut AppState) {
             let dim_w = ((max_u - min_u).abs() * 1000.0).max(1.0);
             let dim_h = ((max_v - min_v).abs() * 1000.0).max(1.0);
             let dim_d = (cutter.depth * 1000.0).max(1.0);
-            let caliper_text = format!("📐 W: {:.1} mm  H: {:.1} mm  D: {:.1} mm", dim_w, dim_h, dim_d);
+            let shape_label = match cutter.shape {
+                crate::modals::cutter::CutterShape::Box => "Box",
+                crate::modals::cutter::CutterShape::Circle => "Circle",
+            };
+            let array_label = if cutter.radial_count > 1 {
+                format!(" | ⚙ N={}", cutter.radial_count)
+            } else {
+                String::new()
+            };
+            let ghost_label = if cutter.is_ghost { " | 👻 Ghost" } else { "" };
+            let caliper_text = format!("📐 {} W: {:.1} mm H: {:.1} mm D: {:.1} mm{}{}", shape_label, dim_w, dim_h, dim_d, array_label, ghost_label);
 
             let center_screen = egui::pos2((pts[0].x + pts[2].x) * 0.5, (pts[0].y + pts[2].y) * 0.5 - 20.0);
-            let pill_rect = egui::Rect::from_center_size(center_screen, egui::vec2(caliper_text.len() as f32 * 7.0 + 16.0, 22.0));
+            let pill_rect = egui::Rect::from_center_size(center_screen, egui::vec2(caliper_text.len() as f32 * 6.5 + 16.0, 22.0));
             painter.rect_filled(pill_rect, 4.0, egui::Color32::from_black_alpha(230));
             painter.rect_stroke(pill_rect, 4.0, egui::Stroke::new(1.0_f32, cutter_color));
             painter.text(center_screen, egui::Align2::CENTER_CENTER, caliper_text, egui::FontId::proportional(11.5), egui::Color32::WHITE);
@@ -457,6 +492,7 @@ pub fn render(state: &mut AppState) {
     // 8. Left Vertical Viewport Tool Strip (Plasticity / Blender T-Shelf Style)
     if state.show_left_toolbar {
         let mut toggle_cutter = false;
+        let mut toggle_push_pull = false;
         let left_offset = if state.show_outliner { 235.0 } else { 15.0 };
         egui::Area::new(egui::Id::new("left_viewport_tool_strip"))
             .fixed_pos(egui::pos2(left_offset, 75.0))
@@ -491,6 +527,9 @@ pub fn render(state: &mut AppState) {
                             if ui.selectable_label(state.cutter_modal.is_some(), "✂").on_hover_text("Interactive Direct Cutter (C)").clicked() {
                                 toggle_cutter = true;
                             }
+                            if ui.selectable_label(state.push_pull_tool, "⤒").on_hover_text("Direct Push-Pull (Shift+E / Click-Drag Face)").clicked() {
+                                toggle_push_pull = true;
+                            }
                             if state.current_workspace == WorkspaceTemplate::Sculpting || state.interaction_mode == InteractionMode::Sculpt {
                                 if ui.selectable_label(state.interaction_mode == InteractionMode::Sculpt, "🖌").on_hover_text("Sculpt Brush").clicked() {
                                     state.interaction_mode = InteractionMode::Sculpt;
@@ -522,6 +561,12 @@ pub fn render(state: &mut AppState) {
                 crate::modals::cutter::cancel(state);
             } else {
                 crate::modals::cutter::start(state);
+            }
+        }
+        if toggle_push_pull {
+            state.push_pull_tool = !state.push_pull_tool;
+            if state.push_pull_tool {
+                state.set_status_message("Direct Push-Pull Active: Click and drag any face to extrude along normal");
             }
         }
     }
