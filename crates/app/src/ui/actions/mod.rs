@@ -145,6 +145,7 @@ pub struct UiActions {
     pub export_ply: bool,
     pub export_step: bool,
     pub export_usd: bool,
+    pub export_gcode: bool,
     pub import_plmb_bytes: Option<Vec<u8>>,
     pub import_obj_text: Option<String>,
     pub import_gltf_text: Option<String>,

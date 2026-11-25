@@ -13,3 +13,4 @@ graph-engine = { workspace = true }
 rayon = { workspace = true }
 image = { workspace = true }
 log = { workspace = true }
+bytemuck = { workspace = true }

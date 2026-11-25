@@ -50,6 +50,7 @@ pub fn draw_file_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
         if ui.button("Export Active Mesh as PLY (.ply)").clicked() { actions.export_ply = true; ui.close_menu(); }
         if ui.button("Export Active Mesh as CAD STEP Solid (.step)").clicked() { actions.export_step = true; ui.close_menu(); }
         if ui.button("Export Active Mesh as Pixar OpenUSD (.usda)").clicked() { actions.export_usd = true; ui.close_menu(); }
+        if ui.button("Export Sliced G-Code for 3D Printing (.gcode)").clicked() { actions.export_gcode = true; ui.close_menu(); }
         if ui.button("🖨 3D Print & CAD Quality Inspector...").clicked() { state.print_inspector.show_dialog = true; ui.close_menu(); }
         ui.separator();
         if ui.button("Import Sample glTF Cube").clicked() {

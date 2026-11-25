@@ -17,6 +17,7 @@
 pub mod baker;
 pub mod bvh;
 pub mod camera;
+pub mod gpu_pathtracer;
 pub mod integrator;
 pub mod material;
 pub mod post_process;
@@ -29,6 +30,10 @@ mod tests;
 pub use baker::{bake_texture, BakeMapType, BakeSettings};
 pub use bvh::{BvhNode, RayHit, Triangle};
 pub use camera::PathtracerCamera;
+pub use gpu_pathtracer::{
+    pack_scene_for_gpu, GpuBvhNode, GpuCameraUniform, GpuMaterial, GpuTriangle,
+    GPU_PATHTRACER_WGSL,
+};
 pub use integrator::trace_path;
 pub use material::{BsdfSample, Material};
 pub use post_process::{apply_post_processing, PostProcessSettings};

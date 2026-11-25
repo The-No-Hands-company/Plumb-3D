@@ -249,6 +249,13 @@ const COMMAND_LIST: &[PaletteItem] = &[
         action: PaletteAction::TriggerAction(|_, a| { a.export_usd = true; }),
     },
     PaletteItem {
+        name: "Export Sliced 3D Print G-code (.gcode)",
+        category: "File",
+        shortcut: "File > Export",
+        keywords: &["gcode", "slicer", "toolpath", "3d print", "bambu", "prusa", "creality"],
+        action: PaletteAction::TriggerAction(|_, a| { a.export_gcode = true; }),
+    },
+    PaletteItem {
         name: "Welcome & Quick-Start Hub",
         category: "App",
         shortcut: "F2",

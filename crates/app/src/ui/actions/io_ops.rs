@@ -166,6 +166,22 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         }
     }
 
+    // 11. Handle Direct 3D Print CAM Slicer G-code Export with native file dialog
+    if actions.export_gcode {
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("3D Printer G-code (*.gcode)", &["gcode"])
+                .set_file_name(format!("{}.gcode", name))
+                .save_file()
+            {
+                let settings = geo_kernel::SlicerSettings::default();
+                if mesh.export_gcode_file(&path, &settings).is_ok() {
+                    state.set_status_message(format!("🖨 Exported 3D Print G-code to: {}", path.display()));
+                }
+            }
+        }
+    }
+
     // In-memory imports (for programmatic samples or drag-and-drop bytes)
     handle_direct_memory_imports(state, actions);
 }

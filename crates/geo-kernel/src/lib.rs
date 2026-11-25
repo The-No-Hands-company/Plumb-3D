@@ -36,6 +36,7 @@ pub mod lsystem;
 pub mod groom;
 pub mod fluid_sph;
 pub mod quadriflow;
+pub mod slicer;
 pub mod plugin;
 pub mod kitbash;
 
@@ -74,6 +75,7 @@ pub use lsystem::{LSystem, LSystemPreset};
 pub use groom::{GroomBrush, GroomSettings, GroomSystem, HairGuide, HairStrand};
 pub use fluid_sph::{FluidParticle, SphFluidSimulator, SphSettings};
 pub use quadriflow::{CrossField4RoSy, QuadriflowSettings};
+pub use slicer::{InfillPattern, SlicedLayer, SlicerSettings, ToolpathSegment};
 pub use raycast::RaycastHit;
 pub use kitbash::{Kitbash, KitbashHardwareType};
 
