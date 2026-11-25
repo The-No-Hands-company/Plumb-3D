@@ -432,7 +432,8 @@ fn draw_tab_about(ui: &mut egui::Ui) {
 
     ui.add_space(8.0);
     ui.label(egui::RichText::new("Engine Status:").strong());
-    ui.label("All 7 workspace crates verified with 158+ passing unit tests and 0 compiler warnings.");
+    ui.label("Plumb 3D Suite Version: 1.0.0 Official Release");
+    ui.label("All 7 workspace crates verified with 175 passing unit tests and 0 compiler warnings.");
 }
 
 #[cfg(test)]

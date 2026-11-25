@@ -133,7 +133,7 @@ dependencies = [
 
 [[package]]
 name = "app"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "core-math",
  "egui",
@@ -726,7 +726,7 @@ dependencies = [
 
 [[package]]
 name = "core-math"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "bytemuck",
  "glam",
@@ -1179,7 +1179,7 @@ dependencies = [
 
 [[package]]
 name = "geo-kernel"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "bytemuck",
  "core-math",
@@ -1195,7 +1195,7 @@ dependencies = [
 
 [[package]]
 name = "geo-nodes"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "core-math",
  "geo-kernel",
@@ -1346,7 +1346,7 @@ dependencies = [
 
 [[package]]
 name = "graph-engine"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "core-math",
  "geo-kernel",
@@ -2584,7 +2584,7 @@ checksum = "d902046e6a28a1e4c3cab97258a0ce11e994903f01c2d97a9447a0b3df85f4f6"
 
 [[package]]
 name = "render-pathtracer"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "core-math",
  "geo-kernel",
@@ -2596,7 +2596,7 @@ dependencies = [
 
 [[package]]
 name = "render-viewport"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "bytemuck",
  "core-math",
