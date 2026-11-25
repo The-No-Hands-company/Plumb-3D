@@ -33,6 +33,9 @@ pub mod xpbd_cloth;
 pub mod multires;
 pub mod gaussian_splat;
 pub mod lsystem;
+pub mod groom;
+pub mod fluid_sph;
+pub mod quadriflow;
 pub mod plugin;
 pub mod kitbash;
 
@@ -68,6 +71,9 @@ pub use xpbd_cloth::{
 pub use multires::{MultiresLevel, MultiresMesh};
 pub use gaussian_splat::{GaussianCloud, GaussianSplat};
 pub use lsystem::{LSystem, LSystemPreset};
+pub use groom::{GroomBrush, GroomSettings, GroomSystem, HairGuide, HairStrand};
+pub use fluid_sph::{FluidParticle, SphFluidSimulator, SphSettings};
+pub use quadriflow::{CrossField4RoSy, QuadriflowSettings};
 pub use raycast::RaycastHit;
 pub use kitbash::{Kitbash, KitbashHardwareType};
 
