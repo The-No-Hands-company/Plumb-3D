@@ -51,6 +51,7 @@ pub(crate) struct CameraUniform {
     pub(crate) eye_pos: [f32; 4],
     pub(crate) viewport_params: [f32; 4],
     pub(crate) light_view_proj: [f32; 16],
+    pub(crate) inv_view_proj: [f32; 16],
 }
 
 pub const MAX_SCENE_LIGHTS: usize = 8;

@@ -108,6 +108,10 @@ impl Modifier for SubdivideModifier {
         self.enabled = enabled;
     }
 
+    fn as_subdivide_mut(&mut self) -> Option<&mut SubdivideModifier> {
+        Some(self)
+    }
+
     fn apply(&self, input: &Mesh) -> Result<Mesh, MeshError> {
         let mut result = input.clone();
         for _ in 0..self.iterations {

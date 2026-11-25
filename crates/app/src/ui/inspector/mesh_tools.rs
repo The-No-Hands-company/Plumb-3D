@@ -450,46 +450,15 @@ pub fn draw_mesh_tools_panel(
                         }
 
                         if state.interaction_mode == InteractionMode::Sculpt {
-                            ui.heading("Sculpt Brushes (Blender / ZBrush)");
-                            ui.horizontal_wrapped(|ui| {
-                                if ui.selectable_label(state.sculpt_settings.brush == SculptBrush::Draw, "Draw").clicked() { state.sculpt_settings.brush = SculptBrush::Draw; }
-                                if ui.selectable_label(state.sculpt_settings.brush == SculptBrush::Smooth, "Smooth").clicked() { state.sculpt_settings.brush = SculptBrush::Smooth; }
-                                if ui.selectable_label(state.sculpt_settings.brush == SculptBrush::Inflate, "Inflate").clicked() { state.sculpt_settings.brush = SculptBrush::Inflate; }
-                                if ui.selectable_label(state.sculpt_settings.brush == SculptBrush::Flatten, "Flatten").clicked() { state.sculpt_settings.brush = SculptBrush::Flatten; }
-                                if ui.selectable_label(state.sculpt_settings.brush == SculptBrush::Grab, "Grab").clicked() { state.sculpt_settings.brush = SculptBrush::Grab; }
-                                if ui.selectable_label(state.sculpt_settings.brush == SculptBrush::Pinch, "Pinch").clicked() { state.sculpt_settings.brush = SculptBrush::Pinch; }
-                                if ui.selectable_label(state.sculpt_settings.brush == SculptBrush::Crease, "Crease").clicked() { state.sculpt_settings.brush = SculptBrush::Crease; }
-                                if ui.selectable_label(state.sculpt_settings.brush == SculptBrush::SnakeHook, "Snake Hook").clicked() { state.sculpt_settings.brush = SculptBrush::SnakeHook; }
-                                if ui.selectable_label(state.sculpt_settings.brush == SculptBrush::Clay, "Clay").clicked() { state.sculpt_settings.brush = SculptBrush::Clay; }
-                                if ui.selectable_label(state.sculpt_settings.brush == SculptBrush::Mask, "🎭 Mask (M)").clicked() { state.sculpt_settings.brush = SculptBrush::Mask; }
-                            });
-                            ui.horizontal(|ui| {
-                                if ui.button("Invert Mask (Ctrl+I)").clicked() { actions.trigger_invert_sculpt_mask = true; }
-                                if ui.button("Clear Mask (Alt+M)").clicked() { actions.trigger_clear_sculpt_mask = true; }
-                                if ui.button("Smooth Mask").clicked() { actions.trigger_smooth_sculpt_mask = true; }
-                            });
-
-                            ui.add(egui::Slider::new(&mut state.sculpt_settings.radius, 0.05..=3.0).text("Radius"));
-                            ui.add(egui::Slider::new(&mut state.sculpt_settings.strength, 0.01..=1.5).text("Strength"));
-                            ui.checkbox(&mut state.sculpt_settings.invert, "Invert Stroke (Ctrl)");
-
-                            egui::ComboBox::from_label("Falloff")
-                                .selected_text(format!("{:?}", state.sculpt_settings.falloff))
-                                .show_ui(ui, |ui| {
-                                    ui.selectable_value(&mut state.sculpt_settings.falloff, BrushFalloff::Smooth, "Smooth");
-                                    ui.selectable_value(&mut state.sculpt_settings.falloff, BrushFalloff::Spherical, "Spherical");
-                                    ui.selectable_value(&mut state.sculpt_settings.falloff, BrushFalloff::Linear, "Linear");
-                                    ui.selectable_value(&mut state.sculpt_settings.falloff, BrushFalloff::Sharp, "Sharp");
-                                });
-
-                            ui.horizontal(|ui| {
-                                ui.label("Symmetry:");
-                                ui.toggle_value(&mut state.sculpt_symmetry_x, "X");
-                                ui.toggle_value(&mut state.sculpt_symmetry_y, "Y");
-                                ui.toggle_value(&mut state.sculpt_symmetry_z, "Z");
-                            });
-
-                            ui.separator();
+                            super::sculpt::draw_sculpt_tools(
+                                ui,
+                                &mut state.sculpt_settings,
+                                &mut state.dyntopo,
+                                &mut state.sculpt_symmetry_x,
+                                &mut state.sculpt_symmetry_y,
+                                &mut state.sculpt_symmetry_z,
+                                actions,
+                            );
                         }
 
                         if state.interaction_mode == InteractionMode::WeightPaint {

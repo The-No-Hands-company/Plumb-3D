@@ -89,30 +89,52 @@ impl AppState {
                         let local_hit_normal = inv_mat.transform_vector3(hit.normal).normalize();
                         let local_motion_delta = motion_delta.map(|m| inv_mat.transform_vector3(m));
 
-                        base_mesh.apply_sculpt_brush(
-                            local_hit_point,
-                            local_hit_normal,
-                            &self.sculpt_settings,
-                            local_motion_delta,
-                        );
+                        if self.dyntopo.enabled {
+                            let _ = base_mesh.apply_dyntopo_sculpt(
+                                local_hit_point,
+                                local_hit_normal,
+                                &self.sculpt_settings,
+                                &self.dyntopo,
+                                local_motion_delta,
+                            );
+                        } else {
+                            base_mesh.apply_sculpt_brush(
+                                local_hit_point,
+                                local_hit_normal,
+                                &self.sculpt_settings,
+                                local_motion_delta,
+                            );
+                        }
 
                         if self.sculpt_symmetry_x {
                             let sym_hit = Vec3::new(-local_hit_point.x, local_hit_point.y, local_hit_point.z);
                             let sym_norm = Vec3::new(-local_hit_normal.x, local_hit_normal.y, local_hit_normal.z);
                             let sym_motion = local_motion_delta.map(|m| Vec3::new(-m.x, m.y, m.z));
-                            base_mesh.apply_sculpt_brush(sym_hit, sym_norm, &self.sculpt_settings, sym_motion);
+                            if self.dyntopo.enabled {
+                                let _ = base_mesh.apply_dyntopo_sculpt(sym_hit, sym_norm, &self.sculpt_settings, &self.dyntopo, sym_motion);
+                            } else {
+                                base_mesh.apply_sculpt_brush(sym_hit, sym_norm, &self.sculpt_settings, sym_motion);
+                            }
                         }
                         if self.sculpt_symmetry_y {
                             let sym_hit = Vec3::new(local_hit_point.x, -local_hit_point.y, local_hit_point.z);
                             let sym_norm = Vec3::new(local_hit_normal.x, -local_hit_normal.y, local_hit_normal.z);
                             let sym_motion = local_motion_delta.map(|m| Vec3::new(m.x, -m.y, m.z));
-                            base_mesh.apply_sculpt_brush(sym_hit, sym_norm, &self.sculpt_settings, sym_motion);
+                            if self.dyntopo.enabled {
+                                let _ = base_mesh.apply_dyntopo_sculpt(sym_hit, sym_norm, &self.sculpt_settings, &self.dyntopo, sym_motion);
+                            } else {
+                                base_mesh.apply_sculpt_brush(sym_hit, sym_norm, &self.sculpt_settings, sym_motion);
+                            }
                         }
                         if self.sculpt_symmetry_z {
                             let sym_hit = Vec3::new(local_hit_point.x, local_hit_point.y, -local_hit_point.z);
                             let sym_norm = Vec3::new(local_hit_normal.x, local_hit_normal.y, -local_hit_normal.z);
                             let sym_motion = local_motion_delta.map(|m| Vec3::new(m.x, m.y, -m.z));
-                            base_mesh.apply_sculpt_brush(sym_hit, sym_norm, &self.sculpt_settings, sym_motion);
+                            if self.dyntopo.enabled {
+                                let _ = base_mesh.apply_dyntopo_sculpt(sym_hit, sym_norm, &self.sculpt_settings, &self.dyntopo, sym_motion);
+                            } else {
+                                base_mesh.apply_sculpt_brush(sym_hit, sym_norm, &self.sculpt_settings, sym_motion);
+                            }
                         }
                         self.scene.mark_dirty(sel_id);
                     }

@@ -195,6 +195,25 @@ pub fn draw_modifiers_panel(
                                         });
                                     }
 
+                                    if let Some(bev_mod) = modifier.as_bevel_mut() {
+                                        ui.horizontal(|ui| {
+                                            ui.label("Width:");
+                                            ui.add(egui::DragValue::new(&mut bev_mod.width).speed(0.01).range(0.001..=5.0));
+                                            ui.label("Min Angle:");
+                                            let mut deg = bev_mod.min_angle_radians.to_degrees();
+                                            if ui.add(egui::Slider::new(&mut deg, 0.0..=180.0).suffix("°")).changed() {
+                                                bev_mod.min_angle_radians = deg.to_radians();
+                                            }
+                                        });
+                                    }
+
+                                    if let Some(sub_mod) = modifier.as_subdivide_mut() {
+                                        ui.horizontal(|ui| {
+                                            ui.label("Iterations:");
+                                            ui.add(egui::DragValue::new(&mut sub_mod.iterations).speed(0.1).range(1..=6));
+                                        });
+                                    }
+
                                     if let Some(solidify_mod) = modifier.as_solidify_mut() {
                                         ui.horizontal(|ui| {
                                             ui.label("Thickness:");

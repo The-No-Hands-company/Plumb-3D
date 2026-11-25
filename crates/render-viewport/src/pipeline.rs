@@ -518,15 +518,14 @@ pub fn create_grid_pipeline(
         cache: None,
     });
 
-    // Large ground quad for procedural grid (100 km span)
-    let s = 100_000.0_f32;
+    // Fullscreen screen-space quad in NDC [-1, 1] for raycast infinite ground grid
     let grid_vertices: [f32; 18] = [
-        -s, 0.0, -s,
-         s, 0.0, -s,
-         s, 0.0,  s,
-        -s, 0.0, -s,
-         s, 0.0,  s,
-        -s, 0.0,  s,
+        -1.0, -1.0, 0.0,
+         1.0, -1.0, 0.0,
+         1.0,  1.0, 0.0,
+        -1.0, -1.0, 0.0,
+         1.0,  1.0, 0.0,
+        -1.0,  1.0, 0.0,
     ];
 
     let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {

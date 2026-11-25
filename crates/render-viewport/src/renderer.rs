@@ -284,8 +284,10 @@ impl ViewportRenderer {
 
         // Update camera uniform
         let eye = camera.eye_position();
+        let vp = camera.view_projection_matrix();
+        let inv_vp = vp.inverse();
         let camera_data = CameraUniform {
-            view_proj: camera.view_projection_matrix().to_cols_array(),
+            view_proj: vp.to_cols_array(),
             eye_pos: [eye.x, eye.y, eye.z, 1.0],
             viewport_params: [
                 shading_mode.as_shader_id(),
@@ -294,6 +296,7 @@ impl ViewportRenderer {
                 cavity_intensity.max(0.0),
             ],
             light_view_proj: light_view_proj.to_cols_array(),
+            inv_view_proj: inv_vp.to_cols_array(),
         };
         self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::bytes_of(&camera_data));
 

@@ -472,6 +472,7 @@ pub fn render(state: &mut AppState) {
             let shape_label = match cutter.shape {
                 crate::modals::cutter::CutterShape::Box => "Box",
                 crate::modals::cutter::CutterShape::Circle => "Circle",
+                crate::modals::cutter::CutterShape::Ngon => "N-gon",
             };
             let array_label = if cutter.radial_count > 1 {
                 format!(" | ⚙ N={}", cutter.radial_count)
@@ -479,7 +480,13 @@ pub fn render(state: &mut AppState) {
                 String::new()
             };
             let ghost_label = if cutter.is_ghost { " | 👻 Ghost" } else { "" };
-            let caliper_text = format!("📐 {} W: {:.1} mm H: {:.1} mm D: {:.1} mm{}{}", shape_label, dim_w, dim_h, dim_d, array_label, ghost_label);
+            let sym_label = match cutter.symmetry_mirror {
+                Some(geo_kernel::MirrorAxis::X) => " | 🪞 X",
+                Some(geo_kernel::MirrorAxis::Y) => " | 🪞 Y",
+                Some(geo_kernel::MirrorAxis::Z) => " | 🪞 Z",
+                None => "",
+            };
+            let caliper_text = format!("📐 {} W: {:.1} mm H: {:.1} mm D: {:.1} mm{}{}{}", shape_label, dim_w, dim_h, dim_d, array_label, sym_label, ghost_label);
 
             let center_screen = egui::pos2((pts[0].x + pts[2].x) * 0.5, (pts[0].y + pts[2].y) * 0.5 - 20.0);
             let pill_rect = egui::Rect::from_center_size(center_screen, egui::vec2(caliper_text.len() as f32 * 6.5 + 16.0, 22.0));

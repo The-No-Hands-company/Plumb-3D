@@ -36,6 +36,10 @@ impl Modifier for BevelModifier {
         self.enabled = enabled;
     }
 
+    fn as_bevel_mut(&mut self) -> Option<&mut BevelModifier> {
+        Some(self)
+    }
+
     fn apply(&self, input: &Mesh) -> Result<Mesh, MeshError> {
         let mut output = input.clone();
         let edge_keys: Vec<_> = output.edges.keys().collect();

@@ -170,6 +170,7 @@ pub struct AppState {
     pub sculpt_stroke_start_mesh: Option<Mesh>,
     pub last_sculpt_hit: Option<(Vec3, Vec3)>,
     pub sculpt_symmetry_x: bool, pub sculpt_symmetry_y: bool, pub sculpt_symmetry_z: bool,
+    pub dyntopo: geo_kernel::DyntopoSettings,
 
     // Custom Object Colors (Albedo Tint)
     pub object_colors: HashMap<NodeId, [f32; 3]>,
@@ -505,6 +506,7 @@ impl AppState {
             sculpt_stroke_start_mesh: None,
             last_sculpt_hit: None,
             sculpt_symmetry_x: true, sculpt_symmetry_y: false, sculpt_symmetry_z: false,
+            dyntopo: geo_kernel::DyntopoSettings { enabled: false, ..Default::default() },
             object_colors,
             object_materials,
             active_material_slot: 0,

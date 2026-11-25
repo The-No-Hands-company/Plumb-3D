@@ -19,6 +19,14 @@ pub trait Modifier: std::fmt::Debug + Send + Sync {
         None
     }
 
+    fn as_bevel_mut(&mut self) -> Option<&mut BevelModifier> {
+        None
+    }
+
+    fn as_subdivide_mut(&mut self) -> Option<&mut SubdivideModifier> {
+        None
+    }
+
     fn as_remesh_mut(&mut self) -> Option<&mut RemeshModifier> {
         None
     }

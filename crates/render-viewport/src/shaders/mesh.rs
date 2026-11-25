@@ -4,6 +4,7 @@ struct CameraUniform {
     eye_pos: vec4<f32>,
     viewport_params: vec4<f32>, // x = shading_mode (0: Studio, 1: Red Wax, 2: Clay, 3: Chrome, 4: Normals, 5: PBR)
     light_view_proj: mat4x4<f32>,
+    inv_view_proj: mat4x4<f32>,
 };
 
 struct ModelUniform {
@@ -472,109 +473,3 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 }
 "#;
 
-pub const WIREFRAME_SHADER: &str = r#"
-struct CameraUniform { view_proj: mat4x4<f32>, eye_pos: vec4<f32>, viewport_params: vec4<f32>, light_view_proj: mat4x4<f32>, };
-struct ModelUniform { model: mat4x4<f32>, color: vec4<f32>, material: vec4<f32>, };
-@group(0) @binding(0) var<uniform> camera: CameraUniform;
-@group(1) @binding(0) var<uniform> object: ModelUniform;
-struct VertexInput { @location(0) position: vec3<f32>, @location(1) normal: vec3<f32>, @location(2) uv: vec2<f32>, @location(3) color: vec4<f32>, };
-struct VertexOutput { @builtin(position) clip_position: vec4<f32>, @location(0) color: vec4<f32>, };
-@vertex fn vs_main(in: VertexInput) -> VertexOutput {
-    var out: VertexOutput;
-    let world_pos4 = object.model * vec4<f32>(in.position, 1.0);
-    var clip = camera.view_proj * world_pos4;
-    clip.z -= 0.0001 * clip.w;
-    out.clip_position = clip;
-    out.color = in.color * object.color;
-    return out;
-}
-@fragment fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> { return in.color; }
-"#;
-
-pub const GRID_SHADER: &str = r#"
-struct CameraUniform { view_proj: mat4x4<f32>, eye_pos: vec4<f32>, viewport_params: vec4<f32>, light_view_proj: mat4x4<f32>, };
-@group(0) @binding(0) var<uniform> camera: CameraUniform;
-struct VertexInput { @location(0) position: vec3<f32>, };
-struct VertexOutput { @builtin(position) clip_position: vec4<f32>, @location(0) world_pos: vec3<f32>, };
-
-@vertex
-fn vs_main(in: VertexInput) -> VertexOutput {
-    var out: VertexOutput;
-    // Follow camera eye in XZ plane for an infinite horizon grid across all zoom scales
-    let world_pos = in.position + vec3<f32>(camera.eye_pos.x, 0.0, camera.eye_pos.z);
-    out.world_pos = world_pos;
-    out.clip_position = camera.view_proj * vec4<f32>(world_pos, 1.0);
-    return out;
-}
-
-fn grid_line(coord: vec2<f32>, scale: f32) -> f32 {
-    let scaled = coord / scale;
-    let g = abs(fract(scaled - 0.5) - 0.5) / fwidth(scaled);
-    return 1.0 - min(min(g.x, g.y), 1.0);
-}
-
-@fragment
-fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
-    let p = in.world_pos.xz;
-    let dist = length(camera.eye_pos.xz - p);
-
-    // Multi-scale cascading subdivisions with derivative-based anti-aliased cross-fading
-    let d = max(fwidth(p.x), fwidth(p.y));
-    let log_val = log(max(d * 18.0, 0.0001)) / 2.302585;
-    let level = floor(log_val);
-    let frac_level = fract(log_val);
-
-    let scale_sub = pow(10.0, level);
-    let scale_pri = scale_sub * 10.0;
-    let scale_mac = scale_pri * 10.0;
-
-    let c_sub = grid_line(p, scale_sub);
-    let c_pri = grid_line(p, scale_pri);
-    let c_mac = grid_line(p, scale_mac);
-
-    let alpha_sub = c_sub * (1.0 - frac_level) * 0.22;
-    let alpha_pri = c_pri * 0.45;
-    let alpha_mac = c_mac * 0.70;
-    let total_alpha = max(alpha_mac, max(alpha_pri, alpha_sub));
-
-    var color = vec4<f32>(mix(vec3<f32>(0.32, 0.35, 0.40), vec3<f32>(0.55, 0.58, 0.65), c_mac), total_alpha);
-
-    // Anti-aliased principal axes (X = Red, Z = Blue)
-    let d_x = abs(in.world_pos.z) / max(fwidth(in.world_pos.z), 1e-5);
-    let d_z = abs(in.world_pos.x) / max(fwidth(in.world_pos.x), 1e-5);
-    let is_x_axis = 1.0 - min(d_x, 1.0);
-    let is_z_axis = 1.0 - min(d_z, 1.0);
-
-    if is_x_axis > 0.0 {
-        color = mix(color, vec4<f32>(0.92, 0.24, 0.24, 0.95), is_x_axis);
-    }
-    if is_z_axis > 0.0 {
-        color = mix(color, vec4<f32>(0.24, 0.48, 0.95, 0.95), is_z_axis);
-    }
-
-    // Horizon grazing angle & adaptive distance falloff scaling with camera height/distance
-    let eye_height = max(abs(camera.eye_pos.y), 1.0);
-    let view_dist = length(camera.eye_pos.xyz);
-    let max_fade_dist = max(eye_height * 40.0, max(view_dist * 10.0, 1000.0));
-    let view_dir = normalize(camera.eye_pos.xyz - in.world_pos);
-    let grazing_fade = smoothstep(0.005, 0.08, abs(view_dir.y));
-    let dist_fade = 1.0 - smoothstep(max_fade_dist * 0.5, max_fade_dist, dist);
-    color.a *= grazing_fade * dist_fade;
-
-    if color.a < 0.005 {
-        discard;
-    }
-    return color;
-}
-"#;
-
-pub const SHADOW_SHADER: &str = r#"
-struct CameraUniform { view_proj: mat4x4<f32>, eye_pos: vec4<f32>, viewport_params: vec4<f32>, light_view_proj: mat4x4<f32>, };
-struct ModelUniform { model: mat4x4<f32>, color: vec4<f32>, material: vec4<f32>, };
-@group(0) @binding(0) var<uniform> camera: CameraUniform;
-@group(1) @binding(0) var<uniform> object: ModelUniform;
-struct VertexInput { @location(0) position: vec3<f32>, @location(1) normal: vec3<f32>, @location(2) uv: vec2<f32>, @location(3) color: vec4<f32>, };
-@vertex fn vs_main(in: VertexInput) -> @builtin(position) vec4<f32> {
-    return camera.light_view_proj * object.model * vec4<f32>(in.position, 1.0);
-}
-"#;
