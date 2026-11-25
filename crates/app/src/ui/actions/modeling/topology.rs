@@ -22,12 +22,11 @@ pub fn handle_topology_actions(state: &mut AppState, actions: &mut UiActions) {
             };
 
             if !target_faces.is_empty() {
-                let cmd = Box::new(ExtrudeCommand {
-                    node_id: sel_id,
-                    faces: target_faces,
-                    distance: state.extrude_distance,
-                    old_mesh: None,
-                });
+                let cmd = Box::new(ExtrudeCommand::new(
+                    sel_id,
+                    target_faces,
+                    state.extrude_distance,
+                ));
                 if let Err(e) = state.history.execute(cmd, &mut state.scene) {
                     eprintln!("Extrude failed: {}", e);
                 } else if let Some(node) = state.scene.nodes.get(sel_id) {
@@ -109,12 +108,11 @@ pub fn handle_topology_actions(state: &mut AppState, actions: &mut UiActions) {
     if actions.trigger_loop_cut {
         if let Some(sel_id) = state.selected_node {
             if let Some(&ek) = state.selected_edges.iter().next() {
-                let cmd = Box::new(LoopCutCommand {
-                    node_id: sel_id,
-                    edge_key: ek,
-                    ratio: state.loop_cut_ratio,
-                    old_mesh: None,
-                });
+                let cmd = Box::new(LoopCutCommand::new(
+                    sel_id,
+                    ek,
+                    state.loop_cut_ratio,
+                ));
                 if let Err(e) = state.history.execute(cmd, &mut state.scene) {
                     eprintln!("Loop cut failed: {}", e);
                 }

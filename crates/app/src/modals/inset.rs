@@ -37,12 +37,11 @@ pub fn commit(state: &mut AppState) {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     if let graph_engine::NodeData::Mesh { base_mesh, .. } = &node.data {
                         if let Some(last_fk) = base_mesh.faces.keys().last() {
-                            let extrude_cmd = Box::new(crate::commands::ExtrudeCommand {
-                                node_id: sel_id,
-                                faces: vec![last_fk],
-                                distance: -depth,
-                                old_mesh: None,
-                            });
+                            let extrude_cmd = Box::new(crate::commands::ExtrudeCommand::new(
+                                sel_id,
+                                vec![last_fk],
+                                -depth,
+                            ));
                             let _ = state.history.execute(extrude_cmd, &mut state.scene);
                         }
                     }

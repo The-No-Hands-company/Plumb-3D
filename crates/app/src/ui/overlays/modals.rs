@@ -86,26 +86,18 @@ pub fn render(state: &mut AppState) {
                             egui::Color32::from_rgb(255, 230, 0)
                         };
 
-                        for k in 0..cuts {
-                            let t = if cuts == 1 {
-                                factor
-                            } else {
-                                let base = (k + 1) as f32 / (cuts + 1) as f32;
-                                (base + (factor - 0.5) * 0.4).clamp(0.05, 0.95)
-                            };
-                            let lines = base_mesh.get_loop_cut_preview(edge, t);
-                            for (p0, p1) in lines {
-                                let w0 = node.world_matrix.transform_point3(p0);
-                                let w1 = node.world_matrix.transform_point3(p1);
-                                if let (Some(s0), Some(s1)) = (
-                                    state.camera.world_to_screen(w0, width, height),
-                                    state.camera.world_to_screen(w1, width, height),
-                                ) {
-                                    painter.line_segment(
-                                        [egui::pos2(s0.x, s0.y), egui::pos2(s1.x, s1.y)],
-                                        egui::Stroke::new(3.0_f32, stroke_color),
-                                    );
-                                }
+                        let lines = base_mesh.get_loop_cut_multi_preview(edge, cuts, factor);
+                        for (p0, p1) in lines {
+                            let w0 = node.world_matrix.transform_point3(p0);
+                            let w1 = node.world_matrix.transform_point3(p1);
+                            if let (Some(s0), Some(s1)) = (
+                                state.camera.world_to_screen(w0, width, height),
+                                state.camera.world_to_screen(w1, width, height),
+                            ) {
+                                painter.line_segment(
+                                    [egui::pos2(s0.x, s0.y), egui::pos2(s1.x, s1.y)],
+                                    egui::Stroke::new(3.0_f32, stroke_color),
+                                );
                             }
                         }
                     }

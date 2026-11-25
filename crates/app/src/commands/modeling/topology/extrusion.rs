@@ -1,12 +1,29 @@
 use geo_kernel::{EdgeKey, FaceKey, Mesh, VertexKey};
 use graph_engine::{Command, NodeData, NodeId, SceneGraph};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ExtrudeCommand {
     pub node_id: NodeId,
     pub faces: Vec<FaceKey>,
     pub distance: f32,
+    pub individual: bool,
+    pub axis: Option<core_math::Vec3>,
     pub old_mesh: Option<Mesh>,
+    pub created_faces: Vec<FaceKey>,
+}
+
+impl ExtrudeCommand {
+    pub fn new(node_id: NodeId, faces: Vec<FaceKey>, distance: f32) -> Self {
+        Self {
+            node_id,
+            faces,
+            distance,
+            individual: false,
+            axis: None,
+            old_mesh: None,
+            created_faces: Vec::new(),
+        }
+    }
 }
 
 impl Command for ExtrudeCommand {
@@ -15,23 +32,27 @@ impl Command for ExtrudeCommand {
     }
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
-        if let Some(node) = scene.nodes.get_mut(self.node_id) {
-            if let NodeData::Mesh { base_mesh, .. } = &mut node.data {
+        let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
+        match &mut node.data {
+            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                for &fk in &self.faces {
-                    if base_mesh.faces.contains_key(fk) {
-                        let _ = base_mesh.extrude_face(fk, self.distance);
-                    }
-                }
+                self.created_faces.clear();
+                let valid_faces: Vec<FaceKey> = self.faces.iter()
+                    .copied()
+                    .filter(|fk| base_mesh.faces.contains_key(*fk))
+                    .collect();
+
+                self.created_faces = base_mesh.extrude_faces(&valid_faces, self.distance, self.individual, self.axis)
+                    .map_err(|e| format!("Extrude failed: {:?}", e))?;
+
+                base_mesh.update_normals();
+                *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
                 Ok(())
-            } else {
-                Err("Node is not a mesh".into())
             }
-        } else {
-            Err("Node not found".into())
+            _ => Err("Node is not a mesh".into()),
         }
     }
 

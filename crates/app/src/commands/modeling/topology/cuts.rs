@@ -52,12 +52,25 @@ impl Command for SplitQuadCommand {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LoopCutCommand {
     pub node_id: NodeId,
     pub edge_key: EdgeKey,
     pub ratio: f32,
+    pub num_cuts: usize,
     pub old_mesh: Option<Mesh>,
+}
+
+impl LoopCutCommand {
+    pub fn new(node_id: NodeId, edge_key: EdgeKey, ratio: f32) -> Self {
+        Self {
+            node_id,
+            edge_key,
+            ratio,
+            num_cuts: 1,
+            old_mesh: None,
+        }
+    }
 }
 
 impl Command for LoopCutCommand {
@@ -72,7 +85,7 @@ impl Command for LoopCutCommand {
                     self.old_mesh = Some(base_mesh.clone());
                 }
                 base_mesh
-                    .loop_cut(self.edge_key, self.ratio)
+                    .loop_cut_multi(self.edge_key, self.num_cuts, self.ratio)
                     .map_err(|e| format!("Loop cut failed: {:?}", e))?;
                 scene.mark_dirty(self.node_id);
                 Ok(())

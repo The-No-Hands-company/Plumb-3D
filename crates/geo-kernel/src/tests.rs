@@ -108,6 +108,13 @@
         assert_eq!(cube.euler_characteristic(), 2);
         assert!(cube.validate().is_ok());
         assert!(cube.faces.contains_key(top_face));
+
+        // Test multi-face contiguous region extrusion on a plane
+        let mut plane = Primitives::create_plane(4.0, 4.0, 3, 3);
+        let f_keys: Vec<_> = plane.faces.keys().take(2).collect();
+        let region_tops = plane.extrude_faces(&f_keys, 1.0, false, None).expect("Region extrude should succeed");
+        assert_eq!(region_tops.len(), 2);
+        assert!(plane.validate().is_ok());
     }
 
     #[test]

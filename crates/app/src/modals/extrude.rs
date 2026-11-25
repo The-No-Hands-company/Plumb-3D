@@ -13,26 +13,37 @@ pub fn commit(state: &mut AppState) {
         let dist = state.extrude_modal_distance;
         let axis = state.extrude_modal_axis_constraint;
         if !faces.is_empty() && dist.abs() > 1e-4 {
+            let axis_vec = match axis {
+                Some(GizmoAxis::X) => Some(core_math::Vec3::X),
+                Some(GizmoAxis::Y) => Some(core_math::Vec3::Y),
+                Some(GizmoAxis::Z) => Some(core_math::Vec3::Z),
+                _ => None,
+            };
             let cmd = Box::new(ExtrudeCommand {
                 node_id: sel_id,
                 faces: faces.clone(),
                 distance: dist,
+                individual: false,
+                axis: axis_vec,
                 old_mesh: None,
+                created_faces: Vec::new(),
             });
-            let _ = state.history.execute(cmd, &mut state.scene);
+            if state.history.execute(cmd, &mut state.scene).is_ok() {
+                if let Some(node) = state.scene.nodes.get(sel_id) {
+                    if let graph_engine::NodeData::Mesh { base_mesh, .. } = &node.data {
+                        state.selected_faces.clear();
+                        let all_fks: Vec<_> = base_mesh.faces.keys().collect();
+                        for &fk in all_fks.iter().rev().take(faces.len()) {
+                            state.selected_faces.insert(fk);
+                        }
+                    }
+                }
+            }
             state.last_operator = Some(LastOperatorInfo::Extrude {
                 faces,
                 distance: dist,
                 axis,
             });
-            if let Some(node) = state.scene.nodes.get(sel_id) {
-                if let graph_engine::NodeData::Mesh { base_mesh, .. } = &node.data {
-                    state.selected_faces.clear();
-                    if let Some(last_fk) = base_mesh.faces.keys().last() {
-                        state.selected_faces.insert(last_fk);
-                    }
-                }
-            }
         }
     }
     state.modal_numeric_buffer.clear();

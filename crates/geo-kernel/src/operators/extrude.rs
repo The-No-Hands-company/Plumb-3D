@@ -3,52 +3,173 @@ use core_math::Vec3;
 use std::collections::{HashMap, HashSet};
 
 impl Mesh {
-    /// Extrude a polygon face outward along its normal by `distance`.
+    /// Extrude a single polygon face outward along its normal by `distance`.
     /// Preserves half-edge 2-manifold topology and Euler characteristic.
     pub fn extrude_face(&mut self, face_key: FaceKey, distance: f32) -> Result<FaceKey, MeshError> {
-        let face = self.faces.get(face_key).ok_or(MeshError::InvalidFace(face_key))?;
-        let normal = face.normal;
-        let v_keys = self.face_vertices(face_key);
-        let n = v_keys.len();
+        let res = self.extrude_faces(&[face_key], distance, true, None)?;
+        res.first().copied().ok_or(MeshError::InvalidFace(face_key))
+    }
 
-        if n < 3 {
-            return Err(MeshError::DegenerateFace(n));
+    /// Extrudes multiple polygon faces with support for unified contiguous region extrusion
+    /// or individual face extrusion, with optional directional axis locking (Blender / Maya 'E' operator).
+    pub fn extrude_faces(
+        &mut self,
+        face_keys: &[FaceKey],
+        distance: f32,
+        individual: bool,
+        direction: Option<Vec3>,
+    ) -> Result<Vec<FaceKey>, MeshError> {
+        if face_keys.is_empty() {
+            return Ok(Vec::new());
         }
 
-        // 1. Detach old face: set all its half-edges to face = None and remove the old face
-        let face_hes = self.face_half_edges(face_key);
-        for &he_key in &face_hes {
-            self.half_edges[he_key].face = None;
+        if individual {
+            let mut results = Vec::with_capacity(face_keys.len());
+            for &fk in face_keys {
+                if !self.faces.contains_key(fk) {
+                    continue;
+                }
+                let face_normal = self.faces[fk].normal;
+                let v_keys = self.face_vertices(fk);
+                let n = v_keys.len();
+                if n < 3 {
+                    return Err(MeshError::DegenerateFace(n));
+                }
+
+                let dir = direction.unwrap_or(face_normal);
+                let offset = dir * distance;
+
+                // Detach old face
+                let face_hes = self.face_half_edges(fk);
+                for &he_key in &face_hes {
+                    self.half_edges[he_key].face = None;
+                }
+                self.faces.remove(fk);
+
+                // Create extruded vertices
+                let mut new_v_keys = Vec::with_capacity(n);
+                for &vk in &v_keys {
+                    let old_pos = self.vertices[vk].position;
+                    let old_uv = self.vertices[vk].uv;
+                    let new_vk = self.add_vertex_with_uv(old_pos + offset, old_uv);
+                    if self.vertices[vk].crease_weight > 0.0 {
+                        self.set_vertex_crease(new_vk, self.vertices[vk].crease_weight);
+                    }
+                    new_v_keys.push(new_vk);
+                }
+
+                // Create side quad skirts
+                for i in 0..n {
+                    let v_curr = v_keys[i];
+                    let v_next = v_keys[(i + 1) % n];
+                    let v_next_top = new_v_keys[(i + 1) % n];
+                    let v_curr_top = new_v_keys[i];
+                    self.add_face(&[v_curr, v_next, v_next_top, v_curr_top])?;
+                }
+
+                // Create top cap face
+                let top_face_key = self.add_face(&new_v_keys)?;
+                results.push(top_face_key);
+            }
+
+            self.update_normals();
+            return Ok(results);
         }
-        self.faces.remove(face_key);
 
-        // 2. Create new extruded vertices
-        let mut new_v_keys = Vec::with_capacity(n);
-        let offset = normal * distance;
-        for &vk in &v_keys {
-            let old_pos = self.vertices[vk].position;
-            let old_uv = self.vertices[vk].uv;
-            let new_vk = self.add_vertex_with_uv(old_pos + offset, old_uv);
-            new_v_keys.push(new_vk);
+        // Region / Shared Perimeter Unified Extrude
+        let face_set: HashSet<FaceKey> = face_keys.iter().copied().filter(|fk| self.faces.contains_key(*fk)).collect();
+        if face_set.is_empty() {
+            return Ok(Vec::new());
         }
 
-        // 3. Create side quad skirts connecting base to extruded top
-        for i in 0..n {
-            let v_curr = v_keys[i];
-            let v_next = v_keys[(i + 1) % n];
-            let v_next_top = new_v_keys[(i + 1) % n];
-            let v_curr_top = new_v_keys[i];
+        let mut face_vert_loops: HashMap<FaceKey, Vec<VertexKey>> = HashMap::new();
+        let mut avg_normal = Vec3::ZERO;
 
+        for &fk in &face_set {
+            let vks = self.face_vertices(fk);
+            if vks.len() < 3 {
+                return Err(MeshError::DegenerateFace(vks.len()));
+            }
+            avg_normal += self.faces[fk].normal;
+            face_vert_loops.insert(fk, vks);
+        }
+
+        let eff_dir = direction.unwrap_or_else(|| {
+            let len = avg_normal.length();
+            if len > 1e-5 { avg_normal / len } else { Vec3::Y }
+        });
+        let offset = eff_dir * distance;
+
+        // Count undirected edges in the selected region
+        let mut edge_counts: HashMap<(VertexKey, VertexKey), usize> = HashMap::new();
+        for vks in face_vert_loops.values() {
+            let n = vks.len();
+            for i in 0..n {
+                let v0 = vks[i];
+                let v1 = vks[(i + 1) % n];
+                let key = if v0 < v1 { (v0, v1) } else { (v1, v0) };
+                *edge_counts.entry(key).or_insert(0) += 1;
+            }
+        }
+
+        // Find boundary directed edges of the region
+        let mut boundary_directed_edges = Vec::new();
+        for vks in face_vert_loops.values() {
+            let n = vks.len();
+            for i in 0..n {
+                let v0 = vks[i];
+                let v1 = vks[(i + 1) % n];
+                let key = if v0 < v1 { (v0, v1) } else { (v1, v0) };
+                if edge_counts.get(&key) == Some(&1) {
+                    boundary_directed_edges.push((v0, v1));
+                }
+            }
+        }
+
+        // Map each unique vertex in the region to a new top vertex
+        let mut old_to_new_v = HashMap::new();
+        for vks in face_vert_loops.values() {
+            for &vk in vks {
+                if let std::collections::hash_map::Entry::Vacant(e) = old_to_new_v.entry(vk) {
+                    let old_pos = self.vertices[vk].position;
+                    let old_uv = self.vertices[vk].uv;
+                    let new_vk = self.add_vertex_with_uv(old_pos + offset, old_uv);
+                    if self.vertices[vk].crease_weight > 0.0 {
+                        self.set_vertex_crease(new_vk, self.vertices[vk].crease_weight);
+                    }
+                    e.insert(new_vk);
+                }
+            }
+        }
+
+        // Detach old faces in region
+        for &fk in &face_set {
+            let face_hes = self.face_half_edges(fk);
+            for &he_key in &face_hes {
+                self.half_edges[he_key].face = None;
+            }
+            self.faces.remove(fk);
+        }
+
+        // Create boundary quad skirts
+        for &(v_curr, v_next) in &boundary_directed_edges {
+            let v_curr_top = old_to_new_v[&v_curr];
+            let v_next_top = old_to_new_v[&v_next];
             self.add_face(&[v_curr, v_next, v_next_top, v_curr_top])?;
         }
 
-        // 4. Create new top cap face
-        let top_face_key = self.add_face(&new_v_keys)?;
+        // Re-create region faces on the top cap
+        let mut new_faces = Vec::with_capacity(face_keys.len());
+        for &fk in face_keys {
+            if let Some(old_vks) = face_vert_loops.get(&fk) {
+                let new_vks: Vec<VertexKey> = old_vks.iter().map(|vk| old_to_new_v[vk]).collect();
+                let new_fk = self.add_face(&new_vks)?;
+                new_faces.push(new_fk);
+            }
+        }
 
-        // 5. Update normals
         self.update_normals();
-
-        Ok(top_face_key)
+        Ok(new_faces)
     }
 
     /// Scale a single face inward or outward relative to its center (Inset Face operator).

@@ -152,12 +152,11 @@ fn test_extrude_distance_numeric_and_undo() {
 
     let mut history = HistoryManager::new();
     // Step 4 of tutorial: extrude walkway down by -0.8m
-    let cmd = Box::new(crate::commands::ExtrudeCommand {
+    let cmd = Box::new(crate::commands::ExtrudeCommand::new(
         node_id,
-        faces: vec![top_face],
-        distance: -0.8,
-        old_mesh: None,
-    });
+        vec![top_face],
+        -0.8,
+    ));
     history.execute(cmd, &mut scene).unwrap();
 
     // Verify undo restores original vertex count and face
@@ -244,12 +243,11 @@ fn test_castle_tower_double_inset_and_walkway_extrusion() {
     };
 
     // 4. Extrude the 16 walkway ring faces down by -0.8m
-    let extrude_walkway = Box::new(crate::commands::ExtrudeCommand {
+    let extrude_walkway = Box::new(crate::commands::ExtrudeCommand::new(
         node_id,
-        faces: walkway_faces.clone(),
-        distance: -0.8,
-        old_mesh: None,
-    });
+        walkway_faces.clone(),
+        -0.8,
+    ));
     history.execute(extrude_walkway, &mut scene).unwrap();
 
     // 5. Verify sunken walkway depth and outer wall height

@@ -120,12 +120,7 @@ fn test_extrude_command_undo_redo() {
         }
     };
 
-    let mut cmd = ExtrudeCommand {
-        node_id,
-        faces: vec![face_key],
-        distance: 1.0,
-        old_mesh: None,
-    };
+    let mut cmd = ExtrudeCommand::new(node_id, vec![face_key], 1.0);
 
     cmd.execute(&mut scene).unwrap();
     {

@@ -11,21 +11,14 @@ pub fn commit(state: &mut AppState) {
     if let (Some(sel_id), Some(edge)) = (state.selected_node, state.loop_cut_hovered_edge) {
         let cuts = state.loop_cut_num_cuts;
         let factor = state.loop_cut_factor;
-        for k in 0..cuts {
-            let t = if cuts == 1 {
-                factor
-            } else {
-                let base = (k + 1) as f32 / (cuts + 1) as f32;
-                (base + (factor - 0.5) * 0.4).clamp(0.05, 0.95)
-            };
-            let cmd = Box::new(LoopCutCommand {
-                node_id: sel_id,
-                edge_key: edge,
-                ratio: t,
-                old_mesh: None,
-            });
-            let _ = state.history.execute(cmd, &mut state.scene);
-        }
+        let cmd = Box::new(LoopCutCommand {
+            node_id: sel_id,
+            edge_key: edge,
+            ratio: factor,
+            num_cuts: cuts,
+            old_mesh: None,
+        });
+        let _ = state.history.execute(cmd, &mut state.scene);
         state.last_operator = Some(LastOperatorInfo::LoopCut {
             edge,
             num_cuts: cuts,
