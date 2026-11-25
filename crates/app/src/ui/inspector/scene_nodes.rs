@@ -248,6 +248,7 @@ pub fn draw_scene_nodes_panel(
 
                                     let mut knot_to_remove = None;
                                     let mut knot_to_subdivide = None;
+                                    let mut change_handle_type = None;
 
                                     if let Some(sel_k) = curve_knot {
                                         if let Some(pt) = spline.points.get_mut(sel_k) {
@@ -268,6 +269,9 @@ pub fn draw_scene_nodes_panel(
                                                         || ui.add(egui::DragValue::new(&mut pt.handle_in.y).speed(0.05).prefix("Y: ")).changed()
                                                         || ui.add(egui::DragValue::new(&mut pt.handle_in.z).speed(0.05).prefix("Z: ")).changed()
                                                     {
+                                                        if pt.handle_type == geo_kernel::HandleType::Aligned {
+                                                            pt.adjust_handle_in(pt.handle_in);
+                                                        }
                                                         *cached_render_mesh = None;
                                                     }
                                                 });
@@ -277,7 +281,45 @@ pub fn draw_scene_nodes_panel(
                                                         || ui.add(egui::DragValue::new(&mut pt.handle_out.y).speed(0.05).prefix("Y: ")).changed()
                                                         || ui.add(egui::DragValue::new(&mut pt.handle_out.z).speed(0.05).prefix("Z: ")).changed()
                                                     {
+                                                        if pt.handle_type == geo_kernel::HandleType::Aligned {
+                                                            pt.adjust_handle_out(pt.handle_out);
+                                                        }
                                                         *cached_render_mesh = None;
+                                                    }
+                                                });
+
+                                                ui.horizontal(|ui| {
+                                                    ui.label("Handle Type:");
+                                                    egui::ComboBox::from_id_salt(format!("knot_handle_type_{}", sel_k))
+                                                        .selected_text(match pt.handle_type {
+                                                            geo_kernel::HandleType::Free => "Free",
+                                                            geo_kernel::HandleType::Aligned => "Aligned",
+                                                            geo_kernel::HandleType::Vector => "Vector",
+                                                            geo_kernel::HandleType::Auto => "Auto",
+                                                        })
+                                                        .show_ui(ui, |ui| {
+                                                            if ui.selectable_value(&mut pt.handle_type, geo_kernel::HandleType::Free, "Free").clicked() {
+                                                                change_handle_type = Some(geo_kernel::HandleType::Free);
+                                                            }
+                                                            if ui.selectable_value(&mut pt.handle_type, geo_kernel::HandleType::Aligned, "Aligned").clicked() {
+                                                                change_handle_type = Some(geo_kernel::HandleType::Aligned);
+                                                            }
+                                                            if ui.selectable_value(&mut pt.handle_type, geo_kernel::HandleType::Vector, "Vector").clicked() {
+                                                                change_handle_type = Some(geo_kernel::HandleType::Vector);
+                                                            }
+                                                            if ui.selectable_value(&mut pt.handle_type, geo_kernel::HandleType::Auto, "Auto").clicked() {
+                                                                change_handle_type = Some(geo_kernel::HandleType::Auto);
+                                                            }
+                                                        });
+                                                });
+
+                                                ui.horizontal(|ui| {
+                                                    let mut knot_fillet_r = ui.data_mut(|d| *d.get_temp_mut_or_insert_with(egui::Id::new("knot_fillet_r"), || 0.2_f32));
+                                                    ui.label("Fillet Knot:");
+                                                    ui.add(egui::DragValue::new(&mut knot_fillet_r).speed(0.01).range(0.01..=5.0));
+                                                    ui.data_mut(|d| d.insert_temp(egui::Id::new("knot_fillet_r"), knot_fillet_r));
+                                                    if ui.button("✨ Fillet Knot").on_hover_text("Fillets only this selected corner with precision circular arc").clicked() {
+                                                        actions.trigger_fillet_selected_curve = Some(knot_fillet_r);
                                                     }
                                                 });
 
@@ -306,6 +348,13 @@ pub fn draw_scene_nodes_panel(
                                                         }
                                                 });
                                             });
+                                        }
+                                    }
+
+                                    if let Some(ht) = change_handle_type {
+                                        if let Some(sel_k) = curve_knot {
+                                            spline.set_handle_type(sel_k, ht);
+                                            *cached_render_mesh = None;
                                         }
                                     }
 

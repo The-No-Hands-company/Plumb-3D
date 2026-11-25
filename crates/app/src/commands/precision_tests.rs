@@ -439,11 +439,7 @@ fn test_curve_fillet_corners_command_execution_and_undo() {
     let curve_id = scene.add_node(node);
 
     // Apply Fillet corners
-    let fillet_cmd = Box::new(crate::commands::FilletCurveCommand {
-        node_id: curve_id,
-        radius: 0.3,
-        old_spline: None,
-    });
+    let fillet_cmd = Box::new(crate::commands::FilletCurveCommand::all(curve_id, 0.3));
 
     history.execute(fillet_cmd, &mut scene).expect("FilletCurveCommand should succeed");
 

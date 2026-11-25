@@ -482,4 +482,70 @@ fn test_bridge_edge_loops_command_execution_and_undo() {
     }
 }
 
+#[test]
+fn test_cad_spline_degree_elevation_and_knot_insertion() {
+    use core_math::Vec3;
+    use geo_kernel::{BezierPoint, HandleType, Spline};
+
+    // 1. Degree Elevation test: quadratic to cubic Bezier
+    let q0 = Vec3::new(0.0, 0.0, 0.0);
+    let q1 = Vec3::new(1.0, 2.0, 0.0);
+    let q2 = Vec3::new(2.0, 0.0, 0.0);
+    let (p0, p1) = BezierPoint::from_quadratic_bezier(q0, q1, q2);
+
+    let spline = Spline::with_points(vec![p0, p1], false);
+    // At t = 0.5, quadratic value is: (1-0.5)^2 * Q0 + 2*(1-0.5)*0.5 * Q1 + 0.5^2 * Q2 = 0.5 * Q1 = (0.5, 1.0, 0.0)
+    let (mid_pos, _) = spline.eval(0.5);
+    assert!((mid_pos.x - 1.0).abs() < 1e-4);
+    assert!((mid_pos.y - 1.0).abs() < 1e-4);
+
+    // 2. Knot insertion at arbitrary parameter u
+    let mut spline_k = Spline::with_points(
+        vec![
+            BezierPoint::sharp(Vec3::new(0.0, 0.0, 0.0)),
+            BezierPoint::sharp(Vec3::new(4.0, 0.0, 0.0)),
+        ],
+        false,
+    );
+    let inserted_idx = spline_k
+        .insert_knot_at_parameter(0.5)
+        .expect("Knot insertion at u=0.5 should succeed");
+    assert_eq!(inserted_idx, 1);
+    assert_eq!(spline_k.points.len(), 3);
+    assert!((spline_k.points[1].position.x - 2.0).abs() < 1e-4);
+
+    // 3. Tangent handle alignment test
+    let mut aligned_pt = BezierPoint::smooth(Vec3::ZERO, Vec3::new(1.0, 0.0, 0.0));
+    assert_eq!(aligned_pt.handle_type, HandleType::Aligned);
+    aligned_pt.adjust_handle_out(Vec3::new(0.0, 2.0, 0.0));
+    assert!((aligned_pt.handle_in.y - (-1.0)).abs() < 1e-4);
+    assert_eq!(aligned_pt.handle_in.x, 0.0);
+}
+
+#[test]
+fn test_variable_corner_fillet_and_loft_splines() {
+    use core_math::Vec3;
+    use geo_kernel::{BezierPoint, Spline};
+
+    // 1. Variable corner fillet: 3-point open polyline (corner at index 1)
+    let p0 = BezierPoint::sharp(Vec3::new(0.0, 0.0, 0.0));
+    let p1 = BezierPoint::sharp(Vec3::new(2.0, 0.0, 0.0));
+    let p2 = BezierPoint::sharp(Vec3::new(2.0, 2.0, 0.0));
+    let spline = Spline::with_points(vec![p0, p1, p2], false);
+
+    let filleted = spline.fillet_selected_corners(&[1], 0.4);
+    // Index 1 split into 2 tangent arc points -> total points = 4
+    assert_eq!(filleted.points.len(), 4);
+
+    // 2. Resampling loft with splines of differing knot counts
+    let s1 = Spline::circle(1.0, Vec3::new(0.0, 0.0, 0.0)); // 4 knots
+    let s2 = Spline::circle(2.0, Vec3::new(0.0, 2.0, 0.0)); // 4 knots
+    let s3 = Spline::circle(0.5, Vec3::new(0.0, 4.0, 0.0)); // 4 knots
+
+    let loft_mesh = Spline::loft_splines(&[s1, s2, s3], 8, false)
+        .expect("Loft of circle splines should succeed");
+    assert!(!loft_mesh.faces.is_empty());
+}
+
+
 

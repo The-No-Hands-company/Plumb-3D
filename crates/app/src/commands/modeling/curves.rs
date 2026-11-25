@@ -198,7 +198,28 @@ impl Command for LoftCurvesCommand {
 pub struct FilletCurveCommand {
     pub node_id: NodeId,
     pub radius: f32,
+    pub selected_knots: Option<Vec<usize>>,
     pub old_spline: Option<Spline>,
+}
+
+impl FilletCurveCommand {
+    pub fn all(node_id: NodeId, radius: f32) -> Self {
+        Self {
+            node_id,
+            radius,
+            selected_knots: None,
+            old_spline: None,
+        }
+    }
+
+    pub fn selected(node_id: NodeId, radius: f32, selected_knots: Vec<usize>) -> Self {
+        Self {
+            node_id,
+            radius,
+            selected_knots: Some(selected_knots),
+            old_spline: None,
+        }
+    }
 }
 
 impl Command for FilletCurveCommand {
@@ -211,7 +232,59 @@ impl Command for FilletCurveCommand {
         match &mut node.data {
             NodeData::Curve { spline, cached_render_mesh, .. } => {
                 self.old_spline = Some(spline.clone());
-                *spline = spline.fillet_all_corners(self.radius);
+                if let Some(knots) = &self.selected_knots {
+                    *spline = spline.fillet_selected_corners(knots, self.radius);
+                } else {
+                    *spline = spline.fillet_all_corners(self.radius);
+                }
+                *cached_render_mesh = None;
+                scene.mark_dirty(self.node_id);
+                Ok(())
+            }
+            _ => Err("Node is not a curve".into()),
+        }
+    }
+
+    fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        if let Some(old) = self.old_spline.take() {
+            let node = scene.nodes.get_mut(self.node_id).ok_or("Curve node not found")?;
+            match &mut node.data {
+                NodeData::Curve { spline, cached_render_mesh, .. } => {
+                    *spline = old;
+                    *cached_render_mesh = None;
+                    scene.mark_dirty(self.node_id);
+                    Ok(())
+                }
+                _ => Err("Node is not a curve".into()),
+            }
+        } else {
+            Err("No previous spline data to restore".into())
+        }
+    }
+}
+
+/// Sets Bézier knot handle constraint type (Free, Aligned, Vector, Auto).
+#[derive(Debug)]
+pub struct SetKnotHandleTypeCommand {
+    pub node_id: NodeId,
+    pub knot_idx: usize,
+    pub handle_type: geo_kernel::HandleType,
+    pub old_spline: Option<Spline>,
+}
+
+impl Command for SetKnotHandleTypeCommand {
+    fn name(&self) -> &str {
+        "Set Curve Knot Handle Type"
+    }
+
+    fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        let node = scene.nodes.get_mut(self.node_id).ok_or("Curve node not found")?;
+        match &mut node.data {
+            NodeData::Curve { spline, cached_render_mesh, .. } => {
+                if self.old_spline.is_none() {
+                    self.old_spline = Some(spline.clone());
+                }
+                spline.set_handle_type(self.knot_idx, self.handle_type);
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
                 Ok(())

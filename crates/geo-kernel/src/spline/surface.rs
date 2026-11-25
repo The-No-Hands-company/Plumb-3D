@@ -419,6 +419,32 @@ impl Spline {
         Ok(mesh)
     }
 
+    /// Multi-Profile Curve Loft for Spline objects: automatically resamples each profile spline
+    /// to a uniform vertex count along its arc length before skinning, ensuring topological
+    /// compatibility even when input curves have varying control knot counts.
+    pub fn loft_splines(
+        splines: &[Spline],
+        samples_per_spline: usize,
+        closed_v: bool,
+    ) -> Result<Mesh, MeshError> {
+        if splines.len() < 2 {
+            return Err(MeshError::InvariantFailed(
+                "Loft requires at least 2 profile splines".into(),
+            ));
+        }
+
+        let samples = samples_per_spline.max(4);
+        let closed_u = splines[0].is_closed;
+
+        let mut sampled_profiles = Vec::with_capacity(splines.len());
+        for s in splines {
+            let pts = s.sample(samples);
+            sampled_profiles.push(pts);
+        }
+
+        Self::loft(&sampled_profiles, closed_u, closed_v)
+    }
+
     /// Offsets a 2D polyline or polygon by distance `distance`.
     /// Positive distance expands outward (or left of curve direction), negative offsets inward.
     pub fn offset_polygon_2d(points: &[Vec2], distance: f32, is_closed: bool) -> Vec<Vec2> {

@@ -44,13 +44,21 @@ pub fn handle_curve_actions(state: &mut AppState, actions: &mut UiActions) {
     // Handle CAD Fillet Curve Corners
     if let Some(radius) = actions.trigger_fillet_curve.take() {
         if let Some(sel_id) = state.selected_node {
-            let cmd = Box::new(FilletCurveCommand {
-                node_id: sel_id,
-                radius,
-                old_spline: None,
-            });
+            let cmd = Box::new(FilletCurveCommand::all(sel_id, radius));
             if let Err(e) = state.history.execute(cmd, &mut state.scene) {
                 eprintln!("Fillet curve failed: {}", e);
+            }
+        }
+    }
+
+    // Handle CAD Fillet Selected Curve Knot
+    if let Some(radius) = actions.trigger_fillet_selected_curve.take() {
+        if let Some(sel_id) = state.selected_node {
+            if let Some(sel_knot) = state.selected_curve_knot {
+                let cmd = Box::new(FilletCurveCommand::selected(sel_id, radius, vec![sel_knot]));
+                if let Err(e) = state.history.execute(cmd, &mut state.scene) {
+                    eprintln!("Fillet selected knot failed: {}", e);
+                }
             }
         }
     }

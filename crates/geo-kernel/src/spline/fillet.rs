@@ -1,15 +1,32 @@
 //! CAD 2D/3D Curve Fillet & Chamfer Engine (Plasticity / Rhino Style).
 //! Rounds sharp corners of Bézier spline polylines with circular G1-continuous fillets.
 
-use crate::spline::types::{BezierPoint, Spline};
+use crate::spline::types::{BezierPoint, HandleType, Spline};
 use core_math::Vec3;
+use std::collections::HashMap;
 
 impl Spline {
     /// Applies a precision CAD circular fillet of given radius to all sharp corners in the spline.
     /// Replaces sharp vertices with tangent-continuous circular cubic Bézier arcs.
     pub fn fillet_all_corners(&self, radius: f32) -> Spline {
         let n = self.points.len();
-        if n < 3 || radius <= 1e-4 {
+        let all_indices: Vec<usize> = (0..n).collect();
+        self.fillet_selected_corners(&all_indices, radius)
+    }
+
+    /// Applies a precision CAD circular fillet to only the specified corner knot indices.
+    pub fn fillet_selected_corners(&self, selected_knots: &[usize], radius: f32) -> Spline {
+        let mut radii = HashMap::new();
+        for &idx in selected_knots {
+            radii.insert(idx, radius);
+        }
+        self.fillet_corners_variable(&radii)
+    }
+
+    /// Applies variable per-corner radius fillets based on a map of `(corner_index -> radius)`.
+    pub fn fillet_corners_variable(&self, radii: &HashMap<usize, f32>) -> Spline {
+        let n = self.points.len();
+        if n < 3 || radii.is_empty() {
             return self.clone();
         }
 
@@ -24,6 +41,12 @@ impl Spline {
         }
 
         for i in start_idx..end_idx {
+            let radius = radii.get(&i).copied().unwrap_or(0.0);
+            if radius <= 1e-4 {
+                out_points.push(self.points[i]);
+                continue;
+            }
+
             let prev_idx = if i == 0 { n - 1 } else { i - 1 };
             let next_idx = (i + 1) % n;
 
@@ -63,17 +86,19 @@ impl Spline {
             // Cubic Bézier handle length for circular arc
             let handle_len = (4.0 / 3.0) * (arc_angle * 0.25).tan() * effective_radius;
 
-            let p1 = BezierPoint {
-                position: t1,
-                handle_in: Vec3::ZERO,
-                handle_out: -u1 * handle_len,
-            };
+            let p1 = BezierPoint::with_type(
+                t1,
+                Vec3::ZERO,
+                -u1 * handle_len,
+                HandleType::Aligned,
+            );
 
-            let p2 = BezierPoint {
-                position: t2,
-                handle_in: -u2 * handle_len,
-                handle_out: Vec3::ZERO,
-            };
+            let p2 = BezierPoint::with_type(
+                t2,
+                -u2 * handle_len,
+                Vec3::ZERO,
+                HandleType::Aligned,
+            );
 
             out_points.push(p1);
             out_points.push(p2);

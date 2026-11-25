@@ -140,6 +140,56 @@ impl Spline {
         Ok(insert_idx)
     }
 
+    /// Inserts a new control knot at global parameter `u` in [0, 1] without altering the curve shape.
+    pub fn insert_knot_at_parameter(&mut self, u: f32) -> Result<usize, String> {
+        let n = self.points.len();
+        if n < 2 {
+            return Err("Spline requires at least 2 points to insert a knot".into());
+        }
+        let seg_count = if self.is_closed { n } else { n - 1 };
+        let clamped_u = u.clamp(0.001, 0.999);
+        let scaled = clamped_u * seg_count as f32;
+        let seg_idx = (scaled.floor() as usize).min(seg_count - 1);
+        let t = (scaled - seg_idx as f32).clamp(0.01, 0.99);
+
+        self.subdivide_segment(seg_idx, t)
+    }
+
+    /// Finds the closest point on the spline curve to `query`, returning `(u_parameter, closest_point, distance)`.
+    pub fn closest_point(&self, query: Vec3, samples_per_segment: usize) -> (f32, Vec3, f32) {
+        let n = self.points.len();
+        if n < 2 {
+            let pos = self.points.first().map(|p| p.position).unwrap_or(Vec3::ZERO);
+            return (0.0, pos, (pos - query).length());
+        }
+
+        let seg_count = if self.is_closed { n } else { n - 1 };
+        let total_samples = seg_count * samples_per_segment.max(4);
+
+        let mut best_u = 0.0;
+        let mut best_pt = Vec3::ZERO;
+        let mut best_dist_sq = f32::MAX;
+
+        for i in 0..=total_samples {
+            let u = i as f32 / total_samples as f32;
+            let (pt, _) = self.eval(u);
+            let d_sq = (pt - query).length_squared();
+            if d_sq < best_dist_sq {
+                best_dist_sq = d_sq;
+                best_u = u;
+                best_pt = pt;
+            }
+        }
+
+        (best_u, best_pt, best_dist_sq.sqrt())
+    }
+
+    /// Projects `point` onto the spline curve and inserts a new knot at the closest location.
+    pub fn insert_knot_at_point(&mut self, point: Vec3) -> Result<usize, String> {
+        let (u, _, _) = self.closest_point(point, 16);
+        self.insert_knot_at_parameter(u)
+    }
+
     /// Reverses spline direction and swaps incoming/outgoing handles for all control points.
     pub fn reverse(&mut self) {
         self.points.reverse();
