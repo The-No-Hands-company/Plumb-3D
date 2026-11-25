@@ -7,6 +7,17 @@ pub enum CameraProjection {
     Orthographic,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum StandardView {
+    Top,
+    Bottom,
+    Front,
+    Back,
+    Right,
+    Left,
+    Isometric,
+}
+
 /// Standard DCC Viewport Orbit/Pan/Zoom Camera
 #[derive(Debug, Clone)]
 pub struct ViewportCamera {
@@ -126,13 +137,68 @@ impl ViewportCamera {
         self.target += pan_offset;
     }
 
-    /// Zoom / Dolly towards/away from target (Scroll wheel / Alt+RMB)
+    /// Zoom / Dolly towards/away from target (micro to kilometer scale)
     pub fn zoom(&mut self, delta: f32) {
         let zoom_factor = 1.15_f32;
         if delta > 0.0 {
-            self.distance = (self.distance / zoom_factor).max(0.1);
+            self.distance = (self.distance / zoom_factor).max(0.005);
         } else if delta < 0.0 {
-            self.distance = (self.distance * zoom_factor).min(500.0);
+            self.distance = (self.distance * zoom_factor).min(5000.0);
+        }
+    }
+
+    /// Snaps camera to standard CAD orthogonal or isometric view direction
+    pub fn set_standard_view(&mut self, view: StandardView) {
+        match view {
+            StandardView::Top => {
+                self.pitch = FRAC_PI_2 - 0.001;
+                self.yaw = 0.0;
+            }
+            StandardView::Bottom => {
+                self.pitch = -FRAC_PI_2 + 0.001;
+                self.yaw = 0.0;
+            }
+            StandardView::Front => {
+                self.pitch = 0.0;
+                self.yaw = 0.0;
+            }
+            StandardView::Back => {
+                self.pitch = 0.0;
+                self.yaw = std::f32::consts::PI;
+            }
+            StandardView::Right => {
+                self.pitch = 0.0;
+                self.yaw = FRAC_PI_2;
+            }
+            StandardView::Left => {
+                self.pitch = 0.0;
+                self.yaw = -FRAC_PI_2;
+            }
+            StandardView::Isometric => {
+                self.pitch = 0.6154797; // arcsin(tan(30 deg))
+                self.yaw = -std::f32::consts::FRAC_PI_4;
+            }
+        }
+    }
+
+    /// Calculates active power-of-10 grid snap step matching the visual cascading viewport grid
+    pub fn adaptive_grid_step(&self) -> f32 {
+        let raw = (self.distance * 0.25).max(0.001);
+        let log_val = raw.log10().floor();
+        10.0_f32.powf(log_val)
+    }
+
+    /// Human-readable label for the active adaptive grid scale
+    pub fn adaptive_grid_label(&self) -> String {
+        let step = self.adaptive_grid_step();
+        if step < 0.01 {
+            format!("{:.0} mm", step * 1000.0)
+        } else if step < 1.0 {
+            format!("{:.0} cm", step * 100.0)
+        } else if step < 1000.0 {
+            format!("{:.0} m", step)
+        } else {
+            format!("{:.0} km", step / 1000.0)
         }
     }
 
@@ -211,5 +277,20 @@ mod tests {
         let sp = screen_pt.unwrap();
         assert!((sp.x - 960.0).abs() < 2.0);
         assert!((sp.y - 540.0).abs() < 2.0);
+    }
+
+    #[test]
+    fn test_camera_standard_views_and_adaptive_grid() {
+        let mut cam = ViewportCamera::new();
+        cam.set_standard_view(StandardView::Top);
+        assert!((cam.pitch - (FRAC_PI_2 - 0.001)).abs() < 1e-4);
+
+        cam.distance = 4.0;
+        assert_eq!(cam.adaptive_grid_step(), 1.0);
+        assert_eq!(cam.adaptive_grid_label(), "1 m");
+
+        cam.distance = 0.04;
+        assert_eq!(cam.adaptive_grid_step(), 0.01);
+        assert_eq!(cam.adaptive_grid_label(), "1 cm");
     }
 }

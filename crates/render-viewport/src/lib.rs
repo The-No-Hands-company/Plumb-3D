@@ -21,7 +21,7 @@ pub mod shaders;
 pub mod spatial_xr;
 pub mod types;
 
-pub use camera::{CameraProjection, ViewportCamera};
+pub use camera::{CameraProjection, StandardView, ViewportCamera};
 pub use gizmo::{GizmoAxis, GizmoMode, TransformGizmo, TransformOrientation};
 pub use renderer::ViewportRenderer;
 pub use rtao::{RtaoKernel, RtaoSettings};
