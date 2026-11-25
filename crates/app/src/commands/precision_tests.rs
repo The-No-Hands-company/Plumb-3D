@@ -572,4 +572,41 @@ fn test_duplicate_node_command_execution_and_undo() {
     assert_eq!(scene.nodes.len(), 2);
 }
 
+#[test]
+fn test_variable_radius_fillet_and_weld_commands() {
+    let mut scene = SceneGraph::new();
+    let mut history = graph_engine::HistoryManager::new();
+
+    let cube = Primitives::create_cube(2.0);
+    let edge_key = cube.edges.keys().next().unwrap();
+    let node_id = scene.add_node(SceneNode::new_mesh("BevelCube", Transform::IDENTITY, cube));
+
+    // 1. Variable Fillet Command
+    let vf_cmd = Box::new(crate::commands::VariableRadiusFilletCommand {
+        node_id,
+        edges: vec![edge_key],
+        r1: 0.1,
+        r2: 0.3,
+        segments: 2,
+        continuity: geo_kernel::FilletContinuity::G2Curvature,
+        old_mesh: None,
+    });
+    history.execute(vf_cmd, &mut scene).expect("variable fillet execute");
+
+    // 2. Undo & Redo
+    history.undo(&mut scene).expect("variable fillet undo");
+    history.redo(&mut scene).expect("variable fillet redo");
+
+    // 3. Generate Weld Bead Command
+    let weld_cmd = Box::new(crate::commands::GenerateWeldBeadCommand {
+        node_id,
+        edges: vec![edge_key],
+        radius: 0.08,
+        style: geo_kernel::WeldStyle::TigWeld,
+        old_mesh: None,
+    });
+    history.execute(weld_cmd, &mut scene).expect("weld bead execute");
+    history.undo(&mut scene).expect("weld bead undo");
+}
+
 

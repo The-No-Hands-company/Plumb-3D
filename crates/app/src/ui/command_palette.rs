@@ -170,6 +170,24 @@ const COMMAND_LIST: &[PaletteItem] = &[
             actions.trigger_symmetrize = true;
         }),
     },
+    PaletteItem {
+        name: "Project Floating Decal & Stamp Normals",
+        category: "Modeling",
+        shortcut: "Alt+D",
+        keywords: &["decal", "project decal", "stamp normal", "floating mesh"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.set_status_message("Press Alt+D to project selected decal onto scene hull");
+        }),
+    },
+    PaletteItem {
+        name: "Hardware Kitbash Drop Tool",
+        category: "Modeling",
+        shortcut: "K / Shift+K",
+        keywords: &["kitbash", "bolt", "screw", "vent", "latch", "insert hardware"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            crate::modals::kitbash::start(state);
+        }),
+    },
     // --- CAD & Precision Inspection ---
     PaletteItem {
         name: "Toggle CAD Caliper / 3D Measure",

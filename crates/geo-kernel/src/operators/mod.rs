@@ -1,7 +1,9 @@
 pub mod bevel;
 pub mod cutting;
+pub mod decal;
 pub mod deformation;
 pub mod extrude;
+pub mod flow_guide;
 pub mod generation;
 pub mod remesh_tables;
 pub mod remesh;
@@ -13,6 +15,10 @@ pub mod symmetrize;
 pub mod topology;
 pub mod types;
 pub mod un_bevel;
+pub mod variable_bevel;
+pub mod weld_bead;
 pub mod weld_clean;
 
 pub use types::*;
+pub use variable_bevel::FilletContinuity;
+pub use weld_bead::WeldStyle;

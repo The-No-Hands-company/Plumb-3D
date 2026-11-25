@@ -510,6 +510,34 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             state.window.request_redraw();
             true
         }
+        KeyCode::KeyD if state.alt_pressed => {
+            // Project active floating mesh decal onto target scene hull with normal stamping
+            if let Some(sel_id) = state.selected_node {
+                let mut target_data = None;
+                for (nid, node) in &state.scene.nodes {
+                    if nid != sel_id {
+                        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                            target_data = Some((base_mesh.clone(), node.world_matrix));
+                            break;
+                        }
+                    }
+                }
+                if let Some((hull_mesh, hull_mat)) = target_data {
+                    if let Some(node) = state.scene.nodes.get_mut(sel_id) {
+                        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                            let decal_mat = node.world_matrix;
+                            if base_mesh.project_floating_decal(&hull_mesh, &decal_mat, &hull_mat, 0.0005).is_ok() {
+                                *cached_render_mesh = None;
+                                state.scene.mark_dirty(sel_id);
+                                state.set_status_message("✨ Floating Mesh Decal Projected & Boundary Normals Stamped (Alt+D)");
+                                state.window.request_redraw();
+                            }
+                        }
+                    }
+                }
+            }
+            true
+        }
         KeyCode::KeyC if !state.curve_pen_active => {
             crate::modals::cutter::start(state);
             true
