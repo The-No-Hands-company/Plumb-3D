@@ -109,6 +109,77 @@ pub enum LastOperatorInfo {
         num_cuts: usize,
         factor: f32,
     },
+    AddPrimitive {
+        node_id: graph_engine::NodeId,
+        params: PrimitiveParams,
+    },
+}
+
+/// Parametric definitions for live primitive adjustment in the F9 operator panel.
+#[derive(Debug, Clone)]
+pub enum PrimitiveParams {
+    Box { width: f32, height: f32, depth: f32, seg_x: u32, seg_y: u32, seg_z: u32 },
+    Plane { width: f32, length: f32, sub_x: u32, sub_z: u32 },
+    UvSphere { radius: f32, segments: u32, rings: u32 },
+    Cylinder { radius: f32, height: f32, segments: u32, cap_fill: geo_kernel::CapFillType },
+    Cone { radius_bottom: f32, radius_top: f32, height: f32, segments: u32, cap_fill: geo_kernel::CapFillType },
+    Torus { major_radius: f32, minor_radius: f32, major_segments: u32, minor_segments: u32 },
+    Pyramid { base_width: f32, base_depth: f32, height: f32 },
+    Capsule { radius: f32, cylinder_height: f32, segments: u32, hemisphere_rings: u32 },
+    IcoSphere { radius: f32, subdivisions: u32 },
+    PlumbBob { segments: usize },
+}
+
+impl PrimitiveParams {
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Box { .. } => "Add Box / Cube",
+            Self::Plane { .. } => "Add Plane Grid",
+            Self::UvSphere { .. } => "Add UV Sphere",
+            Self::Cylinder { .. } => "Add Cylinder",
+            Self::Cone { .. } => "Add Cone / Frustum",
+            Self::Torus { .. } => "Add Torus / Donut",
+            Self::Pyramid { .. } => "Add Pyramid",
+            Self::Capsule { .. } => "Add Capsule / Pill",
+            Self::IcoSphere { .. } => "Add IcoSphere",
+            Self::PlumbBob { .. } => "Add Plumb Bob",
+        }
+    }
+
+    pub fn generate_mesh(&self) -> geo_kernel::Mesh {
+        match self {
+            Self::Box { width, height, depth, seg_x, seg_y, seg_z } => {
+                geo_kernel::Primitives::create_box_parametric(*width, *height, *depth, *seg_x, *seg_y, *seg_z)
+            }
+            Self::Plane { width, length, sub_x, sub_z } => {
+                geo_kernel::Primitives::create_plane(*width, *length, *sub_x, *sub_z)
+            }
+            Self::UvSphere { radius, segments, rings } => {
+                geo_kernel::Primitives::create_uv_sphere(*radius, *segments, *rings)
+            }
+            Self::Cylinder { radius, height, segments, cap_fill } => {
+                geo_kernel::Primitives::create_cylinder_parametric(*radius, *height, *segments, *cap_fill)
+            }
+            Self::Cone { radius_bottom, radius_top, height, segments, cap_fill } => {
+                geo_kernel::Primitives::create_cone_parametric(*radius_bottom, *radius_top, *height, *segments, *cap_fill)
+            }
+            Self::Torus { major_radius, minor_radius, major_segments, minor_segments } => {
+                geo_kernel::Primitives::create_torus(*major_radius, *minor_radius, *major_segments, *minor_segments)
+            }
+            Self::Pyramid { base_width, base_depth, height } => {
+                geo_kernel::Primitives::create_pyramid_parametric(*base_width, *base_depth, *height)
+            }
+            Self::Capsule { radius, cylinder_height, segments, hemisphere_rings } => {
+                geo_kernel::Primitives::create_capsule(*radius, *cylinder_height, *segments, *hemisphere_rings)
+            }
+            Self::IcoSphere { radius, subdivisions } => {
+                geo_kernel::Primitives::create_icosphere(*radius, *subdivisions)
+            }
+            Self::PlumbBob { segments } => {
+                geo_kernel::Primitives::create_plumb_bob_detailed(*segments)
+            }
+        }
+    }
 }
 
 /// Interface layout density setting for screen real estate optimization.

@@ -23,6 +23,29 @@ pub fn handle_spawning(state: &mut AppState, actions: &mut UiActions) {
         state.selected_node = Some(id);
         state.object_colors.insert(id, [0.72, 0.73, 0.75]);
         state.object_materials.insert(id, [0.0, 0.5, 0.0, 0.0]);
+
+        // Connect newly spawned primitive to the interactive F9 operator panel
+        let primitive_params = match name {
+            "Cube" => Some(crate::types::PrimitiveParams::Box { width: 2.0, height: 2.0, depth: 2.0, seg_x: 1, seg_y: 1, seg_z: 1 }),
+            "Plane" => Some(crate::types::PrimitiveParams::Plane { width: 4.0, length: 4.0, sub_x: 4, sub_z: 4 }),
+            "Sphere" | "UVSphere" => Some(crate::types::PrimitiveParams::UvSphere { radius: 1.2, segments: 16, rings: 16 }),
+            "Cylinder" => Some(crate::types::PrimitiveParams::Cylinder { radius: 1.0, height: 2.5, segments: 16, cap_fill: geo_kernel::CapFillType::Ngon }),
+            "Cone" => Some(crate::types::PrimitiveParams::Cone { radius_bottom: 1.2, radius_top: 0.0, height: 2.5, segments: 16, cap_fill: geo_kernel::CapFillType::Ngon }),
+            "Torus" => Some(crate::types::PrimitiveParams::Torus { major_radius: 1.5, minor_radius: 0.4, major_segments: 24, minor_segments: 16 }),
+            "Pyramid" => Some(crate::types::PrimitiveParams::Pyramid { base_width: 2.0, base_depth: 2.0, height: 2.5 }),
+            "Capsule" => Some(crate::types::PrimitiveParams::Capsule { radius: 0.8, cylinder_height: 1.8, segments: 16, hemisphere_rings: 6 }),
+            "IcoSphere" => Some(crate::types::PrimitiveParams::IcoSphere { radius: 1.2, subdivisions: 2 }),
+            "PlumbBob" => Some(crate::types::PrimitiveParams::PlumbBob { segments: 24 }),
+            _ => None,
+        };
+
+        if let Some(params) = primitive_params {
+            state.last_operator = Some(crate::types::LastOperatorInfo::AddPrimitive {
+                node_id: id,
+                params,
+            });
+            state.show_last_operator_panel = true;
+        }
     }
 
     // Handle Spawn Light

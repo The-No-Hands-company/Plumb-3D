@@ -49,7 +49,7 @@ pub use plugin::{
 };
 pub use analysis::MeshAnalysisReport;
 pub use mesh::{Edge, EdgeKey, Face, FaceKey, HalfEdge, HalfEdgeKey, Mesh, MeshError, Vertex, VertexGroup, VertexKey};
-pub use primitives::Primitives;
+pub use primitives::{CapFillType, Primitives};
 pub use triangulation::{GpuVertex, RenderMesh, ShadingMode, SubMeshRange};
 pub use uv::ProjectionAxis;
 pub use operators::{CableGenerator, CutPoint, FilletContinuity, NgonMethod, QuadMethod, SymmetrizeDirection, WeldStyle};

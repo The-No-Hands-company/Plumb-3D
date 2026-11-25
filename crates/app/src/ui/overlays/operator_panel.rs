@@ -1,6 +1,6 @@
 use crate::commands::{BevelEdgeCommand, ExtrudeCommand, InsetCommand, LoopCutCommand};
 use crate::state::AppState;
-use crate::types::LastOperatorInfo;
+use crate::types::{LastOperatorInfo, PrimitiveParams};
 
 pub fn render(state: &mut AppState) {
     if state.last_operator.is_none() {
@@ -18,6 +18,7 @@ pub fn render(state: &mut AppState) {
         LastOperatorInfo::Extrude { .. } => "Extrude Faces",
         LastOperatorInfo::Bevel { .. } => "Bevel Edges",
         LastOperatorInfo::LoopCut { .. } => "Loop Cut",
+        LastOperatorInfo::AddPrimitive { params, .. } => params.name(),
     };
 
     if !state.show_last_operator_panel {
@@ -137,6 +138,142 @@ pub fn render(state: &mut AppState) {
                                 updated_op = Some(LastOperatorInfo::LoopCut { edge, num_cuts, factor });
                             }
                         }
+                        LastOperatorInfo::AddPrimitive { node_id, params } => {
+                            let mut p = params.clone();
+                            let mut changed = false;
+                            match &mut p {
+                                PrimitiveParams::Box { width, height, depth, seg_x, seg_y, seg_z } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("Size:");
+                                        changed |= ui.add(egui::DragValue::new(width).speed(0.01).range(0.01..=100.0).prefix("X:")).changed();
+                                        changed |= ui.add(egui::DragValue::new(height).speed(0.01).range(0.01..=100.0).prefix("Y:")).changed();
+                                        changed |= ui.add(egui::DragValue::new(depth).speed(0.01).range(0.01..=100.0).prefix("Z:")).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Segs:");
+                                        changed |= ui.add(egui::DragValue::new(seg_x).range(1..=32).prefix("X:")).changed();
+                                        changed |= ui.add(egui::DragValue::new(seg_y).range(1..=32).prefix("Y:")).changed();
+                                        changed |= ui.add(egui::DragValue::new(seg_z).range(1..=32).prefix("Z:")).changed();
+                                    });
+                                }
+                                PrimitiveParams::Plane { width, length, sub_x, sub_z } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("Dimensions:");
+                                        changed |= ui.add(egui::DragValue::new(width).speed(0.01).range(0.01..=100.0).prefix("W:")).changed();
+                                        changed |= ui.add(egui::DragValue::new(length).speed(0.01).range(0.01..=100.0).prefix("L:")).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Subdivisions:");
+                                        changed |= ui.add(egui::DragValue::new(sub_x).range(1..=64).prefix("X:")).changed();
+                                        changed |= ui.add(egui::DragValue::new(sub_z).range(1..=64).prefix("Z:")).changed();
+                                    });
+                                }
+                                PrimitiveParams::UvSphere { radius, segments, rings } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("Radius:");
+                                        changed |= ui.add(egui::DragValue::new(radius).speed(0.01).range(0.01..=50.0)).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Segments:");
+                                        changed |= ui.add(egui::DragValue::new(segments).range(3..=64)).changed();
+                                        ui.label("Rings:");
+                                        changed |= ui.add(egui::DragValue::new(rings).range(2..=64)).changed();
+                                    });
+                                }
+                                PrimitiveParams::Cylinder { radius, height, segments, cap_fill } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("Radius:");
+                                        changed |= ui.add(egui::DragValue::new(radius).speed(0.01).range(0.01..=50.0)).changed();
+                                        ui.label("Height:");
+                                        changed |= ui.add(egui::DragValue::new(height).speed(0.01).range(0.01..=50.0)).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Segments:");
+                                        changed |= ui.add(egui::DragValue::new(segments).range(3..=64)).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Cap Fill:");
+                                        changed |= ui.selectable_value(cap_fill, geo_kernel::CapFillType::Ngon, "N-Gon").changed();
+                                        changed |= ui.selectable_value(cap_fill, geo_kernel::CapFillType::TriangleFan, "Fan").changed();
+                                        changed |= ui.selectable_value(cap_fill, geo_kernel::CapFillType::None, "None").changed();
+                                    });
+                                }
+                                PrimitiveParams::Cone { radius_bottom, radius_top, height, segments, cap_fill } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("R Base:");
+                                        changed |= ui.add(egui::DragValue::new(radius_bottom).speed(0.01).range(0.01..=50.0)).changed();
+                                        ui.label("R Top:");
+                                        changed |= ui.add(egui::DragValue::new(radius_top).speed(0.01).range(0.0..=50.0)).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Height:");
+                                        changed |= ui.add(egui::DragValue::new(height).speed(0.01).range(0.01..=50.0)).changed();
+                                        ui.label("Segments:");
+                                        changed |= ui.add(egui::DragValue::new(segments).range(3..=64)).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Cap Fill:");
+                                        changed |= ui.selectable_value(cap_fill, geo_kernel::CapFillType::Ngon, "N-Gon").changed();
+                                        changed |= ui.selectable_value(cap_fill, geo_kernel::CapFillType::TriangleFan, "Fan").changed();
+                                    });
+                                }
+                                PrimitiveParams::Torus { major_radius, minor_radius, major_segments, minor_segments } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("R Major:");
+                                        changed |= ui.add(egui::DragValue::new(major_radius).speed(0.01).range(0.05..=50.0)).changed();
+                                        ui.label("R Minor:");
+                                        changed |= ui.add(egui::DragValue::new(minor_radius).speed(0.01).range(0.01..=20.0)).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Segments:");
+                                        changed |= ui.add(egui::DragValue::new(major_segments).range(3..=64).prefix("Maj:")).changed();
+                                        changed |= ui.add(egui::DragValue::new(minor_segments).range(3..=64).prefix("Min:")).changed();
+                                    });
+                                }
+                                PrimitiveParams::Pyramid { base_width, base_depth, height } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("Base W/D:");
+                                        changed |= ui.add(egui::DragValue::new(base_width).speed(0.01).range(0.01..=50.0).prefix("W:")).changed();
+                                        changed |= ui.add(egui::DragValue::new(base_depth).speed(0.01).range(0.01..=50.0).prefix("D:")).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Height:");
+                                        changed |= ui.add(egui::DragValue::new(height).speed(0.01).range(0.01..=50.0)).changed();
+                                    });
+                                }
+                                PrimitiveParams::Capsule { radius, cylinder_height, segments, hemisphere_rings } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("Radius:");
+                                        changed |= ui.add(egui::DragValue::new(radius).speed(0.01).range(0.01..=50.0)).changed();
+                                        ui.label("Height:");
+                                        changed |= ui.add(egui::DragValue::new(cylinder_height).speed(0.01).range(0.01..=50.0)).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Segments:");
+                                        changed |= ui.add(egui::DragValue::new(segments).range(3..=64)).changed();
+                                        ui.label("Rings:");
+                                        changed |= ui.add(egui::DragValue::new(hemisphere_rings).range(2..=32)).changed();
+                                    });
+                                }
+                                PrimitiveParams::IcoSphere { radius, subdivisions } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("Radius:");
+                                        changed |= ui.add(egui::DragValue::new(radius).speed(0.01).range(0.01..=50.0)).changed();
+                                        ui.label("Subdivisions:");
+                                        changed |= ui.add(egui::DragValue::new(subdivisions).range(1..=4)).changed();
+                                    });
+                                }
+                                PrimitiveParams::PlumbBob { segments } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("Radial Segments:");
+                                        changed |= ui.add(egui::DragValue::new(segments).range(8..=48)).changed();
+                                    });
+                                }
+                            }
+                            if changed {
+                                updated_op = Some(LastOperatorInfo::AddPrimitive { node_id, params: p });
+                            }
+                        }
                     }
                 });
         });
@@ -211,6 +348,16 @@ pub fn render(state: &mut AppState) {
                         });
                         let _ = state.history.execute(cmd, &mut state.scene);
                     }
+                    state.last_operator = Some(new_op);
+                }
+                LastOperatorInfo::AddPrimitive { node_id, params } => {
+                    if let Some(node) = state.scene.nodes.get_mut(*node_id) {
+                        if let graph_engine::NodeData::Mesh { base_mesh, .. } = &mut node.data {
+                            *base_mesh = params.generate_mesh();
+                            state.scene.mark_dirty(*node_id);
+                        }
+                    }
+                    state.sync_gpu_meshes();
                     state.last_operator = Some(new_op);
                 }
             }
