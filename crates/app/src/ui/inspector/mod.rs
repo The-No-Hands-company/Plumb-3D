@@ -1,22 +1,30 @@
 mod constraints;
+mod groom_panel;
 mod materials;
 mod mesh_info;
 mod mesh_tools;
 mod modifiers;
+mod motion_panel;
 mod physics;
 mod scene_nodes;
+mod topology_cad;
 mod transform;
 mod vertex_groups;
+mod volumetrics;
 
 pub use constraints::draw_constraints_panel;
+pub use groom_panel::draw_groom_panel;
 pub use materials::draw_materials_panel;
 pub use mesh_info::draw_mesh_info;
 pub use mesh_tools::draw_mesh_tools_panel;
 pub use modifiers::draw_modifiers_panel;
-pub use physics::draw_physics_panel;
+pub use motion_panel::draw_motion_panel;
+pub use physics::{draw_physics_panel, PhysicsSubTab};
 pub use scene_nodes::draw_scene_nodes_panel;
+pub use topology_cad::draw_topology_cad_panel;
 pub use transform::draw_transform_panel;
 pub use vertex_groups::draw_vertex_groups_panel;
+pub use volumetrics::draw_volumetrics_panel;
 
 use crate::state::AppState;
 use crate::ui::actions::UiActions;
@@ -146,8 +154,20 @@ pub fn draw_inspector(state: &mut AppState, actions: &mut UiActions) {
                             }
                             crate::types::InspectorTab::Materials => {
                                 draw_materials_panel(ui, state, actions, sel_id);
+                                if state.current_workspace == WorkspaceTemplate::LookDev {
+                                    ui.separator();
+                                    draw_volumetrics_panel(ui, state);
+                                }
                             }
                             crate::types::InspectorTab::Tools => {
+                                if state.current_workspace == WorkspaceTemplate::Sculpting {
+                                    draw_groom_panel(ui, state, sel_id);
+                                    ui.separator();
+                                }
+                                if state.current_workspace == WorkspaceTemplate::UvRetopo || state.current_workspace == WorkspaceTemplate::CadPrecision {
+                                    draw_topology_cad_panel(ui, state, actions, sel_id);
+                                    ui.separator();
+                                }
                                 draw_mesh_tools_panel(ui, state, actions, sel_id);
                             }
                             crate::types::InspectorTab::Constraints => {
@@ -156,6 +176,8 @@ pub fn draw_inspector(state: &mut AppState, actions: &mut UiActions) {
                             }
                             crate::types::InspectorTab::Physics => {
                                 draw_physics_panel(ui, state, sel_id);
+                                ui.separator();
+                                draw_motion_panel(ui, state);
                             }
                         }
                     });
