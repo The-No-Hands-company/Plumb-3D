@@ -268,15 +268,11 @@ pub struct AppState {
     pub measure_points: Vec<Vec3>,
 
     // Interactive 3D Bézier Curve Pen Tool (Plasticity / Illustrator Pen)
-    pub curve_pen_active: bool,
-    pub curve_pen_points: Vec<geo_kernel::BezierPoint>,
-    pub curve_pen_is_closed: bool,
-    pub curve_pen_drag_origin: Option<Vec3>,
+    pub curve_pen_active: bool, pub curve_pen_points: Vec<geo_kernel::BezierPoint>,
+    pub curve_pen_is_closed: bool, pub curve_pen_drag_origin: Option<Vec3>,
 
     // Direct Edit Mode Operators
-    pub shrink_fatten_offset: f32,
-    pub relax_iterations: usize,
-    pub relax_factor: f32,
+    pub shrink_fatten_offset: f32, pub relax_iterations: usize, pub relax_factor: f32,
 
     // Object Align Tool (Maya Align / 3ds Max Align Tool Alt+A)
     pub show_align_dialog: bool,
@@ -293,6 +289,7 @@ pub struct AppState {
 
     // UI, Theming & UX Customization
     pub current_theme: crate::ui::theme::ThemePreset,
+    pub studio_domain: crate::ui::workspaces::StudioDomain,
     pub current_workspace: crate::ui::workspaces::WorkspaceTemplate,
     pub custom_workspaces: Vec<crate::ui::workspaces::CustomWorkspace>,
     pub command_palette: crate::ui::command_palette::CommandPaletteState,
@@ -598,14 +595,13 @@ impl AppState {
             bake_state: crate::ui::bake_dialog::BakeDialogState::default(),
             print_inspector: crate::ui::print_inspector::PrintInspectorState::default(),
             current_theme: crate::ui::theme::ThemePreset::PlumbSlate,
-            current_workspace: crate::ui::workspaces::WorkspaceTemplate::General,
+            studio_domain: crate::ui::workspaces::StudioDomain::HardSurfaceCad,
+            current_workspace: crate::ui::workspaces::WorkspaceTemplate::HardSurface,
             custom_workspaces: Vec::new(),
             command_palette: crate::ui::command_palette::CommandPaletteState::default(),
             welcome_hub: crate::ui::welcome_hub::WelcomeHubState::default(),
             preferences: crate::ui::preferences::PreferencesState::default(),
-            egui_ctx,
-            egui_state,
-            egui_renderer,
+            egui_ctx, egui_state, egui_renderer,
             project_file_path: None,
             autosave: crate::autosave::AutosaveManager::default(),
             status_toast: None,
@@ -613,6 +609,7 @@ impl AppState {
             fps: 60.0,
         };
 
+        crate::ui::workspaces::apply_workspace(&mut app_state, crate::ui::workspaces::WorkspaceTemplate::HardSurface);
         app_state.sync_gpu_meshes();
         app_state
     }

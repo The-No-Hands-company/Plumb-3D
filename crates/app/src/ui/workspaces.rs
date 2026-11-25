@@ -2,6 +2,79 @@ use crate::state::AppState;
 use crate::types::*;
 use render_viewport::ViewportShadingMode;
 
+/// Studio focus domain in Plumb 3D suite.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum StudioDomain {
+    /// Laser-focused CAD precision & hard-surface polygon modeling (Default flagship DCC)
+    #[default]
+    HardSurfaceCad,
+    /// Kinematics, keyframing, timeline, constraints, and physics
+    Animation,
+    /// Digital sculpting canvas and vertex painting
+    Sculpting,
+    /// Complete suite showing all workspaces
+    CompleteSuite,
+}
+
+impl StudioDomain {
+    pub const ALL: [StudioDomain; 4] = [
+        Self::HardSurfaceCad,
+        Self::Animation,
+        Self::Sculpting,
+        Self::CompleteSuite,
+    ];
+
+    pub fn label(&self) -> &'static str {
+        match self {
+            Self::HardSurfaceCad => "🛠 Hard-Surface & CAD",
+            Self::Animation => "🎬 Animation & Rigging",
+            Self::Sculpting => "🗿 Digital Sculpting",
+            Self::CompleteSuite => "🌐 Complete Suite",
+        }
+    }
+
+    pub fn workspaces(&self) -> &'static [WorkspaceTemplate] {
+        match self {
+            Self::HardSurfaceCad => &[
+                WorkspaceTemplate::HardSurface,
+                WorkspaceTemplate::CadPrecision,
+                WorkspaceTemplate::LookDev,
+                WorkspaceTemplate::UvRetopo,
+                WorkspaceTemplate::General,
+            ],
+            Self::Animation => &[
+                WorkspaceTemplate::Animation,
+                WorkspaceTemplate::LookDev,
+                WorkspaceTemplate::General,
+            ],
+            Self::Sculpting => &[
+                WorkspaceTemplate::Sculpting,
+                WorkspaceTemplate::LookDev,
+                WorkspaceTemplate::General,
+            ],
+            Self::CompleteSuite => &WorkspaceTemplate::ALL,
+        }
+    }
+
+    pub fn default_workspace(&self) -> WorkspaceTemplate {
+        match self {
+            Self::HardSurfaceCad => WorkspaceTemplate::HardSurface,
+            Self::Animation => WorkspaceTemplate::Animation,
+            Self::Sculpting => WorkspaceTemplate::Sculpting,
+            Self::CompleteSuite => WorkspaceTemplate::HardSurface,
+        }
+    }
+}
+
+/// Applies a studio focus domain, activating matching workspaces and resetting non-domain state.
+pub fn apply_studio_domain(state: &mut AppState, domain: StudioDomain) {
+    state.studio_domain = domain;
+    let allowed = domain.workspaces();
+    if !allowed.contains(&state.current_workspace) {
+        apply_workspace(state, domain.default_workspace());
+    }
+}
+
 /// Predefined workflow workspace templates in Plumb 3D.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum WorkspaceTemplate {
@@ -183,11 +256,22 @@ pub fn apply_custom_workspace(state: &mut AppState, index: usize) {
 /// Renders the one-click workspace template switcher pill bar.
 pub fn draw_workspace_bar(state: &mut AppState, ui: &mut egui::Ui) {
     ui.horizontal(|ui| {
-        for template in WorkspaceTemplate::ALL {
+        egui::ComboBox::from_id_salt("studio_domain_selector")
+            .selected_text(state.studio_domain.label())
+            .show_ui(ui, |ui| {
+                for domain in StudioDomain::ALL {
+                    if ui.selectable_label(state.studio_domain == domain, domain.label()).clicked() {
+                        apply_studio_domain(state, domain);
+                    }
+                }
+            });
+
+        ui.separator();
+
+        for &template in state.studio_domain.workspaces() {
             let is_active = state.current_workspace == template;
             let resp = ui.selectable_label(is_active, template.label());
             if resp.clicked() && !is_active {
-                state.current_workspace = template;
                 apply_workspace(state, template);
             }
             resp.on_hover_text(template.tooltip());
@@ -208,6 +292,15 @@ pub fn draw_workspace_bar(state: &mut AppState, ui: &mut egui::Ui) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_studio_domain_metadata() {
+        assert_eq!(StudioDomain::ALL.len(), 4);
+        for d in StudioDomain::ALL {
+            assert!(!d.label().is_empty());
+            assert!(!d.workspaces().is_empty());
+        }
+    }
 
     #[test]
     fn test_workspace_template_metadata() {

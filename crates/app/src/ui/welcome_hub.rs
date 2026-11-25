@@ -6,7 +6,7 @@ use render_viewport::{CameraProjection, ViewportShadingMode};
 use crate::state::AppState;
 use crate::types::*;
 use crate::ui::actions::UiActions;
-use crate::ui::workspaces::WorkspaceTemplate;
+use crate::ui::workspaces::{apply_studio_domain, apply_workspace, StudioDomain, WorkspaceTemplate};
 
 /// Runtime state for the Interactive Welcome & Quick-Start Hub.
 #[derive(Clone)]
@@ -286,7 +286,8 @@ pub fn apply_project_template(state: &mut AppState, template: ProjectTemplate) {
 
     match template {
         ProjectTemplate::General => {
-            crate::ui::workspaces::apply_workspace(state, WorkspaceTemplate::General);
+            apply_studio_domain(state, StudioDomain::HardSurfaceCad);
+            apply_workspace(state, WorkspaceTemplate::General);
             let cube = Primitives::create_cube(2.0);
             let node = SceneNode::new_mesh("Cube", Transform::IDENTITY, cube);
             let id = state.scene.add_node(node);
@@ -297,7 +298,8 @@ pub fn apply_project_template(state: &mut AppState, template: ProjectTemplate) {
             state.inspector_tab = InspectorTab::Transform;
         }
         ProjectTemplate::HardSurface => {
-            crate::ui::workspaces::apply_workspace(state, WorkspaceTemplate::HardSurface);
+            apply_studio_domain(state, StudioDomain::HardSurfaceCad);
+            apply_workspace(state, WorkspaceTemplate::HardSurface);
             let cube = Primitives::create_cube(2.0);
             let node = SceneNode::new_mesh("HardSurfaceBase", Transform::IDENTITY, cube);
             let id = state.scene.add_node(node);
@@ -309,7 +311,8 @@ pub fn apply_project_template(state: &mut AppState, template: ProjectTemplate) {
             state.inspector_tab = InspectorTab::Modifiers;
         }
         ProjectTemplate::CadPrecision => {
-            crate::ui::workspaces::apply_workspace(state, WorkspaceTemplate::CadPrecision);
+            apply_studio_domain(state, StudioDomain::HardSurfaceCad);
+            apply_workspace(state, WorkspaceTemplate::CadPrecision);
             let cyl = Primitives::create_cylinder(1.5, 3.0, 16);
             let node = SceneNode::new_mesh("CadPart", Transform::IDENTITY, cyl);
             let id = state.scene.add_node(node);
@@ -325,7 +328,8 @@ pub fn apply_project_template(state: &mut AppState, template: ProjectTemplate) {
             state.inspector_tab = InspectorTab::Transform;
         }
         ProjectTemplate::Sculpting => {
-            crate::ui::workspaces::apply_workspace(state, WorkspaceTemplate::Sculpting);
+            apply_studio_domain(state, StudioDomain::Sculpting);
+            apply_workspace(state, WorkspaceTemplate::Sculpting);
             let sphere = Primitives::create_uv_sphere(1.5, 32, 32);
             let node = SceneNode::new_mesh("SculptSphere", Transform::IDENTITY, sphere);
             let id = state.scene.add_node(node);
@@ -337,7 +341,8 @@ pub fn apply_project_template(state: &mut AppState, template: ProjectTemplate) {
             state.inspector_tab = InspectorTab::Tools;
         }
         ProjectTemplate::CastleTower => {
-            crate::ui::workspaces::apply_workspace(state, WorkspaceTemplate::HardSurface);
+            apply_studio_domain(state, StudioDomain::HardSurfaceCad);
+            apply_workspace(state, WorkspaceTemplate::HardSurface);
             crate::scenes::build_medieval_citadel_scene(state);
             return;
         }
