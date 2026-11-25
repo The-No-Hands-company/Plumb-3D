@@ -252,6 +252,77 @@ impl Plane {
     pub fn distance_to_point(&self, point: Vec3) -> f32 {
         self.normal.dot(point) - self.distance
     }
+
+    /// Tests for ray-plane intersection. Returns distance along ray `t` if hit in front of ray.
+    #[inline]
+    pub fn intersects_ray(&self, ray: &Ray) -> Option<f32> {
+        let denom = self.normal.dot(ray.direction);
+        if denom.abs() > 1e-6 {
+            let t = (self.distance - self.normal.dot(ray.origin)) / denom;
+            if t >= 0.0 {
+                return Some(t);
+            }
+        }
+        None
+    }
+}
+
+/// A 2D working plane in 3D space with an origin, normal, and orthonormal tangent basis (Plasticity / Rhino style).
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct Workplane {
+    pub origin: Vec3,
+    pub normal: Vec3,
+    pub tangent_u: Vec3,
+    pub tangent_v: Vec3,
+    pub is_active: bool,
+}
+
+impl Default for Workplane {
+    fn default() -> Self {
+        Self {
+            origin: Vec3::ZERO,
+            normal: Vec3::Y,
+            tangent_u: Vec3::X,
+            tangent_v: Vec3::Z,
+            is_active: false,
+        }
+    }
+}
+
+impl Workplane {
+    pub fn from_point_and_normal(origin: Vec3, normal: Vec3) -> Self {
+        let n = normal.normalize_or_zero();
+        let up = if n.y.abs() < 0.99 { Vec3::Y } else { Vec3::Z };
+        let u = n.cross(up).normalize();
+        let v = n.cross(u).normalize();
+        Self {
+            origin,
+            normal: n,
+            tangent_u: u,
+            tangent_v: v,
+            is_active: true,
+        }
+    }
+
+    /// Project a 3D ray onto the workplane, returning 2D (u, v) coordinates relative to origin.
+    pub fn intersect_ray_uv(&self, ray: &Ray) -> Option<Vec2> {
+        let denom = self.normal.dot(ray.direction);
+        if denom.abs() > 1e-6 {
+            let t = (self.origin - ray.origin).dot(self.normal) / denom;
+            if t >= 0.0 {
+                let hit_pt = ray.origin + ray.direction * t;
+                let rel = hit_pt - self.origin;
+                return Some(Vec2::new(rel.dot(self.tangent_u), rel.dot(self.tangent_v)));
+            }
+        }
+        None
+    }
+
+    /// Convert 2D (u, v) plane coordinates back to 3D world space.
+    #[inline]
+    pub fn uv_to_world(&self, uv: Vec2) -> Vec3 {
+        self.origin + self.tangent_u * uv.x + self.tangent_v * uv.y
+    }
 }
 
 /// Compute the exact closest point on a 3D triangle (a, b, c) to point p.
@@ -361,5 +432,19 @@ mod tests {
         let p_bc = Vec3::new(2.0, 2.0, 0.0);
         let cp_bc = closest_point_on_triangle(p_bc, a, b, c);
         assert!((cp_bc - Vec3::new(1.0, 1.0, 0.0)).length() < 1e-5);
+    }
+
+    #[test]
+    fn test_workplane_projection_and_ray_intersection() {
+        let origin = Vec3::new(10.0, 5.0, 0.0);
+        let normal = Vec3::Y;
+        let wp = Workplane::from_point_and_normal(origin, normal);
+        assert!(wp.is_active);
+
+        // Ray looking straight down from above the workplane
+        let ray = Ray::new(Vec3::new(12.0, 10.0, 3.0), -Vec3::Y);
+        let uv = wp.intersect_ray_uv(&ray).expect("ray hits workplane");
+        let world_reconstruct = wp.uv_to_world(uv);
+        assert!((world_reconstruct - Vec3::new(12.0, 5.0, 3.0)).length() < 1e-4);
     }
 }

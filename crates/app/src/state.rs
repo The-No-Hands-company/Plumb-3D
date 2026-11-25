@@ -129,10 +129,9 @@ pub struct AppState {
     pub vertex_crease_modal_vertices: Vec<VertexKey>,
     pub vertex_crease_modal_original_weights: Vec<(VertexKey, f32)>,
 
-    // UV Editor Window & Tools (Blender / Maya Style)
-    pub show_uv_editor: bool,
-    pub smart_uv_angle_threshold: f32,
-    pub smart_uv_margin: f32,
+    // UV Editor Window & Tools (Blender / Maya Style) & Cutter Modal
+    pub show_uv_editor: bool, pub smart_uv_angle_threshold: f32, pub smart_uv_margin: f32,
+    pub cutter_modal: Option<crate::modals::cutter::CutterModalState>,
 
     // Viewport Shelves & Sidebars
     pub show_outliner: bool,
@@ -263,9 +262,9 @@ pub struct AppState {
     pub vertex_paint_falloff: BrushFalloff,
     pub is_vertex_painting: bool,
 
-    // 3D Measurement Tool (Maya Distance / Blender Measure)
-    pub measure_mode: bool,
-    pub measure_points: Vec<Vec3>,
+    // 3D Measurement Tool (Maya Distance / Blender Measure) & Face-Aligned Workplane
+    pub measure_mode: bool, pub measure_points: Vec<Vec3>,
+    pub workplane: core_math::Workplane,
 
     // Interactive 3D Bézier Curve Pen Tool (Plasticity / Illustrator Pen)
     pub curve_pen_active: bool, pub curve_pen_points: Vec<geo_kernel::BezierPoint>,
@@ -484,9 +483,8 @@ impl AppState {
             vertex_crease_modal_start_mouse: (0.0, 0.0),
             vertex_crease_modal_vertices: Vec::new(),
             vertex_crease_modal_original_weights: Vec::new(),
-            show_uv_editor: false,
-            smart_uv_angle_threshold: 66.0,
-            smart_uv_margin: 0.02,
+            show_uv_editor: false, smart_uv_angle_threshold: 66.0, smart_uv_margin: 0.02,
+            cutter_modal: None,
             show_outliner: true,
             show_inspector: true,
             show_left_toolbar: true,
@@ -570,13 +568,10 @@ impl AppState {
             weight_paint_tool: WeightPaintTool::Brush, weight_gradient_start: None, weight_gradient_end: None,
             weight_gradient_start_w: 1.0, weight_gradient_end_w: 0.0,
             weight_paint_stroke_start_mesh: None,
-            vertex_paint_color: [1.0, 0.2, 0.2, 1.0],
-            vertex_paint_radius: 0.8,
-            vertex_paint_strength: 0.5,
-            vertex_paint_falloff: BrushFalloff::Smooth,
-            is_vertex_painting: false,
-            measure_mode: false,
-            measure_points: Vec::new(),
+            vertex_paint_color: [1.0, 0.2, 0.2, 1.0], vertex_paint_radius: 0.8,
+            vertex_paint_strength: 0.5, vertex_paint_falloff: BrushFalloff::Smooth, is_vertex_painting: false,
+            measure_mode: false, measure_points: Vec::new(),
+            workplane: core_math::Workplane::default(),
             curve_pen_active: false,
             curve_pen_points: Vec::new(),
             curve_pen_is_closed: false,

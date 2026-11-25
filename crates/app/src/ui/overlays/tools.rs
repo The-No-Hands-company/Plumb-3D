@@ -345,8 +345,118 @@ pub fn render(state: &mut AppState) {
         );
     }
 
-    // 6. Left Vertical Viewport Tool Strip (Plasticity / Blender T-Shelf Style)
+    // 6. Render Active Workplane Visual Indicator
+    if state.workplane.is_active {
+        let width = state.surface_config.width as f32;
+        let height = state.surface_config.height as f32;
+        let painter = state.egui_ctx.layer_painter(egui::LayerId::new(
+            egui::Order::Foreground,
+            egui::Id::new("workplane_overlay"),
+        ));
+
+        let o = state.workplane.origin;
+        let u = o + state.workplane.tangent_u * 0.8;
+        let v = o + state.workplane.tangent_v * 0.8;
+        let n = o + state.workplane.normal * 0.8;
+
+        if let (Some(so), Some(su), Some(sv), Some(sn)) = (
+            state.camera.world_to_screen(o, width, height),
+            state.camera.world_to_screen(u, width, height),
+            state.camera.world_to_screen(v, width, height),
+            state.camera.world_to_screen(n, width, height),
+        ) {
+            let po = egui::pos2(so.x, so.y);
+            painter.line_segment([po, egui::pos2(su.x, su.y)], egui::Stroke::new(2.0_f32, egui::Color32::RED));
+            painter.line_segment([po, egui::pos2(sv.x, sv.y)], egui::Stroke::new(2.0_f32, egui::Color32::GREEN));
+            painter.line_segment([po, egui::pos2(sn.x, sn.y)], egui::Stroke::new(2.0_f32, egui::Color32::BLUE));
+
+            painter.circle_filled(po, 3.5, egui::Color32::WHITE);
+            let pill_pos = egui::pos2(po.x + 30.0, po.y);
+            painter.text(pill_pos, egui::Align2::LEFT_CENTER, "📐 CAD Workplane", egui::FontId::proportional(11.0), egui::Color32::from_rgb(0, 220, 255));
+        }
+    }
+
+    // 7. Render Interactive Cutter Modal Overlay & Caliper Callouts
+    if let Some(cutter) = &state.cutter_modal {
+        let width = state.surface_config.width as f32;
+        let height = state.surface_config.height as f32;
+        let painter = state.egui_ctx.layer_painter(egui::LayerId::new(
+            egui::Order::Foreground,
+            egui::Id::new("cutter_overlay"),
+        ));
+
+        let cutter_color = egui::Color32::from_rgb(255, 140, 20); // Bright BoxCutter Orange
+
+        let min_u = cutter.start_uv.x.min(cutter.current_uv.x);
+        let max_u = cutter.start_uv.x.max(cutter.current_uv.x);
+        let min_v = cutter.start_uv.y.min(cutter.current_uv.y);
+        let max_v = cutter.start_uv.y.max(cutter.current_uv.y);
+
+        let p00 = cutter.workplane.uv_to_world(core_math::Vec2::new(min_u, min_v));
+        let p10 = cutter.workplane.uv_to_world(core_math::Vec2::new(max_u, min_v));
+        let p11 = cutter.workplane.uv_to_world(core_math::Vec2::new(max_u, max_v));
+        let p01 = cutter.workplane.uv_to_world(core_math::Vec2::new(min_u, max_v));
+
+        if let (Some(s00), Some(s10), Some(s11), Some(s01)) = (
+            state.camera.world_to_screen(p00, width, height),
+            state.camera.world_to_screen(p10, width, height),
+            state.camera.world_to_screen(p11, width, height),
+            state.camera.world_to_screen(p01, width, height),
+        ) {
+            let pts = [
+                egui::pos2(s00.x, s00.y),
+                egui::pos2(s10.x, s10.y),
+                egui::pos2(s11.x, s11.y),
+                egui::pos2(s01.x, s01.y),
+            ];
+
+            for i in 0..4 {
+                painter.line_segment([pts[i], pts[(i + 1) % 4]], egui::Stroke::new(2.5_f32, cutter_color));
+            }
+
+            if cutter.stage == crate::modals::cutter::CutterStage::ExtrudeDepth {
+                let n = cutter.workplane.normal;
+                let d = cutter.depth;
+                let b00 = p00 - n * d;
+                let b10 = p10 - n * d;
+                let b11 = p11 - n * d;
+                let b01 = p01 - n * d;
+
+                if let (Some(sb00), Some(sb10), Some(sb11), Some(sb01)) = (
+                    state.camera.world_to_screen(b00, width, height),
+                    state.camera.world_to_screen(b10, width, height),
+                    state.camera.world_to_screen(b11, width, height),
+                    state.camera.world_to_screen(b01, width, height),
+                ) {
+                    let bpts = [
+                        egui::pos2(sb00.x, sb00.y),
+                        egui::pos2(sb10.x, sb10.y),
+                        egui::pos2(sb11.x, sb11.y),
+                        egui::pos2(sb01.x, sb01.y),
+                    ];
+                    for i in 0..4 {
+                        painter.line_segment([bpts[i], bpts[(i + 1) % 4]], egui::Stroke::new(1.5_f32, cutter_color));
+                        painter.line_segment([pts[i], bpts[i]], egui::Stroke::new(1.5_f32, cutter_color));
+                    }
+                }
+            }
+
+            let dim_w = ((max_u - min_u).abs() * 1000.0).max(1.0);
+            let dim_h = ((max_v - min_v).abs() * 1000.0).max(1.0);
+            let dim_d = (cutter.depth * 1000.0).max(1.0);
+            let caliper_text = format!("📐 W: {:.1} mm  H: {:.1} mm  D: {:.1} mm", dim_w, dim_h, dim_d);
+
+            let center_screen = egui::pos2((pts[0].x + pts[2].x) * 0.5, (pts[0].y + pts[2].y) * 0.5 - 20.0);
+            let pill_rect = egui::Rect::from_center_size(center_screen, egui::vec2(caliper_text.len() as f32 * 7.0 + 16.0, 22.0));
+            painter.rect_filled(pill_rect, 4.0, egui::Color32::from_black_alpha(230));
+            painter.rect_stroke(pill_rect, 4.0, egui::Stroke::new(1.0_f32, cutter_color));
+            painter.text(center_screen, egui::Align2::CENTER_CENTER, caliper_text, egui::FontId::proportional(11.5), egui::Color32::WHITE);
+        }
+    }
+
+    // 8. Left Vertical Viewport Tool Strip (Plasticity / Blender T-Shelf Style)
     if state.show_left_toolbar {
+        let mut toggle_cutter = false;
         let left_offset = if state.show_outliner { 235.0 } else { 15.0 };
         egui::Area::new(egui::Id::new("left_viewport_tool_strip"))
             .fixed_pos(egui::pos2(left_offset, 75.0))
@@ -378,6 +488,9 @@ pub fn render(state: &mut AppState) {
                             if ui.button("📐").on_hover_text("Align Objects (Alt+A)").clicked() {
                                 state.show_align_dialog = !state.show_align_dialog;
                             }
+                            if ui.selectable_label(state.cutter_modal.is_some(), "✂").on_hover_text("Interactive Direct Cutter (C)").clicked() {
+                                toggle_cutter = true;
+                            }
                             if state.current_workspace == WorkspaceTemplate::Sculpting || state.interaction_mode == InteractionMode::Sculpt {
                                 if ui.selectable_label(state.interaction_mode == InteractionMode::Sculpt, "🖌").on_hover_text("Sculpt Brush").clicked() {
                                     state.interaction_mode = InteractionMode::Sculpt;
@@ -403,5 +516,13 @@ pub fn render(state: &mut AppState) {
                         });
                     });
             });
+
+        if toggle_cutter {
+            if state.cutter_modal.is_some() {
+                crate::modals::cutter::cancel(state);
+            } else {
+                crate::modals::cutter::start(state);
+            }
+        }
     }
 }

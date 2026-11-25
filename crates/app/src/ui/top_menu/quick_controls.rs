@@ -99,6 +99,10 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
         if ui.selectable_label(state.show_grid, "🌐 Grid").clicked() {
             state.show_grid = !state.show_grid;
         }
+        let wp_label = if state.workplane.is_active { "📐 Plane (Active)" } else { "📐 Plane" };
+        if ui.selectable_label(state.workplane.is_active, wp_label).on_hover_text("Align CAD Workplane to Face (Alt+W)").clicked() {
+            crate::commands::workplane::toggle_workplane_align(state);
+        }
         let snap_text = if state.snap_enabled {
             match state.snap_target {
                 SnapTarget::Vertex => "🧲 Snap (V)",

@@ -470,6 +470,10 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             state.window.request_redraw();
             true
         }
+        KeyCode::KeyC if !state.curve_pen_active => {
+            crate::modals::cutter::start(state);
+            true
+        }
         KeyCode::F9 => {
             state.show_last_operator_panel = !state.show_last_operator_panel;
             state.window.request_redraw();

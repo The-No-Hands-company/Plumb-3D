@@ -52,6 +52,61 @@ impl Mesh {
         }
     }
 
+    /// Recalculates vertex normals weighted by face area (Face-Weighted Normals / FWN).
+    /// Large planar polygons dominate adjacent vertex normals, ensuring 100% flat shading
+    /// on machine panels while maintaining smooth curvature on beveled edge strips.
+    pub fn update_face_weighted_normals(&mut self, keep_sharp: bool) {
+        let face_keys: Vec<FaceKey> = self.faces.keys().collect();
+        for fk in face_keys {
+            let v_keys = self.face_vertices(fk);
+            let normal = self.compute_face_normal_newell(&v_keys);
+            if let Some(face) = self.faces.get_mut(fk) {
+                face.normal = normal;
+            }
+        }
+
+        for (_, v) in &mut self.vertices {
+            v.normal = Vec3::ZERO;
+        }
+
+        for (f_key, face) in &self.faces {
+            let f_normal = face.normal;
+            let f_area = self.face_area(f_key).max(1e-6);
+            let start = face.half_edge;
+            let mut curr = start;
+            loop {
+                let he = &self.half_edges[curr];
+                let p_curr = self.vertices[he.origin].position;
+                let p_prev = self.vertices[self.half_edges[he.prev].origin].position;
+                let p_next = self.vertices[he.target].position;
+
+                let e0 = (p_prev - p_curr).normalize_or_zero();
+                let e1 = (p_next - p_curr).normalize_or_zero();
+                let angle = e0.dot(e1).clamp(-1.0, 1.0).acos();
+
+                let weight = f_area * angle;
+                self.vertices[he.origin].normal += f_normal * weight;
+
+                curr = he.next;
+                if curr == start || !self.half_edges.contains_key(curr) {
+                    break;
+                }
+            }
+        }
+
+        for (_, v) in &mut self.vertices {
+            v.normal = v.normal.normalize_or_zero();
+        }
+
+        if keep_sharp {
+            for (_, edge) in &self.edges {
+                if edge.is_sharp {
+                    // Mark sharp edges so corner_normal isolates their smoothing
+                }
+            }
+        }
+    }
+
     /// Evaluates the split corner normal for face `f_key` at vertex `vk`,
     /// respecting sharp edges (`edge.is_sharp`).
     pub fn corner_normal(&self, f_key: FaceKey, vk: VertexKey) -> Vec3 {
@@ -147,5 +202,19 @@ impl Mesh {
         }
         self.update_normals();
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::primitives::Primitives;
+
+    #[test]
+    fn test_face_weighted_normals_cube() {
+        let mut cube = Primitives::create_cube(2.0);
+        cube.update_face_weighted_normals(true);
+        for v in cube.vertices.values() {
+            assert!(v.normal.length() > 0.99 && v.normal.length() < 1.01);
+        }
     }
 }

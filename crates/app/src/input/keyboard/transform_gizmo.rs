@@ -10,6 +10,10 @@ use crate::types::InteractionMode;
 pub fn handle_transform_gizmo_key(state: &mut AppState, key_code: KeyCode) -> bool {
     match key_code {
         KeyCode::KeyW => {
+            if state.alt_pressed {
+                crate::commands::workplane::toggle_workplane_align(state);
+                return true;
+            }
             state.gizmo.mode = GizmoMode::Translate;
             state.window.request_redraw();
             true
