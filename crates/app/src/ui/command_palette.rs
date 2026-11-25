@@ -263,47 +263,34 @@ const COMMAND_LIST: &[PaletteItem] = &[
         action: PaletteAction::OpenPreferences,
     },
     // --- Workspaces ---
+    PaletteItem { name: "Switch to Layout Workspace", category: "Workspace", shortcut: "1", keywords: &["workspace", "layout"], action: PaletteAction::SetWorkspace(WorkspaceTemplate::General) },
+    PaletteItem { name: "Switch to Hard-Surface Workspace", category: "Workspace", shortcut: "2", keywords: &["workspace", "hard-surface"], action: PaletteAction::SetWorkspace(WorkspaceTemplate::HardSurface) },
+    PaletteItem { name: "Switch to CAD Precision Workspace", category: "Workspace", shortcut: "3", keywords: &["workspace", "cad"], action: PaletteAction::SetWorkspace(WorkspaceTemplate::CadPrecision) },
+    PaletteItem { name: "Switch to Digital Sculpting Workspace", category: "Workspace", shortcut: "4", keywords: &["workspace", "sculpt"], action: PaletteAction::SetWorkspace(WorkspaceTemplate::Sculpting) },
+    PaletteItem { name: "Switch to UV & Retopo Workspace", category: "Workspace", shortcut: "5", keywords: &["workspace", "uv"], action: PaletteAction::SetWorkspace(WorkspaceTemplate::UvRetopo) },
+    PaletteItem { name: "Switch to LookDev Workspace", category: "Workspace", shortcut: "6", keywords: &["workspace", "lookdev"], action: PaletteAction::SetWorkspace(WorkspaceTemplate::LookDev) },
+    // --- Procedural Generation & Bio ---
     PaletteItem {
-        name: "Switch to Layout Workspace",
-        category: "Workspace",
-        shortcut: "1",
-        keywords: &["workspace", "layout", "general", "scene composition"],
-        action: PaletteAction::SetWorkspace(WorkspaceTemplate::General),
+        name: "Spawn Procedural Oak Tree (L-System)",
+        category: "Add",
+        shortcut: "Add > Bio",
+        keywords: &["tree", "lsystem", "plant", "organic", "foliage", "procedural"],
+        action: PaletteAction::TriggerAction(|_, a| {
+            if let Ok(m) = geo_kernel::LSystem::from_preset(geo_kernel::LSystemPreset::OakTree).generate_mesh() {
+                a.spawn_mesh = Some(("OakTree", m));
+            }
+        }),
     },
     PaletteItem {
-        name: "Switch to Hard-Surface Workspace",
-        category: "Workspace",
-        shortcut: "2",
-        keywords: &["workspace", "hard-surface", "modeling", "modifiers", "wireframe"],
-        action: PaletteAction::SetWorkspace(WorkspaceTemplate::HardSurface),
-    },
-    PaletteItem {
-        name: "Switch to CAD Precision Workspace",
-        category: "Workspace",
-        shortcut: "3",
-        keywords: &["workspace", "cad", "precision", "drafting", "grid", "measure"],
-        action: PaletteAction::SetWorkspace(WorkspaceTemplate::CadPrecision),
-    },
-    PaletteItem {
-        name: "Switch to Digital Sculpting Workspace",
-        category: "Workspace",
-        shortcut: "4",
-        keywords: &["workspace", "sculpt", "sculpting", "clay", "matcap", "organic"],
-        action: PaletteAction::SetWorkspace(WorkspaceTemplate::Sculpting),
-    },
-    PaletteItem {
-        name: "Switch to UV & Retopo Workspace",
-        category: "Workspace",
-        shortcut: "5",
-        keywords: &["workspace", "uv", "retopo", "texture unwrap", "seams"],
-        action: PaletteAction::SetWorkspace(WorkspaceTemplate::UvRetopo),
-    },
-    PaletteItem {
-        name: "Switch to LookDev Workspace",
-        category: "Workspace",
-        shortcut: "6",
-        keywords: &["workspace", "lookdev", "shading", "materials", "pbr", "render"],
-        action: PaletteAction::SetWorkspace(WorkspaceTemplate::LookDev),
+        name: "Spawn Biomechanical Conduit (L-System)",
+        category: "Add",
+        shortcut: "Add > Bio",
+        keywords: &["conduit", "pipe", "cable", "biomechanical", "sci-fi", "lsystem"],
+        action: PaletteAction::TriggerAction(|_, a| {
+            if let Ok(m) = geo_kernel::LSystem::from_preset(geo_kernel::LSystemPreset::SciFiBiomechanicalConduit).generate_mesh() {
+                a.spawn_mesh = Some(("BioConduit", m));
+            }
+        }),
     },
     // --- Themes ---
     PaletteItem {

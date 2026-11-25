@@ -30,6 +30,9 @@ pub mod sculpt;
 pub mod sculpt_dyntopo;
 pub mod texture_paint;
 pub mod xpbd_cloth;
+pub mod multires;
+pub mod gaussian_splat;
+pub mod lsystem;
 pub mod plugin;
 pub mod kitbash;
 
@@ -62,6 +65,9 @@ pub use texture_paint::{PaintBlendMode, PaintChannel, PaintTexture, TexturePaint
 pub use xpbd_cloth::{
     SphereCollider, XpbdBendingConstraint, XpbdClothSimulator, XpbdDistanceConstraint, XpbdParticle,
 };
+pub use multires::{MultiresLevel, MultiresMesh};
+pub use gaussian_splat::{GaussianCloud, GaussianSplat};
+pub use lsystem::{LSystem, LSystemPreset};
 pub use raycast::RaycastHit;
 pub use kitbash::{Kitbash, KitbashHardwareType};
 

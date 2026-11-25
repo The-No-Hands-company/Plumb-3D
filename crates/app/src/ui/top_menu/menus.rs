@@ -200,6 +200,32 @@ pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
             if ui.button("IcoSphere (Geodesic)").clicked() { actions.spawn_mesh = Some(("IcoSphere", Primitives::create_icosphere(1.2, 2))); ui.close_menu(); }
             if ui.button("📍 Plumb Bob (Mascot)").clicked() { actions.spawn_mesh = Some(("PlumbBob", Primitives::create_plumb_bob())); ui.close_menu(); }
         });
+        ui.menu_button("🌿 Bio-Vegetation (L-System)", |ui| {
+            if ui.button("Oak Tree").clicked() {
+                if let Ok(m) = LSystem::from_preset(LSystemPreset::OakTree).generate_mesh() {
+                    actions.spawn_mesh = Some(("OakTree", m));
+                }
+                ui.close_menu();
+            }
+            if ui.button("Fern Plant").clicked() {
+                if let Ok(m) = LSystem::from_preset(LSystemPreset::FernPlant).generate_mesh() {
+                    actions.spawn_mesh = Some(("FernPlant", m));
+                }
+                ui.close_menu();
+            }
+            if ui.button("Ivy Vines").clicked() {
+                if let Ok(m) = LSystem::from_preset(LSystemPreset::IvyVines).generate_mesh() {
+                    actions.spawn_mesh = Some(("IvyVines", m));
+                }
+                ui.close_menu();
+            }
+            if ui.button("Biomechanical Conduit").clicked() {
+                if let Ok(m) = LSystem::from_preset(LSystemPreset::SciFiBiomechanicalConduit).generate_mesh() {
+                    actions.spawn_mesh = Some(("BioConduit", m));
+                }
+                ui.close_menu();
+            }
+        });
         ui.menu_button("〰 Curves & Splines", |ui| {
             if ui.button("Bézier Path").clicked() { actions.spawn_curve = Some(0); ui.close_menu(); }
             if ui.button("Bézier Circle").clicked() { actions.spawn_curve = Some(1); ui.close_menu(); }

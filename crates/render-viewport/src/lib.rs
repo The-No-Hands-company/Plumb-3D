@@ -15,12 +15,14 @@ pub mod glyph_render;
 pub mod overlay_render;
 pub mod pipeline;
 pub mod renderer;
+pub mod rtao;
 pub mod shaders;
 pub mod types;
 
 pub use camera::{CameraProjection, ViewportCamera};
 pub use gizmo::{GizmoAxis, GizmoMode, TransformGizmo, TransformOrientation};
 pub use renderer::ViewportRenderer;
+pub use rtao::{RtaoKernel, RtaoSettings};
 pub use types::{
     GpuLight, GpuMesh, LightsUniform, MeshDrawCall, SubMeshMaterial, TonemappingMode, ViewportShadingMode,
     MAX_SCENE_LIGHTS,
