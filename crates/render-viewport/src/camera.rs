@@ -77,14 +77,15 @@ impl ViewportCamera {
 
     /// Projection Matrix: Camera -> NDC space (wgpu depth range [0, 1])
     pub fn projection_matrix(&self) -> Mat4 {
+        let dynamic_far = (self.distance * 15.0).max(self.z_far);
         match self.projection {
             CameraProjection::Perspective => {
-                Mat4::perspective_rh(self.fov_y, self.aspect, self.z_near, self.z_far)
+                Mat4::perspective_rh(self.fov_y, self.aspect, self.z_near, dynamic_far)
             }
             CameraProjection::Orthographic => {
                 let h = self.distance * 0.5;
                 let w = h * self.aspect;
-                Mat4::orthographic_rh(-w, w, -h, h, self.z_near, self.z_far)
+                Mat4::orthographic_rh(-w, w, -h, h, self.z_near, dynamic_far)
             }
         }
     }

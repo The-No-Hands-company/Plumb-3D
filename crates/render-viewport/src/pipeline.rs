@@ -518,8 +518,8 @@ pub fn create_grid_pipeline(
         cache: None,
     });
 
-    // Large ground quad for procedural grid
-    let s = 1000.0_f32;
+    // Large ground quad for procedural grid (100 km span)
+    let s = 100_000.0_f32;
     let grid_vertices: [f32; 18] = [
         -s, 0.0, -s,
          s, 0.0, -s,

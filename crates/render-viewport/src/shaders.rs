@@ -552,10 +552,13 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         color = mix(color, vec4<f32>(0.24, 0.48, 0.95, 0.95), is_z_axis);
     }
 
-    // Horizon grazing angle & distance falloff
+    // Horizon grazing angle & adaptive distance falloff scaling with camera height/distance
+    let eye_height = max(abs(camera.eye_pos.y), 1.0);
+    let view_dist = length(camera.eye_pos.xyz);
+    let max_fade_dist = max(eye_height * 40.0, max(view_dist * 10.0, 1000.0));
     let view_dir = normalize(camera.eye_pos.xyz - in.world_pos);
-    let grazing_fade = smoothstep(0.01, 0.12, abs(view_dir.y));
-    let dist_fade = 1.0 - smoothstep(20.0, 300.0, dist);
+    let grazing_fade = smoothstep(0.005, 0.08, abs(view_dir.y));
+    let dist_fade = 1.0 - smoothstep(max_fade_dist * 0.5, max_fade_dist, dist);
     color.a *= grazing_fade * dist_fade;
 
     if color.a < 0.005 {
