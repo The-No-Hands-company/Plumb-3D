@@ -151,16 +151,50 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         }
     }
 
-    // 10. Handle Pixar OpenUSD ASCII Export with native file dialog
-    if actions.export_usd {
+    // 9b. Handle SubD-to-NURBS STEP Export with native file dialog
+    if actions.export_subd_nurbs_step {
         if let Some((name, mesh)) = get_active_mesh(state) {
             if let Some(path) = rfd::FileDialog::new()
-                .add_filter("Pixar OpenUSD (*.usda)", &["usda", "usd"])
-                .set_file_name(format!("{}.usda", name))
+                .add_filter("SubD-to-NURBS CAD STEP Solid (*.step, *.stp)", &["step", "stp"])
+                .set_file_name(format!("{}_nurbs.step", name))
                 .save_file()
             {
-                if mesh.export_usda_file(&path, &name).is_ok() {
-                    state.set_status_message(format!("🎬 Exported Pixar OpenUSD to: {}", path.display()));
+                if mesh.export_subd_nurbs_step_file(&path).is_ok() {
+                    state.set_status_message(format!("📐 Exported Continuous SubD-to-NURBS STEP Solid to: {}", path.display()));
+                }
+            }
+        }
+    }
+
+    // 10. Handle Pixar OpenUSD ASCII Export with native file dialog
+    if actions.export_usd {
+        if let Some(path) = rfd::FileDialog::new()
+            .add_filter("Pixar OpenUSD (*.usda, *.usd)", &["usda", "usd"])
+            .set_file_name("scene.usda")
+            .save_file()
+        {
+            if graph_engine::export_scene_to_usda_file(&state.scene, &path).is_ok() {
+                state.set_status_message(format!("🎬 Exported Pixar OpenUSD Scene to: {}", path.display()));
+            }
+        }
+    }
+
+    // 11. Handle Pixar OpenUSD Import with native file dialog
+    if actions.import_usd {
+        if let Some(path) = rfd::FileDialog::new()
+            .add_filter("Pixar OpenUSD (*.usda, *.usd)", &["usda", "usd"])
+            .pick_file()
+        {
+            match graph_engine::import_scene_from_usda_file(&path, &mut state.scene) {
+                Ok(nodes) => {
+                    if let Some(&first) = nodes.first() {
+                        state.selected_node = Some(first);
+                    }
+                    state.sync_gpu_meshes();
+                    state.set_status_message(format!("🎬 Imported {} nodes from USDA: {}", nodes.len(), path.display()));
+                }
+                Err(err) => {
+                    state.set_status_message(format!("Failed to import USDA: {}", err));
                 }
             }
         }

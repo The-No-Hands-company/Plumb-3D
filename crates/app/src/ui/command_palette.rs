@@ -242,11 +242,18 @@ const COMMAND_LIST: &[PaletteItem] = &[
         action: PaletteAction::TriggerAction(|_, a| { a.export_step = true; }),
     },
     PaletteItem {
-        name: "Export Active Mesh as Pixar OpenUSD (.usda)",
+        name: "Export Full Scene as Pixar OpenUSD (.usda)",
         category: "File",
         shortcut: "File > Export",
         keywords: &["usd", "usda", "openusd", "pixar", "houdini", "unreal", "materialx"],
         action: PaletteAction::TriggerAction(|_, a| { a.export_usd = true; }),
+    },
+    PaletteItem {
+        name: "Import Pixar OpenUSD Scene (.usda)",
+        category: "File",
+        shortcut: "File > Import",
+        keywords: &["usd", "usda", "import", "openusd", "pixar"],
+        action: PaletteAction::TriggerAction(|_, a| { a.import_usd = true; }),
     },
     PaletteItem {
         name: "Export Sliced 3D Print G-code (.gcode)",

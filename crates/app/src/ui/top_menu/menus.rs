@@ -49,7 +49,9 @@ pub fn draw_file_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
         if ui.button("Export Active Mesh as glTF 2.0 (.gltf)").clicked() { actions.export_gltf = true; ui.close_menu(); }
         if ui.button("Export Active Mesh as PLY (.ply)").clicked() { actions.export_ply = true; ui.close_menu(); }
         if ui.button("Export Active Mesh as CAD STEP Solid (.step)").clicked() { actions.export_step = true; ui.close_menu(); }
-        if ui.button("Export Active Mesh as Pixar OpenUSD (.usda)").clicked() { actions.export_usd = true; ui.close_menu(); }
+        if ui.button("Export SubD Limit Surface as Continuous NURBS CAD STEP (.step)").clicked() { actions.export_subd_nurbs_step = true; ui.close_menu(); }
+        if ui.button("Export Full Scene as Pixar OpenUSD (.usda)").clicked() { actions.export_usd = true; ui.close_menu(); }
+        if ui.button("Import Pixar OpenUSD Scene (.usda)...").clicked() { actions.import_usd = true; ui.close_menu(); }
         if ui.button("Export Sliced G-Code for 3D Printing (.gcode)").clicked() { actions.export_gcode = true; ui.close_menu(); }
         if ui.button("🖨 3D Print & CAD Quality Inspector...").clicked() { state.print_inspector.show_dialog = true; ui.close_menu(); }
         ui.separator();
@@ -251,6 +253,20 @@ pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
             if ui.button("Loft Selected Curves (Ctrl+L)").clicked() { actions.trigger_loft_curves = true; ui.close_menu(); }
             if ui.button("✨ Fillet Curve Corners (0.2m)").clicked() { actions.trigger_fillet_curve = Some(0.2); ui.close_menu(); }
             if ui.button("🏺 Revolve / Lathe Curve (360°)").clicked() { actions.trigger_lathe_curve = Some((16, 360.0)); ui.close_menu(); }
+        });
+        ui.menu_button("☁ OpenVDB Volumetrics", |ui| {
+            if ui.button("Cumulus Cloud (Level-Set Mesh)").clicked() {
+                let cloud = geo_kernel::VolumeGenerators::create_cumulus_cloud(core_math::Vec3::ZERO, 2.0, 1.0, 0.4);
+                let mesh = cloud.extract_isosurface(0.35);
+                actions.spawn_mesh = Some(("VdbCumulusCloud", mesh));
+                ui.close_menu();
+            }
+            if ui.button("Atmospheric Ground Fog (Level-Set Mesh)").clicked() {
+                let fog = geo_kernel::VolumeGenerators::create_ground_fog(4.0, 1.5, 0.8, 0.4);
+                let mesh = fog.extract_isosurface(0.2);
+                actions.spawn_mesh = Some(("VdbGroundFog", mesh));
+                ui.close_menu();
+            }
         });
         ui.menu_button("💡 Lights", |ui| {
             if ui.button("Directional Light (Sun)").clicked() { actions.spawn_light = Some(("SunLight", LightType::Directional)); ui.close_menu(); }
@@ -540,7 +556,8 @@ pub fn draw_window_menu(state: &mut AppState, ui: &mut egui::Ui) {
         ui.separator();
         ui.checkbox(&mut state.show_node_editor, "🌿 Geometry Nodes Canvas");
         ui.checkbox(&mut state.show_uv_editor, "🗺 2D UV Editor Window");
-        ui.checkbox(&mut state.show_script_console, "📜 Scripting Console (Rhai)");
+        ui.checkbox(&mut state.show_script_console, "📜 Multi-Engine Scripting Console");
+        ui.checkbox(&mut state.show_collab_dialog, "👥 Live Collaboration Session (Figma for 3D)");
         ui.checkbox(&mut state.production_render.show_dialog, "📷 Production Render Result");
         ui.checkbox(&mut state.bake_state.show_dialog, "🍳 PBR Texture Baker");
         ui.checkbox(&mut state.print_inspector.show_dialog, "🖨 3D Print Quality Inspector");

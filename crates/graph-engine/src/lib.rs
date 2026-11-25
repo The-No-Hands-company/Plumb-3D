@@ -19,6 +19,8 @@ pub mod material;
 pub mod node;
 pub mod physics;
 pub mod scene;
+pub mod usda;
+pub mod collab;
 
 pub use animation::{AnimationManager, AnimationTrack, InterpolationMode, Keyframe, TransformTrack};
 pub use constraint::{AimConstraint, Constraint, ConstraintStack, ParentConstraint, PathConstraint};
@@ -28,6 +30,11 @@ pub use material::{LightType, Material};
 pub use node::{NodeData, NodeId, SceneNode};
 pub use physics::{CollisionShape, PhysicsWorld, RigidBodyComponent, RigidBodyType};
 pub use scene::SceneGraph;
+pub use usda::{
+    export_scene_to_usda, export_scene_to_usda_file, import_scene_from_usda,
+    import_scene_from_usda_file,
+};
+pub use collab::{CollabChatEntry, CollabMessage, CollabSession, CollabUser};
 
 #[cfg(test)]
 mod tests;

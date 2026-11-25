@@ -37,6 +37,8 @@ pub mod groom;
 pub mod fluid_sph;
 pub mod quadriflow;
 pub mod slicer;
+pub mod subd_nurbs;
+pub mod openvdb;
 pub mod plugin;
 pub mod kitbash;
 
@@ -76,6 +78,8 @@ pub use groom::{GroomBrush, GroomSettings, GroomSystem, HairGuide, HairStrand};
 pub use fluid_sph::{FluidParticle, SphFluidSimulator, SphSettings};
 pub use quadriflow::{CrossField4RoSy, QuadriflowSettings};
 pub use slicer::{InfillPattern, SlicedLayer, SlicerSettings, ToolpathSegment};
+pub use subd_nurbs::{BicubicNurbsPatch, convert_mesh_to_nurbs_patches, export_subd_nurbs_step};
+pub use openvdb::{VdbGrid, VdbLeafBrick, VolumeGenerators, VolumetricSample};
 pub use raycast::RaycastHit;
 pub use kitbash::{Kitbash, KitbashHardwareType};
 

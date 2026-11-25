@@ -1,6 +1,7 @@
 pub mod actions;
 pub mod align_dialog;
 pub mod bake_dialog;
+pub mod collab_dialog;
 pub mod command_palette;
 pub mod context_menu;
 pub mod help_dialog;
@@ -22,6 +23,7 @@ pub mod workspaces;
 pub use actions::*;
 pub use align_dialog::*;
 pub use bake_dialog::*;
+pub use collab_dialog::*;
 pub use command_palette::*;
 pub use context_menu::*;
 pub use help_dialog::*;
@@ -58,6 +60,7 @@ pub fn draw_ui(state: &mut AppState) {
     render_dialog::draw_render_dialog(state);
     bake_dialog::draw_bake_dialog(state);
     print_inspector::draw_print_inspector(state);
+    collab_dialog::draw_collab_dialog(state);
     help_dialog::draw_help_dialog(state);
     context_menu::draw_context_menu(state, &mut actions);
 
