@@ -3,6 +3,7 @@ pub mod cutter;
 pub mod edge_crease;
 pub mod extrude;
 pub mod inset;
+pub mod kitbash;
 pub mod knife;
 pub mod loop_cut;
 pub mod vertex_crease;
@@ -22,11 +23,15 @@ pub fn is_any_modal_active(state: &AppState) -> bool {
         || state.loop_cut_active
         || state.knife_active
         || state.cutter_modal.is_some()
+        || state.kitbash_modal.is_some()
 }
 
 pub fn handle_mouse_input(state: &mut AppState, button: MouseButton, is_pressed: bool) -> bool {
     if state.cutter_modal.is_some() {
         return cutter::handle_mouse_input(state, button, is_pressed);
+    }
+    if state.kitbash_modal.is_some() {
+        return kitbash::handle_mouse_input(state, button, is_pressed);
     }
     if state.extrude_modal_active {
         return extrude::handle_mouse_input(state, button, is_pressed);
@@ -56,6 +61,9 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
     if state.cutter_modal.is_some() {
         return cutter::handle_cursor_moved(state, position);
     }
+    if state.kitbash_modal.is_some() {
+        return kitbash::handle_cursor_moved(state, position);
+    }
     if state.extrude_modal_active {
         return extrude::handle_cursor_moved(state, position);
     }
@@ -84,6 +92,9 @@ pub fn handle_mouse_wheel(state: &mut AppState, scroll: f32) -> bool {
     if state.cutter_modal.is_some() {
         return cutter::handle_mouse_wheel(state, scroll);
     }
+    if state.kitbash_modal.is_some() {
+        return kitbash::handle_mouse_wheel(state, scroll);
+    }
     if state.bevel_modal_active {
         return bevel::handle_mouse_wheel(state, scroll);
     }
@@ -102,6 +113,9 @@ pub fn handle_mouse_wheel(state: &mut AppState, scroll: f32) -> bool {
 pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
     if state.cutter_modal.is_some() {
         return cutter::handle_keyboard_input(state, key_code);
+    }
+    if state.kitbash_modal.is_some() {
+        return kitbash::handle_keyboard_input(state, key_code);
     }
     if state.extrude_modal_active {
         return extrude::handle_keyboard_input(state, key_code);

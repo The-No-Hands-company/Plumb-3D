@@ -39,7 +39,26 @@ impl AppState {
     /// Handles mouse clicks when Curve Pen Tool is active.
     pub fn handle_curve_pen_click(&mut self, mx: f64, my: f64) {
         let ray = self.get_screen_ray(mx, my);
-        let pt = if ray.direction.y.abs() > 1e-4 {
+        let pt = if self.live_surface_snap {
+            let mut best_hit = None;
+            for node in self.scene.nodes.values() {
+                if let graph_engine::NodeData::Mesh { base_mesh, .. } = &node.data {
+                    if let Some(hit) = base_mesh.raycast(&ray, &node.world_matrix) {
+                        if best_hit.as_ref().is_none_or(|b: &geo_kernel::RaycastHit| hit.distance < b.distance) {
+                            best_hit = Some(hit);
+                        }
+                    }
+                }
+            }
+            if let Some(hit) = best_hit {
+                hit.point + hit.normal * self.live_surface_offset
+            } else if ray.direction.y.abs() > 1e-4 {
+                let t = -ray.origin.y / ray.direction.y;
+                if t > 0.0 { ray.origin + ray.direction * t } else { ray.origin + ray.direction * 5.0 }
+            } else {
+                ray.origin + ray.direction * 5.0
+            }
+        } else if ray.direction.y.abs() > 1e-4 {
             let t = -ray.origin.y / ray.direction.y;
             if t > 0.0 {
                 ray.origin + ray.direction * t

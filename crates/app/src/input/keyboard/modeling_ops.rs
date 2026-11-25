@@ -126,7 +126,28 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             true
         }
         KeyCode::KeyB => {
-            if state.ctrl_pressed && state.shift_pressed && state.interaction_mode == InteractionMode::Edit {
+            if state.alt_pressed && state.shift_pressed && state.interaction_mode == InteractionMode::Edit {
+                // MeshMachine Alt+Shift+B: Un-Bevel & Dissolve Chamfer Strip
+                if let Some(sel_id) = state.selected_node {
+                    let target_faces: Vec<FaceKey> = state.selected_faces.iter().copied().collect();
+                    if !target_faces.is_empty() {
+                        if let Some(node) = state.scene.nodes.get_mut(sel_id) {
+                            if let NodeData::Mesh { base_mesh, .. } = &mut node.data {
+                                if let Ok(n) = base_mesh.un_bevel_faces(&target_faces) {
+                                    state.sync_gpu_meshes();
+                                    state.scene.mark_dirty(sel_id);
+                                    state.set_status_message(format!("Un-Beveled {} chamfer face(s) back to crisp edge! (Ctrl+Z to Undo)", n));
+                                    state.selected_faces.clear();
+                                }
+                            }
+                        }
+                    } else {
+                        state.set_status_message("Select bevel/chamfer face(s) to un-bevel (Alt+Shift+B)");
+                    }
+                }
+                state.window.request_redraw();
+                return true;
+            } else if state.ctrl_pressed && state.shift_pressed && state.interaction_mode == InteractionMode::Edit {
                 if let Some(sel_id) = state.selected_node {
                     let target_verts: Vec<VertexKey> = if !state.selected_vertices.is_empty() {
                         state.selected_vertices.iter().copied().collect()
@@ -267,6 +288,16 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                 state.set_status_message(msg);
                 state.window.request_redraw();
             }
+            true
+        }
+        KeyCode::KeyK if state.shift_pressed || state.interaction_mode == InteractionMode::Object => {
+            if state.kitbash_modal.is_some() {
+                state.kitbash_modal = None;
+                state.set_status_message("Exited Kitbash Tool");
+            } else {
+                crate::modals::kitbash::start(state);
+            }
+            state.window.request_redraw();
             true
         }
         KeyCode::KeyK if state.interaction_mode == InteractionMode::Edit => {

@@ -523,24 +523,14 @@ pub fn render(state: &mut AppState) {
                                 state.edge_crease_modal_weight = (pct / 100.0).clamp(0.0, 1.0);
                             }
                             ui.separator();
-                            if ui.button("✓ Confirm (Enter)").clicked() {
-                                commit_edge_crease = true;
-                            }
-                            if ui.button("✕ Cancel (Esc)").clicked() {
-                                cancel_edge_crease = true;
-                            }
+                            if ui.button("✓ Confirm (Enter)").clicked() { commit_edge_crease = true; }
+                            if ui.button("✕ Cancel (Esc)").clicked() { cancel_edge_crease = true; }
                         });
                     });
             });
 
-        if commit_edge_crease {
-            crate::modals::edge_crease::commit(state);
-            return;
-        }
-        if cancel_edge_crease {
-            crate::modals::edge_crease::cancel(state);
-            return;
-        }
+        if commit_edge_crease { crate::modals::edge_crease::commit(state); return; }
+        if cancel_edge_crease { crate::modals::edge_crease::cancel(state); return; }
     }
 
     // 8. Interactive Vertex Crease Modal Banner (Blender Shift+V / OpenSubdiv Semi-Sharp Corners)
@@ -567,20 +557,55 @@ pub fn render(state: &mut AppState) {
                                 state.vertex_crease_modal_weight = (pct / 100.0).clamp(0.0, 1.0);
                             }
                             ui.separator();
-                            if ui.button("✓ Confirm (Enter)").clicked() {
-                                commit_vertex_crease = true;
-                            }
-                            if ui.button("✕ Cancel (Esc)").clicked() {
-                                cancel_vertex_crease = true;
-                            }
+                            if ui.button("✓ Confirm (Enter)").clicked() { commit_vertex_crease = true; }
+                            if ui.button("✕ Cancel (Esc)").clicked() { cancel_vertex_crease = true; }
                         });
                     });
             });
 
-        if commit_vertex_crease {
-            crate::modals::vertex_crease::commit(state);
-        } else if cancel_vertex_crease {
-            crate::modals::vertex_crease::cancel(state);
+        if commit_vertex_crease { crate::modals::vertex_crease::commit(state); }
+        else if cancel_vertex_crease { crate::modals::vertex_crease::cancel(state); }
+    }
+
+    // 9. Hardware Kitbash / Insert Mesh HUD
+    if let Some(kb) = &state.kitbash_modal {
+        let ctx = state.egui_ctx.clone();
+        let hw_label = kb.hardware_type.label();
+        let scale = kb.scale;
+        let is_sub = kb.is_subtractive;
+        let mut exit_kb = false;
+        let mut toggle_sub = false;
+
+        egui::Area::new(egui::Id::new("kitbash_hardware_hud"))
+            .anchor(egui::Align2::CENTER_TOP, egui::vec2(0.0, 48.0))
+            .order(egui::Order::Foreground)
+            .show(&ctx, |ui| {
+                egui::Frame::window(ui.style())
+                    .fill(egui::Color32::from_rgba_premultiplied(20, 24, 30, 245))
+                    .stroke(egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(255, 180, 50)))
+                    .rounding(egui::Rounding::same(6.0))
+                    .inner_margin(egui::Margin::symmetric(14.0, 7.0))
+                    .show(ui, |ui| {
+                        ui.horizontal(|ui| {
+                            ui.label(egui::RichText::new("🔩 HARDWARE INSERT").strong().color(egui::Color32::from_rgb(255, 180, 50)));
+                            ui.separator();
+                            ui.label(egui::RichText::new(hw_label).strong());
+                            ui.label(format!("Scale: {:.2}x", scale));
+                            let mode_txt = if is_sub { "✂ Socket Cut (B)" } else { "➕ Union (B)" };
+                            if ui.button(mode_txt).clicked() { toggle_sub = true; }
+                            ui.separator();
+                            ui.label(egui::RichText::new("LMB: Drop | Wheel: Scale | Tab: Cycle").weak().small());
+                            if ui.button("✕ Exit (Esc)").clicked() { exit_kb = true; }
+                        });
+                    });
+            });
+
+        if toggle_sub {
+            if let Some(kb) = &mut state.kitbash_modal { kb.is_subtractive = !kb.is_subtractive; }
+        }
+        if exit_kb {
+            state.kitbash_modal = None;
+            state.set_status_message("Exited Kitbash Tool");
         }
     }
 }

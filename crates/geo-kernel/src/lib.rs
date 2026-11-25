@@ -28,6 +28,7 @@ pub mod decimate;
 pub mod spline;
 pub mod sculpt;
 pub mod plugin;
+pub mod kitbash;
 
 pub use io::{PlmbMetadata, PlmbVersion, PLMB_MAGIC};
 pub use plugin::{
@@ -54,6 +55,7 @@ pub use decimate::{decimate_mesh, DecimateModifier, SymmQuadric};
 pub use spline::{BezierPoint, ProfileShape, Spline};
 pub use sculpt::{BrushFalloff, SculptBrush, SculptSettings};
 pub use raycast::RaycastHit;
+pub use kitbash::{Kitbash, KitbashHardwareType};
 
 
 #[cfg(test)]

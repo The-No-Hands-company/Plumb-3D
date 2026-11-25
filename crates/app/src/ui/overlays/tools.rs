@@ -493,6 +493,7 @@ pub fn render(state: &mut AppState) {
     if state.show_left_toolbar {
         let mut toggle_cutter = false;
         let mut toggle_push_pull = false;
+        let mut toggle_kitbash = false;
         let left_offset = if state.show_outliner { 235.0 } else { 15.0 };
         egui::Area::new(egui::Id::new("left_viewport_tool_strip"))
             .fixed_pos(egui::pos2(left_offset, 75.0))
@@ -530,6 +531,9 @@ pub fn render(state: &mut AppState) {
                             if ui.selectable_label(state.push_pull_tool, "⤒").on_hover_text("Direct Push-Pull (Shift+E / Click-Drag Face)").clicked() {
                                 toggle_push_pull = true;
                             }
+                            if ui.selectable_label(state.kitbash_modal.is_some(), "🔩").on_hover_text("Hardware Kitbash Tool (K / Shift+K)").clicked() {
+                                toggle_kitbash = true;
+                            }
                             if state.current_workspace == WorkspaceTemplate::Sculpting || state.interaction_mode == InteractionMode::Sculpt {
                                 if ui.selectable_label(state.interaction_mode == InteractionMode::Sculpt, "🖌").on_hover_text("Sculpt Brush").clicked() {
                                     state.interaction_mode = InteractionMode::Sculpt;
@@ -561,6 +565,14 @@ pub fn render(state: &mut AppState) {
                 crate::modals::cutter::cancel(state);
             } else {
                 crate::modals::cutter::start(state);
+            }
+        }
+        if toggle_kitbash {
+            if state.kitbash_modal.is_some() {
+                state.kitbash_modal = None;
+                state.set_status_message("Exited Kitbash Tool");
+            } else {
+                crate::modals::kitbash::start(state);
             }
         }
         if toggle_push_pull {

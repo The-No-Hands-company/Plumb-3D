@@ -174,6 +174,15 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
                 }
             });
 
+        // Live Surface Snapping (Curved Hull Retopo / Paneling)
+        let snap_surf_text = if state.live_surface_snap { "🎯 Hull Snap [ON]" } else { "🎯 Hull Snap" };
+        if ui.selectable_label(state.live_surface_snap, snap_surf_text)
+            .on_hover_text("Live Surface Constraint: Projects curves and retopo geometry onto underlying reference hulls")
+            .clicked()
+        {
+            state.live_surface_snap = !state.live_surface_snap;
+        }
+
         // Camera mode selector
         egui::ComboBox::from_id_salt("quick_camera_combo")
             .selected_text(if let Some(cam_id) = state.active_camera_node {

@@ -34,14 +34,12 @@ pub struct AppState {
     pub lock_camera_to_view: bool,
     pub gpu_mesh_cache: HashMap<NodeId, GpuMesh>,
     pub gpu_texture_bind_groups: HashMap<String, wgpu::BindGroup>,
-
     // 3D Transform Gizmo
     pub gizmo: TransformGizmo,
     pub transform_orientation: TransformOrientation,
     pub hovered_gizmo_axis: Option<GizmoAxis>,
     pub active_gizmo_axis: Option<GizmoAxis>,
     pub drag_start_transform: Option<Transform>,
-
     // Scene & Selection
     pub scene: SceneGraph,
     pub selected_node: Option<NodeId>,
@@ -65,7 +63,7 @@ pub struct AppState {
     pub box_select_start: Option<(f32, f32)>,
     pub box_select_current: Option<(f32, f32)>,
 
-    // Snapping (Blender Shift+Tab / Grid, Vertex, Edge, Face)
+    // Snapping (Blender Shift+Tab / Grid, Vertex, Edge, Face) & Live Surface Retopo
     pub snap_enabled: bool,
     pub snap_target: SnapTarget,
     pub snap_to_grid: bool,
@@ -73,6 +71,8 @@ pub struct AppState {
     pub snap_angle: bool,
     pub angle_snap_degrees: f32,
     pub snap_distance_threshold: f32,
+    pub live_surface_snap: bool,
+    pub live_surface_offset: f32,
     pub last_snap_hit: Option<(Vec3, &'static str)>,
 
     // Interactive Knife Tool (Blender 'K' / Maya Multi-Cut)
@@ -131,14 +131,13 @@ pub struct AppState {
     pub vertex_crease_modal_vertices: Vec<VertexKey>,
     pub vertex_crease_modal_original_weights: Vec<(VertexKey, f32)>,
 
-    // UV Editor Window & Tools (Blender / Maya Style) & Cutter Modal
+    // UV Editor Window & Tools (Blender / Maya Style), Cutter & Kitbash Modals
     pub show_uv_editor: bool, pub smart_uv_angle_threshold: f32, pub smart_uv_margin: f32,
     pub cutter_modal: Option<crate::modals::cutter::CutterModalState>,
+    pub kitbash_modal: Option<crate::modals::kitbash::KitbashModalState>,
 
     // Viewport Shelves & Sidebars
-    pub show_outliner: bool,
-    pub show_inspector: bool,
-    pub show_left_toolbar: bool,
+    pub show_outliner: bool, pub show_inspector: bool, pub show_left_toolbar: bool,
 
     // RMB Context Menu (Blender / Maya / Plasticity Style)
     pub show_context_menu: bool,
@@ -444,6 +443,8 @@ impl AppState {
             snap_angle: false,
             angle_snap_degrees: 15.0,
             snap_distance_threshold: 0.4,
+            live_surface_snap: false,
+            live_surface_offset: 0.001,
             last_snap_hit: None,
             knife_active: false,
             knife_points: Vec::new(),
@@ -488,10 +489,8 @@ impl AppState {
             vertex_crease_modal_vertices: Vec::new(),
             vertex_crease_modal_original_weights: Vec::new(),
             show_uv_editor: false, smart_uv_angle_threshold: 66.0, smart_uv_margin: 0.02,
-            cutter_modal: None,
-            show_outliner: true,
-            show_inspector: true,
-            show_left_toolbar: true,
+            cutter_modal: None, kitbash_modal: None,
+            show_outliner: true, show_inspector: true, show_left_toolbar: true,
             show_context_menu: false,
             context_menu_pos: None,
             show_help_dialog: false,

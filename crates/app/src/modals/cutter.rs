@@ -133,7 +133,10 @@ pub fn commit(state: &mut AppState) {
                 }
                 local_cutter.update_normals();
 
+                base_mesh.stash_normals();
                 if let Ok(mut new_mesh) = base_mesh.boolean(&local_cutter, cutter.operation) {
+                    new_mesh.stashed_normals = base_mesh.stashed_normals.clone();
+                    new_mesh.transfer_stashed_normals(0.25);
                     new_mesh.update_face_weighted_normals(true);
                     *base_mesh = new_mesh;
                     state.sync_gpu_meshes();

@@ -12,6 +12,7 @@ pub mod spatial;
 pub mod symmetrize;
 pub mod topology;
 pub mod types;
+pub mod un_bevel;
 pub mod weld_clean;
 
 pub use types::*;

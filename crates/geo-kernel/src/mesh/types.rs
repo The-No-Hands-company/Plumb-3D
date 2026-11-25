@@ -187,4 +187,5 @@ pub struct Mesh {
     pub faces: SlotMap<FaceKey, Face>,
     pub half_edges: SlotMap<HalfEdgeKey, HalfEdge>,
     pub vertex_groups: Vec<VertexGroup>,
+    pub stashed_normals: Option<Vec<(Vec3, Vec3)>>,
 }

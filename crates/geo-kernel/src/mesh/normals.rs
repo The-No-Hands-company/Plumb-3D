@@ -203,6 +203,51 @@ impl Mesh {
         self.update_normals();
         Ok(())
     }
+
+    /// Stashes the current vertex positions and pristine normals (MeshMachine / HardOps style).
+    /// Used by hard-surface workflows before complex boolean cuts so pristine surface curvature
+    /// can be projected back onto cut vertices.
+    pub fn stash_normals(&mut self) {
+        let samples = self
+            .vertices
+            .values()
+            .map(|v| (v.position, v.normal))
+            .collect();
+        self.stashed_normals = Some(samples);
+    }
+
+    /// Transfers stashed curvature normals to the current vertices within `max_dist`.
+    /// Finds the nearest stashed sample and projects the pristine curvature normal back.
+    /// Returns the number of vertices that received transferred normals.
+    pub fn transfer_stashed_normals(&mut self, max_dist: f32) -> usize {
+        let samples = match &self.stashed_normals {
+            Some(s) if !s.is_empty() => s.clone(),
+            _ => return 0,
+        };
+
+        let max_dist_sq = max_dist * max_dist;
+        let mut transferred_count = 0;
+
+        for v in self.vertices.values_mut() {
+            let mut best_dist_sq = f32::MAX;
+            let mut best_normal = Vec3::ZERO;
+
+            for &(stashed_pos, stashed_norm) in &samples {
+                let d_sq = (v.position - stashed_pos).length_squared();
+                if d_sq < best_dist_sq {
+                    best_dist_sq = d_sq;
+                    best_normal = stashed_norm;
+                }
+            }
+
+            if best_dist_sq <= max_dist_sq && best_normal.length_squared() > 1e-4 {
+                v.normal = best_normal.normalize();
+                transferred_count += 1;
+            }
+        }
+
+        transferred_count
+    }
 }
 
 #[cfg(test)]
@@ -216,5 +261,27 @@ mod tests {
         for v in cube.vertices.values() {
             assert!(v.normal.length() > 0.99 && v.normal.length() < 1.01);
         }
+    }
+
+    #[test]
+    fn test_normal_stash_and_transfer() {
+        let mut cylinder = Primitives::create_cylinder(1.0, 2.0, 16);
+        cylinder.update_normals();
+
+        // Stash the pristine cylindrical curvature normals
+        cylinder.stash_normals();
+        assert!(cylinder.stashed_normals.is_some());
+        assert_eq!(cylinder.stashed_normals.as_ref().unwrap().len(), cylinder.vertices.len());
+
+        // Corrupt one vertex normal (simulating a messy boolean cut)
+        let vk = cylinder.vertices.keys().next().unwrap();
+        let pristine_norm = cylinder.vertices[vk].normal;
+        cylinder.vertices[vk].normal = core_math::Vec3::new(1.0, 0.0, 0.0);
+
+        // Transfer stashed normals back
+        let transferred = cylinder.transfer_stashed_normals(0.1);
+        assert!(transferred >= 1);
+        let restored_norm = cylinder.vertices[vk].normal;
+        assert!((restored_norm - pristine_norm).length() < 1e-4);
     }
 }
