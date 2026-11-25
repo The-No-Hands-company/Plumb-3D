@@ -210,9 +210,7 @@ const COMMAND_LIST: &[PaletteItem] = &[
         category: "CAD",
         shortcut: "File > Print",
         keywords: &["3d print", "slicer", "stl", "manifold", "watertight check", "wall thickness"],
-        action: PaletteAction::TriggerAction(|state, _| {
-            state.print_inspector.show_dialog = true;
-        }),
+        action: PaletteAction::TriggerAction(|state, _| { state.print_inspector.show_dialog = true; }),
     },
     // --- File & Project ---
     PaletteItem {
@@ -220,34 +218,35 @@ const COMMAND_LIST: &[PaletteItem] = &[
         category: "File",
         shortcut: "Ctrl+S",
         keywords: &["save", "plmb", "project", "store", "export plmb"],
-        action: PaletteAction::TriggerAction(|_, actions| {
-            actions.export_plmb = true;
-        }),
+        action: PaletteAction::TriggerAction(|_, a| { a.export_plmb = true; }),
     },
     PaletteItem {
         name: "Export Active Mesh as glTF 2.0 (.gltf)",
         category: "File",
         shortcut: "Ctrl+E",
         keywords: &["export", "gltf", "glb", "web 3d", "game engine"],
-        action: PaletteAction::TriggerAction(|_, actions| {
-            actions.export_gltf = true;
-        }),
+        action: PaletteAction::TriggerAction(|_, a| { a.export_gltf = true; }),
     },
     PaletteItem {
         name: "Export Active Mesh as STL for 3D Printing",
         category: "File",
         shortcut: "Ctrl+Shift+S",
         keywords: &["stl", "3d print", "export stl", "slicer", "bambu", "prusa"],
-        action: PaletteAction::TriggerAction(|_, actions| {
-            actions.export_stl = true;
-        }),
+        action: PaletteAction::TriggerAction(|_, a| { a.export_stl = true; }),
     },
     PaletteItem {
         name: "Export Active Mesh as CAD STEP Solid (.step)",
         category: "File",
         shortcut: "File > Export",
         keywords: &["step", "stp", "cad solid", "brep", "solidworks", "cnc", "cam"],
-        action: PaletteAction::TriggerAction(|_, actions| { actions.export_step = true; }),
+        action: PaletteAction::TriggerAction(|_, a| { a.export_step = true; }),
+    },
+    PaletteItem {
+        name: "Export Active Mesh as Pixar OpenUSD (.usda)",
+        category: "File",
+        shortcut: "File > Export",
+        keywords: &["usd", "usda", "openusd", "pixar", "houdini", "unreal", "materialx"],
+        action: PaletteAction::TriggerAction(|_, a| { a.export_usd = true; }),
     },
     PaletteItem {
         name: "Welcome & Quick-Start Hub",

@@ -27,6 +27,9 @@ pub mod uv;
 pub mod decimate;
 pub mod spline;
 pub mod sculpt;
+pub mod sculpt_dyntopo;
+pub mod texture_paint;
+pub mod xpbd_cloth;
 pub mod plugin;
 pub mod kitbash;
 
@@ -54,6 +57,11 @@ pub use subdivision::CatmullClarkModifier;
 pub use decimate::{decimate_mesh, DecimateModifier, SymmQuadric};
 pub use spline::{BezierPoint, ProfileShape, Spline};
 pub use sculpt::{BrushFalloff, SculptBrush, SculptSettings};
+pub use sculpt_dyntopo::{DyntopoDetailMode, DyntopoMode, DyntopoSettings, DyntopoStats};
+pub use texture_paint::{PaintBlendMode, PaintChannel, PaintTexture, TexturePaintBrush};
+pub use xpbd_cloth::{
+    SphereCollider, XpbdBendingConstraint, XpbdClothSimulator, XpbdDistanceConstraint, XpbdParticle,
+};
 pub use raycast::RaycastHit;
 pub use kitbash::{Kitbash, KitbashHardwareType};
 

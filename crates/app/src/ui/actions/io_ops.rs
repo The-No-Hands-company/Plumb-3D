@@ -151,6 +151,21 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         }
     }
 
+    // 10. Handle Pixar OpenUSD ASCII Export with native file dialog
+    if actions.export_usd {
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Pixar OpenUSD (*.usda)", &["usda", "usd"])
+                .set_file_name(format!("{}.usda", name))
+                .save_file()
+            {
+                if mesh.export_usda_file(&path, &name).is_ok() {
+                    state.set_status_message(format!("🎬 Exported Pixar OpenUSD to: {}", path.display()));
+                }
+            }
+        }
+    }
+
     // In-memory imports (for programmatic samples or drag-and-drop bytes)
     handle_direct_memory_imports(state, actions);
 }
