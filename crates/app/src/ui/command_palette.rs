@@ -243,6 +243,13 @@ const COMMAND_LIST: &[PaletteItem] = &[
         }),
     },
     PaletteItem {
+        name: "Export Active Mesh as CAD STEP Solid (.step)",
+        category: "File",
+        shortcut: "File > Export",
+        keywords: &["step", "stp", "cad solid", "brep", "solidworks", "cnc", "cam"],
+        action: PaletteAction::TriggerAction(|_, actions| { actions.export_step = true; }),
+    },
+    PaletteItem {
         name: "Welcome & Quick-Start Hub",
         category: "App",
         shortcut: "F2",

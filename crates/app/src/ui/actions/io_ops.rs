@@ -136,6 +136,21 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         }
     }
 
+    // 9. Handle CAD STEP Solid Export with native file dialog
+    if actions.export_step {
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("CAD STEP Solid (*.step, *.stp)", &["step", "stp"])
+                .set_file_name(format!("{}.step", name))
+                .save_file()
+            {
+                if mesh.export_step_file(&path).is_ok() {
+                    state.set_status_message(format!("📐 Exported CAD Solid STEP to: {}", path.display()));
+                }
+            }
+        }
+    }
+
     // In-memory imports (for programmatic samples or drag-and-drop bytes)
     handle_direct_memory_imports(state, actions);
 }

@@ -1,8 +1,11 @@
+pub mod auto_uv;
 pub mod bevel;
+pub mod cable;
 pub mod cutting;
 pub mod decal;
 pub mod deformation;
 pub mod extrude;
+pub mod field_remesh;
 pub mod flow_guide;
 pub mod generation;
 pub mod remesh_tables;
@@ -20,5 +23,6 @@ pub mod weld_bead;
 pub mod weld_clean;
 
 pub use types::*;
+pub use cable::CableGenerator;
 pub use variable_bevel::FilletContinuity;
 pub use weld_bead::WeldStyle;

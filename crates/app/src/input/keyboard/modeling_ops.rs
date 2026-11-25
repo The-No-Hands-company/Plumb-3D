@@ -538,6 +538,19 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             }
             true
         }
+        KeyCode::KeyC if state.ctrl_pressed && state.shift_pressed => {
+            let p_a = Vec3::new(-1.0, 1.0, 0.0);
+            let p_b = Vec3::new(1.0, 1.0, 0.0);
+            let cable_mesh = geo_kernel::CableGenerator::create_cable(p_a, p_b, 0.04, 0.25, 12, 8);
+            let name = format!("HydraulicHose_{}", state.scene.nodes.len());
+            let node = graph_engine::SceneNode::new_mesh(name, core_math::Transform::IDENTITY, cable_mesh);
+            let id = state.scene.add_node(node);
+            state.selected_node = Some(id);
+            state.sync_gpu_meshes();
+            state.set_status_message("✨ Dynamic Hydraulic Cable with Fittings Created (Ctrl+Shift+C)");
+            state.window.request_redraw();
+            true
+        }
         KeyCode::KeyC if !state.curve_pen_active => {
             crate::modals::cutter::start(state);
             true
