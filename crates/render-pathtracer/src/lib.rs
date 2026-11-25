@@ -18,6 +18,7 @@ pub mod baker;
 pub mod bvh;
 pub mod camera;
 pub mod gpu_pathtracer;
+pub mod hardware_rt;
 pub mod integrator;
 pub mod material;
 pub mod post_process;
@@ -33,6 +34,10 @@ pub use camera::PathtracerCamera;
 pub use gpu_pathtracer::{
     pack_scene_for_gpu, GpuBvhNode, GpuCameraUniform, GpuMaterial, GpuTriangle,
     GPU_PATHTRACER_WGSL,
+};
+pub use hardware_rt::{
+    evaluate_hardware_rt_speedup, BlasGeometryDesc, HardwareRtProfile, RtPerformanceReport,
+    TlasInstanceDesc, HARDWARE_RAY_QUERY_WGSL,
 };
 pub use integrator::trace_path;
 pub use material::{BsdfSample, Material};

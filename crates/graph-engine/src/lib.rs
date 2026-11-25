@@ -21,6 +21,7 @@ pub mod physics;
 pub mod scene;
 pub mod usda;
 pub mod collab;
+pub mod motion_matching;
 
 pub use animation::{AnimationManager, AnimationTrack, InterpolationMode, Keyframe, TransformTrack};
 pub use constraint::{AimConstraint, Constraint, ConstraintStack, ParentConstraint, PathConstraint};
@@ -35,6 +36,10 @@ pub use usda::{
     import_scene_from_usda_file,
 };
 pub use collab::{CollabChatEntry, CollabMessage, CollabSession, CollabUser};
+pub use motion_matching::{
+    InertializationBlend, MotionDatabase, MotionFeatureWeights, MotionMatchingController,
+    MotionPose, TrajectorySample,
+};
 
 #[cfg(test)]
 mod tests;

@@ -45,30 +45,21 @@ const COMMAND_LIST: &[PaletteItem] = &[
         category: "Modeling",
         shortcut: "E",
         keywords: &["extrude", "push", "pull", "expand", "faces"],
-        action: PaletteAction::TriggerAction(|state, actions| {
-            state.interaction_mode = InteractionMode::Edit;
-            actions.trigger_extrude = true;
-        }),
+        action: PaletteAction::TriggerAction(|state, actions| { state.interaction_mode = InteractionMode::Edit; actions.trigger_extrude = true; }),
     },
     PaletteItem {
         name: "Bevel Edges / Vertices",
         category: "Modeling",
         shortcut: "Ctrl+B",
         keywords: &["bevel", "chamfer", "round", "fillet", "smooth corners", "edges"],
-        action: PaletteAction::TriggerAction(|state, actions| {
-            state.interaction_mode = InteractionMode::Edit;
-            actions.trigger_bevel = true;
-        }),
+        action: PaletteAction::TriggerAction(|state, actions| { state.interaction_mode = InteractionMode::Edit; actions.trigger_bevel = true; }),
     },
     PaletteItem {
         name: "Inset Faces",
         category: "Modeling",
         shortcut: "I",
         keywords: &["inset", "inner face", "offset", "border"],
-        action: PaletteAction::TriggerAction(|state, actions| {
-            state.interaction_mode = InteractionMode::Edit;
-            actions.trigger_inset = true;
-        }),
+        action: PaletteAction::TriggerAction(|state, actions| { state.interaction_mode = InteractionMode::Edit; actions.trigger_inset = true; }),
     },
     PaletteItem {
         name: "Loop Cut and Slide",
@@ -85,40 +76,28 @@ const COMMAND_LIST: &[PaletteItem] = &[
         category: "Modeling",
         shortcut: "K",
         keywords: &["knife", "cut", "slice", "polygon cut", "multi-cut"],
-        action: PaletteAction::TriggerAction(|state, _| {
-            state.interaction_mode = InteractionMode::Edit;
-            state.knife_active = true;
-        }),
+        action: PaletteAction::TriggerAction(|state, _| { state.interaction_mode = InteractionMode::Edit; state.knife_active = true; }),
     },
     PaletteItem {
         name: "Subdivide Mesh / Faces",
         category: "Modeling",
         shortcut: "W -> Subd",
         keywords: &["subdivide", "subdiv", "smooth", "increase density", "resolution"],
-        action: PaletteAction::TriggerAction(|state, actions| {
-            state.interaction_mode = InteractionMode::Edit;
-            actions.add_subdivide_to_selected = true;
-        }),
+        action: PaletteAction::TriggerAction(|state, actions| { state.interaction_mode = InteractionMode::Edit; actions.add_subdivide_to_selected = true; }),
     },
     PaletteItem {
         name: "Merge Vertices at Center",
         category: "Modeling",
         shortcut: "M",
         keywords: &["merge", "weld", "collapse", "center", "join vertices"],
-        action: PaletteAction::TriggerAction(|state, actions| {
-            state.interaction_mode = InteractionMode::Edit;
-            actions.trigger_merge_vertices = true;
-        }),
+        action: PaletteAction::TriggerAction(|state, actions| { state.interaction_mode = InteractionMode::Edit; actions.trigger_merge_vertices = true; }),
     },
     PaletteItem {
         name: "Relax / Smooth Vertices (Laplacian)",
         category: "Modeling",
         shortcut: "Alt+R",
         keywords: &["relax", "smooth", "laplacian", "straighten", "distribute evenly"],
-        action: PaletteAction::TriggerAction(|state, actions| {
-            state.interaction_mode = InteractionMode::Edit;
-            actions.trigger_relax_vertices = true;
-        }),
+        action: PaletteAction::TriggerAction(|state, actions| { state.interaction_mode = InteractionMode::Edit; actions.trigger_relax_vertices = true; }),
     },
     PaletteItem {
         name: "Spin / Revolve Geometry 360°",
@@ -261,6 +240,22 @@ const COMMAND_LIST: &[PaletteItem] = &[
         shortcut: "File > Export",
         keywords: &["gcode", "slicer", "toolpath", "3d print", "bambu", "prusa", "creality"],
         action: PaletteAction::TriggerAction(|_, a| { a.export_gcode = true; }),
+    },
+    PaletteItem {
+        name: "Toggle OpenXR Spatial Computing (VR 6-DoF)",
+        category: "View",
+        shortcut: "Window > OpenXR",
+        keywords: &["xr", "openxr", "vr", "spatial", "headset", "immersive", "vision pro", "quest"],
+        action: PaletteAction::TriggerAction(|s, _| { s.xr_session.is_active = !s.xr_session.is_active; }),
+    },
+    PaletteItem {
+        name: "Step Inertial Motion Matching Locomotion",
+        category: "Animation",
+        shortcut: "Animation > Motion",
+        keywords: &["motion matching", "locomotion", "sprint", "run", "walk", "inertialization"],
+        action: PaletteAction::TriggerAction(|s, _| {
+            s.motion_matching.step(0.016, core_math::Vec2::new(0.0, 1.0));
+        }),
     },
     PaletteItem {
         name: "Welcome & Quick-Start Hub",

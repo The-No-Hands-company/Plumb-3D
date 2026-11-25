@@ -18,6 +18,7 @@ pub mod renderer;
 pub mod rtao;
 pub mod npr;
 pub mod shaders;
+pub mod spatial_xr;
 pub mod types;
 
 pub use camera::{CameraProjection, ViewportCamera};
@@ -25,6 +26,7 @@ pub use gizmo::{GizmoAxis, GizmoMode, TransformGizmo, TransformOrientation};
 pub use renderer::ViewportRenderer;
 pub use rtao::{RtaoKernel, RtaoSettings};
 pub use npr::{NprPipeline, NprSettings};
+pub use spatial_xr::{SpatialController, SpatialModelingSession, SpatialToolMode, StereoRig};
 pub use types::{
     GpuLight, GpuMesh, LightsUniform, MeshDrawCall, SubMeshMaterial, TonemappingMode, ViewportShadingMode,
     MAX_SCENE_LIGHTS,
