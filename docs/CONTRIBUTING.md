@@ -1,6 +1,6 @@
-# Contributing to DCC Suite
+# Contributing to Plumb 3D
 
-Thank you for your interest in contributing to the pure-Rust DCC Suite! This guide outlines our architectural standards, code style, testing expectations, and contribution process.
+Thank you for your interest in contributing to Plumb 3D! This guide outlines our architectural standards, code style, testing expectations, and contribution process.
 
 ---
 

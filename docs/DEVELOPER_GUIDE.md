@@ -1,16 +1,16 @@
-# DCC Suite Developer Guide & Architectural Manual
+# Plumb 3D Developer Guide & Architectural Manual
 
-This document is the authoritative engineering manual for developers contributing to or maintaining the DCC Suite codebase.
+This document is the authoritative engineering manual for developers contributing to or maintaining the Plumb 3D codebase.
 
 ---
 
 ## 1. System Architecture & Crate Decomposition
 
-The workspace is organized as a clean multi-crate Cargo workspace adhering to strict **Separation of Concerns (SoC)** and the **Zero Foreign C/C++ FFI** principle.
+The workspace is organized as a clean multi-crate Cargo workspace adhering to strict **Separation of Concerns (SoC)**, the **Zero Foreign C/C++ FFI** principle, and 100% Pure Safe Rust.
 
 ```text
                                ┌─────────────┐
-                               │     app     │ (Winit, egui, Modals, Commands, Rhai)
+                               │     app     │ (Winit, egui, egui_dock, Modals, Commands, Rhai)
                                └──────┬──────┘
                                       │
          ┌────────────────────────────┼───────────────────────────┐
@@ -25,12 +25,12 @@ The workspace is organized as a clean multi-crate Cargo workspace adhering to st
                                      │
                                      ▼
                           ┌─────────────────────┐
-                          │    graph-engine     │ (Maya DAG, Constraints, IK)
+                          │    graph-engine     │ (Maya DAG, Constraints, 2-Bone IK, CCD)
                           └──────────┬──────────┘
                                      │
                                      ▼
                           ┌─────────────────────┐
-                          │     geo-kernel      │ (BMesh, Modifiers, Sculpt, IO)
+                          │     geo-kernel      │ (BMesh, Modifiers, Sculpt, Splines, UV)
                           └──────────┬──────────┘
                                      │
                                      ▼
@@ -40,10 +40,11 @@ The workspace is organized as a clean multi-crate Cargo workspace adhering to st
 ```
 
 ### Engineering Rules & Code Invariants
-1. **Zero Foreign C/C++ FFI**: All algorithms, data structures, math, windowing, and rendering pipelines are 100% safe pure Rust.
-2. **File Length Discipline (~600-700 Line Limit)**: No operational source file may exceed ~650-700 lines. Monolithic files must be decomposed into focused submodules with explicit single responsibilities.
-3. **Zero Compiler Warnings**: All crates must pass `cargo check --workspace` and `cargo test --workspace` with **0 warnings** and **0 errors**.
-4. **Deterministic Topologic Invariants**: Every topological mutation must preserve 2-manifold half-edge integrity and Euler characteristics.
+1. **100% Pure Safe Rust (`zero unsafe`)**: All algorithms, data structures, math, windowing, and rendering pipelines are pure safe Rust. Zero `unsafe` blocks across all 7 workspace crates.
+2. **Strict Zajfan Engineering Line Ceiling ($\le 630$ Lines)**: Every single `.rs` source file must strictly adhere to the $\le 630$ line ceiling. Monolithic files must be decomposed into focused submodules with explicit single responsibilities.
+3. **Zero Compiler & Clippy Warnings**: All crates must pass `cargo check --workspace`, `cargo test --workspace`, and `cargo clippy --workspace -- -D warnings` with **0 warnings** and **0 errors**.
+4. **Deterministic Topologic Invariants**: Every topological mutation must preserve 2-manifold half-edge integrity and Euler characteristics ($V - E + F = 2(1 - g)$).
+5. **Clean Typography**: 100% 7-bit ASCII typography throughout the entire UI subsystem to prevent font fallback tofu glyphs (`[ ]`).
 
 ---
 
@@ -98,122 +99,36 @@ pub trait Modifier: std::fmt::Debug + Send + Sync {
 1. **Define the Struct**: Create a new file under `crates/geo-kernel/src/modifiers/generate/` or `deform/`:
    ```rust
    #[derive(Debug, Clone)]
-   pub struct MyCustomModifier {
-       pub factor: f32,
+   pub struct MyModifier {
+       pub parameter: f32,
        pub enabled: bool,
    }
    ```
-2. **Implement the `Modifier` Trait**:
-   ```rust
-   impl Modifier for MyCustomModifier {
-       fn name(&self) -> &str { "Custom Modifier" }
-       fn apply(&self, mesh: &mut Mesh) {
-           if !self.enabled { return; }
-           // Perform parametric mutation on mesh
-       }
-       fn is_enabled(&self) -> bool { self.enabled }
-       fn set_enabled(&mut self, enabled: bool) { self.enabled = enabled; }
-       fn clone_box(&self) -> Box<dyn Modifier> { Box::new(self.clone()) }
-   }
-   ```
-3. **Expose Downcasting (if inspector controls are needed)**:
-   Add `as_my_custom_mut(&mut self) -> Option<&mut MyCustomModifier>` to the `Modifier` trait.
-4. **Register in UI**: Add UI sliders inside [`crates/app/src/ui/inspector/modifiers.rs`](../crates/app/src/ui/inspector/modifiers.rs).
+2. **Implement `Modifier`**: Implement `name()`, `apply()`, `is_enabled()`, `set_enabled()`, and `clone_box()`.
+3. **Register in Stack**: Register the new modifier variant in `ModifierType` enum and the inspector UI.
 
 ---
 
-## 4. Maya DAG Scene Graph & Rigging (`graph-engine`)
+## 4. Testing & Verification
 
-The scene graph in [`graph-engine`](../crates/graph-engine/) evaluates a Directed Acyclic Graph:
-
-- **Node Hierarchy**: Each `Node` contains `parent: Option<NodeId>`, `children: Vec<NodeId>`, `local_transform: Transform`, and `world_matrix: Mat4`.
-- **Dirty Flagging**: Modifications to a node's local transform mark its dirty flag and recursively propagate to all descendants.
-- **Evaluation Pipeline**:
-  $$\mathbf{M}_{\text{world}} = \mathbf{M}_{\text{parent\_world}} \times \mathbf{M}_{\text{local}}$$
-- **Constraints Stack**: Evaluated sequentially:
-  - `AimConstraint`: Computes rotation quaternion orienting forward axis toward target node with an up-vector.
-  - `ParentConstraint`: Replicates parent-child transform tracking with offset preservation.
-  - `PathConstraint`: Parameterizes position along a spline curve.
-- **IK Solvers**:
-  - `Analytic2BoneIK`: Closed-form trigonometric law-of-cosines joint calculation for humanoid limbs.
-  - `CyclicCoordinateDescentIK (CCD)`: Iterative gradient-free multi-bone chain solver.
-
----
-
-## 5. Visual Geometry Nodes (`geo-nodes`)
-
-The visual node editor in [`crates/geo-nodes`](../crates/geo-nodes/) allows node graph composition:
-
-- **Graph Structure**: `GeoNodeGraph` stores `nodes: HashMap<NodeId, GeoNode>` and `connections: Vec<NodeConnection>`.
-- **Topological Sorting**: Evaluates dependencies using **Kahn's Algorithm**. Cycles are rejected at connection time via DFS cycle detection (`can_connect`).
-- **Dataflow Sockets**:
-  - `SocketType::Geometry`: Carries a complete `geo_kernel::Mesh`.
-  - `SocketType::Vector`: Carries `core_math::Vec3`.
-  - `SocketType::Float`: Carries `f32`.
-  - `SocketType::Transform`: Carries `core_math::Transform`.
-- **Modifier Bridge**: The `GeometryNodesModifier` holds an internal `GeoNodeGraph` and executes it during the object's modifier stack pass.
-
----
-
-## 6. Real-Time Viewport Pipeline (`render-viewport`)
-
-The interactive viewport uses **wgpu 23**:
-
-- **Forward Rasterization**:
-  - Vertex layout: `[position: [f32; 3], normal: [f32; 3], uv: [f32; 2], color: [f32; 4]]`.
-  - Shaders written in WGSL (`shaders.rs`).
-- **Uniform Bind Groups**:
-  - `@group(0) @binding(0)`: `CameraUniform` (`view_proj`, `eye_pos`, `viewport_params`).
-  - `@group(1) @binding(0)`: `ModelUniform` (`model`, `color`, `material`).
-- **3D Transform Gizmos**:
-  - Scaled adaptively in screen space: $\text{scale} \propto \|\mathbf{p}_{\text{eye}} - \mathbf{p}_{\text{gizmo}}\|$.
-  - Rendered with depth test enabled but depth write disabled to maintain clear overlay visibility without self-occlusion artifacts.
-
----
-
-## 7. Production Path Tracer (`render-pathtracer`)
-
-The offline Monte Carlo path tracer operates headlessly on CPU threads using **Rayon**:
-
-- **Spatial Acceleration**:
-  - Surface Area Heuristic (SAH) Bounding Volume Hierarchy (**BVH**).
-  - Traverses ray intersections in $O(\log N)$ time against scene triangles using the Möller-Trumbore algorithm.
-- **Microfacet BSDF**:
-  - Cook-Torrance specular distribution with GGX normal distribution function (NDF):
-    $$D(h) = \frac{\alpha^2}{\pi ((n \cdot h)^2 (\alpha^2 - 1) + 1)^2}$$
-  - Smith geometric shadowing/masking function: $G(l, v, h)$.
-  - Schlick Fresnel approximation: $F(\theta) = F_0 + (1 - F_0)(1 - \cos \theta)^5$.
-  - Dielectric glass transmission refraction via Snell's Law.
-- **Thin-Lens Physical Camera**:
-  - Pinhole rays are jittered across a disk aperture with radius $R_{\text{lens}}$ and converged at focal plane distance $d_{\text{focus}}$ to simulate optical depth of field and bokeh.
-- **Progressive Accumulation**:
-  - Progressive accumulation buffer storing high-dynamic-range floating-point values:
-    $$\bar{C}_{N} = \frac{N-1}{N} \bar{C}_{N-1} + \frac{1}{N} C_{\text{sample}}$$
-
----
-
-## 8. Modal State Machine Pattern (`app::modals`)
-
-Interactive viewport operations (Extrude, Bevel, Inset, Knife, LoopCut, Crease) are implemented as isolated modal state machines:
-
-1. Hotkey triggers modal (e.g. `KeyCode::KeyE` sets `extrude_modal_active = true`).
-2. Input routers in [`crates/app/src/input/`](../crates/app/src/input/) check `crate::modals::handle_mouse_input` and `crate::modals::handle_cursor_moved` first.
-3. If an interactive modal is active, it consumes the event and short-circuits general viewport navigation.
-4. Dragging adjusts parameters dynamically.
-5. `LMB` / `Enter` commits the operation by pushing an undoable `Command` to the history stack.
-6. `Esc` / `RMB` cancels the operation and reverts geometry.
-
----
-
-## 9. Testing & Quality Assurance
-
-Run the test suite across the entire workspace:
+Plumb 3D maintains a rigorous test suite of **281 passing unit and integration tests**:
 
 ```bash
-# Run all unit and integration tests
+# Run all workspace unit & integration tests
 cargo test --workspace
 
-# Validate zero compiler warnings
-cargo check --workspace --all-targets
+# Run Clippy with zero warnings allowed
+cargo clippy --workspace -- -D warnings
+
+# Check file line limits
+python3 -c '
+import os
+for root, _, files in os.walk("crates"):
+    for f in files:
+        if f.endswith(".rs"):
+            p = os.path.join(root, f)
+            with open(p) as fl:
+                n = len(fl.readlines())
+                if n > 630: print(f"VIOLATION: {n} lines: {p}")
+'
 ```
-All unit tests must pass before opening a pull request.

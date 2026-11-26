@@ -4,6 +4,32 @@ All notable changes to the Plumb 3D DCC Suite are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-26 - The Hardened DCC Studio Release
+
+### Added
+- **Drag-and-Drop Dockable Workspace (`egui_dock`)**:
+  - Full tab rearranging and panel docking across Viewport, Outliner, Inspector, Geometry Nodes, 2D UV Editor, Timeline, and Script Console.
+  - Transparent 3D viewport canvas integration preventing render-pass occlusions.
+- **UV Island Parameterization & ABF++ Distortion Analysis**:
+  - Per-face angular and area stretch distortion heatmap visualization directly on 2D UV charts.
+  - Interactive 2D Seam Cut Mode: Click edges directly in the 2D UV canvas to cut or clear seams in real-time.
+- **CAD Precision Splines & NURBS**:
+  - Multi-segment 3D cubic Bézier boolean spline trimming and parametric knot splitting.
+  - Interactive tangent arc snapping ($G^1$ continuity) and dynamic workplane alignment (`Alt+W`).
+  - STEP (ISO 10303-21) and Continuous NURBS export.
+- **XPBD Cloth Self-Collision Hardening**:
+  - $O(N)$ 3D spatial hash grid particle self-collision resolution preventing fabric self-penetration.
+- **Skeletal Rigging & IK Hardening**:
+  - Analytic 2-Bone IK solver with Pole Vector target, Pole Twist Angle ($-180^\circ$ to $+180^\circ$), and FK/IK weight blend.
+- **Hardware Ray Tracing Acceleration**:
+  - Multi-million polygon BLAS partitioning into 64K-triangle chunks with strict 256-byte alignment and 64-byte TLAS instance descriptors.
+- **UI/UX Collision & Glyph Hardening**:
+  - Moved outliner parenting inside the master scroll area, eliminating status bar overflow.
+  - Replaced all non-ASCII emoji glyphs with standard 7-bit ASCII badges, eliminating font fallback tofu boxes.
+  - Right-anchored panel toggles and isolated ribbon horizontal scroll.
+  - 281 passing unit and integration tests across 7 workspace crates.
+  - Strict Zajfan Engineering Line Ceiling ($\le 630$ lines per `.rs` file) and 100% pure safe Rust (`zero unsafe`).
+
 ## [1.0.0] - 2026-11-25 - Official Launch Release
 
 ### Added

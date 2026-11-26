@@ -1,6 +1,6 @@
-# DCC Suite Beginner Modeling Tutorials
+# Plumb 3D Beginner Modeling Tutorials
 
-Welcome to the **DCC Suite Beginner Tutorials**! This guide contains 7 comprehensive, hands-on tutorials designed to teach you the fundamentals of 3D modeling, sculpting, procedural design, and rendering across different styles and industries.
+Welcome to the **Plumb 3D Beginner Tutorials**! This guide contains 7 comprehensive, hands-on tutorials designed to teach you the fundamentals of 3D modeling, sculpting, procedural design, and rendering across different styles and industries.
 
 ---
 
@@ -378,7 +378,7 @@ Welcome to the **DCC Suite Beginner Tutorials**! This guide contains 7 comprehen
 ---
 
 ## Congratulations!
-You now have mastered the essential workflows of the DCC Suite:
+You now have mastered the essential workflows of Plumb 3D:
 - **Box Modeling**: Inset (`I`), Extrude (`E`), and Bevel (`Ctrl+B`).
 - **Architectural Modeling**: Primitives, cuts, and battlements.
 - **Digital Sculpting**: Grab, Clay, Draw, Inflate, and Smooth brushes.

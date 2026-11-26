@@ -1,211 +1,255 @@
-# DCC Suite User Guide
+# Plumb 3D User Guide
 
-Welcome to the **DCC Suite User Guide**! This comprehensive manual walks you through the concepts, tools, shortcuts, and workflows of this next-generation 3D modeling and rendering package.
+Welcome to the **Plumb 3D User Guide**! This comprehensive manual walks you through the concepts, tools, shortcuts, and workflows of this next-generation 3D modeling and rendering suite engineered in 100% Safe Pure Rust.
 
 ---
 
 ## Table of Contents
-1. [User Interface Layout](#1-user-interface-layout)
+1. [User Interface Layout & Docking System](#1-user-interface-layout--docking-system)
 2. [Viewport Navigation & Camera Controls](#2-viewport-navigation--camera-controls)
 3. [Selection & Transform Gizmos](#3-selection--transform-gizmos)
 4. [Mesh Modeling & Interactive Modals](#4-mesh-modeling--interactive-modals)
-5. [Right-Click (RMB) Context Menu](#5-right-click-rmb-context-menu)
-6. [3ds Max-Style Parametric Modifier Stack](#6-3ds-max-style-parametric-modifier-stack)
-7. [Digital Sculpting Mode](#7-digital-sculpting-mode)
-8. [Precision Spline Curves & Pipes](#8-precision-spline-curves--pipes)
-9. [UV Unwrapping & 2D UV Editor](#9-uv-unwrapping--2d-uv-editor)
-10. [Visual Geometry Nodes](#10-visual-geometry-nodes)
-11. [Embedded Rhai Scripting](#11-embedded-rhai-scripting)
-12. [Offline Production Path Tracer (F12)](#12-offline-production-path-tracer-f12)
-13. [CAD & 3D Printing Export](#13-cad--3d-printing-export)
+5. [CAD Precision Drafting & NURBS Splines](#5-cad-precision-drafting--nurbs-splines)
+6. [Hard-Surface Cutters & Kitbash Modals](#6-hard-surface-cutters--kitbash-modals)
+7. [3ds Max-Style Parametric Modifier Stack](#7-3ds-max-style-parametric-modifier-stack)
+8. [Digital Sculpting & Dynamic Topology](#8-digital-sculpting--dynamic-topology)
+9. [Texture Painting & Polypaint](#9-texture-painting--polypaint)
+10. [UV Unwrapping & ABF++ Distortion Analysis](#10-uv-unwrapping--abf-distortion-analysis)
+11. [Physics, XPBD Cloth & Fluid Particles](#11-physics-xpbd-cloth--fluid-particles)
+12. [Skeletal Rigging, Constraints & 2-Bone IK](#12-skeletal-rigging-constraints--2-bone-ik)
+13. [Animation Timeline & Motion Matching](#13-animation-timeline--motion-matching)
+14. [Visual Geometry Nodes](#14-visual-geometry-nodes)
+15. [Multi-Engine Scripting (Rhai, Python, Lua)](#15-multi-engine-scripting-rhai-python-lua)
+16. [Production Path Tracer & Hardware RT](#16-production-path-tracer--hardware-rt)
+17. [CAM 3D Print Quality Inspector & Slicing](#17-cam-3d-print-quality-inspector--slicing)
 
 ---
 
-## 1. User Interface Layout
+## 1. User Interface Layout & Docking System
 
-The workspace is organized into clean, focused functional areas:
+The workspace is organized into clean, focused functional areas designed to eliminate panel overlap and visual clutter:
 
-- **Top App Menu Bar**: Provides standard desktop menus (`File`, `Edit`, `Add`, `Mode`, `Viewport`, `Shading`, `UV`, `Render`, `Window`, `Help`) along with editor quick-launch pills (`Render F12`, `Rhai Console`, `Geo Nodes`, `UV Editor`, `Help F1`).
-- **Viewport Ribbon Header**: Fast access to active Interaction Modes (`[ 📦 Object | ✏ Edit | 🎨 Sculpt | 〰 Curve ]`), Sub-Element levels (`[ ⏺ Vert | ➖ Edge | ⏹ Face ]`), Transform tools (`[ ✥ Move | ⟲ Rotate | ⤢ Scale ]`), Coordinate space (`Global / Local / Normal / View`), Shading modes, and viewport display toggles.
-- **Left Tool Strip**: Vertical quick-action shelf (Plasticity / Blender T-Shelf style) for instant switching between Select, Move, Rotate, Scale, Measure, Align, Sculpt, and specialized editors.
-- **Scene Outliner (Left Panel)**: Maya-style DAG scene graph displaying all nodes (Meshes, Lights, Cameras, Joints, Curves) in a hierarchical tree. Supports parenting, grouping, and visibility toggling. Collapsible via the `◀` header button.
-- **Properties Inspector (Right Panel)**: Deep inspector displaying Object Info, Transform parameters, PBR Material slots, the 3ds Max Modifier Stack, Vertex Groups, Constraints, and BMesh operators. Collapsible via the `▶` header button.
-- **3D Viewport**: Hardware-accelerated wgpu canvas featuring infinite ground grid, 6-Axis navigation orbit sphere, active selection outlines, and 3D transform gizmos.
-- **Animation Timeline & Dope Sheet (Bottom)**: Frame scrubber, playback controls, start/end range, and keyframe markers.
-- **Status Bar (Footer)**: Live statistics: FPS, active mode, coordinate space, camera projection, vertex/edge/face counts, and selection metrics.
+- **Top App Menu Bar**: Desktop menus (`File`, `Edit`, `Add`, `Render`, `Window`, `Help`) along with quick-access buttons (`Render F12`, `Help F1`, `Welcome F2`, `Search F3`).
+- **Workspace Ribbon Header Bar**: Quick-access pills for Interaction Modes (`Object`, `Edit`, `Sculpt`, `Curve`), Sub-Element levels (`Vert (1)`, `Edge (2)`, `Face (3)`), Transform tools (`Move (W)`, `Rotate (E)`, `Scale (R)`), Coordinate spaces (`Global`, `Local`, `Normal`, `View`), Shading modes (`Studio`, `PBR`, `Normals`, `Zebra`, `Rendered`), Snapping presets, and panel toggles.
+- **Drag-and-Drop Docking Workspace (`egui_dock`)**:
+  - Toggle via **Window -> Drag-and-Drop Docking Workspace**.
+  - Allows clicking and dragging any tab to rearrange the workspace into custom split panes.
+  - Supported dockable tabs: `3D Viewport`, `Scene Outliner`, `Inspector`, `Geometry Nodes`, `2D UV Editor`, `Animation Timeline`, and `Script Console`.
+- **Scene Outliner (Left Panel)**: Hierarchical DAG scene graph displaying Meshes, Lights, Cameras, Joints, and Splines. Features group parenting (`P`), unparenting (`Shift+P`), mesh joining (`Ctrl+J`), and integrated vertical scrolling that prevents status bar clipping.
+- **Properties Inspector (Right Panel)**: Deep inspector providing access to Transform parameters, 3ds Max Modifier Stack, PBR Shading, Brushes, Rigging Constraints, and SubD NURBS topology.
+- **Status Bar (Footer)**: Real-time telemetry: FPS, interaction mode, gizmo space, camera projection, vertex/edge/face counts, and selection counts.
 
 ---
 
 ## 2. Viewport Navigation & Camera Controls
 
-- **Orbiting**: Hold `Alt + Left Mouse Button` or press `Middle Mouse Button (MMB)` and drag to tumble the viewport around the active pivot.
-- **Panning**: Hold `Alt + MMB` or `Shift + MMB` and drag to pan horizontally and vertically.
+- **Orbiting**: Hold `Alt + Left Mouse Button` or press `Middle Mouse Button (MMB)` and drag to tumble around the active pivot.
+- **Panning**: Hold `Alt + MMB` or `Shift + MMB` and drag to pan laterally.
 - **Zooming**: Scroll the `Mouse Wheel` up/down to zoom smoothly.
 - **Focusing (`F`)**: Press `F` or `Numpad .` to instantly frame the camera view onto the selected object or sub-elements.
 - **Orthographic Snapping**:
   - `Numpad 1`: Front View
   - `Numpad 3`: Right View
   - `Numpad 7`: Top View
-  - `Numpad 5`: Toggle Perspective ⇄ Orthographic
-- **Interactive 6-Axis Compass**: Click the colored bubbles ($+X, -X, +Y, -Y, +Z, -Z$) in the top-right corner of the viewport to instantly snap the camera to that view angle, or drag the compass sphere to orbit.
+  - `Numpad 5`: Toggle Perspective / Orthographic projection
+  - `Numpad 0`: Toggle Active Camera View / Free Orbit
+- **6-Axis Navigation Compass**: Click the colored axes ($+X, -X, +Y, -Y, +Z, -Z$) in the top-right corner to snap to orthogonal projections; drag the sphere to orbit.
 
 ---
 
 ## 3. Selection & Transform Gizmos
 
 ### Selection Modes
-- **Object Mode (`Tab`)**: Click any 3D model to select it. The active object receives a bright selection wireframe and corner bounds.
-- **Edit Mode (`Tab`)**: Switch to sub-element editing. Use the number keys:
+- **Object Mode (`Tab`)**: Click any model to select it. The active object receives a bright selection wireframe and corner bounds.
+- **Edit Mode (`Tab`)**: Sub-element selection levels:
   - `1`: Vertex selection level.
   - `2`: Edge selection level.
   - `3`: Face selection level.
 - **Multi-Select**: Hold `Shift` while clicking to add or remove elements.
 - **Box Select (`B`)**: Click and drag a marquee rectangle across the screen.
 - **Select All (`A`) / Deselect All (`Alt + A`)**.
-- **Select Linked (`L`)**: Hover over or select a vertex and press `L` to select all contiguous manifold geometry.
+- **Select Linked (`L`)**: Hover over geometry and press `L` to select all connected manifold geometry.
 - **Edge Loop (`Alt + L`)**: Select continuous topological quad edge rings.
+- **Invert Selection (`Ctrl + I`)**: Invert the current selection set.
 
 ### Transform Gizmos
-- `W` (Translate): 3D arrowhead cones for $X, Y, Z$ motion, planar squares ($XY, XZ, YZ$) for planar constrained translation, and center ring for screen-parallel motion.
-- `E` (Rotate): Smooth rings around each principal axis, plus an outer trackball circle.
-- `R` (Scale): 3D cubes on axis tips for axial scaling, and a center cube for uniform 3D scale.
+- `W` (Translate): 3D arrowhead cones for axial movement, planar tiles ($XY, XZ, YZ$), and center ring for screen-space movement.
+- `E` (Rotate): Smooth rings around each principal axis with angle readout.
+- `R` (Scale): 3D cubes on axis tips for axial scaling, and a center cube for uniform scaling.
 - **Coordinate Space (`,`)**: Press `,` (Comma) to cycle between Global, Local, Normal, and View coordinates.
-- **Snapping (`Shift + Tab`)**: Snaps translation to the grid or vertex positions.
-- **Proportional Editing (`O`)**: Enables smooth soft-selection falloff.
+- **Precision Snapping (`V`)**: Toggle vertex, midpoint, face center, and grid magnetic snapping.
 
 ---
 
 ## 4. Mesh Modeling & Interactive Modals
 
-All modeling tools in Edit Mode operate on a **2-Manifold BMesh Half-Edge kernel** with undoable transactional commands (`Ctrl+Z` / `Ctrl+Y`).
+All modeling tools operate on a **2-Manifold BMesh Half-Edge kernel** with complete undo/redo history (`Ctrl+Z` / `Ctrl+Y`).
 
 ### Extrude (`E`)
-Select one or more faces (or edges) and press `E`. Drag the mouse to pull new geometry outward along surface normals. The tool dynamically constructs watertight side-wall polygons. Click `LMB` or press `Enter` to confirm; press `Esc` or `RMB` to cancel.
+Select faces (or edges) and press `E`. Drag the mouse to pull new geometry outward along surface normals. Watertight side-wall polygons are generated automatically. Click `LMB` or press `Enter` to confirm.
+
+### Direct Push-Pull (`Shift + E`)
+Select a face and press `Shift+E` (or click-drag a face directly). Extruding outward adds volume; pushing inward automatically creates recessed pockets or boolean cutouts.
 
 ### Bevel (`Ctrl + B`)
-Select edges or faces and press `Ctrl+B`. Drag the mouse to expand the bevel distance. **Scroll the Mouse Wheel** while dragging to increase or decrease the number of bevel profile segments.
+Select edges or faces and press `Ctrl+B`. Drag the mouse to expand bevel width. **Scroll the Mouse Wheel** while dragging to increase or decrease the number of bevel profile segments.
 
 ### Inset (`I`)
-Select faces and press `I`. Drag the mouse inward to create an inset boundary ring. Press `I` again during the drag to toggle between:
+Select faces and press `I`. Drag inward to create an inset boundary ring. Press `I` again during the drag to toggle between:
 - **Region Inset**: Insets the outer perimeter of contiguous selected faces as a single patch.
 - **Individual Inset**: Insets each selected face independently.
 
 ### Interactive Knife Tool (`K`)
-Press `K` to enter Knife cut mode. Move your mouse across the mesh; the crosshair snaps to vertices and edges. Click `LMB` to place cut points. Press `Enter` or `Space` to commit the cut; the engine bisects the polygons and updates half-edge twin pointers cleanly.
+Press `K` to enter Knife cut mode. The crosshair snaps to vertices and edges. Click `LMB` to place cut points. Press `Enter` or `Space` to commit the cut; the engine bisects polygons and heals half-edge twin pointers cleanly.
 
 ### Loop Cut & Slide (`Ctrl + R`)
-Press `Ctrl+R` and hover over a quad face. A cut preview ring appears perpendicular to the hovered edge. Click `LMB` to confirm the cut ring, then slide the mouse along the quad loop to position the cut. Click `LMB` again to finalize.
+Press `Ctrl+R` and hover over a quad face. A preview cut ring appears perpendicular to the hovered edge. Click `LMB` to confirm the cut ring, then slide the mouse along the loop to position the cut. Click `LMB` again to finalize.
 
-### Semi-Sharp Creasing (`Shift + E` & `Shift + V`)
-With a Subdivision or Catmull-Clark modifier active, select edges and press `Shift+E`. Drag mouse to set edge crease weights from `0.0` (fully smooth) to `1.0` (infinitely sharp). Press `Shift+V` to crease vertex corners.
-
-### Connect Vertices (`J`) & Rip (`V`)
-Select two non-adjacent vertices on a polygonal face and press `J` to split the face with a new edge. Select vertices and press `V` to rip them apart, creating a seam.
+### Bridge Edge Loops
+Select two boundary edge loops and trigger **Bridge Edge Loops** in the Mesh menu or context menu to loft connecting quad strips with twist and segment controls.
 
 ---
 
-## 5. Right-Click (RMB) Context Menu
+## 5. CAD Precision Drafting & NURBS Splines
 
-Right-click anywhere in the viewport to open a context-sensitive floating menu:
-- In **Object Mode**: Smooth/Flat shading, Recalculate Normals, Parenting, Join Meshes, Separate Loose Parts, Delete.
-- In **Edit Mode**: Instant access to Face tools (Extrude, Inset, Bevel, Poke, Triangulate, Bisect), Edge tools (Bevel, Loop Cut, Knife, Sharp, Seams, Slide), and Vertex tools.
-- In **Sculpt Mode**: Brush picker (Draw, Clay, Inflate, Smooth, Grab, etc.) with Radius and Strength sliders.
-- In **Empty Space**: Quick Add primitives (Cube, Cylinder, Sphere, Plane, Cone, Torus), lights, and cameras.
-
----
-
-## 6. 3ds Max-Style Parametric Modifier Stack
-
-Modifiers apply non-destructive, parametric operations on top of base meshes in the Inspector:
-
-- **Subdivision & Catmull-Clark**: Smooths geometry while honoring semi-sharp edge/vertex creases.
-- **Decimate (Garland-Heckbert QEM)**: Reduces polygon count by computing quadratic error metrics, preserving silhouette edges.
-- **Solidify**: Extrudes an inner or outer shell with uniform thickness—essential for 3D printing hollow models.
-- **Array**: Replicates geometry with constant or relative offsets across multiple copies.
-- **Mirror**: Non-destructively mirrors across the $X, Y,$ or $Z$ plane with automatic center-weld.
-- **Boolean**: Real-time CSG Union, Difference, and Intersection with target objects.
-- **Cloth Simulation**: Simulates physical fabric using Verlet integration with distance constraints, ground floor collision, and vertex group pinning masks.
-- **Particle System**: Emits particles with initial velocity along surface normals, simulated under gravity, bounce restitution, and drag.
-- **Deformers**: Lattice FFD, Curve Deform, Simple Deform (Bend, Twist, Taper, Stretch), Shrinkwrap, and Weighted Normal.
+- **Interactive Bézier Pen Tool (`P`)**: Click to place anchor points; drag to adjust smooth tangent handles. Press `C` to close the curve or `Enter` to commit to the scene graph.
+- **Boolean Spline Trimming**: Intersect arbitrary 3D cubic Bézier curves; the solver computes exact intersection parameters, inserts subdivision knots, and trims segments inside or outside boundaries.
+- **Continuous Tangent Arc Fillets ($G^1$)**: Replaces sharp curve corners with circular fillet arcs ensuring first-derivative continuity.
+- **Cursor Tangent Snapping**: Cursor automatically snaps to curve tangents and normal projections for precision CAD drafting.
+- **Pipe Sweeps & Revolve (Lathe)**: Generate hollow tubes or solid pipes along 3D splines, or revolve profiles around axes into rotationally symmetric vessels.
+- **CAD Construction Workplane (`Alt+W`)**: Align the dynamic workplane to any polygonal face. Draw curves and transform objects directly in the aligned construction frame. Press `Alt+X` to symmetrize across the workplane.
+- **STEP (ISO 10303-21) Export**: Export bicubic B-spline NURBS surfaces directly into industry-standard CAD formats.
 
 ---
 
-## 7. Digital Sculpting Mode
+## 6. Hard-Surface Cutters & Kitbash Modals
 
-Press `Tab` and switch to **Sculpt Mode** or click the Sculpt pill in the viewport ribbon:
-- **9 High-Performance Brushes**:
-  - `Draw`: Pushes vertices outward along surface normals.
-  - `Clay`: Builds up layered organic volume like clay strips.
-  - `Inflate`: Expands vertices omnidirectionally.
-  - `Smooth`: Relaxes mesh curvature and relieves surface tension.
-  - `Flatten`: Projects vertices toward an average local plane.
-  - `Grab`: Drags a cluster of vertices in screen space.
-  - `Pinch`: Contracts vertices toward the stroke center.
-  - `Crease`: Carves sharp valleys or ridges.
-  - `SnakeHook`: Extrudes organic tentacles and horns from the mesh.
-- **Falloffs**: Switch between Cubic, Smooth, Linear, and Sharp curves.
+- **Direct Cutter Modal (`C`)**:
+  - **Box Cutter**: Drag a rectangular cutting profile across the surface; push inward to create clean subtractive boolean cavities.
+  - **Circle Cutter**: Draw circular counter-bores and through-holes.
+  - **Ngon Cutter**: Click custom polygonal boundary points to cut complex architectural recesses.
+  - **Radial Compound Cutter**: Circular array cutting for bolt patterns, vents, and turbine casings.
+  - **Ghost Cutter Preview**: Move and rotate cutting shapes in 3D space with `W/E/R` before committing booleans.
+- **Hardware Kitbash Tool (`K` / `Shift + K`)**:
+  - Drop industrial hex bolts, allen screws, slotted vents, and latches directly onto surfaces with surface-normal alignment.
+- **Conformal Decals & Weld Beads**: Project floating surface details and procedural welding beads along sharp seam edges.
 
 ---
 
-## 8. Precision Spline Curves & Pipes
+## 7. 3ds Max-Style Parametric Modifier Stack
 
-Create parametric cubic Bézier curves via `Add -> Curve`:
-- **Tangent Handles**: Select knot points in Curve Edit Mode to translate in/out handles.
-- **Curve-to-Mesh (Sweep)**: Adjust `Bevel Radius` in Inspector to turn any 2D/3D spline curve into a watertight 3D pipe mesh.
-- **Profile Shapes**: Choose between Circle, Square, Rectangle, Star, Triangle, and Hexagon cross-section profiles.
+Located in the Properties Inspector on the right, the non-destructive modifier stack allows stacking procedural operations:
 
----
-
-## 9. UV Unwrapping & 2D UV Editor
-
-Access the UV menu or open the **2D UV Editor Window** (`🗺 UV Editor`):
-- **Mark Seams (`✂ Mark Seam`)**: Select boundary edges in Edit Mode and mark them as UV cutting seams (displayed in orange).
-- **Unwrap (`U`)**: Unwraps 3D mesh islands into 2D UV texture space using conformal boundary relaxation.
-- **Smart UV Project**: Automatically detects sharp face angle thresholds and packs separated planar islands with configurable margins.
-- **Projections**: Fast Planar, Box / Cube, Cylindrical, and Spherical UV generation.
+- **Generate**: SubD Catmull-Clark (with semi-sharp edge/vertex crease weights `Shift+E` / `Shift+V`), Bevel Chamfer, Array, Solidify, Screw (Lathe), Triangulate, Wireframe.
+- **Boolean**: Real-time Constructive Solid Geometry (`Union`, `Difference`, `Intersection`) referencing other scene nodes.
+- **Deform**: Simple Deform (Bend, Twist, Taper, Stretch), Lattice FFD, Curve Deform, Shrinkwrap, Morpher (Blendshapes), Linear Blend Skinning.
+- **Decimate**: Garland-Heckbert Quadric Error Metric (QEM) polygon reduction preserving silhouettes.
+- **Simulation**: XPBD Cloth, SPH Fluid Particles, Rigid Bodies.
 
 ---
 
-## 10. Visual Geometry Nodes
+## 8. Digital Sculpting & Dynamic Topology
 
-Build generative models visually using Directed Acyclic Graph (DAG) nodes:
-1. Open the canvas via **`🌿 Geo Nodes`** in the top menu or left toolbar.
-2. Pan the infinite canvas with `MMB` and zoom with the scroll wheel.
-3. Click **`+ Add Node`** to place Primitives (Cube, Sphere, Cylinder, Grid), Transforms, Math operations, Noise Displacement, or Point Scattering.
-4. Drag from output sockets (right) to input sockets (left). Data types are strictly color-coded (Green = Mesh, Yellow = Vector, Blue = Float).
-5. In the object Inspector, add a **🌿 Geometry Nodes** modifier to apply the visual graph non-destructively to your 3D scene object.
+Switch to **Sculpt Mode** via the mode selector in the top ribbon:
 
----
-
-## 11. Embedded Rhai Scripting
-
-For technical artists and pipeline automation, open the **`📜 Rhai`** console:
-- Fast, 100% safe Rust scripting runtime without crashes or segmentation faults.
-- Create procedural buildings, mathematical lattices, and automated scene setups.
-- See the complete [Rhai Scripting API Reference](RHAI_SCRIPTING_API.md) for methods, types, and copy-pasteable script templates.
+- **Brushes**: Clay, Grab (Move), Crease, Smooth, Inflate, Flatten, Pinch, Scrape, SnakeHook.
+- **Dynamic Topology (DynTopo)**: Automatically tessellates and subdivides edges under the brush stroke, allowing unlimited freeform sculpting without pre-subdividing the base mesh.
+- **Symmetry**: Live mirror sculpting across $X, Y, Z$ planes with multi-point visual feedback.
+- **Brush Controls**: Adjust Radius with `[` and `]`, or interactively in the Inspector.
 
 ---
 
-## 12. Offline Production Path Tracer (F12)
+## 9. Texture Painting & Polypaint
 
-When ready to produce a final, photo-realistic image:
-1. Press **`F12`** or select **`Render -> Render Image`**.
-2. The Production Render Dialog opens and starts rendering immediately.
-3. **Resolution Presets**: Choose from 360p, 720p, 1080p Full HD, or 1440p QHD.
-4. **Quality / SPP**: Adjust samples per pixel from 16 spp (rapid preview) to 512 spp (grain-free presentation).
-5. **Physical Camera Bokeh**: In the Scene Camera parameters, configure `Aperture Radius` and `Focal Distance` to render real optical depth of field with circular bokeh.
-6. **Save Image**: Click **`💾 Save Image (PNG)`** once the render completes.
+- **Vertex Color Painting**: Paint RGBA colors directly onto mesh vertices with smooth spherical falloff brushes.
+- **Weight Painting**: Assign bone influence weights or modifier density masks with color-coded heatmaps (Blue $= 0.0 \to$ Red $= 1.0$).
+- **Linear Gradient Tool**: Click-and-drag linear falloff gradients across vertices.
+- **Cavity & Curvature Shading**: Real-time geometric curvature preview emphasizing crevices and high-frequency edges.
 
 ---
 
-## 13. CAD & 3D Printing Export
+## 10. UV Unwrapping & ABF++ Distortion Analysis
 
-Export calibrated, watertight models under **`File -> Export`**:
-- **STL (.stl)**: Binary or ASCII format for slicing software (UltiMaker Cura, PrusaSlicer, Bambu Studio).
-- **PLY (.ply)**: For 3D scanning, point cloud visualization, and color vertex data.
-- **glTF 2.0 (.gltf)** & **Wavefront OBJ (.obj)**: For game engine integration (Unreal Engine 5, Unity, Godot).
+Open the **2D UV Editor** via **Window -> 2D UV Editor**:
+
+- **Unwrapping Algorithms**: Conformal Tutte Disk Harmonic parameterization, LSCM unwrap, and Smart UV Angle Projection.
+- **ABF++ Distortion Heatmap**: Check **Heatmap** to render per-face distortion gradients directly over the 2D canvas:
+  - Deep Blue ($D=0.0$): Perfect isometric / conformal match.
+  - Cyan / Green: Low distortion.
+  - Yellow / Red: High angle shear or area compression.
+- **Interactive 2D Seam Cut Mode**: Click **Cut Seams [ON]** to interactively click edges in the 2D UV view to cut or clear seams.
+- **UV Island Packing & Tools**: Pack Islands with uniform texel density, Rotate CW/CCW, Flip Horizontal/Vertical, Scale, and Laplacian UV Relaxation.
 
 ---
 
-## Need More Help?
-Press **`F1`** inside the application at any time to open the built-in, searchable User Manual and Shortcuts Reference!
+## 11. Physics, XPBD Cloth & Fluid Particles
+
+- **XPBD Cloth Simulator**:
+  - Extended Position-Based Dynamics with stretch/shear constraints, isometric bending, pneumatic pressure inflation, and ground plane collision.
+  - **Spatial Hash Grid Self-Collision**: $O(N)$ neighborhood search prevents cloth from penetrating through its own folds.
+- **SPH Fluid Dynamics**: Smoothed-Particle Hydrodynamics simulating water droplets and viscous fluids.
+- **Rigid Body Dynamics**: Gravity, linear impulse, and restitution collisions against ground and obstacle colliders.
+- **Simulation Baking**: One-click bake of physics simulations into keyframed animation tracks.
+
+---
+
+## 12. Skeletal Rigging, Constraints & 2-Bone IK
+
+- **Armatures & Bones**: Add joint hierarchies and automatically bind skin envelopes with heat diffusion weighting.
+- **Analytic 2-Bone IK Solver**:
+  - Law of Cosines solver with **Pole Vector target**, **Pole Twist Angle ($ -180^\circ$ to $+180^\circ$)**, and **FK/IK Weight Blend**.
+- **Cyclic Coordinate Descent (CCD) IK**: Solves multi-joint kinematic chains with damping and target reach tolerance.
+- **Parametric Constraints**: Aim (Look-At with World Up), Parent (offset maintaining), and Spline Path Follow.
+
+---
+
+## 13. Animation Timeline & Motion Matching
+
+- **Timeline Controls**: Frame scrubbing, playback/loop, start/end frame range, and current frame readout.
+- **Keyframe Tracks**: Dopesheet view with Linear, Step, and Smooth Bézier spline interpolation curves.
+- **Inertialization Smooth Decay**: Blends jarring animation transitions into natural continuous motion.
+- **Motion Matching Database**: Real-time trajectory prediction and feature cost querying for responsive character locomotion.
+
+---
+
+## 14. Visual Geometry Nodes
+
+Open the **Geometry Nodes Canvas** via **Window -> Geometry Nodes**:
+
+- Visual Directed Acyclic Graph (DAG) for procedural modeling.
+- **Nodes**: Primitives (Cube, Cylinder, Sphere, Grid), Transforms, Noise Displacement, Point Scattering / Instancing, Curve Fillet/Revolve, Math operations, and Boolean CSG.
+- Host any node graph as a live modifier in an object's stack.
+
+---
+
+## 15. Multi-Engine Scripting (Rhai, Python, Lua)
+
+Open the **Script Console** via **Window -> Script Console**:
+
+- **Native Rhai**: 100% pure-safe Rust scripting runtime with memory caps and instruction step limits. First-class access to math vectors, meshes, and scene nodes.
+- **Python 3 & Lua 5.4**: Integrated multi-engine runners for external pipeline scripts.
+- **Interactive REPL**: Multiline script editor with stdout capture and execution timing.
+
+---
+
+## 16. Production Path Tracer & Hardware RT
+
+Press **`F12`** or select **Render -> Production Path Tracer**:
+
+- Multi-threaded CPU Monte Carlo path tracing engine powered by **Rayon**.
+- Cook-Torrance Microfacet specular BRDF, Lambertian diffuse, dielectric Fresnel glass transmission, and metallic reflections.
+- Thin-lens optical camera with physical bokeh depth-of-field.
+- **Hardware RT Acceleration**: Multi-million polygon BLAS partitioning into 64K-triangle chunks with strict 256-byte alignment and 64-byte TLAS instance descriptors.
+- **Built-in LookDev Compositor**: Multi-pass separable Gaussian Bloom glow, corner vignette falloff, saturation/contrast curve grading, and ACES Filmic tone mapping.
+- PBR Texture Map Baker: Tangent-space Normal, Ambient Occlusion, and Displacement baking.
+
+---
+
+## 17. CAM 3D Print Quality Inspector & Slicing
+
+Open via **Render -> 3D Print Quality Inspector**:
+
+- **Watertightness & Manifold Validation**: Detects non-manifold boundary edges and flipped face normals.
+- **Overhang Angle Heatmap**: Highlights faces exceeding support thresholds ($>45^\circ$).
+- **Volume & Weight Estimation**: Real-time calculations of enclosed volume ($\text{cm}^3$) and PLA filament weight.
+- **CAM Layer Slicing & G-code Export**: Computes horizontal layer contours, infill paths, and exports standard G-code for 3D printers.
