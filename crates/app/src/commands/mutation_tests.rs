@@ -338,3 +338,56 @@ fn test_connect_tangent_arc_command_and_undo() {
     history.undo(&mut scene).unwrap();
     assert_eq!(scene.nodes.len(), initial_node_count);
 }
+
+#[test]
+fn test_bevel_edge_command_multi_segment_profile_and_undo() {
+    use crate::commands::BevelEdgeCommand;
+    use geo_kernel::{BevelProfile, Primitives};
+
+    let mut scene = SceneGraph::new();
+    let mesh = Primitives::create_cube(2.0);
+    let id = scene.add_node(SceneNode::new_mesh("Cube", core_math::Transform::IDENTITY, mesh));
+
+    let initial_face_count = {
+        let node = scene.nodes.get(id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.faces.len()
+        } else { 0 }
+    };
+
+    let edge = {
+        let node = scene.nodes.get(id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.edges.keys().next().unwrap()
+        } else { panic!("Expected mesh") }
+    };
+
+    let mut history = graph_engine::HistoryManager::new();
+    let cmd = Box::new(BevelEdgeCommand {
+        node_id: id,
+        edges: vec![edge],
+        width: 0.2,
+        segments: 3,
+        profile: BevelProfile::Round(0.5),
+        old_mesh: None,
+    });
+
+    history.execute(cmd, &mut scene).unwrap();
+    let beveled_face_count = {
+        let node = scene.nodes.get(id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.faces.len()
+        } else { 0 }
+    };
+    // 3 segments creates 3 bevel facet strips replacing the original edge seam
+    assert!(beveled_face_count > initial_face_count);
+
+    history.undo(&mut scene).unwrap();
+    let restored_face_count = {
+        let node = scene.nodes.get(id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.faces.len()
+        } else { 0 }
+    };
+    assert_eq!(restored_face_count, initial_face_count);
+}

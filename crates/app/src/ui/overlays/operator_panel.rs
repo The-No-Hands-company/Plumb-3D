@@ -106,7 +106,7 @@ pub fn render(state: &mut AppState) {
                                 updated_op = Some(LastOperatorInfo::Extrude { faces, distance, axis });
                             }
                         }
-                        LastOperatorInfo::Bevel { edges, mut width, mut segments } => {
+                        LastOperatorInfo::Bevel { edges, mut width, mut segments, mut profile_type, mut tension } => {
                             let mut changed = false;
                             ui.horizontal(|ui| {
                                 ui.label("Width:");
@@ -120,8 +120,27 @@ pub fn render(state: &mut AppState) {
                                     changed = true;
                                 }
                             });
+                            ui.horizontal(|ui| {
+                                ui.label("Profile:");
+                                let p_name = match profile_type { 1 => "Stepped", 2 => "Concave", _ => "Round" };
+                                egui::ComboBox::from_id_salt("bevel_p_combo")
+                                    .selected_text(p_name)
+                                    .show_ui(ui, |ui| {
+                                        changed |= ui.selectable_value(&mut profile_type, 0, "Round").changed();
+                                        changed |= ui.selectable_value(&mut profile_type, 1, "Stepped").changed();
+                                        changed |= ui.selectable_value(&mut profile_type, 2, "Concave").changed();
+                                    });
+                            });
+                            if profile_type == 0 {
+                                ui.horizontal(|ui| {
+                                    ui.label("Tension:");
+                                    if ui.add(egui::Slider::new(&mut tension, 0.0..=1.0)).changed() {
+                                        changed = true;
+                                    }
+                                });
+                            }
                             if changed {
-                                updated_op = Some(LastOperatorInfo::Bevel { edges, width, segments });
+                                updated_op = Some(LastOperatorInfo::Bevel { edges, width, segments, profile_type, tension });
                             }
                         }
                         LastOperatorInfo::LoopCut { edge, mut num_cuts, mut factor } => {
@@ -354,13 +373,19 @@ pub fn render(state: &mut AppState) {
                         state.last_operator = Some(new_op);
                     }
                 }
-                LastOperatorInfo::Bevel { edges, width, segments } => {
+                LastOperatorInfo::Bevel { edges, width, segments, profile_type, tension } => {
                     if state.history.undo(&mut state.scene).is_ok() {
+                        let profile = match profile_type {
+                            1 => geo_kernel::BevelProfile::Stepped,
+                            2 => geo_kernel::BevelProfile::Concave,
+                            _ => geo_kernel::BevelProfile::Round(*tension),
+                        };
                         let cmd = Box::new(BevelEdgeCommand {
                             node_id: sel_id,
                             edges: edges.clone(),
                             width: *width,
                             segments: *segments,
+                            profile,
                             old_mesh: None,
                         });
                         let _ = state.history.execute(cmd, &mut state.scene);

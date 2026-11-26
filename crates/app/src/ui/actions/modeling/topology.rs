@@ -157,6 +157,7 @@ pub fn handle_topology_actions(state: &mut AppState, actions: &mut UiActions) {
                     edges,
                     width: state.bevel_modal_width,
                     segments: state.bevel_modal_segments,
+                    profile: geo_kernel::BevelProfile::default(),
                     old_mesh: None,
                 });
                 if let Err(e) = state.history.execute(cmd, &mut state.scene) {

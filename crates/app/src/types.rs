@@ -104,6 +104,8 @@ pub enum LastOperatorInfo {
         edges: Vec<geo_kernel::EdgeKey>,
         width: f32,
         segments: usize,
+        profile_type: u8,
+        tension: f32,
     },
     LoopCut {
         edge: geo_kernel::EdgeKey,

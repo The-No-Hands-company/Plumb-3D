@@ -52,7 +52,7 @@ pub use mesh::{Edge, EdgeKey, Face, FaceKey, HalfEdge, HalfEdgeKey, Mesh, MeshEr
 pub use primitives::{CapFillType, Primitives};
 pub use triangulation::{GpuVertex, RenderMesh, ShadingMode, SubMeshRange};
 pub use uv::ProjectionAxis;
-pub use operators::{CableGenerator, CutPoint, FilletContinuity, NgonMethod, QuadMethod, SymmetrizeDirection, WeldStyle};
+pub use operators::{bevel::BevelProfile, CableGenerator, CutPoint, FilletContinuity, NgonMethod, QuadMethod, SymmetrizeDirection, WeldStyle};
 pub use modifiers::{
     ArrayMode, ArrayModifier, BevelModifier, BooleanModifier, ClothModifier, ClothParticle, CurveModifier, DeformAxis, DisplaceModifier, LatticeModifier,
     MirrorAxis, MirrorModifier, Modifier, ModifierStack, MorphTarget, MorpherModifier, Particle, ParticleRenderShape, ParticleSystemModifier,

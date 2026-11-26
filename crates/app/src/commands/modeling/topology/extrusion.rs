@@ -193,6 +193,7 @@ pub struct BevelEdgeCommand {
     pub edges: Vec<EdgeKey>,
     pub width: f32,
     pub segments: usize,
+    pub profile: geo_kernel::BevelProfile,
     pub old_mesh: Option<Mesh>,
 }
 
@@ -207,7 +208,7 @@ impl Command for BevelEdgeCommand {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                let _ = base_mesh.bevel_edges_miter(&self.edges, self.width, self.segments);
+                let _ = base_mesh.bevel_edges_miter_profile(&self.edges, self.width, self.segments, self.profile);
                 scene.mark_dirty(self.node_id);
                 Ok(())
             } else {

@@ -18,6 +18,7 @@ pub fn commit(state: &mut AppState) {
                 edges: edges.clone(),
                 width,
                 segments,
+                profile: geo_kernel::BevelProfile::default(),
                 old_mesh: None,
             });
             let _ = state.history.execute(cmd, &mut state.scene);
@@ -25,6 +26,8 @@ pub fn commit(state: &mut AppState) {
                 edges,
                 width,
                 segments,
+                profile_type: 0,
+                tension: 0.5,
             });
         } else if !faces.is_empty() {
             let cmd = Box::new(BevelCommand {
