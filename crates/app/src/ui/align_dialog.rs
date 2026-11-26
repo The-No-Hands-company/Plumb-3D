@@ -8,7 +8,7 @@ pub fn draw_align_dialog(state: &mut AppState, actions: &mut UiActions) {
             let mut close_dialog = false;
             let can_align = state.selected_node.is_some() && state.previous_selected_node.is_some();
 
-            egui::Window::new("📐 Align Objects (3ds Max / Maya)")
+            egui::Window::new("Align Objects (3ds Max / Maya)")
                 .open(&mut state.show_align_dialog)
                 .resizable(false)
                 .show(&state.egui_ctx, |ui| {
@@ -26,7 +26,7 @@ pub fn draw_align_dialog(state: &mut AppState, actions: &mut UiActions) {
                         .map(|n| n.name.as_str())
                         .unwrap_or("Target");
 
-                    ui.label(format!("Source: {} ➔ Target: {}", src_name, tgt_name));
+                    ui.label(format!("Source: {} -> Target: {}", src_name, tgt_name));
                     ui.separator();
 
                     ui.heading("Align Position");

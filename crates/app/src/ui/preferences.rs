@@ -55,7 +55,7 @@ pub fn draw_preferences_dialog(state: &mut AppState) {
     let ctx = state.egui_ctx.clone();
     let mut close = false;
 
-    egui::Window::new("⚙ Plumb 3D — Preferences & Customization")
+    egui::Window::new("Plumb 3D -- Preferences & Customization")
         .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
         .fixed_size(egui::vec2(580.0, 420.0))
         .collapsible(false)
@@ -69,13 +69,13 @@ pub fn draw_preferences_dialog(state: &mut AppState) {
         )
         .show(&ctx, |ui| {
             ui.horizontal(|ui| {
-                ui.selectable_value(&mut state.preferences.active_tab, 0, "🖥 Interface & Density");
-                ui.selectable_value(&mut state.preferences.active_tab, 1, "⌨ Keymap Navigation");
-                ui.selectable_value(&mut state.preferences.active_tab, 2, "📐 Workspaces");
-                ui.selectable_value(&mut state.preferences.active_tab, 3, "⚡ System & Undo");
+                ui.selectable_value(&mut state.preferences.active_tab, 0, "Interface & Density");
+                ui.selectable_value(&mut state.preferences.active_tab, 1, "Keymap Navigation");
+                ui.selectable_value(&mut state.preferences.active_tab, 2, "Workspaces");
+                ui.selectable_value(&mut state.preferences.active_tab, 3, "System & Undo");
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.button("❌ Close").clicked() {
+                    if ui.button("Close").clicked() {
                         close = true;
                     }
                 });
@@ -149,7 +149,7 @@ pub fn draw_preferences_dialog(state: &mut AppState) {
                     ui.horizontal(|ui| {
                         ui.label("Name:");
                         ui.text_edit_singleline(&mut state.preferences.custom_workspace_name);
-                        if ui.button("💾 Save Current Setup").clicked() && !state.preferences.custom_workspace_name.trim().is_empty() {
+                        if ui.button("Save Current Setup").clicked() && !state.preferences.custom_workspace_name.trim().is_empty() {
                             let name = state.preferences.custom_workspace_name.trim().to_string();
                             state.custom_workspaces.push(crate::ui::workspaces::CustomWorkspace {
                                 name,
@@ -178,11 +178,11 @@ pub fn draw_preferences_dialog(state: &mut AppState) {
                         for idx in 0..state.custom_workspaces.len() {
                             let name = state.custom_workspaces[idx].name.clone();
                             ui.horizontal(|ui| {
-                                ui.label(format!("📁 {}", name));
+                                ui.label(format!("[W] {}", name));
                                 if ui.button("Load").clicked() {
                                     to_load = Some(idx);
                                 }
-                                if ui.button("🗑").clicked() {
+                                if ui.button("Delete").clicked() {
                                     to_remove = Some(idx);
                                 }
                             });

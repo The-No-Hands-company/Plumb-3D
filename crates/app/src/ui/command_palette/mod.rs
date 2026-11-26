@@ -63,7 +63,7 @@ pub fn draw_command_palette(state: &mut AppState, actions: &mut UiActions) {
         close = true;
     }
 
-    egui::Window::new("🔍 Plumb Command Palette")
+    egui::Window::new("Plumb Command Palette")
         .anchor(egui::Align2::CENTER_TOP, egui::vec2(0.0, 80.0))
         .fixed_size(egui::vec2(580.0, 420.0))
         .collapsible(false)
@@ -81,18 +81,18 @@ pub fn draw_command_palette(state: &mut AppState, actions: &mut UiActions) {
         )
         .show(&ctx, |ui| {
             ui.horizontal(|ui| {
-                ui.label(egui::RichText::new("🔍").size(18.0));
+                ui.label(egui::RichText::new("Find:").strong().size(14.0));
                 let resp = ui.add(
                     egui::TextEdit::singleline(&mut state.command_palette.query)
                         .hint_text("Search operator, tool, workspace, theme, or shortcut... (e.g. 'bridge', 'bevel', 'caliper')")
-                        .desired_width(490.0)
+                        .desired_width(470.0)
                         .font(egui::TextStyle::Heading),
                 );
                 if !state.command_palette.focus_requested {
                     resp.request_focus();
                     state.command_palette.focus_requested = true;
                 }
-                if ui.button("❌").clicked() {
+                if ui.button("X").clicked() {
                     close = true;
                 }
             });
@@ -217,17 +217,17 @@ pub fn draw_command_palette(state: &mut AppState, actions: &mut UiActions) {
             ui.separator();
             ui.horizontal(|ui| {
                 ui.label(
-                    egui::RichText::new("↑/↓ Navigate")
+                    egui::RichText::new("Up/Down Navigate")
                         .size(10.0)
                         .color(egui::Color32::GRAY),
                 );
-                ui.label(egui::RichText::new("•").size(10.0).color(egui::Color32::DARK_GRAY));
+                ui.label(egui::RichText::new("|").size(10.0).color(egui::Color32::DARK_GRAY));
                 ui.label(
                     egui::RichText::new("Enter Execute")
                         .size(10.0)
                         .color(egui::Color32::GRAY),
                 );
-                ui.label(egui::RichText::new("•").size(10.0).color(egui::Color32::DARK_GRAY));
+                ui.label(egui::RichText::new("|").size(10.0).color(egui::Color32::DARK_GRAY));
                 ui.label(
                     egui::RichText::new("Esc Close")
                         .size(10.0)

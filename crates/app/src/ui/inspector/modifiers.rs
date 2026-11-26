@@ -21,10 +21,10 @@ pub fn draw_modifiers_panel(
 
                         if let NodeData::Mesh { modifier_stack, .. } = &mut node.data {
                             ui.horizontal(|ui| {
-                                ui.menu_button("➕ Add Modifier", |ui| {
+                                ui.menu_button("+ Add Modifier", |ui| {
                                     ui.set_min_width(180.0);
                                     ui.label(egui::RichText::new("GENERATE").small().color(egui::Color32::from_rgb(100, 180, 255)));
-                                    if ui.button("🌿 Geometry Nodes").clicked() {
+                                    if ui.button("Geometry Nodes").clicked() {
                                         actions.add_geometry_nodes_to_selected = true;
                                         ui.close_menu();
                                     }
@@ -109,11 +109,11 @@ pub fn draw_modifiers_panel(
                                     }
                                     ui.separator();
                                     ui.label(egui::RichText::new("SIMULATION & DYNAMICS").small().color(egui::Color32::from_rgb(255, 140, 180)));
-                                    if ui.button("🧵 Cloth Simulation").clicked() {
+                                    if ui.button("Cloth Simulation").clicked() {
                                         actions.add_cloth_to_selected = true;
                                         ui.close_menu();
                                     }
-                                    if ui.button("✨ Particle System").clicked() {
+                                    if ui.button("Particle System").clicked() {
                                         actions.add_particle_system_to_selected = true;
                                         ui.close_menu();
                                     }
@@ -149,7 +149,7 @@ pub fn draw_modifiers_panel(
                                         }
                                         ui.label(egui::RichText::new(format!("{}. {}", i + 1, modifier.name())).strong());
                                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                            if ui.small_button("✖").on_hover_text("Delete modifier").clicked() {
+                                            if ui.small_button("X").on_hover_text("Delete modifier").clicked() {
                                                 actions.remove_modifier_idx = Some(i);
                                             }
                                             if ui.small_button("Apply").on_hover_text("Bake modifier into base mesh").clicked() {
@@ -211,7 +211,7 @@ pub fn draw_modifiers_panel(
                                             ui.add(egui::DragValue::new(&mut bev_mod.width).speed(0.01).range(0.001..=5.0));
                                             ui.label("Min Angle:");
                                             let mut deg = bev_mod.min_angle_radians.to_degrees();
-                                            if ui.add(egui::Slider::new(&mut deg, 0.0..=180.0).suffix("°")).changed() {
+                                            if ui.add(egui::Slider::new(&mut deg, 0.0..=180.0).suffix(" deg")).changed() {
                                                 bev_mod.min_angle_radians = deg.to_radians();
                                             }
                                         });
@@ -271,7 +271,7 @@ pub fn draw_modifiers_panel(
                                             }
                                             geo_kernel::ArrayMode::Radial => {
                                                 ui.horizontal(|ui| {
-                                                    ui.label("Total Angle (°):");
+                                                    ui.label("Total Angle (deg):");
                                                     ui.add(egui::DragValue::new(&mut array_mod.total_angle_degrees).speed(1.0).range(1.0..=720.0));
                                                     ui.label("Axis:");
                                                     ui.selectable_value(&mut array_mod.radial_axis, geo_kernel::RadialAxis::Y, "Y");
@@ -462,10 +462,10 @@ pub fn draw_modifiers_panel(
                                             ui.checkbox(&mut cloth_mod.ground_collision, "Floor (Y=0)");
                                         });
                                         ui.horizontal(|ui| {
-                                            if ui.button("▶ Step (1/60s)").clicked() {
+                                            if ui.button("Step (1/60s)").clicked() {
                                                 cloth_mod.step(1.0 / 60.0);
                                             }
-                                            if ui.button("🔄 Reset").clicked() {
+                                            if ui.button("Reset").clicked() {
                                                 cloth_mod.reset();
                                             }
                                         });
@@ -514,7 +514,7 @@ pub fn draw_modifiers_panel(
                                             }
                                         });
                                         ui.horizontal(|ui| {
-                                            if ui.button("🔄 Reset Particles").clicked() {
+                                            if ui.button("Reset Particles").clicked() {
                                                 particle_mod.reset();
                                             }
                                         });
@@ -551,9 +551,9 @@ pub fn draw_modifiers_panel(
                                                 let channel_name = format!("morph:{}", target.name);
                                                 let has_key = animation.has_scalar_keyframe(sel_id, &channel_name, cur_frame);
                                                 let key_btn = if has_key {
-                                                    egui::RichText::new("◆").color(egui::Color32::from_rgb(255, 215, 0))
+                                                    egui::RichText::new("[K]").color(egui::Color32::from_rgb(255, 215, 0))
                                                 } else {
-                                                    egui::RichText::new("◇").color(egui::Color32::GRAY)
+                                                    egui::RichText::new("[ ]").color(egui::Color32::GRAY)
                                                 };
                                                 if ui.button(key_btn).on_hover_text("Insert / Remove Keyframe at Current Frame").clicked() {
                                                     if has_key {
@@ -567,7 +567,7 @@ pub fn draw_modifiers_panel(
                                                     && has_key {
                                                         animation.insert_scalar_keyframe(sel_id, &channel_name, cur_frame, target.weight, InterpolationMode::Linear);
                                                     }
-                                                if ui.small_button("✖").clicked() {
+                                                if ui.small_button("X").clicked() {
                                                     target_to_remove = Some(t_idx);
                                                 }
                                             });

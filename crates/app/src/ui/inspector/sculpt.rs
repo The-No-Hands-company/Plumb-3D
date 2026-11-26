@@ -13,16 +13,16 @@ pub fn draw_sculpt_tools(
     ui.heading("Sculpt Brushes (Blender / ZBrush)");
     ui.horizontal_wrapped(|ui| {
         let b = sculpt_settings.brush;
-        if ui.selectable_label(b == SculptBrush::Draw, "🖌 Draw").clicked() { sculpt_settings.brush = SculptBrush::Draw; }
-        if ui.selectable_label(b == SculptBrush::Clay, "🧱 Clay").clicked() { sculpt_settings.brush = SculptBrush::Clay; }
-        if ui.selectable_label(b == SculptBrush::Smooth, "💧 Smooth").clicked() { sculpt_settings.brush = SculptBrush::Smooth; }
-        if ui.selectable_label(b == SculptBrush::Inflate, "🎈 Inflate").clicked() { sculpt_settings.brush = SculptBrush::Inflate; }
-        if ui.selectable_label(b == SculptBrush::Flatten, "📐 Flatten").clicked() { sculpt_settings.brush = SculptBrush::Flatten; }
-        if ui.selectable_label(b == SculptBrush::Grab, "🖐 Grab").clicked() { sculpt_settings.brush = SculptBrush::Grab; }
-        if ui.selectable_label(b == SculptBrush::Pinch, "🤏 Pinch").clicked() { sculpt_settings.brush = SculptBrush::Pinch; }
-        if ui.selectable_label(b == SculptBrush::Crease, "🔪 Crease").clicked() { sculpt_settings.brush = SculptBrush::Crease; }
-        if ui.selectable_label(b == SculptBrush::SnakeHook, "🐍 Snake").clicked() { sculpt_settings.brush = SculptBrush::SnakeHook; }
-        if ui.selectable_label(b == SculptBrush::Mask, "🎭 Mask (M)").clicked() { sculpt_settings.brush = SculptBrush::Mask; }
+        if ui.selectable_label(b == SculptBrush::Draw, "Draw").clicked() { sculpt_settings.brush = SculptBrush::Draw; }
+        if ui.selectable_label(b == SculptBrush::Clay, "Clay").clicked() { sculpt_settings.brush = SculptBrush::Clay; }
+        if ui.selectable_label(b == SculptBrush::Smooth, "Smooth").clicked() { sculpt_settings.brush = SculptBrush::Smooth; }
+        if ui.selectable_label(b == SculptBrush::Inflate, "Inflate").clicked() { sculpt_settings.brush = SculptBrush::Inflate; }
+        if ui.selectable_label(b == SculptBrush::Flatten, "Flatten").clicked() { sculpt_settings.brush = SculptBrush::Flatten; }
+        if ui.selectable_label(b == SculptBrush::Grab, "Grab").clicked() { sculpt_settings.brush = SculptBrush::Grab; }
+        if ui.selectable_label(b == SculptBrush::Pinch, "Pinch").clicked() { sculpt_settings.brush = SculptBrush::Pinch; }
+        if ui.selectable_label(b == SculptBrush::Crease, "Crease").clicked() { sculpt_settings.brush = SculptBrush::Crease; }
+        if ui.selectable_label(b == SculptBrush::SnakeHook, "Snake").clicked() { sculpt_settings.brush = SculptBrush::SnakeHook; }
+        if ui.selectable_label(b == SculptBrush::Mask, "Mask (M)").clicked() { sculpt_settings.brush = SculptBrush::Mask; }
     });
 
     ui.horizontal(|ui| {
@@ -54,7 +54,7 @@ pub fn draw_sculpt_tools(
     ui.separator();
 
     // Dynamic Topology (DynTopo) Section
-    ui.collapsing("🌀 Dynamic Topology (DynTopo)", |ui| {
+    ui.collapsing("Dynamic Topology (DynTopo)", |ui| {
         ui.checkbox(&mut dyntopo.enabled, "Enable Live DynTopo");
         if dyntopo.enabled {
             ui.horizontal(|ui| {

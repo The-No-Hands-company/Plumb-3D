@@ -1,6 +1,6 @@
 use egui::{epaint::CubicBezierShape, Color32, Painter, Pos2, Stroke, Vec2};
 
-/// Renders a smooth cubic Bézier cable between two node sockets.
+/// Renders a smooth cubic Bezier cable between two node sockets.
 pub fn draw_bezier_cable(
     painter: &Painter,
     from: Pos2,

@@ -156,7 +156,7 @@ pub fn render(state: &mut AppState) {
                         painter.text(
                             cage_pill_rect.center(),
                             egui::Align2::CENTER_CENTER,
-                            format!("⛓ SUBD CONTROL CAGE | Optimal: {}", if state.optimal_display { "ON" } else { "OFF" }),
+                            format!("SUBD CONTROL CAGE | Optimal: {}", if state.optimal_display { "ON" } else { "OFF" }),
                             egui::FontId::proportional(11.0),
                             egui::Color32::from_rgb(255, 220, 160),
                         );

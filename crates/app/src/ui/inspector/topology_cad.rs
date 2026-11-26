@@ -13,7 +13,7 @@ pub fn draw_topology_cad_panel(
     _actions: &mut UiActions,
     sel_id: NodeId,
 ) {
-    ui.heading("📐 Topology & SubD-to-NURBS CAD");
+    ui.heading("Topology & SubD-to-NURBS CAD");
     ui.label(
         egui::RichText::new("Production quad retopology and mathematical CAD limit-surface export.")
             .small()
@@ -37,7 +37,7 @@ pub fn draw_topology_cad_panel(
     // 1. QuadriFlow 4-RoSy Field-Aligned Auto-Retopology
     ui.group(|ui| {
         ui.horizontal(|ui| {
-            ui.label(egui::RichText::new("⚡ QuadriFlow 4-RoSy Auto-Retopology").strong());
+            ui.label(egui::RichText::new("QuadriFlow 4-RoSy Auto-Retopology").strong());
         });
         ui.label(
             egui::RichText::new("Aligns smooth 4-rotational symmetry cross-fields to geometric creases.")
@@ -54,12 +54,12 @@ pub fn draw_topology_cad_panel(
         if state.quadriflow_sharp {
             ui.horizontal(|ui| {
                 ui.label("Crease Angle:");
-                ui.add(egui::Slider::new(&mut state.quadriflow_crease_deg, 15.0..=80.0).text("°"));
+                ui.add(egui::Slider::new(&mut state.quadriflow_crease_deg, 15.0..=80.0).text("deg"));
             });
         }
 
         ui.add_space(4.0);
-        if ui.button("⚡ Run QuadriFlow Retopology")
+        if ui.button("Run QuadriFlow Retopology")
             .on_hover_text("Calculates smooth 4-RoSy tangent cross field and extracts clean quad manifold")
             .clicked()
         {
@@ -79,10 +79,10 @@ pub fn draw_topology_cad_panel(
                         }
                     }
                     state.sync_gpu_meshes();
-                    state.set_status_message(format!("⚡ QuadriFlow remeshed to {} clean production quads.", quad_count));
+                    state.set_status_message(format!("QuadriFlow remeshed to {} clean production quads.", quad_count));
                 }
                 Err(err) => {
-                    state.set_status_message(format!("❌ QuadriFlow retopology failed: {:?}", err));
+                    state.set_status_message(format!("QuadriFlow retopology failed: {:?}", err));
                 }
             }
         }
@@ -93,10 +93,10 @@ pub fn draw_topology_cad_panel(
     // 2. SubD-to-NURBS Limit Surface CAD Solid
     ui.group(|ui| {
         ui.horizontal(|ui| {
-            ui.label(egui::RichText::new("📐 SubD-to-NURBS Limit Surface CAD").strong());
+            ui.label(egui::RichText::new("SubD-to-NURBS Limit Surface CAD").strong());
         });
         ui.label(
-            egui::RichText::new("Evaluates Catmull-Clark limit surface into exact bicubic Bézier NURBS patches.")
+            egui::RichText::new("Evaluates Catmull-Clark limit surface into exact bicubic Bezier NURBS patches.")
                 .small()
                 .weak(),
         );
@@ -104,7 +104,7 @@ pub fn draw_topology_cad_panel(
         let patch_count = base_mesh.faces.len();
         ui.label(format!("Estimated NURBS Patches: {}", patch_count));
 
-        if ui.button("💾 Export Continuous NURBS STEP Solid (.step)")
+        if ui.button("Export Continuous NURBS STEP Solid (.step)")
             .on_hover_text("Exports mathematical bicubic G1 continuous limit surface to standard ISO 10303-21 STEP CAD solid")
             .clicked()
         {
@@ -118,7 +118,7 @@ pub fn draw_topology_cad_panel(
                 if std::fs::write(&path, step_content).is_ok() {
                     let patches = convert_mesh_to_nurbs_patches(&base_mesh);
                     state.set_status_message(format!(
-                        "📐 Exported {} bicubic NURBS patches to: {}",
+                        "Exported {} bicubic NURBS patches to: {}",
                         patches.len(),
                         path.display()
                     ));
@@ -132,7 +132,7 @@ pub fn draw_topology_cad_panel(
     // 3. Voxel Remeshing & Decimation
     ui.group(|ui| {
         ui.horizontal(|ui| {
-            ui.label(egui::RichText::new("🧊 Voxel Remesh & QEM Decimate").strong());
+            ui.label(egui::RichText::new("Voxel Remesh & QEM Decimate").strong());
         });
 
         ui.horizontal(|ui| {
@@ -144,7 +144,7 @@ pub fn draw_topology_cad_panel(
                         }
                     }
                     state.sync_gpu_meshes();
-                    state.set_status_message("🧊 Mesh voxel remeshed to watertight solid.");
+                    state.set_status_message("Mesh voxel remeshed to watertight solid.");
                 }
             }
 
@@ -156,7 +156,7 @@ pub fn draw_topology_cad_panel(
                         }
                     }
                     state.sync_gpu_meshes();
-                    state.set_status_message("📉 Mesh decimated by 50% using Quadric Error Metric.");
+                    state.set_status_message("Mesh decimated by 50% using Quadric Error Metric.");
                 }
             }
         });

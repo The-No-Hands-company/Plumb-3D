@@ -113,9 +113,9 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
         (
             "4. Industrial Pipe & Wiring Harness (Curves)",
             "Precision Industrial Design",
-            "Create smooth, sweepable 3D pipes and hydraulic lines using Bézier spline curves.",
+            "Create smooth, sweepable 3D pipes and hydraulic lines using Bezier spline curves.",
             &[
-                ("1. Add Spline Curve", "Click 'Add Curve -> 3D Spline Curve'. A parametric Bézier curve appears in the viewport."),
+                ("1. Add Spline Curve", "Click 'Add Curve -> 3D Spline Curve'. A parametric Bezier curve appears in the viewport."),
                 ("2. Curve Edit Mode", "In the top ribbon, click 'Curve' mode. The spline's control knots and tangent handles become visible."),
                 ("3. Shape the Curve", "Select knot points and move them with the 3D Gizmo ('W'). Select the tangent handle tips to rotate and curve the path in 3D space."),
                 ("4. Extrude Knots ('E')", "Select the last knot and press 'E' to extrude new sequential knots following your pipe path."),
@@ -228,7 +228,7 @@ fn draw_tab_shortcuts(ui: &mut egui::Ui, query: &str) {
         ("Shift + Tab", "Toggle Geometry Snapping (Grid / Vertex)", "Transform"),
         ("O", "Toggle Proportional Editing (Soft Selection)", "Transform"),
         // Modes & Sub-Elements
-        ("Tab", "Toggle Object Mode ⇄ Edit Mode", "Mode"),
+        ("Tab", "Toggle Object Mode / Edit Mode", "Mode"),
         ("1", "Vertex Selection Level (Edit Mode)", "Mode"),
         ("2", "Edge Selection Level (Edit Mode)", "Mode"),
         ("3", "Face Selection Level (Edit Mode)", "Mode"),
@@ -266,7 +266,7 @@ fn draw_tab_shortcuts(ui: &mut egui::Ui, query: &str) {
         if cat != current_category {
             current_category = cat;
             ui.add_space(6.0);
-            ui.label(egui::RichText::new(format!("─── {} ───", current_category)).strong().color(egui::Color32::from_rgb(100, 185, 255)));
+            ui.label(egui::RichText::new(format!("--- {} ---", current_category)).strong().color(egui::Color32::from_rgb(100, 185, 255)));
         }
 
         ui.horizontal(|ui| {
@@ -309,11 +309,11 @@ fn draw_tab_geo_nodes(ui: &mut egui::Ui, query: &str) {
     ui.add_space(8.0);
 
     let info = [
-        ("Opening the Canvas", "Click '🌿 Geo Nodes' in the top menu bar or left toolbar, or toggle 'Window -> Geometry Nodes Canvas'."),
+        ("Opening the Canvas", "Click 'Geo Nodes' in the top menu bar or left toolbar, or toggle 'Window -> Geometry Nodes Canvas'."),
         ("Canvas Navigation", "Drag with Middle Mouse Button (MMB) to pan the infinite grid. Scroll mouse wheel to zoom in and out."),
         ("Adding Nodes", "Right-click on the node canvas or click the '+ Add Node' dropdown in the canvas header. Choose from Primitives (Cube, Cylinder, Sphere, Grid), Ops (Transform, Subdivide, Extrude, Noise Displace, Scatter Points), Math, and Group Output."),
         ("Connecting Sockets", "Click and drag from an Output socket (right side of node) to an Input socket (left side of another node). Cables are color-coded: Green for Mesh Geometry, Yellow for 3D Vectors, Blue for Floats, Purple for Transforms. Cyclic connections are automatically rejected."),
-        ("Modifier Integration", "In the Inspector under 'Modifier Stack', add '🌿 Geometry Nodes'. The procedural node graph will evaluate dynamically as a non-destructive modifier in the object's stack."),
+        ("Modifier Integration", "In the Inspector under 'Modifier Stack', add 'Geometry Nodes'. The procedural node graph will evaluate dynamically as a non-destructive modifier in the object's stack."),
     ];
 
     for &(title, text) in &info {
@@ -334,7 +334,7 @@ fn draw_tab_rhai(ui: &mut egui::Ui, query: &str) {
     ui.add_space(8.0);
 
     let script_topics = [
-        ("Script Console", "Toggle the console via '📜 Rhai' in the top bar or toolbar. You can execute single commands interactively or load and run full multi-line procedural pipelines."),
+        ("Script Console", "Toggle the console via 'Rhai' in the top bar or toolbar. You can execute single commands interactively or load and run full multi-line procedural pipelines."),
         ("Built-in Math & Types", "vec3(x, y, z), mat4_identity(), length(v), normalize(v), dot(a, b), cross(a, b)."),
         ("Mesh Primitives", "Primitives::create_cube(size), Primitives::create_cylinder(radius, height, segments), Primitives::create_uv_sphere(radius, segments, rings), Primitives::create_plane(width, depth, seg_x, seg_z)."),
         ("Mesh Methods", "mesh.subdivide(levels), mesh.extrude_all_faces(distance), mesh.transform(tx, ty, tz, sx, sy, sz), mesh.vertex_count(), mesh.face_count()."),
@@ -370,10 +370,10 @@ fn draw_tab_pathtracer(ui: &mut egui::Ui, query: &str) {
 
     let pt_topics = [
         ("Launching Render (F12)", "Press 'F12' or click 'Render -> Render Image' in the top bar. The render window opens and immediately begins progressive sample accumulation."),
-        ("Resolution Presets", "Supports presets from 360p draft up to 4K UHD (3840×2160) or custom width and height dimensions."),
+        ("Resolution Presets", "Supports presets from 360p draft up to 4K UHD (3840x2160) or custom width and height dimensions."),
         ("Quality & Samples (SPP)", "Select sample counts from 16 spp (quick preview) up to 512 spp (noise-free production). Ray bounces support diffuse, specular, and transmission refraction."),
         ("Physical Thin-Lens Camera (Bokeh)", "Adjust Lens Aperture Radius and Focal Distance in Camera Inspector. Rays are sampled over the optical aperture disc to produce authentic physical depth-of-field bokeh."),
-        ("Saving Final Image", "Once render reaches target sample count (or paused), click '💾 Save Image (PNG)' to export to disk."),
+        ("Saving Final Image", "Once render reaches target sample count (or paused), click 'Save Image (PNG)' to export to disk."),
     ];
 
     for &(title, text) in &pt_topics {
@@ -415,20 +415,20 @@ fn draw_tab_printing(ui: &mut egui::Ui, query: &str) {
 fn draw_tab_about(ui: &mut egui::Ui) {
     ui.heading("About Plumb 3D");
     ui.label("A next-generation, high-performance architectural and precision 3D DCC suite engineered in 100% Safe Pure Rust.");
-    ui.label(egui::RichText::new("Named after the plumb bob — the classical instrument of true verticality, gravity, and architectural precision.").italics().color(egui::Color32::from_rgb(255, 215, 100)));
+    ui.label(egui::RichText::new("Named after the plumb bob -- the classical instrument of true verticality, gravity, and architectural precision.").italics().color(egui::Color32::from_rgb(255, 215, 100)));
     ui.add_space(8.0);
 
     ui.group(|ui| {
         ui.label(egui::RichText::new("Architecture Highlights:").strong());
-        ui.label("• 100% Pure Safe Rust: Zero foreign C/C++ FFI dependencies.");
-        ui.label("• wgpu 23 Hardware Acceleration: Modern Vulkan / Metal / DirectX 12 graphics backend.");
-        ui.label("• 2-Manifold BMesh Half-Edge Kernel: Robust topological editing without mesh non-manifold corruption.");
-        ui.label("• Maya DAG Scene Hierarchy & Maya Constraints: World matrix transform propagation with Aim, Parent, and Path constraints.");
-        ui.label("• 3ds Max Linear Modifier Stack: Non-destructive modifier evaluation with live caching.");
-        ui.label("• Offline Monte Carlo Path Tracer: Multi-threaded ray tracer with SAH BVH spatial trees and Principled PBR BSDF.");
-        ui.label("• Visual Geometry Nodes: Procedural node canvas with type-checked dataflow.");
-        ui.label("• Rigid Body Physics Dynamics: Semi-implicit Euler integration, friction, restitution, and keyframe baking.");
-        ui.label("• Rhai Scripting Engine: Safe, sandboxed scripting runtime.");
+        ui.label("- 100% Pure Safe Rust: Zero foreign C/C++ FFI dependencies.");
+        ui.label("- wgpu 23 Hardware Acceleration: Modern Vulkan / Metal / DirectX 12 graphics backend.");
+        ui.label("- 2-Manifold BMesh Half-Edge Kernel: Robust topological editing without mesh non-manifold corruption.");
+        ui.label("- Maya DAG Scene Hierarchy & Maya Constraints: World matrix transform propagation with Aim, Parent, and Path constraints.");
+        ui.label("- 3ds Max Linear Modifier Stack: Non-destructive modifier evaluation with live caching.");
+        ui.label("- Offline Monte Carlo Path Tracer: Multi-threaded ray tracer with SAH BVH spatial trees and Principled PBR BSDF.");
+        ui.label("- Visual Geometry Nodes: Procedural node canvas with type-checked dataflow.");
+        ui.label("- Rigid Body Physics Dynamics: Semi-implicit Euler integration, friction, restitution, and keyframe baking.");
+        ui.label("- Rhai Scripting Engine: Safe, sandboxed scripting runtime.");
     });
 
     ui.add_space(8.0);

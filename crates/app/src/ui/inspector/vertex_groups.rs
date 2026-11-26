@@ -26,7 +26,7 @@ pub fn draw_vertex_groups_panel(
 
                             if !base_mesh.vertex_groups.is_empty() {
                                 ui.horizontal(|ui| {
-                                    if ui.button("⚖ Normalize All Weights").clicked() {
+                                    if ui.button("Normalize All Weights").clicked() {
                                         let all_names: Vec<String> = base_mesh.vertex_groups.iter().map(|g| g.name.clone()).collect();
                                         actions.trigger_normalize_vertex_groups = Some(all_names);
                                     }
@@ -35,8 +35,8 @@ pub fn draw_vertex_groups_panel(
                                 for vg in &mut base_mesh.vertex_groups {
                                     ui.group(|ui| {
                                         ui.horizontal(|ui| {
-                                            ui.label(format!("• {} ({} verts)", vg.name, vg.weights.len()));
-                                            if ui.button("⇋ Mirror (X)").clicked() {
+                                            ui.label(format!("- {} ({} verts)", vg.name, vg.weights.len()));
+                                            if ui.button("Mirror (X)").clicked() {
                                                 let target = if vg.name.ends_with(".L") {
                                                     format!("{}.R", &vg.name[..vg.name.len() - 2])
                                                 } else if vg.name.ends_with(".R") {

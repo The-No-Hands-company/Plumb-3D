@@ -103,10 +103,10 @@ pub fn draw_print_inspector(state: &mut AppState) {
                                 ui.label(egui::RichText::new("[!] Non-Watertight / Boundary Holes").color(egui::Color32::from_rgb(255, 80, 80)).strong());
                             });
                             if report.open_boundary_edges > 0 {
-                                ui.label(format!("• Open boundary half-edges: {}", report.open_boundary_edges));
+                                ui.label(format!("- Open boundary half-edges: {}", report.open_boundary_edges));
                             }
                             if report.degenerate_faces > 0 {
-                                ui.label(format!("• Degenerate zero-area faces: {}", report.degenerate_faces));
+                                ui.label(format!("- Degenerate zero-area faces: {}", report.degenerate_faces));
                             }
                         });
                     }
@@ -122,7 +122,7 @@ pub fn draw_print_inspector(state: &mut AppState) {
 
                     ui.horizontal(|ui| {
                         ui.label("Enclosed Volume:");
-                        ui.label(format!("{:.2} cm³ ({:.6} m³)", report.volume_cm3, report.volume_m3));
+                        ui.label(format!("{:.2} cm3 ({:.6} m3)", report.volume_cm3, report.volume_m3));
                     });
 
                     ui.horizontal(|ui| {
@@ -136,7 +136,7 @@ pub fn draw_print_inspector(state: &mut AppState) {
                     ui.label(egui::RichText::new("FDM Support & Overhang Analysis").strong());
                     ui.horizontal(|ui| {
                         ui.label("Overhang Threshold:");
-                        ui.add(egui::Slider::new(&mut state.print_inspector.overhang_angle_deg, 20.0..=75.0).text("° from bed"));
+                        ui.add(egui::Slider::new(&mut state.print_inspector.overhang_angle_deg, 20.0..=75.0).text("deg from bed"));
                     });
 
                     let pct = if report.face_count > 0 {
@@ -205,9 +205,9 @@ pub fn draw_print_inspector(state: &mut AppState) {
 
                         ui.horizontal(|ui| {
                             ui.label("Nozzle Temp:");
-                            ui.add(egui::Slider::new(&mut state.print_inspector.nozzle_temp_c, 180..=280).text("°C"));
+                            ui.add(egui::Slider::new(&mut state.print_inspector.nozzle_temp_c, 180..=280).text(" deg C"));
                             ui.label("Bed Temp:");
-                            ui.add(egui::Slider::new(&mut state.print_inspector.bed_temp_c, 40..=100).text("°C"));
+                            ui.add(egui::Slider::new(&mut state.print_inspector.bed_temp_c, 40..=100).text(" deg C"));
                         });
 
                         ui.add_space(4.0);
@@ -256,7 +256,7 @@ pub fn draw_print_inspector(state: &mut AppState) {
                     let stl_data = base_mesh.to_stl_binary();
                     let filename = format!("{}_3dprint.stl", node.name);
                     let _ = std::fs::write(&filename, stl_data);
-                    state.set_status_message(format!("💾 Saved binary STL to: {}", filename));
+                    state.set_status_message(format!("Saved binary STL to: {}", filename));
                 }
             }
         }
@@ -282,7 +282,7 @@ pub fn draw_print_inspector(state: &mut AppState) {
                         settings.bed_temp = state.print_inspector.bed_temp_c;
 
                         if base_mesh.export_gcode_file(&path, &settings).is_ok() {
-                            state.set_status_message(format!("🖨 Exported G-code toolpath to: {}", path.display()));
+                            state.set_status_message(format!("Exported G-code toolpath to: {}", path.display()));
                         }
                     }
                 }

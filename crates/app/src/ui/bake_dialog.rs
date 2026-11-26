@@ -58,7 +58,7 @@ pub fn draw_bake_dialog(state: &mut AppState) {
     let mut trigger_bake = false;
     let mut trigger_export = false;
 
-    egui::Window::new("🍳 PBR Texture Map Baker")
+    egui::Window::new("PBR Texture Map Baker")
         .open(&mut open)
         .default_size(egui::vec2(480.0, 560.0))
         .resizable(true)
@@ -166,11 +166,11 @@ pub fn draw_bake_dialog(state: &mut AppState) {
 
             let can_bake = state.selected_node.is_some();
             ui.horizontal(|ui| {
-                if ui.add_enabled(can_bake, egui::Button::new("🍳 Bake Texture")).clicked() {
+                if ui.add_enabled(can_bake, egui::Button::new("Bake Texture")).clicked() {
                     trigger_bake = true;
                 }
                 if state.bake_state.last_baked_image.is_some()
-                    && ui.button("💾 Export PNG...").clicked() {
+                    && ui.button("Export PNG...").clicked() {
                         trigger_export = true;
                     }
             });

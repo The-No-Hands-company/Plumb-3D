@@ -6,7 +6,7 @@ use crate::ui::actions::UiActions;
 pub fn draw_uv_editor(state: &mut AppState, actions: &mut UiActions) {
         // Render 2D UV Editor Window (Blender / Maya UV Editor)
         if state.show_uv_editor {
-            egui::Window::new("🌐 2D UV Editor & Texture Coordinates")
+            egui::Window::new("2D UV Editor & Texture Coordinates")
                 .open(&mut state.show_uv_editor)
                 .default_size(egui::vec2(520.0, 560.0))
                 .resizable(true)
@@ -15,60 +15,60 @@ pub fn draw_uv_editor(state: &mut AppState, actions: &mut UiActions) {
                         if let Some(node) = state.scene.nodes.get(sel_id) {
                             if let NodeData::Mesh { base_mesh, .. } = &node.data {
                                 ui.horizontal(|ui| {
-                                    if ui.button("🌐 Unwrap Seams").clicked() {
+                                    if ui.button("Unwrap Seams").clicked() {
                                         actions.trigger_unwrap_seams = true;
                                     }
-                                    if ui.button("📐 Smart Project").clicked() {
+                                    if ui.button("Smart Project").clicked() {
                                         actions.trigger_smart_uv_project = true;
                                     }
-                                    if ui.button("✂ Mark Seam").clicked() {
+                                    if ui.button("Mark Seam").clicked() {
                                         actions.trigger_mark_seam = true;
                                     }
-                                    if ui.button("✖ Clear Seam").clicked() {
+                                    if ui.button("Clear Seam").clicked() {
                                         actions.trigger_clear_seam = true;
                                     }
-                                    if ui.button("🗑 Clear All").clicked() {
+                                    if ui.button("Clear All").clicked() {
                                         actions.trigger_clear_all_seams = true;
                                     }
                                 });
 
                                 ui.horizontal(|ui| {
-                                    if ui.button("📦 Pack Islands").clicked() {
+                                    if ui.button("Pack Islands").clicked() {
                                         actions.trigger_pack_uv_islands = true;
                                     }
-                                    if ui.button("↷ Rotate CW").clicked() {
+                                    if ui.button("Rotate CW").clicked() {
                                         actions.trigger_rotate_uv_cw = true;
                                     }
-                                    if ui.button("↶ Rotate CCW").clicked() {
+                                    if ui.button("Rotate CCW").clicked() {
                                         actions.trigger_rotate_uv_ccw = true;
                                     }
-                                    if ui.button("↔ Flip H").clicked() {
+                                    if ui.button("Flip H").clicked() {
                                         actions.trigger_flip_uv_h = true;
                                     }
-                                    if ui.button("↕ Flip V").clicked() {
+                                    if ui.button("Flip V").clicked() {
                                         actions.trigger_flip_uv_v = true;
                                     }
-                                    if ui.button("➕ 1.2x").clicked() {
+                                    if ui.button("+ 1.2x").clicked() {
                                         actions.trigger_scale_uv = Some(1.2);
                                     }
-                                    if ui.button("➖ 0.8x").clicked() {
+                                    if ui.button("- 0.8x").clicked() {
                                         actions.trigger_scale_uv = Some(0.8);
                                     }
-                                    if ui.button("🍃 Relax UVs").on_hover_text("Smooths vertex UVs using Laplacian diffusion to minimize distortion while pinning island boundaries").clicked() {
+                                    if ui.button("Relax UVs").on_hover_text("Smooths vertex UVs using Laplacian diffusion to minimize distortion while pinning island boundaries").clicked() {
                                         actions.trigger_relax_uvs = true;
                                     }
                                 });
 
                                 ui.horizontal(|ui| {
                                     ui.label(egui::RichText::new("Projections:").weak());
-                                    if ui.button("📐 Planar Y").clicked() { actions.trigger_planar_uv = true; }
-                                    if ui.button("📦 Box Map").clicked() { actions.trigger_box_uv = true; }
-                                    if ui.button("🥫 Cylinder").clicked() { actions.trigger_cylindrical_uv = true; }
-                                    if ui.button("🌐 Sphere").clicked() { actions.trigger_spherical_uv = true; }
+                                    if ui.button("Planar Y").clicked() { actions.trigger_planar_uv = true; }
+                                    if ui.button("Box Map").clicked() { actions.trigger_box_uv = true; }
+                                    if ui.button("Cylinder").clicked() { actions.trigger_cylindrical_uv = true; }
+                                    if ui.button("Sphere").clicked() { actions.trigger_spherical_uv = true; }
                                 });
 
                                 ui.horizontal(|ui| {
-                                    ui.add(egui::Slider::new(&mut state.smart_uv_angle_threshold, 15.0..=89.0).text("Angle Thresh (°)"));
+                                    ui.add(egui::Slider::new(&mut state.smart_uv_angle_threshold, 15.0..=89.0).text("Angle Thresh (deg)"));
                                     ui.add(egui::Slider::new(&mut state.smart_uv_margin, 0.005..=0.1).text("Margin"));
                                 });
 

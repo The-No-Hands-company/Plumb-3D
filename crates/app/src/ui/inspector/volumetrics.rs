@@ -9,7 +9,7 @@ use geo_kernel::VolumeGenerators;
 use graph_engine::SceneNode;
 
 pub fn draw_volumetrics_panel(ui: &mut Ui, state: &mut AppState) {
-    ui.heading("☁ OpenVDB Volumetrics & Atmospheric VFX");
+    ui.heading("OpenVDB Volumetrics & Atmospheric VFX");
     ui.label(
         egui::RichText::new("Sparse hierarchical volume grids for realistic ground fog, clouds, and smoke.")
             .small()
@@ -19,7 +19,7 @@ pub fn draw_volumetrics_panel(ui: &mut Ui, state: &mut AppState) {
 
     // 1. Procedural Atmospheric Ground Fog
     ui.group(|ui| {
-        ui.label(egui::RichText::new("🌫 Atmospheric Ground Fog").strong());
+        ui.label(egui::RichText::new("Atmospheric Ground Fog").strong());
         ui.label(
             egui::RichText::new("Low-lying sparse volume with height falloff and Perlin turbulence.")
                 .small()
@@ -31,7 +31,7 @@ pub fn draw_volumetrics_panel(ui: &mut Ui, state: &mut AppState) {
             ui.add(egui::Slider::new(&mut state.vdb_density, 0.05..=2.0));
         });
 
-        if ui.button("🌫 Spawn Atmospheric Ground Fog Grid")
+        if ui.button("Spawn Atmospheric Ground Fog Grid")
             .on_hover_text("Constructs sparse VDB tree with ground fog density and extracts boundary mesh")
             .clicked()
         {
@@ -44,7 +44,7 @@ pub fn draw_volumetrics_panel(ui: &mut Ui, state: &mut AppState) {
             state.selected_node = Some(id);
             state.sync_gpu_meshes();
             state.set_status_message(format!(
-                "🌫 Spawned OpenVDB ground fog ({} active bricks, {} KB sparse storage).",
+                "Spawned OpenVDB ground fog ({} active bricks, {} KB sparse storage).",
                 active_bricks,
                 active_bricks * 2
             ));
@@ -55,7 +55,7 @@ pub fn draw_volumetrics_panel(ui: &mut Ui, state: &mut AppState) {
 
     // 2. Procedural Cumulus Cloud
     ui.group(|ui| {
-        ui.label(egui::RichText::new("☁ Procedural Cumulus Cloud").strong());
+        ui.label(egui::RichText::new("Procedural Cumulus Cloud").strong());
         ui.label(
             egui::RichText::new("Multi-octave noise turbulence volume representing fluffy cumulus clouds.")
                 .small()
@@ -72,7 +72,7 @@ pub fn draw_volumetrics_panel(ui: &mut Ui, state: &mut AppState) {
             ui.add(egui::Slider::new(&mut state.vdb_iso_level, 0.05..=0.8));
         });
 
-        if ui.button("☁ Generate Cumulus Cloud Volume")
+        if ui.button("Generate Cumulus Cloud Volume")
             .on_hover_text("Samples 3D fractal noise into sparse VDB grid and creates cloud isosurface")
             .clicked()
         {
@@ -86,7 +86,7 @@ pub fn draw_volumetrics_panel(ui: &mut Ui, state: &mut AppState) {
             state.selected_node = Some(id);
             state.sync_gpu_meshes();
             state.set_status_message(format!(
-                "☁ Generated Cumulus Cloud ({} active bricks in sparse hierarchical tree).",
+                "Generated Cumulus Cloud ({} active bricks in sparse hierarchical tree).",
                 active_bricks
             ));
         }

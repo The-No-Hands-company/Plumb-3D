@@ -102,7 +102,7 @@ pub fn render(state: &AppState) {
     painter.text(
         badge_pos,
         egui::Align2::LEFT_TOP,
-        format!("📷 {} | Gate {:.2}:1", cam_node.name, cam_aspect),
+        format!("[Cam] {} | Gate {:.2}:1", cam_node.name, cam_aspect),
         egui::FontId::proportional(11.0),
         egui::Color32::from_rgb(200, 210, 225),
     );

@@ -111,7 +111,7 @@ pub fn draw_node_card(
         painter.text(
             delete_rect.center(),
             egui::Align2::CENTER_CENTER,
-            "×",
+            "x",
             egui::FontId::proportional(14.0 * zoom),
             Color32::from_rgb(255, 90, 90),
         );
@@ -119,7 +119,7 @@ pub fn draw_node_card(
         painter.text(
             delete_rect.center(),
             egui::Align2::CENTER_CENTER,
-            "×",
+            "x",
             egui::FontId::proportional(12.0 * zoom),
             Color32::from_white_alpha(150),
         );

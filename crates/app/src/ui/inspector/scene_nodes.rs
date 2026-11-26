@@ -62,7 +62,7 @@ pub fn draw_scene_nodes_panel(
                                         let mut outer_deg = spot_outer_angle_radians.to_degrees();
                                         ui.horizontal(|ui| {
                                             ui.label("Inner Cone:");
-                                            if ui.add(egui::Slider::new(&mut inner_deg, 1.0..=85.0).suffix("°")).changed() {
+                                            if ui.add(egui::Slider::new(&mut inner_deg, 1.0..=85.0).suffix(" deg")).changed() {
                                                 if inner_deg > outer_deg { outer_deg = inner_deg; }
                                                 *spot_inner_angle_radians = inner_deg.to_radians();
                                                 *spot_outer_angle_radians = outer_deg.to_radians();
@@ -70,7 +70,7 @@ pub fn draw_scene_nodes_panel(
                                         });
                                         ui.horizontal(|ui| {
                                             ui.label("Outer Cone:");
-                                            if ui.add(egui::Slider::new(&mut outer_deg, 1.0..=89.0).suffix("°")).changed() {
+                                            if ui.add(egui::Slider::new(&mut outer_deg, 1.0..=89.0).suffix(" deg")).changed() {
                                                 if outer_deg < inner_deg { inner_deg = outer_deg; }
                                                 *spot_inner_angle_radians = inner_deg.to_radians();
                                                 *spot_outer_angle_radians = outer_deg.to_radians();
@@ -104,7 +104,7 @@ pub fn draw_scene_nodes_panel(
                                         let mut fov_deg = fov_y_radians.to_degrees();
                                         ui.horizontal(|ui| {
                                             ui.label("FOV:");
-                                            if ui.add(egui::Slider::new(&mut fov_deg, 10.0..=120.0).suffix("°")).changed() {
+                                            if ui.add(egui::Slider::new(&mut fov_deg, 10.0..=120.0).suffix(" deg")).changed() {
                                                 *fov_y_radians = fov_deg.to_radians();
                                             }
                                         });
@@ -134,7 +134,7 @@ pub fn draw_scene_nodes_panel(
                                     });
 
                                     ui.separator();
-                                    if ui.button("➕ Extrude Child Bone").clicked() {
+                                    if ui.button("+ Extrude Child Bone").clicked() {
                                         actions.add_child_joint = Some((sel_id, *length));
                                     }
 
@@ -151,12 +151,12 @@ pub fn draw_scene_nodes_panel(
                                 ui.separator();
                             }
                             NodeData::Curve { spline, bevel_radius, bevel_resolution, cached_render_mesh, profile_shape } => {
-                                ui.collapsing("Bézier Curve / Spline", |ui| {
+                                ui.collapsing("Bezier Curve / Spline", |ui| {
                                     let is_curve_edit = interaction_mode == InteractionMode::CurveEdit;
                                     let btn_text = if is_curve_edit {
                                         egui::RichText::new("Exit Curve Edit (Tab)").color(egui::Color32::from_rgb(100, 220, 255)).strong()
                                     } else {
-                                        egui::RichText::new("✏️ Curve Edit Mode (Tab)").strong()
+                                        egui::RichText::new("Curve Edit Mode (Tab)").strong()
                                     };
                                     ui.horizontal(|ui| {
                                         if ui.button(btn_text).clicked() {
@@ -223,7 +223,7 @@ pub fn draw_scene_nodes_panel(
                                         ui.label("Fillet R:");
                                         ui.add(egui::DragValue::new(&mut fillet_r).speed(0.01).range(0.01..=10.0));
                                         ui.data_mut(|d| d.insert_temp(egui::Id::new("fillet_radius_val"), fillet_r));
-                                        if ui.button("✨ Fillet Corners").on_hover_text("Rounds sharp corners of the Bézier curve with precision CAD circular G1-continuous fillets").clicked() {
+                                        if ui.button("Fillet Corners").on_hover_text("Rounds sharp corners of the Bezier curve with precision CAD circular G1-continuous fillets").clicked() {
                                             actions.trigger_fillet_curve = Some(fillet_r);
                                         }
                                     });
@@ -232,12 +232,12 @@ pub fn draw_scene_nodes_panel(
                                         let mut lathe_ang = ui.data_mut(|d| *d.get_temp_mut_or_insert_with(egui::Id::new("lathe_ang_val"), || 360.0_f32));
                                         ui.label("Lathe:");
                                         ui.add(egui::DragValue::new(&mut lathe_segs).speed(0.2).range(3..=128).suffix(" segs"));
-                                        ui.add(egui::DragValue::new(&mut lathe_ang).speed(1.0).range(1.0..=360.0).suffix("°"));
+                                        ui.add(egui::DragValue::new(&mut lathe_ang).speed(1.0).range(1.0..=360.0).suffix(" deg"));
                                         ui.data_mut(|d| {
                                             d.insert_temp(egui::Id::new("lathe_segs_val"), lathe_segs);
                                             d.insert_temp(egui::Id::new("lathe_ang_val"), lathe_ang);
                                         });
-                                        if ui.button("🏺 Revolve to Mesh").on_hover_text("Revolves this curve profile around the Y-axis into a 3D solid rotational mesh").clicked() {
+                                        if ui.button("Revolve to Mesh").on_hover_text("Revolves this curve profile around the Y-axis into a 3D solid rotational mesh").clicked() {
                                             actions.trigger_lathe_curve = Some((lathe_segs, lathe_ang));
                                         }
                                     });
@@ -318,7 +318,7 @@ pub fn draw_scene_nodes_panel(
                                                     ui.label("Fillet Knot:");
                                                     ui.add(egui::DragValue::new(&mut knot_fillet_r).speed(0.01).range(0.01..=5.0));
                                                     ui.data_mut(|d| d.insert_temp(egui::Id::new("knot_fillet_r"), knot_fillet_r));
-                                                    if ui.button("✨ Fillet Knot").on_hover_text("Fillets only this selected corner with precision circular arc").clicked() {
+                                                    if ui.button("Fillet Knot").on_hover_text("Fillets only this selected corner with precision circular arc").clicked() {
                                                         actions.trigger_fillet_selected_curve = Some(knot_fillet_r);
                                                     }
                                                 });
@@ -382,7 +382,7 @@ pub fn draw_scene_nodes_panel(
                                     });
 
                                     ui.horizontal(|ui| {
-                                        if ui.button("➕ Extrude Knot (E)").clicked() {
+                                        if ui.button("+ Extrude Knot (E)").clicked() {
                                             let cur_idx = curve_knot.unwrap_or_else(|| spline.points.len().saturating_sub(1));
                                             let cur_pt = spline.points[cur_idx];
                                             let dir = if cur_pt.handle_out.length_squared() > 1e-4 {
@@ -398,7 +398,7 @@ pub fn draw_scene_nodes_panel(
                                             curve_handle = Some(CurveHandleSelection::Knot);
                                             *cached_render_mesh = None;
                                         }
-                                        if ui.button("🔄 Reverse Direction").clicked() {
+                                        if ui.button("Reverse Direction").clicked() {
                                             spline.reverse();
                                             if let Some(k) = curve_knot {
                                                 curve_knot = Some(spline.points.len().saturating_sub(1) - k);

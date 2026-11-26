@@ -156,7 +156,7 @@ pub fn render(state: &mut AppState) {
 
                     if let Some(s1) = state.camera.world_to_screen(p1, width, height) {
                         let angle_pos = egui::pos2(s1.x, s1.y - 18.0);
-                        let angle_label = format!("{:.1}°", angle_deg);
+                        let angle_label = format!("{:.1} deg", angle_deg);
                         painter.rect_filled(
                             egui::Rect::from_center_size(angle_pos, egui::vec2(angle_label.len() as f32 * 7.5 + 8.0, 16.0)),
                             3.0,
@@ -175,7 +175,7 @@ pub fn render(state: &mut AppState) {
         }
 
         // Measurement Tool floating panel
-        egui::Window::new("📏 3D Measurement Tool (Ruler)")
+        egui::Window::new("3D Measurement Tool (Ruler)")
             .default_pos(egui::pos2(width - 320.0, height - 260.0))
             .show(&state.egui_ctx, |ui| {
                 ui.horizontal(|ui| {
@@ -198,7 +198,7 @@ pub fn render(state: &mut AppState) {
                         let dx = (p1.x - p0.x).abs();
                         let dy = (p1.y - p0.y).abs();
                         let dz = (p1.z - p0.z).abs();
-                        ui.label(format!("P{} -> P{}: Dist: {:.3}m (ΔX: {:.2}, ΔY: {:.2}, ΔZ: {:.2})", i - 1, i, d, dx, dy, dz));
+                        ui.label(format!("P{} -> P{}: Dist: {:.3}m (dX: {:.2}, dY: {:.2}, dZ: {:.2})", i - 1, i, d, dx, dy, dz));
                     }
                 }
             });
@@ -253,9 +253,9 @@ pub fn render(state: &mut AppState) {
                 } else {
                     state.angle_snap_degrees
                 };
-                format!("📐 Angle Snapped ({:.0}° step)", snap_step)
+                format!("Angle Snapped ({:.0} deg step)", snap_step)
             } else {
-                format!("⌖ Snapped to {} ({:.2}, {:.2}, {:.2})", label, hit_pos.x, hit_pos.y, hit_pos.z)
+                format!("Snapped to {} ({:.2}, {:.2}, {:.2})", label, hit_pos.x, hit_pos.y, hit_pos.z)
             };
             let pill_pos = egui::pos2(center.x, center.y - 24.0);
             let pill_rect = egui::Rect::from_center_size(pill_pos, egui::vec2(pill_text.len() as f32 * 6.8 + 14.0, 20.0));
@@ -339,7 +339,7 @@ pub fn render(state: &mut AppState) {
         }
 
         // Curve Pen HUD banner
-        let hud_text = "✒ Curve Pen: Click to place anchor | Drag for smooth tangent | C/Click Start to close | Enter to commit | Esc to cancel";
+        let hud_text = "Curve Pen: Click to place anchor | Drag for smooth tangent | C/Click Start to close | Enter to commit | Esc to cancel";
         let banner_rect = egui::Rect::from_center_size(
             egui::pos2(width * 0.5, 38.0),
             egui::vec2(hud_text.len() as f32 * 6.5 + 24.0, 26.0),
@@ -382,7 +382,7 @@ pub fn render(state: &mut AppState) {
 
             painter.circle_filled(po, 3.5, egui::Color32::WHITE);
             let pill_pos = egui::pos2(po.x + 30.0, po.y);
-            painter.text(pill_pos, egui::Align2::LEFT_CENTER, "📐 CAD Workplane", egui::FontId::proportional(11.0), egui::Color32::from_rgb(0, 220, 255));
+            painter.text(pill_pos, egui::Align2::LEFT_CENTER, "CAD Workplane", egui::FontId::proportional(11.0), egui::Color32::from_rgb(0, 220, 255));
         }
     }
 
@@ -485,18 +485,18 @@ pub fn render(state: &mut AppState) {
                 crate::modals::cutter::CutterShape::Ngon => "N-gon",
             };
             let array_label = if cutter.radial_count > 1 {
-                format!(" | ⚙ N={}", cutter.radial_count)
+                format!(" | Array N={}", cutter.radial_count)
             } else {
                 String::new()
             };
-            let ghost_label = if cutter.is_ghost { " | 👻 Ghost" } else { "" };
+            let ghost_label = if cutter.is_ghost { " | Ghost" } else { "" };
             let sym_label = match cutter.symmetry_mirror {
-                Some(geo_kernel::MirrorAxis::X) => " | 🪞 X",
-                Some(geo_kernel::MirrorAxis::Y) => " | 🪞 Y",
-                Some(geo_kernel::MirrorAxis::Z) => " | 🪞 Z",
+                Some(geo_kernel::MirrorAxis::X) => " | Mirror X",
+                Some(geo_kernel::MirrorAxis::Y) => " | Mirror Y",
+                Some(geo_kernel::MirrorAxis::Z) => " | Mirror Z",
                 None => "",
             };
-            let caliper_text = format!("📐 {} W: {:.1} mm H: {:.1} mm D: {:.1} mm{}{}{}", shape_label, dim_w, dim_h, dim_d, array_label, sym_label, ghost_label);
+            let caliper_text = format!("{} W: {:.1} mm H: {:.1} mm D: {:.1} mm{}{}{}", shape_label, dim_w, dim_h, dim_d, array_label, sym_label, ghost_label);
 
             let center_screen = egui::pos2((pts[0].x + pts[2].x) * 0.5, (pts[0].y + pts[2].y) * 0.5 - 20.0);
             let pill_rect = egui::Rect::from_center_size(center_screen, egui::vec2(caliper_text.len() as f32 * 6.5 + 16.0, 22.0));
@@ -562,7 +562,7 @@ pub fn render(state: &mut AppState) {
                             state.interaction_mode = InteractionMode::Sculpt;
                         }
                     }
-                    if ui.selectable_label(state.curve_pen_active, "Pen").on_hover_text("Bézier Curve Pen Tool (P)").clicked() {
+                    if ui.selectable_label(state.curve_pen_active, "Pen").on_hover_text("Bezier Curve Pen Tool (P)").clicked() {
                         state.curve_pen_active = !state.curve_pen_active;
                         if state.curve_pen_active {
                             state.curve_pen_points.clear();

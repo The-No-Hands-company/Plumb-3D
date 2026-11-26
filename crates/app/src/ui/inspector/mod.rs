@@ -49,7 +49,7 @@ pub fn draw_inspector(state: &mut AppState, actions: &mut UiActions) {
             ui.horizontal(|ui| {
                 ui.heading("Inspector");
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.small_button("▶").on_hover_text("Collapse Inspector").clicked() {
+                    if ui.small_button(">").on_hover_text("Collapse Inspector").clicked() {
                         state.show_inspector = false;
                     }
                 });
@@ -80,18 +80,18 @@ pub fn draw_inspector(state: &mut AppState, actions: &mut UiActions) {
                 // Header (Name, Type Badge, and Visibility)
                 if let Some(node) = state.scene.nodes.get_mut(sel_id) {
                     let type_badge = match &node.data {
-                        NodeData::Mesh { .. } => "⬡ Mesh",
-                        NodeData::Light { .. } => "💡 Light",
-                        NodeData::Camera { .. } => "📷 Camera",
-                        NodeData::Joint { .. } => "🦴 Bone",
-                        NodeData::Curve { .. } => "〰 Spline",
-                        NodeData::Transform => "📁 Group",
+                        NodeData::Mesh { .. } => "Mesh",
+                        NodeData::Light { .. } => "Light",
+                        NodeData::Camera { .. } => "Camera",
+                        NodeData::Joint { .. } => "Bone",
+                        NodeData::Curve { .. } => "Spline",
+                        NodeData::Transform => "Group",
                     };
                     ui.horizontal(|ui| {
                         ui.label(egui::RichText::new(&node.name).strong().size(14.0));
                         ui.label(egui::RichText::new(type_badge).small().color(egui::Color32::from_rgb(140, 150, 175)));
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            ui.checkbox(&mut node.visible, "👁");
+                            ui.checkbox(&mut node.visible, "Visible");
                         });
                     });
                 }
@@ -99,22 +99,22 @@ pub fn draw_inspector(state: &mut AppState, actions: &mut UiActions) {
 
                 // Modern Pill Tab Bar - strictly context-isolated to active workspace
                 ui.horizontal_wrapped(|ui| {
-                    if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Transform, "📍 Node").clicked() {
+                    if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Transform, "Node").clicked() {
                         state.inspector_tab = crate::types::InspectorTab::Transform;
                     }
-                    if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Modifiers, "⚡ Modifiers").clicked() {
+                    if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Modifiers, "Modifiers").clicked() {
                         state.inspector_tab = crate::types::InspectorTab::Modifiers;
                     }
-                    if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Materials, "🎨 Shading").clicked() {
+                    if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Materials, "Shading").clicked() {
                         state.inspector_tab = crate::types::InspectorTab::Materials;
                     }
 
                     // Context-Isolated Tools Tab
                     if state.current_workspace != WorkspaceTemplate::Animation {
                         let tool_label = match state.current_workspace {
-                            WorkspaceTemplate::Sculpting => "🎨 Brushes",
-                            WorkspaceTemplate::UvRetopo => "🗺 UV Tools",
-                            _ => "🛠 Tools",
+                            WorkspaceTemplate::Sculpting => "Brushes",
+                            WorkspaceTemplate::UvRetopo => "UV Tools",
+                            _ => "Tools",
                         };
                         if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Tools, tool_label).clicked() {
                             state.inspector_tab = crate::types::InspectorTab::Tools;
@@ -123,10 +123,10 @@ pub fn draw_inspector(state: &mut AppState, actions: &mut UiActions) {
 
                     // Context-Isolated: Rigging & Physics ONLY appear in Animation workspace!
                     if state.current_workspace == WorkspaceTemplate::Animation {
-                        if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Constraints, "🔗 Rigging").clicked() {
+                        if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Constraints, "Rigging").clicked() {
                             state.inspector_tab = crate::types::InspectorTab::Constraints;
                         }
-                        if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Physics, "⚛ Physics").clicked() {
+                        if ui.selectable_label(state.inspector_tab == crate::types::InspectorTab::Physics, "Physics").clicked() {
                             state.inspector_tab = crate::types::InspectorTab::Physics;
                         }
                     }

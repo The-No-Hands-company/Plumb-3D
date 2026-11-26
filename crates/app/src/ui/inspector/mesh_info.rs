@@ -11,7 +11,7 @@ pub fn draw_mesh_info(
     selected_faces: &HashSet<FaceKey>,
     base_mesh: &Mesh,
 ) {
-    ui.collapsing("📐 CAD Dimensions & Measurement", |ui| {
+    ui.collapsing("CAD Dimensions & Measurement", |ui| {
         // Overall Bounding Box & Element Metrics
         ui.horizontal(|ui| {
             ui.label(format!("Verts: {}", base_mesh.vertices.len()));
@@ -23,19 +23,19 @@ pub fn draw_mesh_info(
 
         let dims = base_mesh.bounding_dimensions();
         let center = base_mesh.bounding_center();
-        ui.label(format!("Bounding Box: [{:.3}m × {:.3}m × {:.3}m]", dims.x, dims.y, dims.z));
+        ui.label(format!("Bounding Box: [{:.3}m x {:.3}m x {:.3}m]", dims.x, dims.y, dims.z));
         ui.label(format!("Geometric Center: [{:.3}, {:.3}, {:.3}]", center.x, center.y, center.z));
 
         // 2-Manifold Topology Health Report
         let report = base_mesh.check_manifold();
         ui.horizontal(|ui| {
             if report.is_watertight {
-                ui.label(egui::RichText::new("🟢 Watertight Solid").color(egui::Color32::from_rgb(100, 220, 140)));
+                ui.label(egui::RichText::new("[Solid] Watertight Solid").color(egui::Color32::from_rgb(100, 220, 140)));
             } else {
-                ui.label(egui::RichText::new(format!("🟠 Open Shell ({} Holes)", report.boundary_edge_count)).color(egui::Color32::from_rgb(255, 170, 80)));
+                ui.label(egui::RichText::new(format!("[Open] Open Shell ({} Holes)", report.boundary_edge_count)).color(egui::Color32::from_rgb(255, 170, 80)));
             }
             ui.separator();
-            ui.label(format!("Euler χ: {} | Genus: {}", report.euler_characteristic, report.genus));
+            ui.label(format!("Euler Chi: {} | Genus: {}", report.euler_characteristic, report.genus));
         });
 
         ui.separator();
@@ -57,9 +57,9 @@ pub fn draw_mesh_info(
                     let incline_deg = delta.y.atan2(dist_xz).to_degrees();
 
                     ui.group(|ui| {
-                        ui.label(egui::RichText::new(format!("📏 3D Distance: {:.4} m", dist)).strong().color(egui::Color32::from_rgb(100, 220, 160)));
-                        ui.label(format!("ΔX: {:.4} m | ΔY: {:.4} m (Height) | ΔZ: {:.4} m", delta.x.abs(), delta.y.abs(), delta.z.abs()));
-                        ui.label(format!("Ground Run (XZ): {:.4} m | Incline: {:.2}°", dist_xz, incline_deg));
+                        ui.label(egui::RichText::new(format!("3D Distance: {:.4} m", dist)).strong().color(egui::Color32::from_rgb(100, 220, 160)));
+                        ui.label(format!("dX: {:.4} m | dY: {:.4} m (Height) | dZ: {:.4} m", delta.x.abs(), delta.y.abs(), delta.z.abs()));
+                        ui.label(format!("Ground Run (XZ): {:.4} m | Incline: {:.2} deg", dist_xz, incline_deg));
                     });
                 }
             } else if selected_vertices.len() == 3 {
@@ -78,7 +78,7 @@ pub fn draw_mesh_info(
                         0.0
                     };
                     ui.group(|ui| {
-                        ui.label(egui::RichText::new(format!("📐 Vertex Angle (∠ABC): {:.2}°", angle_deg)).strong().color(egui::Color32::from_rgb(130, 200, 255)));
+                        ui.label(egui::RichText::new(format!("Vertex Angle (ABC): {:.2} deg", angle_deg)).strong().color(egui::Color32::from_rgb(130, 200, 255)));
                         ui.label(format!("Leg 1 (BA): {:.4} m | Leg 2 (BC): {:.4} m", ba.length(), bc.length()));
                     });
                 }
@@ -90,9 +90,9 @@ pub fn draw_mesh_info(
                     let p1 = base_mesh.vertices[he.target].position;
                     let len = (p1 - p0).length();
                     ui.group(|ui| {
-                        ui.label(egui::RichText::new(format!("📏 Edge Length: {:.4} m", len)).strong().color(egui::Color32::from_rgb(100, 220, 160)));
+                        ui.label(egui::RichText::new(format!("Edge Length: {:.4} m", len)).strong().color(egui::Color32::from_rgb(100, 220, 160)));
                         let dy = (p1.y - p0.y).abs();
-                        ui.label(format!("Vertical Rise (ΔY): {:.4} m", dy));
+                        ui.label(format!("Vertical Rise (dY): {:.4} m", dy));
                     });
                 }
             } else if selected_edges.len() == 2 {
@@ -114,7 +114,7 @@ pub fn draw_mesh_info(
                     let midpoint_dist = (mid1 - mid0).length();
 
                     ui.group(|ui| {
-                        ui.label(egui::RichText::new(format!("📐 Edge Angle: {:.2}°", angle_deg)).strong().color(egui::Color32::from_rgb(130, 200, 255)));
+                        ui.label(egui::RichText::new(format!("Edge Angle: {:.2} deg", angle_deg)).strong().color(egui::Color32::from_rgb(130, 200, 255)));
                         ui.label(format!("Midpoint Distance: {:.4} m", midpoint_dist));
                     });
                 }
@@ -139,7 +139,7 @@ pub fn draw_mesh_info(
                         }
                     }
                     ui.group(|ui| {
-                        ui.label(egui::RichText::new(format!("⬡ Face Area: {:.4} m²", area)).strong().color(egui::Color32::from_rgb(255, 180, 100)));
+                        ui.label(egui::RichText::new(format!("Face Area: {:.4} m2", area)).strong().color(egui::Color32::from_rgb(255, 180, 100)));
                         ui.label(format!("Perimeter: {:.4} m | Vertices: {}", perimeter, v_keys.len()));
                         ui.label(format!("Surface Normal: [{:.2}, {:.2}, {:.2}]", face.normal.x, face.normal.y, face.normal.z));
                     });
@@ -150,7 +150,7 @@ pub fn draw_mesh_info(
                     let dot = f0.normal.dot(f1.normal).clamp(-1.0, 1.0);
                     let dihedral_deg = dot.acos().to_degrees();
                     ui.group(|ui| {
-                        ui.label(egui::RichText::new(format!("📐 Dihedral Angle: {:.2}°", dihedral_deg)).strong().color(egui::Color32::from_rgb(255, 200, 120)));
+                        ui.label(egui::RichText::new(format!("Dihedral Angle: {:.2} deg", dihedral_deg)).strong().color(egui::Color32::from_rgb(255, 200, 120)));
                         ui.label(format!("Normal 1: [{:.2}, {:.2}, {:.2}]", f0.normal.x, f0.normal.y, f0.normal.z));
                         ui.label(format!("Normal 2: [{:.2}, {:.2}, {:.2}]", f1.normal.x, f1.normal.y, f1.normal.z));
                     });
@@ -169,7 +169,7 @@ pub fn draw_mesh_info(
                     }
                 }
                 ui.group(|ui| {
-                    ui.label(egui::RichText::new(format!("⬡ Total Selection Area: {:.4} m²", total_area)).strong().color(egui::Color32::from_rgb(255, 180, 100)));
+                    ui.label(egui::RichText::new(format!("Total Selection Area: {:.4} m2", total_area)).strong().color(egui::Color32::from_rgb(255, 180, 100)));
                     ui.label(format!("Selected Faces Count: {}", selected_faces.len()));
                 });
             } else {

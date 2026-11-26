@@ -74,7 +74,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
         }
     }
 
-    egui::Window::new("Plumb 3D — Welcome & Quick-Start Hub")
+    egui::Window::new("Plumb 3D -- Welcome & Quick-Start Hub")
         .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
         .fixed_size(egui::vec2(660.0, 680.0))
         .collapsible(false)
@@ -115,7 +115,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                 );
                 ui.add_space(2.0);
                 ui.label(
-                    egui::RichText::new("Medieval Citadel & Fortress • Plumb 3D v1.0.0 Official Release Splash Artwork")
+                    egui::RichText::new("Medieval Citadel & Fortress - Plumb 3D v1.0.0 Official Release Splash Artwork")
                         .size(10.0)
                         .italics()
                         .color(egui::Color32::from_rgb(130, 140, 160)),
@@ -127,7 +127,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {
                     ui.label(egui::RichText::new("PLUMB 3D").size(24.0).strong().color(egui::Color32::from_rgb(226, 179, 87)));
-                    ui.label(egui::RichText::new("Precision & Hard-Surface DCC Suite • v1.0.0").size(12.0).color(egui::Color32::from_rgb(160, 170, 190)));
+                    ui.label(egui::RichText::new("Precision & Hard-Surface DCC Suite - v1.0.0").size(12.0).color(egui::Color32::from_rgb(160, 170, 190)));
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if ui.button("Close").clicked() {

@@ -38,7 +38,7 @@ pub fn draw_vertex_paint_tools(ui: &mut egui::Ui, state: &mut AppState, actions:
 }
 
 pub fn draw_texture_paint_tools(ui: &mut egui::Ui, state: &mut AppState) {
-    ui.heading("🎨 PBR Texture Paint (Substance 3D)");
+    ui.heading("PBR Texture Paint (Substance 3D)");
 
     ui.horizontal(|ui| {
         ui.label("Channel:");
@@ -85,10 +85,10 @@ pub fn draw_texture_paint_tools(ui: &mut egui::Ui, state: &mut AppState) {
         let has_canvas = state.paint_textures.contains_key(&sel_id);
         ui.horizontal(|ui| {
             if !has_canvas {
-                if ui.button("🖼 Create 1024 Canvas").clicked() {
+                if ui.button("Create 1024 Canvas").clicked() {
                     state.paint_textures.insert(sel_id, geo_kernel::PaintTexture::new(1024, 1024, [220, 220, 220, 255]));
                 }
-                if ui.button("🖼 Create 2048 Canvas").clicked() {
+                if ui.button("Create 2048 Canvas").clicked() {
                     state.paint_textures.insert(sel_id, geo_kernel::PaintTexture::new(2048, 2048, [220, 220, 220, 255]));
                 }
             } else if let Some(tex) = state.paint_textures.get_mut(&sel_id) {

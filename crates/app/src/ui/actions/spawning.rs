@@ -107,7 +107,7 @@ pub fn handle_spawning(state: &mut AppState, actions: &mut UiActions) {
         }
     }
 
-    // Handle Spawn Bézier Curve
+    // Handle Spawn Bezier Curve
     if let Some(curve_type) = actions.spawn_curve.take() {
         state.selected_vertices.clear();
         state.selected_edges.clear();

@@ -204,12 +204,12 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
 
         // 9. Right Aligned: Collapsible Panel Toggles
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            let insp_text = if state.show_inspector { "Inspector ▶" } else { "◀ Inspector" };
+            let insp_text = if state.show_inspector { "Inspector >" } else { "< Inspector" };
             if ui.selectable_label(state.show_inspector, insp_text).clicked() {
                 state.show_inspector = !state.show_inspector;
             }
 
-            let outl_text = if state.show_outliner { "◀ Outliner" } else { "Outliner ▶" };
+            let outl_text = if state.show_outliner { "< Outliner" } else { "Outliner >" };
             if ui.selectable_label(state.show_outliner, outl_text).clicked() {
                 state.show_outliner = !state.show_outliner;
             }

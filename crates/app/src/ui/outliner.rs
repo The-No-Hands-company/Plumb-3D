@@ -15,7 +15,7 @@ pub fn draw_outliner(state: &mut AppState, actions: &mut UiActions) {
             ui.horizontal(|ui| {
                 ui.heading("Scene Outliner");
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.small_button("◀").on_hover_text("Collapse Outliner").clicked() {
+                    if ui.small_button("<").on_hover_text("Collapse Outliner").clicked() {
                         state.show_outliner = false;
                     }
                 });
@@ -24,7 +24,7 @@ pub fn draw_outliner(state: &mut AppState, actions: &mut UiActions) {
 
                 ui.horizontal(|ui| {
                     ui.add(egui::TextEdit::singleline(&mut state.outliner_filter).hint_text("Search outliner..."));
-                    if !state.outliner_filter.is_empty() && ui.small_button("✖").clicked() {
+                    if !state.outliner_filter.is_empty() && ui.small_button("X").clicked() {
                         state.outliner_filter.clear();
                     }
                 });
@@ -79,7 +79,7 @@ pub fn draw_outliner(state: &mut AppState, actions: &mut UiActions) {
                                 }
                             });
 
-                            if ui.button("🗑 Delete Selected (X)").clicked() {
+                            if ui.button("Delete Selected (X)").clicked() {
                                 actions.delete_selected = true;
                             }
                         });
@@ -159,28 +159,28 @@ fn draw_outliner_tree_node(
         let branch = if node.children.is_empty() {
             " "
         } else {
-            "▼"
+            "v"
         };
-        let kind_icon = match &node.data {
-            NodeData::Mesh { .. } => "⬡",
+        let kind_badge = match &node.data {
+            NodeData::Mesh { .. } => "[M]",
             NodeData::Light { light_type, .. } => match light_type {
-                LightType::Directional => "☀️",
-                LightType::Point => "💡",
-                LightType::Spot => "🔦",
+                LightType::Directional => "[Sun]",
+                LightType::Point => "[Pt]",
+                LightType::Spot => "[Spot]",
             },
-            NodeData::Camera { .. } => "📷",
-            NodeData::Joint { .. } => "🦴",
-            NodeData::Curve { .. } => "➰",
-            NodeData::Transform => "📁",
+            NodeData::Camera { .. } => "[Cam]",
+            NodeData::Joint { .. } => "[Bone]",
+            NodeData::Curve { .. } => "[Crv]",
+            NodeData::Transform => "[Grp]",
         };
 
         ui.horizontal(|ui| {
-            let eye_text = if node.visible { "👁" } else { "⊘" };
+            let eye_text = if node.visible { "[o]" } else { "[-]" };
             if ui.small_button(eye_text).on_hover_text("Toggle Visibility").clicked() {
                 *toggle_vis = Some(node_id);
             }
 
-            let text = format!("{}{} {} {}", indent, branch, kind_icon, node.name);
+            let text = format!("{}{} {} {}", indent, branch, kind_badge, node.name);
             let label = if is_active {
                 egui::RichText::new(text)
                     .strong()

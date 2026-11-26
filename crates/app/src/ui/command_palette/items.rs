@@ -122,7 +122,7 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         }),
     },
     PaletteItem {
-        name: "Spin / Revolve Geometry 360°",
+        name: "Spin / Revolve Geometry 360 deg",
         category: "Modeling",
         shortcut: "Alt+S",
         keywords: &["spin", "revolve", "lathe", "turn", "radial extrude"],

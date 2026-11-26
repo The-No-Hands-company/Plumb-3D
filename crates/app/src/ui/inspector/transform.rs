@@ -47,16 +47,16 @@ pub fn draw_transform_panel(ui: &mut egui::Ui, state: &mut AppState, sel_id: Nod
             ui.label("Orientation (,):");
             egui::ComboBox::from_id_salt("transform_orientation_combo")
                 .selected_text(match state.transform_orientation {
-                    TransformOrientation::Global => "🌐 Global",
-                    TransformOrientation::Local => "📦 Local",
-                    TransformOrientation::Normal => "📐 Normal",
-                    TransformOrientation::View => "👁 View",
+                    TransformOrientation::Global => "Global",
+                    TransformOrientation::Local => "Local",
+                    TransformOrientation::Normal => "Normal",
+                    TransformOrientation::View => "View",
                 })
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut state.transform_orientation, TransformOrientation::Global, "🌐 Global");
-                    ui.selectable_value(&mut state.transform_orientation, TransformOrientation::Local, "📦 Local");
-                    ui.selectable_value(&mut state.transform_orientation, TransformOrientation::Normal, "📐 Normal");
-                    ui.selectable_value(&mut state.transform_orientation, TransformOrientation::View, "👁 View");
+                    ui.selectable_value(&mut state.transform_orientation, TransformOrientation::Global, "Global");
+                    ui.selectable_value(&mut state.transform_orientation, TransformOrientation::Local, "Local");
+                    ui.selectable_value(&mut state.transform_orientation, TransformOrientation::Normal, "Normal");
+                    ui.selectable_value(&mut state.transform_orientation, TransformOrientation::View, "View");
                 });
         });
         ui.horizontal(|ui| {
@@ -66,10 +66,10 @@ pub fn draw_transform_panel(ui: &mut egui::Ui, state: &mut AppState, sel_id: Nod
         if state.snap_enabled {
             ui.horizontal(|ui| {
                 ui.label("Target:");
-                ui.selectable_value(&mut state.snap_target, SnapTarget::Vertex, "📍 Vert (V)");
-                ui.selectable_value(&mut state.snap_target, SnapTarget::EdgeMidpoint, "📏 Mid");
-                ui.selectable_value(&mut state.snap_target, SnapTarget::FaceCenter, "▫ Face");
-                ui.selectable_value(&mut state.snap_target, SnapTarget::Grid, "🌐 Grid");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::Vertex, "Vert (V)");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::EdgeMidpoint, "Mid");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::FaceCenter, "Face");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::Grid, "Grid");
             });
             if state.snap_target == SnapTarget::Grid {
                 ui.horizontal(|ui| {
@@ -93,7 +93,7 @@ pub fn draw_transform_panel(ui: &mut egui::Ui, state: &mut AppState, sel_id: Nod
         ui.horizontal(|ui| {
             ui.checkbox(&mut state.snap_angle, "Angle Snap");
             if state.snap_angle {
-                ui.add(egui::DragValue::new(&mut state.angle_snap_degrees).speed(1.0).range(1.0..=180.0).suffix("°"));
+                ui.add(egui::DragValue::new(&mut state.angle_snap_degrees).speed(1.0).range(1.0..=180.0).suffix(" deg"));
             }
         });
         ui.separator();

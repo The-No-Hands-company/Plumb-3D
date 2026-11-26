@@ -281,7 +281,7 @@ pub fn draw_workspace_bar(state: &mut AppState, ui: &mut egui::Ui) {
             ui.separator();
             for idx in 0..state.custom_workspaces.len() {
                 let name = state.custom_workspaces[idx].name.clone();
-                if ui.button(format!("📁 {}", name)).on_hover_text("Load personalized custom workspace").clicked() {
+                if ui.button(format!("[W] {}", name)).on_hover_text("Load personalized custom workspace").clicked() {
                     apply_custom_workspace(state, idx);
                 }
             }

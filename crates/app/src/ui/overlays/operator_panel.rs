@@ -29,7 +29,7 @@ pub fn render(state: &mut AppState) {
             .fixed_pos(egui::pos2(panel_x, panel_y))
             .order(egui::Order::Middle)
             .show(&ctx, |ui| {
-                if ui.button(format!("⚙ Adjust {} (F9)", op_title)).clicked() {
+                if ui.button(format!("Adjust {} (F9)", op_title)).clicked() {
                     state.show_last_operator_panel = true;
                 }
             });
@@ -51,9 +51,9 @@ pub fn render(state: &mut AppState) {
                 .show(ui, |ui| {
                     ui.set_width(220.0);
                     ui.horizontal(|ui| {
-                        ui.label(egui::RichText::new(format!("▼ {} (F9)", op_title)).strong().color(egui::Color32::from_rgb(100, 200, 255)));
+                        ui.label(egui::RichText::new(format!("v {} (F9)", op_title)).strong().color(egui::Color32::from_rgb(100, 200, 255)));
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            if ui.small_button("✕").clicked() {
+                            if ui.small_button("X").clicked() {
                                 close_panel = true;
                             }
                         });

@@ -9,7 +9,7 @@ use crate::ui::actions::UiActions;
 
 pub fn draw_file_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut egui::Ui) {
     ui.menu_button("File", |ui| {
-        if ui.button("✨ Welcome & Starter Hub (F2)").clicked() {
+        if ui.button("Welcome & Starter Hub (F2)").clicked() {
             state.welcome_hub.show_dialog = true;
             ui.close_menu();
         }
@@ -27,19 +27,19 @@ pub fn draw_file_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
             ui.close_menu();
         }
         ui.separator();
-        if ui.button("💾 Save Project (Ctrl+S)").clicked() {
+        if ui.button("Save Project (Ctrl+S)").clicked() {
             actions.export_plmb = true;
             ui.close_menu();
         }
-        if ui.button("💾 Save Project As... (Ctrl+Shift+S)").clicked() {
+        if ui.button("Save Project As... (Ctrl+Shift+S)").clicked() {
             actions.export_plmb_as = true;
             ui.close_menu();
         }
-        if ui.button("📂 Open Project... (Ctrl+O)").clicked() {
+        if ui.button("Open Project... (Ctrl+O)").clicked() {
             actions.trigger_open_plmb = true;
             ui.close_menu();
         }
-        if ui.button("📥 Import 3D Model... (plmb, obj, stl, ply, gltf)").clicked() {
+        if ui.button("Import 3D Model... (plmb, obj, stl, ply, gltf)").clicked() {
             actions.trigger_import_dialog = true;
             ui.close_menu();
         }
@@ -53,7 +53,7 @@ pub fn draw_file_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
         if ui.button("Export Full Scene as Pixar OpenUSD (.usda)").clicked() { actions.export_usd = true; ui.close_menu(); }
         if ui.button("Import Pixar OpenUSD Scene (.usda)...").clicked() { actions.import_usd = true; ui.close_menu(); }
         if ui.button("Export Sliced G-Code for 3D Printing (.gcode)").clicked() { actions.export_gcode = true; ui.close_menu(); }
-        if ui.button("🖨 3D Print & CAD Quality Inspector...").clicked() { state.print_inspector.show_dialog = true; ui.close_menu(); }
+        if ui.button("3D Print & CAD Quality Inspector...").clicked() { state.print_inspector.show_dialog = true; ui.close_menu(); }
         ui.separator();
         if ui.button("Import Sample glTF Cube").clicked() {
             let sample_gltf = Primitives::create_cube(2.0).to_gltf("ImportedCube");
@@ -172,11 +172,11 @@ pub fn draw_edit_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
             actions.trigger_relax_vertices = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit && !state.selected_vertices.is_empty(), egui::Button::new("✂ Rip Vertices (V)")).clicked() {
+        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit && !state.selected_vertices.is_empty(), egui::Button::new("Rip Vertices (V)")).clicked() {
             actions.trigger_rip_vertices = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit, egui::Button::new("✂ Knife Multi-Cut (K)")).clicked() {
+        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit, egui::Button::new("Knife Multi-Cut (K)")).clicked() {
             state.knife_active = !state.knife_active;
             if !state.knife_active {
                 state.knife_points.clear();
@@ -191,7 +191,7 @@ pub fn draw_edit_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
 
 pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
     ui.menu_button("Add", |ui| {
-        ui.menu_button("📦 Mesh Primitives", |ui| {
+        ui.menu_button("Mesh Primitives", |ui| {
             if ui.button("Box / Cube").clicked() { actions.spawn_mesh = Some(("Cube", Primitives::create_cube(2.0))); ui.close_menu(); }
             if ui.button("Plane Grid").clicked() { actions.spawn_mesh = Some(("Plane", Primitives::create_plane(4.0, 4.0, 4, 4))); ui.close_menu(); }
             if ui.button("UV Sphere").clicked() { actions.spawn_mesh = Some(("Sphere", Primitives::create_uv_sphere(1.2, 16, 16))); ui.close_menu(); }
@@ -201,9 +201,9 @@ pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
             if ui.button("Pyramid").clicked() { actions.spawn_mesh = Some(("Pyramid", Primitives::create_pyramid(2.0, 2.5))); ui.close_menu(); }
             if ui.button("Capsule / Pill").clicked() { actions.spawn_mesh = Some(("Capsule", Primitives::create_capsule(0.8, 1.8, 16, 6))); ui.close_menu(); }
             if ui.button("IcoSphere (Geodesic)").clicked() { actions.spawn_mesh = Some(("IcoSphere", Primitives::create_icosphere(1.2, 2))); ui.close_menu(); }
-            if ui.button("📍 Plumb Bob (Mascot)").clicked() { actions.spawn_mesh = Some(("PlumbBob", Primitives::create_plumb_bob())); ui.close_menu(); }
+            if ui.button("Plumb Bob (Mascot)").clicked() { actions.spawn_mesh = Some(("PlumbBob", Primitives::create_plumb_bob())); ui.close_menu(); }
         });
-        ui.menu_button("🌿 Bio-Vegetation (L-System)", |ui| {
+        ui.menu_button("Bio-Vegetation (L-System)", |ui| {
             if ui.button("Oak Tree").clicked() {
                 if let Ok(m) = LSystem::from_preset(LSystemPreset::OakTree).generate_mesh() {
                     actions.spawn_mesh = Some(("OakTree", m));
@@ -229,9 +229,9 @@ pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
                 ui.close_menu();
             }
         });
-        ui.menu_button("〰 Curves & Splines", |ui| {
-            if ui.button("Bézier Path").clicked() { actions.spawn_curve = Some(0); ui.close_menu(); }
-            if ui.button("Bézier Circle").clicked() { actions.spawn_curve = Some(1); ui.close_menu(); }
+        ui.menu_button("Curves & Splines", |ui| {
+            if ui.button("Bezier Path").clicked() { actions.spawn_curve = Some(0); ui.close_menu(); }
+            if ui.button("Bezier Circle").clicked() { actions.spawn_curve = Some(1); ui.close_menu(); }
             if ui.button("Helical Spiral").clicked() { actions.spawn_curve = Some(2); ui.close_menu(); }
             ui.separator();
             if ui.button("Lathe Vase (Spline)").clicked() {
@@ -251,10 +251,10 @@ pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
             }
             ui.separator();
             if ui.button("Loft Selected Curves (Ctrl+L)").clicked() { actions.trigger_loft_curves = true; ui.close_menu(); }
-            if ui.button("✨ Fillet Curve Corners (0.2m)").clicked() { actions.trigger_fillet_curve = Some(0.2); ui.close_menu(); }
-            if ui.button("🏺 Revolve / Lathe Curve (360°)").clicked() { actions.trigger_lathe_curve = Some((16, 360.0)); ui.close_menu(); }
+            if ui.button("Fillet Curve Corners (0.2m)").clicked() { actions.trigger_fillet_curve = Some(0.2); ui.close_menu(); }
+            if ui.button("Revolve / Lathe Curve (360 deg)").clicked() { actions.trigger_lathe_curve = Some((16, 360.0)); ui.close_menu(); }
         });
-        ui.menu_button("☁ OpenVDB Volumetrics", |ui| {
+        ui.menu_button("OpenVDB Volumetrics", |ui| {
             if ui.button("Cumulus Cloud (Level-Set Mesh)").clicked() {
                 let cloud = geo_kernel::VolumeGenerators::create_cumulus_cloud(core_math::Vec3::ZERO, 2.0, 1.0, 0.4);
                 let mesh = cloud.extract_isosurface(0.35);
@@ -268,13 +268,13 @@ pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
                 ui.close_menu();
             }
         });
-        ui.menu_button("💡 Lights", |ui| {
+        ui.menu_button("Lights", |ui| {
             if ui.button("Directional Light (Sun)").clicked() { actions.spawn_light = Some(("SunLight", LightType::Directional)); ui.close_menu(); }
             if ui.button("Point Light (Omni)").clicked() { actions.spawn_light = Some(("PointLight", LightType::Point)); ui.close_menu(); }
             if ui.button("Spot Light (Cone)").clicked() { actions.spawn_light = Some(("SpotLight", LightType::Spot)); ui.close_menu(); }
         });
-        if ui.button("📷 Camera").clicked() { actions.spawn_camera = true; ui.close_menu(); }
-        if ui.button("🦴 Joint / Bone Armature").clicked() { actions.spawn_joint = true; ui.close_menu(); }
+        if ui.button("Camera").clicked() { actions.spawn_camera = true; ui.close_menu(); }
+        if ui.button("Joint / Bone Armature").clicked() { actions.spawn_joint = true; ui.close_menu(); }
     });
 }
 
@@ -305,7 +305,7 @@ pub fn draw_mode_menu(state: &mut AppState, ui: &mut egui::Ui) {
             if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
             ui.close_menu();
         }
-        if ui.selectable_label(state.interaction_mode == InteractionMode::TexturePaint, "🎨 Texture Paint Mode").clicked() {
+        if ui.selectable_label(state.interaction_mode == InteractionMode::TexturePaint, "Texture Paint Mode").clicked() {
             state.interaction_mode = InteractionMode::TexturePaint;
             if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
             ui.close_menu();
@@ -327,10 +327,10 @@ pub fn draw_viewport_menu(state: &mut AppState, actions: &mut UiActions, ui: &mu
     ui.menu_button("Viewport", |ui| {
         ui.checkbox(&mut state.show_grid, "Ground Grid");
         ui.checkbox(&mut state.show_wireframe, "Wireframe Overlay");
-        ui.checkbox(&mut state.show_subd_cage, "⛓ Subd Control Cage");
-        ui.checkbox(&mut state.optimal_display, "✦ Optimal Display (Subd)");
-        ui.checkbox(&mut state.show_face_normals, "📐 Show Face Normals");
-        ui.checkbox(&mut state.show_vertex_normals, "📍 Show Vertex Normals");
+        ui.checkbox(&mut state.show_subd_cage, "Subd Control Cage");
+        ui.checkbox(&mut state.optimal_display, "Optimal Display (Subd)");
+        ui.checkbox(&mut state.show_face_normals, "Show Face Normals");
+        ui.checkbox(&mut state.show_vertex_normals, "Show Vertex Normals");
         if state.show_face_normals || state.show_vertex_normals {
             ui.add(egui::Slider::new(&mut state.normal_display_length, 0.05..=1.0).text("Normal Length"));
         }
@@ -345,7 +345,7 @@ pub fn draw_viewport_menu(state: &mut AppState, actions: &mut UiActions, ui: &mu
             ui.selectable_value(&mut state.tonemapping, TonemappingMode::None, "Raw");
         });
         ui.horizontal(|ui| {
-            ui.checkbox(&mut state.show_cavity, "⚡ Cavity & Ridges");
+            ui.checkbox(&mut state.show_cavity, "Cavity & Ridges");
             if state.show_cavity {
                 ui.add(egui::Slider::new(&mut state.cavity_intensity, 0.1..=1.5).text("Intensity"));
             }
@@ -368,8 +368,8 @@ pub fn draw_viewport_menu(state: &mut AppState, actions: &mut UiActions, ui: &mu
         ui.separator();
         ui.checkbox(&mut state.timeline_expanded, "Animation Timeline");
         ui.checkbox(&mut state.show_uv_editor, "2D UV Editor Window");
-        ui.checkbox(&mut state.show_node_editor, "🌿 Geometry Nodes Canvas");
-        ui.checkbox(&mut state.show_script_console, "📜 Scripting Console (Rhai)");
+        ui.checkbox(&mut state.show_node_editor, "Geometry Nodes Canvas");
+        ui.checkbox(&mut state.show_script_console, "Scripting Console (Rhai)");
         ui.separator();
         let is_persp = state.camera.projection == CameraProjection::Perspective;
         if ui.selectable_label(is_persp, "Perspective Camera").clicked() {
@@ -458,50 +458,50 @@ pub fn draw_shading_menu(state: &mut AppState, ui: &mut egui::Ui) {
         ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MatCapClay, "MatCap Clay (Form)");
         ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MatCapChrome, "MatCap Chrome (Reflection)");
         ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::NormalInspection, "Normal Vector Inspection");
-        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Zebra, "🦓 Zebra Surfacing (Class-A Reflection)");
+        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Zebra, "Zebra Surfacing (Class-A Reflection)");
         ui.separator();
-        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Rendered, "☀ Rendered (Live Path Tracer)");
+        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Rendered, "Rendered (Live Path Tracer)");
     });
 }
 
 pub fn draw_uv_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut egui::Ui) {
     ui.menu_button("UV", |ui| {
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("🌐 Unwrap (Seams) (U)")).clicked() {
+        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Unwrap (Seams) (U)")).clicked() {
             actions.trigger_unwrap_seams = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("📐 Smart UV Project")).clicked() {
+        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Smart UV Project")).clicked() {
             actions.trigger_smart_uv_project = true;
             ui.close_menu();
         }
         ui.separator();
         let can_seam = state.interaction_mode == InteractionMode::Edit && !state.selected_edges.is_empty();
-        if ui.add_enabled(can_seam, egui::Button::new("✂ Mark Seam")).clicked() {
+        if ui.add_enabled(can_seam, egui::Button::new("Mark Seam")).clicked() {
             actions.trigger_mark_seam = true;
             ui.close_menu();
         }
-        if ui.add_enabled(can_seam, egui::Button::new("✖ Clear Seam")).clicked() {
+        if ui.add_enabled(can_seam, egui::Button::new("Clear Seam")).clicked() {
             actions.trigger_clear_seam = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("🗑 Clear All Seams")).clicked() {
+        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Clear All Seams")).clicked() {
             actions.trigger_clear_all_seams = true;
             ui.close_menu();
         }
         ui.separator();
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("⬛ Planar Projection")).clicked() {
+        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Planar Projection")).clicked() {
             actions.trigger_planar_uv = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("📦 Box / Cube Projection")).clicked() {
+        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Box / Cube Projection")).clicked() {
             actions.trigger_box_uv = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("🥫 Cylindrical Projection")).clicked() {
+        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Cylindrical Projection")).clicked() {
             actions.trigger_cylindrical_uv = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("🔮 Spherical Projection")).clicked() {
+        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Spherical Projection")).clicked() {
             actions.trigger_spherical_uv = true;
             ui.close_menu();
         }
@@ -512,21 +512,21 @@ pub fn draw_uv_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut egui
 
 pub fn draw_render_menu(state: &mut AppState, ui: &mut egui::Ui) {
     ui.menu_button("Render", |ui| {
-        if ui.button("📷 Render Image (F12)").clicked() {
+        if ui.button("Render Image (F12)").clicked() {
             state.production_render.show_dialog = true;
             crate::ui::render_dialog::start_production_render(state);
             ui.close_menu();
         }
-        if ui.button("⚙ Render Settings...").clicked() {
+        if ui.button("Render Settings...").clicked() {
             state.production_render.show_dialog = true;
             ui.close_menu();
         }
         ui.separator();
-        if ui.button("🍳 PBR Texture Baking...").clicked() {
+        if ui.button("PBR Texture Baking...").clicked() {
             state.bake_state.show_dialog = true;
             ui.close_menu();
         }
-        if ui.button("⚡ Evaluate Hardware RT Core Acceleration...").clicked() {
+        if ui.button("Evaluate Hardware RT Core Acceleration...").clicked() {
             let report = render_pathtracer::evaluate_hardware_rt_speedup(150_000, (1920, 1080), 1);
             state.set_status_message(format!(
                 "RT Cores: {:.1}x Speedup (Est: {:.1} FPS @ 1080p, {:.0} MRays/s)",
@@ -542,17 +542,17 @@ pub fn draw_render_menu(state: &mut AppState, ui: &mut egui::Ui) {
 
 pub fn draw_window_menu(state: &mut AppState, ui: &mut egui::Ui) {
     ui.menu_button("Window", |ui| {
-        if ui.button("🔍 Command Palette (F3)").clicked() {
+        if ui.button("Command Palette (F3)").clicked() {
             state.command_palette.is_open = true;
             state.command_palette.focus_requested = false;
             ui.close_menu();
         }
-        if ui.button("⚙ Preferences (Ctrl+,)").clicked() {
+        if ui.button("Preferences (Ctrl+,)").clicked() {
             state.preferences.show_dialog = true;
             ui.close_menu();
         }
         ui.separator();
-        ui.menu_button("🎨 Themes", |ui| {
+        ui.menu_button("Themes", |ui| {
             for preset in crate::ui::theme::ThemePreset::ALL {
                 let is_cur = state.current_theme == preset;
                 if ui.selectable_label(is_cur, preset.name()).clicked() {
@@ -567,28 +567,28 @@ pub fn draw_window_menu(state: &mut AppState, ui: &mut egui::Ui) {
         ui.checkbox(&mut state.show_left_toolbar, "Left Tool Strip");
         ui.checkbox(&mut state.show_viewport_hud, "Scene Statistics HUD");
         ui.separator();
-        ui.checkbox(&mut state.show_node_editor, "🌿 Geometry Nodes Canvas");
-        ui.checkbox(&mut state.show_uv_editor, "🗺 2D UV Editor Window");
-        ui.checkbox(&mut state.show_script_console, "📜 Multi-Engine Scripting Console");
-        ui.checkbox(&mut state.show_collab_dialog, "👥 Live Collaboration Session (Figma for 3D)");
-        ui.checkbox(&mut state.xr_session.is_active, "🥽 OpenXR Spatial Computing (VR 6-DoF)");
-        ui.checkbox(&mut state.production_render.show_dialog, "📷 Production Render Result");
-        ui.checkbox(&mut state.bake_state.show_dialog, "🍳 PBR Texture Baker");
-        ui.checkbox(&mut state.print_inspector.show_dialog, "🖨 3D Print Quality Inspector");
-        ui.checkbox(&mut state.show_help_dialog, "📖 User Manual & Shortcuts (F1)");
+        ui.checkbox(&mut state.show_node_editor, "Geometry Nodes Canvas");
+        ui.checkbox(&mut state.show_uv_editor, "2D UV Editor Window");
+        ui.checkbox(&mut state.show_script_console, "Multi-Engine Scripting Console");
+        ui.checkbox(&mut state.show_collab_dialog, "Live Collaboration Session (Figma for 3D)");
+        ui.checkbox(&mut state.xr_session.is_active, "OpenXR Spatial Computing (VR 6-DoF)");
+        ui.checkbox(&mut state.production_render.show_dialog, "Production Render Result");
+        ui.checkbox(&mut state.bake_state.show_dialog, "PBR Texture Baker");
+        ui.checkbox(&mut state.print_inspector.show_dialog, "3D Print Quality Inspector");
+        ui.checkbox(&mut state.show_help_dialog, "User Manual & Shortcuts (F1)");
     });
 }
 
 pub fn draw_help_menu(state: &mut AppState, ui: &mut egui::Ui) {
     ui.menu_button("Help", |ui| {
         for (label, tab) in [
-            ("📖 User Manual & Shortcuts (F1)", 0),
-            ("🎓 Beginner Tutorials", 1),
-            ("🛠 Modeling & Modals Guide", 2),
-            ("🌿 Geometry Nodes Guide", 3),
-            ("📜 Rhai Scripting API", 4),
-            ("📷 Path Tracer Rendering", 5),
-            ("🖨 3D Printing & CAD Interchange", 6),
+            ("User Manual & Shortcuts (F1)", 0),
+            ("Beginner Tutorials", 1),
+            ("Modeling & Modals Guide", 2),
+            ("Geometry Nodes Guide", 3),
+            ("Rhai Scripting API", 4),
+            ("Path Tracer Rendering", 5),
+            ("3D Printing & CAD Interchange", 6),
         ] {
             if ui.button(label).clicked() {
                 state.show_help_dialog = true;
@@ -597,7 +597,7 @@ pub fn draw_help_menu(state: &mut AppState, ui: &mut egui::Ui) {
             }
         }
         ui.separator();
-        if ui.button("ℹ About Plumb 3D").clicked() {
+        if ui.button("About Plumb 3D").clicked() {
             state.show_help_dialog = true;
             state.help_dialog_tab = 7;
             ui.close_menu();

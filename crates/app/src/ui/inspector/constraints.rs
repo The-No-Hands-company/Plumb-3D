@@ -21,7 +21,7 @@ pub fn draw_constraints_panel(
                             ui.horizontal(|ui| {
                                 ui.checkbox(&mut p.enabled, "Path Follow");
                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                    if ui.small_button("✖").clicked() {
+                                    if ui.small_button("X").clicked() {
                                         remove_idx = Some(i);
                                     }
                                 });
@@ -33,7 +33,7 @@ pub fn draw_constraints_panel(
                             ui.horizontal(|ui| {
                                 ui.checkbox(&mut a.enabled, "Aim Target");
                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                    if ui.small_button("✖").clicked() {
+                                    if ui.small_button("X").clicked() {
                                         remove_idx = Some(i);
                                     }
                                 });
@@ -56,7 +56,7 @@ pub fn draw_constraints_panel(
                             ui.horizontal(|ui| {
                                 ui.checkbox(&mut pc.enabled, "Parent Constraint");
                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                    if ui.small_button("✖").clicked() {
+                                    if ui.small_button("X").clicked() {
                                         remove_idx = Some(i);
                                     }
                                 });
@@ -80,7 +80,7 @@ pub fn draw_constraints_panel(
                             ui.horizontal(|ui| {
                                 ui.checkbox(&mut ik.enabled, "Inverse Kinematics (IK)");
                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                    if ui.small_button("✖").clicked() {
+                                    if ui.small_button("X").clicked() {
                                         remove_idx = Some(i);
                                     }
                                 });

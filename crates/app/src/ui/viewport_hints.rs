@@ -8,56 +8,56 @@ pub fn draw_viewport_hints(state: &mut AppState) {
     // Determine the active operational context and appropriate hint text
     let (icon, main_hint, sub_hint) = if state.inset_modal_active {
         (
-            "📐 INSET",
-            "🖱 Drag: Inset Factor  |  ⌨ Type: Exact Thickness  |  I: Individual Faces",
+            "INSET",
+            "Drag: Inset Factor  |  Type: Exact Thickness  |  I: Individual Faces",
             "Enter / LMB: Confirm  |  Esc / RMB: Cancel",
         )
     } else if state.extrude_modal_active {
         (
-            "📐 EXTRUDE",
-            "🖱 Drag: Extrude Distance  |  ⌨ Type: Value (m)  |  X/Y/Z: Constrain Axis",
+            "EXTRUDE",
+            "Drag: Extrude Distance  |  Type: Value (m)  |  X/Y/Z: Constrain Axis",
             "Enter / LMB: Confirm  |  Esc / RMB: Cancel",
         )
     } else if state.bevel_modal_active {
         (
-            "📐 BEVEL",
-            "🖱 Drag: Bevel Width  |  Wheel: Segments count  |  ⌨ Type: Exact Width",
+            "BEVEL",
+            "Drag: Bevel Width  |  Wheel: Segments count  |  Type: Exact Width",
             "Enter / LMB: Confirm  |  Esc / RMB: Cancel",
         )
     } else if state.knife_active {
         (
-            "🔪 KNIFE",
-            "🖱 LMB: Snap / Add Cut Point along Edge or Face",
+            "KNIFE",
+            "LMB: Snap / Add Cut Point along Edge or Face",
             "Enter: Finalize Cut  |  Esc: Cancel Tool",
         )
     } else if state.loop_cut_active {
         (
-            "✂ LOOP CUT",
-            "🖱 Move: Target Edge Ring  |  Wheel: Number of Cuts  |  LMB: Slide Loop",
+            "LOOP CUT",
+            "Move: Target Edge Ring  |  Wheel: Number of Cuts  |  LMB: Slide Loop",
             "Enter / LMB: Confirm  |  Esc / RMB: Cancel",
         )
     } else if state.edge_crease_modal_active {
         (
-            "⚓ EDGE CREASE",
-            "🖱 Drag: Adjust Crease Weight (0.0 Sub-D Soft -> 1.0 Sharp Edge)",
+            "EDGE CREASE",
+            "Drag: Adjust Crease Weight (0.0 Sub-D Soft -> 1.0 Sharp Edge)",
             "Enter / LMB: Confirm  |  Esc / RMB: Cancel",
         )
     } else if state.vertex_crease_modal_active {
         (
-            "⏺ VERTEX CREASE",
-            "🖱 Drag: Adjust Semi-Sharp Corner Weight (OpenSubdiv)",
+            "VERTEX CREASE",
+            "Drag: Adjust Semi-Sharp Corner Weight (OpenSubdiv)",
             "Enter / LMB: Confirm  |  Esc / RMB: Cancel",
         )
     } else if state.interaction_mode == InteractionMode::Sculpt {
         (
-            "🎨 SCULPT",
-            "🖱 Drag: Sculpt Stroke  |  Ctrl+Drag: Invert (Sub)  |  Shift+Drag: Smooth",
+            "SCULPT",
+            "Drag: Sculpt Stroke  |  Ctrl+Drag: Invert (Sub)  |  Shift+Drag: Smooth",
             "[/]: Brush Radius  |  Shift+F: Brush Strength",
         )
     } else if state.interaction_mode == InteractionMode::CurveEdit {
         (
-            "〰 CURVE",
-            "🖱 LMB: Select Knot / Tangent Handle  |  W/E/R: Transform Handle",
+            "CURVE",
+            "LMB: Select Knot / Tangent Handle  |  W/E/R: Transform Handle",
             "P: Curve Pen Tool  |  Tab: Return to Object Mode",
         )
     } else if state.interaction_mode == InteractionMode::Edit {
@@ -67,14 +67,14 @@ pub fn draw_viewport_hints(state: &mut AppState) {
             SubElementLevel::Face => "3: Faces",
         };
         (
-            "✏ EDIT",
-            "🖱 LMB: Select  |  Shift+LMB: Multi  |  E: Extrude  |  I: Inset  |  Ctrl+B: Bevel  |  K: Knife",
+            "EDIT",
+            "LMB: Select  |  Shift+LMB: Multi  |  E: Extrude  |  I: Inset  |  Ctrl+B: Bevel  |  K: Knife",
             level_str,
         )
     } else {
         (
-            "📦 OBJECT",
-            "🖱 LMB: Select  |  MMB: Orbit View  |  Shift+MMB: Pan  |  W/E/R: Move/Rot/Scale",
+            "OBJECT",
+            "LMB: Select  |  MMB: Orbit View  |  Shift+MMB: Pan  |  W/E/R: Move/Rot/Scale",
             "Tab: Edit Mode  |  F3: Command Palette  |  F1: Manual",
         )
     };

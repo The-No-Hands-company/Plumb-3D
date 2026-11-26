@@ -9,7 +9,7 @@ use geo_kernel::{GroomBrush, GroomSettings, GroomSystem};
 use graph_engine::{NodeData, NodeId, SceneNode};
 
 pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
-    ui.heading("🦁 Hair & Fur Grooming Studio");
+    ui.heading("Hair & Fur Grooming Studio");
     ui.label(
         egui::RichText::new("Guide curves, directional styling, clumping, and hair ribbon generation.")
             .small()
@@ -32,11 +32,11 @@ pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
     ui.group(|ui| {
         ui.label(egui::RichText::new("Styling & Grooming Brushes").strong());
         ui.horizontal_wrapped(|ui| {
-            ui.selectable_value(&mut state.groom_brush, GroomBrush::Comb, "✋ Comb");
-            ui.selectable_value(&mut state.groom_brush, GroomBrush::Puff, "💨 Puff");
-            ui.selectable_value(&mut state.groom_brush, GroomBrush::Smooth, "✨ Smooth");
-            ui.selectable_value(&mut state.groom_brush, GroomBrush::Length, "📏 Length");
-            ui.selectable_value(&mut state.groom_brush, GroomBrush::Cut, "✂ Cut");
+            ui.selectable_value(&mut state.groom_brush, GroomBrush::Comb, "Comb");
+            ui.selectable_value(&mut state.groom_brush, GroomBrush::Puff, "Puff");
+            ui.selectable_value(&mut state.groom_brush, GroomBrush::Smooth, "Smooth");
+            ui.selectable_value(&mut state.groom_brush, GroomBrush::Length, "Length");
+            ui.selectable_value(&mut state.groom_brush, GroomBrush::Cut, "Cut");
         });
 
         ui.horizontal(|ui| {
@@ -58,7 +58,7 @@ pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
                 .weak(),
         );
 
-        if ui.button("🌿 Generate Guides From Surface")
+        if ui.button("Generate Guides From Surface")
             .on_hover_text("Spawns normal-aligned guide splines on all surface vertices")
             .clicked()
         {
@@ -71,7 +71,7 @@ pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
             let new_id = state.scene.add_node(new_node);
             state.selected_node = Some(new_id);
             state.sync_gpu_meshes();
-            state.set_status_message(format!("🦁 Generated {} hair guide splines and ribbon mesh.", guide_count));
+            state.set_status_message(format!("Generated {} hair guide splines and ribbon mesh.", guide_count));
         }
     });
 
@@ -86,7 +86,7 @@ pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
                 .weak(),
         );
 
-        if ui.button("✨ Bake Dense Hair Ribbons (10x)")
+        if ui.button("Bake Dense Hair Ribbons (10x)")
             .on_hover_text("Interpolates dense clumped strands into camera-facing ribbon polygons")
             .clicked()
         {
@@ -103,7 +103,7 @@ pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
             let new_id = state.scene.add_node(new_node);
             state.selected_node = Some(new_id);
             state.sync_gpu_meshes();
-            state.set_status_message(format!("🦁 Synthesized {} dense hair ribbon strands.", strand_count));
+            state.set_status_message(format!("Synthesized {} dense hair ribbon strands.", strand_count));
         }
     });
 }

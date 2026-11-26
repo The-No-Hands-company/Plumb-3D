@@ -37,15 +37,15 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                     InteractionMode::Object => {
                         if let Some(sel_id) = state.selected_node {
                             let node_name = state.scene.nodes.get(sel_id).map(|n| n.name.clone()).unwrap_or_else(|| "Object".into());
-                            ui.label(egui::RichText::new(format!("📦 {}", node_name)).strong().color(egui::Color32::from_rgb(100, 185, 255)));
+                            ui.label(egui::RichText::new(format!("[Object] {}", node_name)).strong().color(egui::Color32::from_rgb(100, 185, 255)));
                             ui.separator();
 
                             // Mode Switch
-                            if ui.button("✏ Enter Edit Mode (Tab)").clicked() {
+                            if ui.button("Enter Edit Mode (Tab)").clicked() {
                                 state.interaction_mode = InteractionMode::Edit;
                                 close_menu = true;
                             }
-                            if ui.button("🎯 Focus Camera on Object (F)").clicked() {
+                            if ui.button("Focus Camera on Object (F)").clicked() {
                                 actions.trigger_frame_selected = true;
                                 close_menu = true;
                             }
@@ -53,26 +53,26 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
 
                             // Shading & Normals
                             ui.label(egui::RichText::new("SHADING & NORMALS").small().color(egui::Color32::GRAY));
-                            if ui.button("🔘 Shade Smooth / Auto-Smooth").clicked() {
+                            if ui.button("Shade Smooth / Auto-Smooth").clicked() {
                                 actions.trigger_auto_smooth = true;
                                 close_menu = true;
                             }
-                            if ui.button("🔲 Shade Flat").clicked() {
+                            if ui.button("Shade Flat").clicked() {
                                 state.flat_shading = true;
                                 if let Some(n) = state.scene.nodes.get_mut(sel_id) {
                                     n.is_dirty = true;
                                 }
                                 close_menu = true;
                             }
-                            if ui.button("🔄 Recalculate Normals Outside").clicked() {
+                            if ui.button("Recalculate Normals Outside").clicked() {
                                 actions.trigger_recalculate_normals = Some(false);
                                 close_menu = true;
                             }
-                            if ui.button("🔄 Recalculate Normals Inside").clicked() {
+                            if ui.button("Recalculate Normals Inside").clicked() {
                                 actions.trigger_recalculate_normals = Some(true);
                                 close_menu = true;
                             }
-                            if ui.button("🔄 Flip Normals").clicked() {
+                            if ui.button("Flip Normals").clicked() {
                                 actions.trigger_flip_normals = true;
                                 close_menu = true;
                             }
@@ -99,16 +99,16 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                                     actions.add_mirror_to_selected = Some(MirrorAxis::X);
                                     close_menu = true;
                                 }
-                                if ui.button("🧵 Cloth").clicked() {
+                                if ui.button("Cloth").clicked() {
                                     actions.add_cloth_to_selected = true;
                                     close_menu = true;
                                 }
-                                if ui.button("✨ Particles").clicked() {
+                                if ui.button("Particles").clicked() {
                                     actions.add_particle_system_to_selected = true;
                                     close_menu = true;
                                 }
                             });
-                            if ui.button("🔨 Collapse All Modifiers").clicked() {
+                            if ui.button("Collapse All Modifiers").clicked() {
                                 actions.collapse_modifiers = true;
                                 close_menu = true;
                             }
@@ -117,36 +117,36 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                             // Hierarchy & Organization
                             ui.label(egui::RichText::new("HIERARCHY & OPS").small().color(egui::Color32::GRAY));
                             let can_parent = state.previous_selected_node.is_some() && state.previous_selected_node != state.selected_node;
-                            if ui.button("📁 Group Selected (Ctrl+G)").clicked() {
+                            if ui.button("Group Selected (Ctrl+G)").clicked() {
                                 actions.trigger_group_nodes = true;
                                 close_menu = true;
                             }
-                            if ui.button("📋 Duplicate Object (Shift+D)").clicked() {
+                            if ui.button("Duplicate Object (Shift+D)").clicked() {
                                 actions.trigger_duplicate_node = true;
                                 close_menu = true;
                             }
-                            if ui.add_enabled(can_parent, egui::Button::new("🔪 Live Boolean Carve (Diff)")).on_hover_text("Carves secondary selected cutter out of active object in real time").clicked() {
+                            if ui.add_enabled(can_parent, egui::Button::new("Live Boolean Carve (Diff)")).on_hover_text("Carves secondary selected cutter out of active object in real time").clicked() {
                                 actions.trigger_boolean_carve = true;
                                 close_menu = true;
                             }
-                            if ui.add_enabled(can_parent, egui::Button::new("🔗 Set Parent (P)")).clicked() {
+                            if ui.add_enabled(can_parent, egui::Button::new("Set Parent (P)")).clicked() {
                                 actions.trigger_parent = true;
                                 close_menu = true;
                             }
-                            if ui.button("⛓ Clear Parent (Shift+P)").clicked() {
+                            if ui.button("Clear Parent (Shift+P)").clicked() {
                                 actions.trigger_unparent = true;
                                 close_menu = true;
                             }
-                            if ui.add_enabled(can_parent, egui::Button::new("⛶ Join Objects (J)")).clicked() {
+                            if ui.add_enabled(can_parent, egui::Button::new("Join Objects (J)")).clicked() {
                                 actions.trigger_join_meshes = true;
                                 close_menu = true;
                             }
-                            if ui.button("✂ Separate Loose Parts").clicked() {
+                            if ui.button("Separate Loose Parts").clicked() {
                                 actions.trigger_separate_loose_parts = true;
                                 close_menu = true;
                             }
                             ui.separator();
-                            if ui.button(egui::RichText::new("🗑 Delete Object (X)").color(egui::Color32::from_rgb(255, 90, 90))).clicked() {
+                            if ui.button(egui::RichText::new("Delete Object (X)").color(egui::Color32::from_rgb(255, 90, 90))).clicked() {
                                 actions.delete_selected = true;
                                 close_menu = true;
                             }
@@ -165,49 +165,49 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                             SubElementLevel::Edge => "Edge",
                             SubElementLevel::Face => "Face",
                         };
-                        ui.label(egui::RichText::new(format!("✏ Edit Mode Context ({})", level_str)).strong().color(egui::Color32::from_rgb(255, 200, 80)));
+                        ui.label(egui::RichText::new(format!("Edit Mode Context ({})", level_str)).strong().color(egui::Color32::from_rgb(255, 200, 80)));
                         ui.separator();
 
                         // Face Operations
                         if state.sub_element_level == SubElementLevel::Face || !state.selected_faces.is_empty() {
                             ui.label(egui::RichText::new("FACE OPS").small().color(egui::Color32::GRAY));
-                            if ui.button("⤊ Extrude Region (E)").clicked() {
+                            if ui.button("Extrude Region (E)").clicked() {
                                 actions.trigger_extrude = true;
                                 close_menu = true;
                             }
-                            if ui.button("◱ Inset Faces (I)").clicked() {
+                            if ui.button("Inset Faces (I)").clicked() {
                                 actions.trigger_inset = true;
                                 close_menu = true;
                             }
-                            if ui.button("❖ Bevel Faces (Ctrl+B)").clicked() {
+                            if ui.button("Bevel Faces (Ctrl+B)").clicked() {
                                 actions.trigger_bevel = true;
                                 close_menu = true;
                             }
-                            if ui.button("✂ Poke Face").clicked() {
+                            if ui.button("Poke Face").clicked() {
                                 actions.trigger_poke_face = true;
                                 close_menu = true;
                             }
-                            if ui.button("🔲 Triangulate Faces").clicked() {
+                            if ui.button("Triangulate Faces").clicked() {
                                 actions.trigger_triangulate = true;
                                 close_menu = true;
                             }
-                            if ui.button("✂ Bisect Plane Cut").clicked() {
+                            if ui.button("Bisect Plane Cut").clicked() {
                                 actions.trigger_bisect = true;
                                 close_menu = true;
                             }
-                            if ui.button("🗂 Separate Selected Faces").clicked() {
+                            if ui.button("Separate Selected Faces").clicked() {
                                 actions.trigger_separate_faces = true;
                                 close_menu = true;
                             }
-                            if ui.button("🔄 Flip Normals (Alt+N)").clicked() {
+                            if ui.button("Flip Normals (Alt+N)").clicked() {
                                 actions.trigger_flip_normals = true;
                                 close_menu = true;
                             }
-                            if ui.button("🔄 Recalculate Normals Outside (Shift+N)").clicked() {
+                            if ui.button("Recalculate Normals Outside (Shift+N)").clicked() {
                                 actions.trigger_recalculate_normals = Some(false);
                                 close_menu = true;
                             }
-                            if ui.button("🔄 Recalculate Normals Inside (Shift+Ctrl+N)").clicked() {
+                            if ui.button("Recalculate Normals Inside (Shift+Ctrl+N)").clicked() {
                                 actions.trigger_recalculate_normals = Some(true);
                                 close_menu = true;
                             }
@@ -217,43 +217,43 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                         // Edge Operations
                         if state.sub_element_level == SubElementLevel::Edge || !state.selected_edges.is_empty() {
                             ui.label(egui::RichText::new("EDGE OPS").small().color(egui::Color32::GRAY));
-                            if ui.button("❖ Bevel Edges (Ctrl+B)").clicked() {
+                            if ui.button("Bevel Edges (Ctrl+B)").clicked() {
                                 actions.trigger_bevel = true;
                                 close_menu = true;
                             }
-                            if ui.button("✂ Loop Cut & Slide (Ctrl+R)").clicked() {
+                            if ui.button("Loop Cut & Slide (Ctrl+R)").clicked() {
                                 actions.trigger_loop_cut = true;
                                 close_menu = true;
                             }
-                            if ui.button("✂ Knife Bisect Tool (K)").clicked() {
+                            if ui.button("Knife Bisect Tool (K)").clicked() {
                                 state.knife_active = true;
                                 close_menu = true;
                             }
-                            if ui.button("⚡ Mark Sharp Edge").clicked() {
+                            if ui.button("Mark Sharp Edge").clicked() {
                                 actions.trigger_mark_sharp = true;
                                 close_menu = true;
                             }
-                            if ui.button("⚡ Clear Sharp Edge").clicked() {
+                            if ui.button("Clear Sharp Edge").clicked() {
                                 actions.trigger_clear_sharp = true;
                                 close_menu = true;
                             }
-                            if ui.button("🌸 Mark UV Seam").clicked() {
+                            if ui.button("Mark UV Seam").clicked() {
                                 actions.trigger_mark_seam = true;
                                 close_menu = true;
                             }
-                            if ui.button("✖ Clear UV Seam").clicked() {
+                            if ui.button("Clear UV Seam").clicked() {
                                 actions.trigger_clear_seam = true;
                                 close_menu = true;
                             }
-                            if ui.button("〰 Slide Edges").clicked() {
+                            if ui.button("Slide Edges").clicked() {
                                 actions.trigger_slide_edges = true;
                                 close_menu = true;
                             }
-                            if ui.button("🗑 Dissolve Edge").clicked() {
+                            if ui.button("Dissolve Edge").clicked() {
                                 actions.trigger_dissolve_edge = true;
                                 close_menu = true;
                             }
-                            if ui.button("🌉 Bridge Edge Loops").clicked() {
+                            if ui.button("Bridge Edge Loops").clicked() {
                                 actions.trigger_bridge_edge_loops = true;
                                 close_menu = true;
                             }
@@ -263,19 +263,19 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                         // Vertex Operations
                         if state.sub_element_level == SubElementLevel::Vertex || !state.selected_vertices.is_empty() {
                             ui.label(egui::RichText::new("VERTEX OPS").small().color(egui::Color32::GRAY));
-                            if ui.button("❖ Bevel Vertex (Shift+Ctrl+B)").clicked() {
+                            if ui.button("Bevel Vertex (Shift+Ctrl+B)").clicked() {
                                 actions.trigger_bevel_vertex = true;
                                 close_menu = true;
                             }
-                            if ui.button("⮂ Merge at Center (M)").clicked() {
+                            if ui.button("Merge at Center (M)").clicked() {
                                 actions.trigger_merge_vertices = true;
                                 close_menu = true;
                             }
-                            if ui.button("✂ Rip Vertices (V)").clicked() {
+                            if ui.button("Rip Vertices (V)").clicked() {
                                 actions.trigger_rip_vertices = true;
                                 close_menu = true;
                             }
-                            if ui.button("〰 Connect Vertex Pair (J)").clicked() {
+                            if ui.button("Connect Vertex Pair (J)").clicked() {
                                 actions.trigger_connect_vertices = true;
                                 close_menu = true;
                             }
@@ -305,7 +305,7 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                             }
                         });
                         ui.separator();
-                        if ui.button("📦 Return to Object Mode (Tab)").clicked() {
+                        if ui.button("Return to Object Mode (Tab)").clicked() {
                             state.interaction_mode = InteractionMode::Object;
                             close_menu = true;
                         }
@@ -315,7 +315,7 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                     // 3. SCULPT MODE CONTEXT MENU
                     // ==========================================
                     InteractionMode::Sculpt => {
-                        ui.label(egui::RichText::new("🎨 Sculpt Brush Context").strong().color(egui::Color32::from_rgb(255, 120, 60)));
+                        ui.label(egui::RichText::new("Sculpt Brush Context").strong().color(egui::Color32::from_rgb(255, 120, 60)));
                         ui.separator();
                         ui.horizontal(|ui| {
                             ui.label("Radius:");
@@ -327,31 +327,31 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                         });
                         ui.separator();
                         ui.label(egui::RichText::new("SWITCH BRUSH").small().color(egui::Color32::GRAY));
-                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Draw, "🖌 Draw").clicked() {
+                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Draw, "Draw").clicked() {
                             state.sculpt_settings.brush = geo_kernel::SculptBrush::Draw;
                             close_menu = true;
                         }
-                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Clay, "🧱 Clay").clicked() {
+                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Clay, "Clay").clicked() {
                             state.sculpt_settings.brush = geo_kernel::SculptBrush::Clay;
                             close_menu = true;
                         }
-                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Inflate, "🎈 Inflate").clicked() {
+                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Inflate, "Inflate").clicked() {
                             state.sculpt_settings.brush = geo_kernel::SculptBrush::Inflate;
                             close_menu = true;
                         }
-                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Smooth, "💧 Smooth").clicked() {
+                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Smooth, "Smooth").clicked() {
                             state.sculpt_settings.brush = geo_kernel::SculptBrush::Smooth;
                             close_menu = true;
                         }
-                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Grab, "🖐 Grab / Move").clicked() {
+                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Grab, "Grab / Move").clicked() {
                             state.sculpt_settings.brush = geo_kernel::SculptBrush::Grab;
                             close_menu = true;
                         }
-                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::SnakeHook, "🐍 Snake Hook").clicked() {
+                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::SnakeHook, "Snake Hook").clicked() {
                             state.sculpt_settings.brush = geo_kernel::SculptBrush::SnakeHook;
                             close_menu = true;
                         }
-                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Mask, "🎭 Mask (M)").clicked() {
+                        if ui.selectable_label(state.sculpt_settings.brush == geo_kernel::SculptBrush::Mask, "Mask (M)").clicked() {
                             state.sculpt_settings.brush = geo_kernel::SculptBrush::Mask;
                             close_menu = true;
                         }
@@ -370,7 +370,7 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                             close_menu = true;
                         }
                         ui.separator();
-                        if ui.button("📦 Exit to Object Mode (Tab)").clicked() {
+                        if ui.button("Exit to Object Mode (Tab)").clicked() {
                             state.interaction_mode = InteractionMode::Object;
                             close_menu = true;
                         }
@@ -380,9 +380,9 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                     // 4. CURVE EDIT MODE CONTEXT MENU
                     // ==========================================
                     InteractionMode::CurveEdit => {
-                        ui.label(egui::RichText::new("〰 Curve Spline Context").strong().color(egui::Color32::from_rgb(100, 230, 200)));
+                        ui.label(egui::RichText::new("Curve Spline Context").strong().color(egui::Color32::from_rgb(100, 230, 200)));
                         ui.separator();
-                        if ui.button("⤊ Extrude Knot (E)").clicked() {
+                        if ui.button("Extrude Knot (E)").clicked() {
                             if let Some(sel_id) = state.selected_node {
                                 if let Some(node) = state.scene.nodes.get_mut(sel_id) {
                                     if let NodeData::Curve { spline, .. } = &mut node.data {
@@ -399,12 +399,12 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                             }
                             close_menu = true;
                         }
-                        if ui.button("〰 Convert Curve to Pipe Mesh").clicked() {
+                        if ui.button("Convert Curve to Pipe Mesh").clicked() {
                             actions.trigger_convert_curve = true;
                             close_menu = true;
                         }
                         ui.separator();
-                        if ui.button("📦 Exit to Object Mode (Tab)").clicked() {
+                        if ui.button("Exit to Object Mode (Tab)").clicked() {
                             state.interaction_mode = InteractionMode::Object;
                             close_menu = true;
                         }
@@ -436,40 +436,40 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
 }
 
 fn draw_quick_add_menu(actions: &mut UiActions, close_menu: &mut bool, ui: &mut egui::Ui) {
-    ui.label(egui::RichText::new("➕ Quick Add to Scene").strong().color(egui::Color32::from_rgb(120, 220, 160)));
+    ui.label(egui::RichText::new("Quick Add to Scene").strong().color(egui::Color32::from_rgb(120, 220, 160)));
     ui.separator();
 
     ui.label(egui::RichText::new("MESH PRIMITIVES").small().color(egui::Color32::GRAY));
     ui.horizontal(|ui| {
-        if ui.button("📦 Cube").clicked() {
+        if ui.button("Cube").clicked() {
             actions.spawn_mesh = Some(("Cube", Primitives::create_cube(2.0)));
             *close_menu = true;
         }
-        if ui.button("🔮 Sphere").clicked() {
+        if ui.button("Sphere").clicked() {
             actions.spawn_mesh = Some(("UVSphere", Primitives::create_uv_sphere(1.0, 16, 16)));
             *close_menu = true;
         }
     });
     ui.horizontal(|ui| {
-        if ui.button("🥫 Cylinder").clicked() {
+        if ui.button("Cylinder").clicked() {
             actions.spawn_mesh = Some(("Cylinder", Primitives::create_cylinder(1.0, 2.0, 16)));
             *close_menu = true;
         }
-        if ui.button("⬛ Plane").clicked() {
+        if ui.button("Plane").clicked() {
             actions.spawn_mesh = Some(("Plane", Primitives::create_plane(2.0, 2.0, 4, 4)));
             *close_menu = true;
         }
     });
     ui.horizontal(|ui| {
-        if ui.button("🔺 Cone").clicked() {
+        if ui.button("Cone").clicked() {
             actions.spawn_mesh = Some(("Cone", Primitives::create_cone(1.0, 2.0, 16)));
             *close_menu = true;
         }
-        if ui.button("🍩 Torus").clicked() {
+        if ui.button("Torus").clicked() {
             actions.spawn_mesh = Some(("Torus", Primitives::create_torus(1.0, 0.35, 16, 12)));
             *close_menu = true;
         }
-        if ui.button("📍 Plumb Bob").clicked() {
+        if ui.button("Plumb Bob").clicked() {
             actions.spawn_mesh = Some(("PlumbBob", Primitives::create_plumb_bob()));
             *close_menu = true;
         }
@@ -478,20 +478,20 @@ fn draw_quick_add_menu(actions: &mut UiActions, close_menu: &mut bool, ui: &mut 
     ui.separator();
     ui.label(egui::RichText::new("LIGHTS & CAMERAS").small().color(egui::Color32::GRAY));
     ui.horizontal(|ui| {
-        if ui.button("💡 Point").clicked() {
+        if ui.button("Point").clicked() {
             actions.spawn_light = Some(("PointLight", LightType::Point));
             *close_menu = true;
         }
-        if ui.button("☀️ Sun").clicked() {
+        if ui.button("Sun").clicked() {
             actions.spawn_light = Some(("SunLight", LightType::Directional));
             *close_menu = true;
         }
-        if ui.button("🔦 Spot").clicked() {
+        if ui.button("Spot").clicked() {
             actions.spawn_light = Some(("SpotLight", LightType::Spot));
             *close_menu = true;
         }
     });
-    if ui.button("📷 Add Camera").clicked() {
+    if ui.button("Add Camera").clicked() {
         actions.spawn_camera = true;
         *close_menu = true;
     }

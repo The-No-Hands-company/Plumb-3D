@@ -256,7 +256,7 @@ pub fn draw_mesh_tools_panel(
 
                             ui.add_space(5.0);
                             ui.collapsing("Spin Revolve (Lathe)", |ui| {
-                                ui.add(egui::Slider::new(&mut state.spin_angle_degrees, 15.0..=360.0).text("Angle (°)"));
+                                ui.add(egui::Slider::new(&mut state.spin_angle_degrees, 15.0..=360.0).text("Angle (deg)"));
                                 ui.add(egui::Slider::new(&mut state.spin_steps, 3..=64).text("Steps"));
                                 if ui.button("Execute Spin").clicked() {
                                     actions.trigger_spin = true;
@@ -334,7 +334,7 @@ pub fn draw_mesh_tools_panel(
                                                 }
                                                 node.is_dirty = true;
                                             }
-                                            if ui.button("🌉 Bridge Loops").clicked() {
+                                            if ui.button("Bridge Loops").clicked() {
                                                 actions.trigger_bridge_edge_loops = true;
                                             }
                                         });
@@ -426,7 +426,7 @@ pub fn draw_mesh_tools_panel(
                         }
 
                         if state.interaction_mode == InteractionMode::Pose {
-                            ui.heading("🦴 Pose Mode (Rigging)");
+                            ui.heading("Pose Mode (Rigging)");
                             if matches!(node.data, NodeData::Joint { .. }) {
                                 ui.label(egui::RichText::new(format!("Active Pose Bone: {}", node.name)).strong().color(egui::Color32::from_rgb(80, 240, 200)));
                                 ui.horizontal(|ui| {
@@ -488,8 +488,8 @@ pub fn draw_mesh_tools_panel(
                             }
 
                             ui.horizontal(|ui| {
-                                ui.selectable_value(&mut state.weight_paint_tool, WeightPaintTool::Brush, "🖌 Brush");
-                                ui.selectable_value(&mut state.weight_paint_tool, WeightPaintTool::LinearGradient, "⤹ Linear Gradient");
+                                ui.selectable_value(&mut state.weight_paint_tool, WeightPaintTool::Brush, "Brush");
+                                ui.selectable_value(&mut state.weight_paint_tool, WeightPaintTool::LinearGradient, "Linear Gradient");
                             });
 
                             if state.weight_paint_tool == WeightPaintTool::Brush {
@@ -518,11 +518,11 @@ pub fn draw_mesh_tools_panel(
                                 ui.add(egui::Slider::new(&mut state.weight_gradient_start_w, 0.0..=1.0).text("Start Weight"));
                                 ui.add(egui::Slider::new(&mut state.weight_gradient_end_w, 0.0..=1.0).text("End Weight"));
                                 ui.horizontal(|ui| {
-                                    if ui.button("1.0 → 0.0 (Fade Out)").clicked() {
+                                    if ui.button("1.0 -> 0.0 (Fade Out)").clicked() {
                                         state.weight_gradient_start_w = 1.0;
                                         state.weight_gradient_end_w = 0.0;
                                     }
-                                    if ui.button("0.0 → 1.0 (Fade In)").clicked() {
+                                    if ui.button("0.0 -> 1.0 (Fade In)").clicked() {
                                         state.weight_gradient_start_w = 0.0;
                                         state.weight_gradient_end_w = 1.0;
                                     }

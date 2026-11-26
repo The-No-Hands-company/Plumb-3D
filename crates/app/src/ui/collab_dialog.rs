@@ -20,13 +20,13 @@ pub fn draw_collab_dialog(state: &mut AppState) {
             // Header: Status and room input
             ui.horizontal(|ui| {
                 if state.collab_session.is_connected {
-                    ui.colored_label(egui::Color32::from_rgb(80, 220, 100), "● Connected");
+                    ui.colored_label(egui::Color32::from_rgb(80, 220, 100), "[Online] Connected");
                     ui.label(format!("(Room: '{}')", state.collab_session.room_name));
                     if ui.button("Disconnect").clicked() {
                         state.collab_session.disconnect();
                     }
                 } else {
-                    ui.colored_label(egui::Color32::from_rgb(220, 80, 80), "○ Offline");
+                    ui.colored_label(egui::Color32::from_rgb(220, 80, 80), "[Offline]");
                     ui.label("Room:");
                     ui.text_edit_singleline(&mut state.collab_session.room_name);
                     if ui.button("Connect").clicked() {
@@ -43,7 +43,7 @@ pub fn draw_collab_dialog(state: &mut AppState) {
                 ui.horizontal(|ui| {
                     let c = state.collab_session.local_user.color;
                     let color = egui::Color32::from_rgb((c[0] * 255.0) as u8, (c[1] * 255.0) as u8, (c[2] * 255.0) as u8);
-                    ui.colored_label(color, "■");
+                    ui.colored_label(color, "[#]");
                     ui.strong(format!("{} (You)", state.collab_session.local_user.name));
                     ui.label(format!("| Tool: {}", state.collab_session.local_user.active_tool));
                 });
@@ -64,7 +64,7 @@ pub fn draw_collab_dialog(state: &mut AppState) {
                             ui.horizontal(|ui| {
                                 let c = peer.color;
                                 let color = egui::Color32::from_rgb((c[0] * 255.0) as u8, (c[1] * 255.0) as u8, (c[2] * 255.0) as u8);
-                                ui.colored_label(color, "●");
+                                ui.colored_label(color, "[#]");
                                 ui.label(&peer.name);
                                 ui.colored_label(egui::Color32::GRAY, format!("pos: [{:.1}, {:.1}, {:.1}]", peer.cursor_pos.x, peer.cursor_pos.y, peer.cursor_pos.z));
                             });

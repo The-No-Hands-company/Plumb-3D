@@ -83,7 +83,7 @@ pub fn draw_status_bar(state: &mut AppState) {
                             ui.separator();
                             ui.label(format!("F: {}", base_mesh.face_count()));
                             ui.separator();
-                            ui.label(format!("Euler χ: {}", base_mesh.euler_characteristic()));
+                            ui.label(format!("Euler Chi: {}", base_mesh.euler_characteristic()));
                             ui.separator();
                             match state.sub_element_level {
                                 SubElementLevel::Vertex => {

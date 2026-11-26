@@ -21,7 +21,7 @@ pub fn draw_materials_panel(
     if let Some(node) = state.scene.nodes.get_mut(sel_id) {
         if let NodeData::Mesh { base_mesh, materials, .. } = &mut node.data {
             draw_mesh_info(ui, interaction_mode, &sel_verts, &sel_edges, &sel_faces, base_mesh);
-                                ui.collapsing("🎨 Material Slots & PBR Shading", |ui| {
+                                ui.collapsing("Material Slots & PBR Shading", |ui| {
                                     if materials.is_empty() {
                                         materials.push(Material::default());
                                     }
@@ -31,10 +31,10 @@ pub fn draw_materials_panel(
 
                                     ui.horizontal(|ui| {
                                         ui.label(format!("Slots ({}):", materials.len()));
-                                        if ui.button("➕ Add Slot").on_hover_text("Add a new material slot to this mesh").clicked() {
+                                        if ui.button("+ Add Slot").on_hover_text("Add a new material slot to this mesh").clicked() {
                                             actions.trigger_add_material_slot = true;
                                         }
-                                        if materials.len() > 1 && ui.button("➖ Remove").on_hover_text("Remove active material slot").clicked() {
+                                        if materials.len() > 1 && ui.button("- Remove").on_hover_text("Remove active material slot").clicked() {
                                             actions.trigger_remove_material_slot = true;
                                         }
                                     });
@@ -49,7 +49,7 @@ pub fn draw_materials_panel(
                                                 (c[1].clamp(0.0, 1.0) * 255.0) as u8,
                                                 (c[2].clamp(0.0, 1.0) * 255.0) as u8,
                                             );
-                                            let label = egui::RichText::new(format!("● Slot {}: {}", slot_idx, slot_mat.name)).color(col32);
+                                            let label = egui::RichText::new(format!("[*] Slot {}: {}", slot_idx, slot_mat.name)).color(col32);
                                             if ui.selectable_label(is_selected, label).clicked() {
                                                 active_material_slot = slot_idx;
                                             }
@@ -58,13 +58,13 @@ pub fn draw_materials_panel(
 
                                     if interaction_mode == InteractionMode::Edit && sub_element_level == SubElementLevel::Face {
                                         ui.horizontal_wrapped(|ui| {
-                                            if ui.button("📥 Assign to Selected").on_hover_text("Assign active material slot to selected faces").clicked() {
+                                            if ui.button("Assign to Selected").on_hover_text("Assign active material slot to selected faces").clicked() {
                                                 actions.trigger_assign_material_slot = Some(active_material_slot as u32);
                                             }
-                                            if ui.button("🔍 Select Faces").on_hover_text("Select all faces using this material slot").clicked() {
+                                            if ui.button("Select Faces").on_hover_text("Select all faces using this material slot").clicked() {
                                                 actions.trigger_select_material_faces = Some(active_material_slot as u32);
                                             }
-                                            if ui.button("✖ Deselect").on_hover_text("Deselect faces using this material slot").clicked() {
+                                            if ui.button("Deselect").on_hover_text("Deselect faces using this material slot").clicked() {
                                                 actions.trigger_deselect_material_faces = Some(active_material_slot as u32);
                                             }
                                         });
@@ -146,7 +146,7 @@ pub fn draw_materials_panel(
                                         });
 
                                         // Image Texture Maps (PBR Diffuse, Normal, Roughness/Metallic)
-                                        ui.collapsing("🖼 Texture Maps (PBR)", |ui| {
+                                        ui.collapsing("Texture Maps (PBR)", |ui| {
                                             ui.horizontal(|ui| {
                                                 ui.label("Albedo (.png/.jpg):");
                                                 let mut path_str = active_mat.albedo_texture_path.clone().unwrap_or_default();
@@ -223,11 +223,11 @@ pub fn draw_materials_panel(
                                 // Normals & Auto-Smooth
                                 ui.collapsing("Normals & Shading", |ui| {
                                     ui.horizontal_wrapped(|ui| {
-                                        if ui.button("Auto-Smooth (30°)").on_hover_text("Mark edges >30° sharp and split normals").clicked() {
+                                        if ui.button("Auto-Smooth (30 deg)").on_hover_text("Mark edges >30 deg sharp and split normals").clicked() {
                                             base_mesh.auto_smooth_normals(std::f32::consts::PI / 6.0);
                                             node.is_dirty = true;
                                         }
-                                        if ui.button("Auto-Smooth (45°)").on_hover_text("Mark edges >45° sharp").clicked() {
+                                        if ui.button("Auto-Smooth (45 deg)").on_hover_text("Mark edges >45 deg sharp").clicked() {
                                             base_mesh.auto_smooth_normals(std::f32::consts::FRAC_PI_4);
                                             node.is_dirty = true;
                                         }
@@ -240,7 +240,7 @@ pub fn draw_materials_panel(
                                         }
                                     });
                                     ui.horizontal(|ui| {
-                                        ui.add(egui::Slider::new(&mut auto_smooth_angle_degrees, 0.0..=180.0).text("Angle (°)"));
+                                        ui.add(egui::Slider::new(&mut auto_smooth_angle_degrees, 0.0..=180.0).text("Angle (deg)"));
                                         if ui.button("Auto-Smooth").clicked() {
                                             actions.trigger_auto_smooth = true;
                                         }
