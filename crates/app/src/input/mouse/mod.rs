@@ -72,6 +72,17 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
         if state.box_select_start.is_some() {
             state.box_select_current = Some((position.x as f32, position.y as f32));
             state.window.request_redraw();
+        } else if state.is_box_selecting && state.selection_tool_mode == SelectionToolMode::Lasso && !state.lasso_points.is_empty() {
+            let (px, py) = (position.x as f32, position.y as f32);
+            let last = state.lasso_points.last().copied().unwrap_or((px, py));
+            if (px - last.0).abs() > 3.0 || (py - last.1).abs() > 3.0 {
+                state.lasso_points.push((px, py));
+                state.window.request_redraw();
+            }
+        } else if state.is_box_selecting && state.selection_tool_mode == SelectionToolMode::CirclePaint && state.last_mouse_pos.is_some() {
+            let (px, py) = (position.x as f32, position.y as f32);
+            state.select_in_circle((px, py), state.circle_select_radius);
+            state.window.request_redraw();
         } else if let Some(axis) = state.active_gizmo_axis {
             handle_gizmo_drag(state, axis, dx, dy, move_dist);
         } else if state.is_orbiting {

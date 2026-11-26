@@ -220,5 +220,17 @@ pub enum KeymapStyle {
     MayaStudio,
 }
 
+/// Multi-element viewport selection tool mode.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SelectionToolMode {
+    /// Rectangular marquee bounding box (Hotkey B).
+    #[default]
+    Box,
+    /// Freehand polygonal lasso lassoing sub-elements (Hotkey Alt+B).
+    Lasso,
+    /// Continuous circular paint brush selection (Hotkey C / Drag).
+    CirclePaint,
+}
+
 
 

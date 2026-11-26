@@ -57,10 +57,13 @@ pub struct AppState {
     pub proportional_editing: bool,
     pub proportional_radius: f32,
 
-    // Box / Marquee Selection (Blender 'B' / Drag-select)
+    // Selection Tools (Box 'B', Lasso 'Alt+B', Circle/Paint 'C')
     pub is_box_selecting: bool,
     pub box_select_start: Option<(f32, f32)>,
     pub box_select_current: Option<(f32, f32)>,
+    pub selection_tool_mode: SelectionToolMode,
+    pub lasso_points: Vec<(f32, f32)>,
+    pub circle_select_radius: f32,
 
     // Snapping (Blender Shift+Tab / Grid, Vertex, Edge, Face) & Live Surface Retopo
     pub snap_enabled: bool,
@@ -147,23 +150,18 @@ pub struct AppState {
     pub help_dialog_tab: usize,
     pub selected_tutorial: usize,
     pub help_search_query: String,
-
     // Visual Geometry Nodes (Blender Geo Nodes / Unreal Blueprints)
     pub geo_node_graph: geo_nodes::GeoNodeGraph,
     pub node_canvas_state: crate::ui::node_editor::NodeCanvasState,
     pub show_node_editor: bool,
     pub docking_state: crate::ui::docking::AppDockState,
-
     // Embedded Rhai Scripting Engine & Console
     pub script_console_state: crate::scripting::ScriptConsoleState,
     pub show_script_console: bool,
-
     // PBR Texture Map Baker
     pub bake_state: crate::ui::bake_dialog::BakeDialogState,
-
     // 3D Printing & CAD Quality Inspector
     pub print_inspector: crate::ui::print_inspector::PrintInspectorState,
-
     // Sculpt Mode Settings & Stroke State
     pub sculpt_settings: SculptSettings,
     pub is_sculpting: bool,
@@ -436,6 +434,9 @@ impl AppState {
             is_box_selecting: false,
             box_select_start: None,
             box_select_current: None,
+            selection_tool_mode: SelectionToolMode::Box,
+            lasso_points: Vec::new(),
+            circle_select_radius: 25.0,
             snap_enabled: false,
             snap_target: SnapTarget::Grid,
             snap_to_grid: false,

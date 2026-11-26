@@ -3,6 +3,7 @@ pub mod hud;
 pub mod mesh_features;
 pub mod modals;
 pub mod operator_panel;
+pub mod selection_overlay;
 pub mod tools;
 
 use crate::state::AppState;
@@ -11,6 +12,7 @@ pub fn draw_overlays(state: &mut AppState) {
     crate::live_pathtracer::step_live_viewport_pathtracer(state);
     crate::live_pathtracer::render_live_pathtracer_overlay(state);
     camera_gate::render(state);
+    selection_overlay::render_selection_overlay(state);
     tools::render(state);
     modals::render(state);
     operator_panel::render(state);

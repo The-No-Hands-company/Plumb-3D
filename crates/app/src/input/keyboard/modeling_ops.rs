@@ -6,7 +6,7 @@ use winit::keyboard::KeyCode;
 
 use crate::commands::*;
 use crate::state::AppState;
-use crate::types::{CurveHandleSelection, InteractionMode, SnapTarget, SubElementLevel};
+use crate::types::{CurveHandleSelection, InteractionMode, SelectionToolMode, SnapTarget, SubElementLevel};
 
 pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
     match key_code {
@@ -195,8 +195,14 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                     } else { Vec::new() };
                     state.bevel_modal_faces = state.selected_faces.iter().copied().collect();
                 }
-            } else if state.shift_pressed || state.interaction_mode == InteractionMode::Object || (state.selected_faces.is_empty() && state.selected_edges.is_empty()) {
+            } else if state.alt_pressed {
+                state.selection_tool_mode = SelectionToolMode::Lasso;
                 state.is_box_selecting = !state.is_box_selecting;
+                state.set_status_message(if state.is_box_selecting { "Lasso Select Activated (Drag to outline)" } else { "Selection Deactivated" });
+            } else if state.shift_pressed || state.interaction_mode == InteractionMode::Object || (state.selected_faces.is_empty() && state.selected_edges.is_empty()) {
+                state.selection_tool_mode = SelectionToolMode::Box;
+                state.is_box_selecting = !state.is_box_selecting;
+                state.set_status_message(if state.is_box_selecting { "Box Select Activated (Drag rectangle)" } else { "Selection Deactivated" });
             } else if state.interaction_mode == InteractionMode::Edit {
                 if let Some(sel_id) = state.selected_node {
                     let target_faces: Vec<FaceKey> = state.selected_faces.iter().copied().collect();
@@ -553,6 +559,13 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             state.selected_node = Some(id);
             state.sync_gpu_meshes();
             state.set_status_message("✨ Dynamic Hydraulic Cable with Fittings Created (Ctrl+Shift+C)");
+            state.window.request_redraw();
+            true
+        }
+        KeyCode::KeyC if state.shift_pressed && !state.ctrl_pressed => {
+            state.selection_tool_mode = SelectionToolMode::CirclePaint;
+            state.is_box_selecting = !state.is_box_selecting;
+            state.set_status_message(if state.is_box_selecting { "Paint / Circle Select Activated (Drag to paint)" } else { "Selection Deactivated" });
             state.window.request_redraw();
             true
         }

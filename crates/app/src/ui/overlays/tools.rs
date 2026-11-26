@@ -6,25 +6,7 @@ use crate::types::*;
 use crate::ui::workspaces::WorkspaceTemplate;
 
 pub fn render(state: &mut AppState) {
-    // 1. Render Marquee / Box Selection Overlay
-    if let (Some(start), Some(curr)) = (state.box_select_start, state.box_select_current) {
-        let min_x = start.0.min(curr.0);
-        let max_x = start.0.max(curr.0);
-        let min_y = start.1.min(curr.1);
-        let max_y = start.1.max(curr.1);
-        let painter = state.egui_ctx.layer_painter(egui::LayerId::new(
-            egui::Order::Foreground,
-            egui::Id::new("marquee_overlay"),
-        ));
-        painter.rect(
-            egui::Rect::from_min_max(egui::pos2(min_x, min_y), egui::pos2(max_x, max_y)),
-            0.0,
-            egui::Color32::from_rgba_premultiplied(40, 130, 255, 30),
-            egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(80, 170, 255)),
-        );
-    }
-
-    // 2. Render Sculpt / Weight Paint Brush Circular Overlay
+    // 1. Render Sculpt / Weight Paint Brush Circular Overlay
     if state.interaction_mode == InteractionMode::Sculpt
         || state.interaction_mode == InteractionMode::WeightPaint
         || state.interaction_mode == InteractionMode::VertexPaint
@@ -529,8 +511,23 @@ pub fn render(state: &mut AppState) {
                 .inner_margin(egui::Margin::symmetric(4.0, 6.0)))
             .show(&state.egui_ctx, |ui| {
                 ui.vertical_centered(|ui| {
-                    if ui.selectable_label(state.is_box_selecting, "Box").on_hover_text("Marquee Box Select (B)").clicked() {
+                    let sel_label = match (state.is_box_selecting, state.selection_tool_mode) {
+                        (false, _) => "Select",
+                        (true, SelectionToolMode::Box) => "Box",
+                        (true, SelectionToolMode::Lasso) => "Lasso",
+                        (true, SelectionToolMode::CirclePaint) => "Paint",
+                    };
+                    let resp = ui.selectable_label(state.is_box_selecting, sel_label)
+                        .on_hover_text("Select (Box 'B', Lasso 'Alt+B', Circle Paint 'Shift+C')\nClick to toggle, Secondary click to cycle mode");
+                    if resp.clicked() {
                         state.is_box_selecting = !state.is_box_selecting;
+                    } else if resp.secondary_clicked() {
+                        state.selection_tool_mode = match state.selection_tool_mode {
+                            SelectionToolMode::Box => SelectionToolMode::Lasso,
+                            SelectionToolMode::Lasso => SelectionToolMode::CirclePaint,
+                            SelectionToolMode::CirclePaint => SelectionToolMode::Box,
+                        };
+                        state.is_box_selecting = true;
                     }
                     if ui.selectable_label(state.gizmo.mode == render_viewport::GizmoMode::Translate, "Move").on_hover_text("Move Tool (W)").clicked() {
                         state.gizmo.mode = render_viewport::GizmoMode::Translate;

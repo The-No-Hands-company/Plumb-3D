@@ -152,6 +152,39 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         }),
     },
     PaletteItem {
+        name: "Selection Mode: Marquee Box Select",
+        category: "Select",
+        shortcut: "B",
+        keywords: &["select", "box", "marquee", "rectangle", "window"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.selection_tool_mode = SelectionToolMode::Box;
+            state.is_box_selecting = true;
+            state.set_status_message("Box Select Mode Activated");
+        }),
+    },
+    PaletteItem {
+        name: "Selection Mode: Freehand Lasso Select",
+        category: "Select",
+        shortcut: "Alt+B",
+        keywords: &["select", "lasso", "freehand", "polygon", "outline"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.selection_tool_mode = SelectionToolMode::Lasso;
+            state.is_box_selecting = true;
+            state.set_status_message("Lasso Select Mode Activated (Drag to outline)");
+        }),
+    },
+    PaletteItem {
+        name: "Selection Mode: Circle Paint Select",
+        category: "Select",
+        shortcut: "Shift+C",
+        keywords: &["select", "circle", "paint", "brush", "drag"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.selection_tool_mode = SelectionToolMode::CirclePaint;
+            state.is_box_selecting = true;
+            state.set_status_message("Circle Paint Select Activated (Drag to paint)");
+        }),
+    },
+    PaletteItem {
         name: "Grid Fill Hole",
         category: "Modeling",
         shortcut: "Alt+F",

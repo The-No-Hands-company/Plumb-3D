@@ -124,8 +124,20 @@ pub fn handle_mouse_left_down(state: &mut AppState) {
         }
     } else if state.is_box_selecting {
         if let Some((x, y)) = state.last_mouse_pos {
-            state.box_select_start = Some((x as f32, y as f32));
-            state.box_select_current = Some((x as f32, y as f32));
+            let (px, py) = (x as f32, y as f32);
+            match state.selection_tool_mode {
+                SelectionToolMode::Box => {
+                    state.box_select_start = Some((px, py));
+                    state.box_select_current = Some((px, py));
+                }
+                SelectionToolMode::Lasso => {
+                    state.lasso_points.clear();
+                    state.lasso_points.push((px, py));
+                }
+                SelectionToolMode::CirclePaint => {
+                    state.select_in_circle((px, py), state.circle_select_radius);
+                }
+            }
         }
     } else if let Some(axis) = state.hovered_gizmo_axis {
         state.active_gizmo_axis = Some(axis);
@@ -215,11 +227,29 @@ pub fn handle_mouse_left_up(state: &mut AppState) {
         }
     } else if state.interaction_mode == InteractionMode::TexturePaint {
         state.is_texture_painting = false;
-    } else if let (Some(start), Some(curr)) = (state.box_select_start.take(), state.box_select_current.take()) {
-        if (start.0 - curr.0).abs() > 3.0 || (start.1 - curr.1).abs() > 3.0 {
-            state.select_in_marquee_box(start, curr);
+    } else if state.is_box_selecting {
+        match state.selection_tool_mode {
+            SelectionToolMode::Box => {
+                if let (Some(start), Some(curr)) = (state.box_select_start.take(), state.box_select_current.take()) {
+                    if (start.0 - curr.0).abs() > 3.0 || (start.1 - curr.1).abs() > 3.0 {
+                        state.select_in_marquee_box(start, curr);
+                    }
+                }
+                state.is_box_selecting = false;
+            }
+            SelectionToolMode::Lasso => {
+                if state.lasso_points.len() >= 3 {
+                    let pts = std::mem::take(&mut state.lasso_points);
+                    state.select_in_lasso(&pts);
+                } else {
+                    state.lasso_points.clear();
+                }
+                state.is_box_selecting = false;
+            }
+            SelectionToolMode::CirclePaint => {
+                // Circle select remains active for continuous paint brushing until toggled off
+            }
         }
-        state.is_box_selecting = false;
     } else if let Some(start_t) = state.drag_start_transform.take() {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get(sel_id) {
