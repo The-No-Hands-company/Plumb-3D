@@ -273,3 +273,68 @@ fn test_dissolve_faces_command_and_undo() {
     };
     assert_eq!(face_count_redone, 1);
 }
+
+#[test]
+fn test_trim_curve_command_execution_and_undo() {
+    use crate::commands::TrimCurveCommand;
+    use core_math::Vec3;
+    use geo_kernel::Spline;
+
+    let mut scene = SceneGraph::new();
+    let target = Spline::polyline(&[Vec3::new(-3.0, 0.0, 0.0), Vec3::new(3.0, 0.0, 0.0)], false);
+    let cutter = Spline::circle(1.0, Vec3::ZERO);
+
+    let target_id = scene.add_node(SceneNode::new_curve("TargetLine", core_math::Transform::IDENTITY, target));
+    let cutter_id = scene.add_node(SceneNode::new_curve("CutterCircle", core_math::Transform::IDENTITY, cutter));
+
+    let mut history = graph_engine::HistoryManager::new();
+    let cmd = Box::new(TrimCurveCommand::new(target_id, cutter_id, true, 0.1));
+
+    history.execute(cmd, &mut scene).unwrap();
+
+    let pt_count_trimmed = {
+        let node = scene.nodes.get(target_id).unwrap();
+        if let NodeData::Curve { spline, .. } = &node.data {
+            spline.points.len()
+        } else {
+            0
+        }
+    };
+    assert!(pt_count_trimmed >= 2);
+
+    // Test Undo
+    history.undo(&mut scene).unwrap();
+    let pt_count_undone = {
+        let node = scene.nodes.get(target_id).unwrap();
+        if let NodeData::Curve { spline, .. } = &node.data {
+            spline.points.len()
+        } else {
+            0
+        }
+    };
+    assert_eq!(pt_count_undone, 2);
+}
+
+#[test]
+fn test_connect_tangent_arc_command_and_undo() {
+    use crate::commands::ConnectTangentArcCommand;
+    use core_math::Vec3;
+    use geo_kernel::Spline;
+
+    let mut scene = SceneGraph::new();
+    let c1 = Spline::polyline(&[Vec3::new(-2.0, 0.0, 0.0), Vec3::new(-1.0, 0.0, 0.0)], false);
+    let c2 = Spline::polyline(&[Vec3::new(0.0, 0.0, 1.0), Vec3::new(0.0, 0.0, 2.0)], false);
+
+    let id1 = scene.add_node(SceneNode::new_curve("Curve1", core_math::Transform::IDENTITY, c1));
+    let id2 = scene.add_node(SceneNode::new_curve("Curve2", core_math::Transform::IDENTITY, c2));
+
+    let mut history = graph_engine::HistoryManager::new();
+    let cmd = Box::new(ConnectTangentArcCommand::new(id1, 1, id2, 0));
+
+    let initial_node_count = scene.nodes.len();
+    history.execute(cmd, &mut scene).unwrap();
+    assert_eq!(scene.nodes.len(), initial_node_count + 1);
+
+    history.undo(&mut scene).unwrap();
+    assert_eq!(scene.nodes.len(), initial_node_count);
+}

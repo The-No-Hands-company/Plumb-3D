@@ -26,6 +26,54 @@ pub struct TangentArc {
     pub normal: Vec3,
 }
 
+impl TangentArc {
+    /// Converts this circular tangent arc into a cubic Bézier spline approximation.
+    pub fn to_spline(&self) -> Spline {
+        let v_start = self.start_point - self.center;
+        let v_end = self.end_point - self.center;
+        let len_start = v_start.length();
+        let len_end = v_end.length();
+        if len_start < 1e-4 || len_end < 1e-4 {
+            return Spline::with_points(vec![
+                BezierPoint::sharp(self.start_point),
+                BezierPoint::sharp(self.end_point),
+            ], false);
+        }
+
+        let u_start = v_start / len_start;
+        let u_end = v_end / len_end;
+
+        let cos_theta = u_start.dot(u_end).clamp(-0.9999, 0.9999);
+        let theta = cos_theta.acos();
+
+        // Tangent directions at start and end
+        let t_start = self.normal.cross(u_start).normalize_or_zero();
+        let t_end = self.normal.cross(u_end).normalize_or_zero();
+
+        // Orient tangents along the arc direction from start_point to end_point
+        let dir_sign = if t_start.dot(self.end_point - self.start_point) >= 0.0 { 1.0 } else { -1.0 };
+        let t_start_directed = t_start * dir_sign;
+        let t_end_directed = t_end * dir_sign;
+
+        let handle_len = (4.0 / 3.0) * (theta * 0.25).tan() * self.radius;
+
+        let p0 = BezierPoint::with_type(
+            self.start_point,
+            Vec3::ZERO,
+            t_start_directed * handle_len,
+            crate::spline::types::HandleType::Aligned,
+        );
+        let p1 = BezierPoint::with_type(
+            self.end_point,
+            -t_end_directed * handle_len,
+            Vec3::ZERO,
+            crate::spline::types::HandleType::Aligned,
+        );
+
+        Spline::with_points(vec![p0, p1], false)
+    }
+}
+
 impl Spline {
     /// Creates a piecewise linear spline from an array of 3D positions.
     pub fn polyline(positions: &[Vec3], is_closed: bool) -> Self {

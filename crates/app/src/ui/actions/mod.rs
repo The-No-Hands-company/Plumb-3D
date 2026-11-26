@@ -75,6 +75,8 @@ pub struct UiActions {
     pub trigger_fillet_curve: Option<f32>,
     pub trigger_fillet_selected_curve: Option<f32>,
     pub trigger_lathe_curve: Option<(u32, f32)>,
+    pub trigger_trim_curves: Option<bool>,
+    pub trigger_connect_tangent_arc: bool,
     pub trigger_fill_vertex_color: bool,
     pub trigger_invert_sculpt_mask: bool,
     pub trigger_clear_sculpt_mask: bool,

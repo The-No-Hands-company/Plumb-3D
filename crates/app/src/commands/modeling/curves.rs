@@ -410,6 +410,187 @@ impl Command for LatheCurveCommand {
     }
 }
 
+/// Trims a curve with another cutting curve (CAD Multi-Segment Boolean Trimming).
+#[derive(Debug)]
+pub struct TrimCurveCommand {
+    pub target_curve_id: NodeId,
+    pub cutter_curve_id: NodeId,
+    pub keep_inside: bool,
+    pub tolerance: f32,
+    pub old_spline: Option<Spline>,
+    pub created_node_ids: Vec<NodeId>,
+}
+
+impl TrimCurveCommand {
+    pub fn new(target_curve_id: NodeId, cutter_curve_id: NodeId, keep_inside: bool, tolerance: f32) -> Self {
+        Self {
+            target_curve_id,
+            cutter_curve_id,
+            keep_inside,
+            tolerance,
+            old_spline: None,
+            created_node_ids: Vec::new(),
+        }
+    }
+}
+
+impl Command for TrimCurveCommand {
+    fn name(&self) -> &str {
+        if self.keep_inside {
+            "Trim Curve (Keep Inside)"
+        } else {
+            "Trim Curve (Keep Outside)"
+        }
+    }
+
+    fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        let (target_spline, transform, name) = {
+            let node = scene.nodes.get(self.target_curve_id).ok_or("Target curve node not found")?;
+            match &node.data {
+                NodeData::Curve { spline, .. } => (spline.clone(), node.local_transform, node.name.clone()),
+                _ => return Err("Target node is not a curve".into()),
+            }
+        };
+
+        let cutter_spline = {
+            let node = scene.nodes.get(self.cutter_curve_id).ok_or("Cutter curve node not found")?;
+            match &node.data {
+                NodeData::Curve { spline, .. } => spline.clone(),
+                _ => return Err("Cutter node is not a curve".into()),
+            }
+        };
+
+        let trimmed_sub_splines = target_spline.trim_with_spline(&cutter_spline, self.keep_inside, self.tolerance);
+        if trimmed_sub_splines.is_empty() {
+            return Err("Trimming resulted in an empty curve".into());
+        }
+
+        self.old_spline = Some(target_spline);
+        self.created_node_ids.clear();
+
+        // 1. Replace target curve with first trimmed piece
+        if let Some(node) = scene.nodes.get_mut(self.target_curve_id) {
+            if let NodeData::Curve { spline, cached_render_mesh, .. } = &mut node.data {
+                *spline = trimmed_sub_splines[0].clone();
+                *cached_render_mesh = None;
+            }
+            scene.mark_dirty(self.target_curve_id);
+        }
+
+        // 2. If multiple pieces resulted, spawn remaining pieces as sibling curve nodes
+        for (i, sub_spline) in trimmed_sub_splines.iter().enumerate().skip(1) {
+            let sub_name = format!("{}_trim_{}", name, i + 1);
+            let sub_node = SceneNode::new_curve(sub_name, transform, sub_spline.clone());
+            let sub_id = scene.add_node(sub_node);
+            self.created_node_ids.push(sub_id);
+        }
+
+        Ok(())
+    }
+
+    fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        for id in self.created_node_ids.drain(..) {
+            scene.remove_node(id);
+        }
+
+        if let Some(old) = self.old_spline.take() {
+            if let Some(node) = scene.nodes.get_mut(self.target_curve_id) {
+                if let NodeData::Curve { spline, cached_render_mesh, .. } = &mut node.data {
+                    *spline = old;
+                    *cached_render_mesh = None;
+                }
+                scene.mark_dirty(self.target_curve_id);
+            }
+        }
+
+        Ok(())
+    }
+}
+
+/// Connects two curve endpoints or knots with a G1 circular tangent arc (Plasticity Tangent Arc).
+#[derive(Debug)]
+pub struct ConnectTangentArcCommand {
+    pub curve_a_id: NodeId,
+    pub knot_a: usize,
+    pub curve_b_id: NodeId,
+    pub knot_b: usize,
+    pub created_arc_node_id: Option<NodeId>,
+}
+
+impl ConnectTangentArcCommand {
+    pub fn new(curve_a_id: NodeId, knot_a: usize, curve_b_id: NodeId, knot_b: usize) -> Self {
+        Self {
+            curve_a_id,
+            knot_a,
+            curve_b_id,
+            knot_b,
+            created_arc_node_id: None,
+        }
+    }
+}
+
+impl Command for ConnectTangentArcCommand {
+    fn name(&self) -> &str {
+        "Connect Tangent Arc"
+    }
+
+    fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        let (pt_a, dir_a, transform_a) = {
+            let node = scene.nodes.get(self.curve_a_id).ok_or("Curve A not found")?;
+            match &node.data {
+                NodeData::Curve { spline, .. } => {
+                    let k = self.knot_a.min(spline.points.len().saturating_sub(1));
+                    let pt = spline.points[k].position;
+                    let dir = if spline.points[k].handle_out.length_squared() > 1e-4 {
+                        spline.points[k].handle_out.normalize()
+                    } else if k > 0 {
+                        (pt - spline.points[k - 1].position).normalize_or_zero()
+                    } else {
+                        core_math::Vec3::X
+                    };
+                    (pt, dir, node.local_transform)
+                }
+                _ => return Err("Node A is not a curve".into()),
+            }
+        };
+
+        let (pt_b, dir_b) = {
+            let node = scene.nodes.get(self.curve_b_id).ok_or("Curve B not found")?;
+            match &node.data {
+                NodeData::Curve { spline, .. } => {
+                    let k = self.knot_b.min(spline.points.len().saturating_sub(1));
+                    let pt = spline.points[k].position;
+                    let dir = if spline.points[k].handle_in.length_squared() > 1e-4 {
+                        spline.points[k].handle_in.normalize()
+                    } else if k + 1 < spline.points.len() {
+                        (spline.points[k + 1].position - pt).normalize_or_zero()
+                    } else {
+                        core_math::Vec3::Z
+                    };
+                    (pt, dir)
+                }
+                _ => return Err("Node B is not a curve".into()),
+            }
+        };
+
+        let arc = Spline::compute_tangent_arc(pt_a, dir_a, pt_b, dir_b)
+            .ok_or("Could not compute valid tangent arc between points")?;
+
+        let arc_spline = arc.to_spline();
+        let arc_node = SceneNode::new_curve("TangentArc", transform_a, arc_spline);
+        let new_id = scene.add_node(arc_node);
+        self.created_arc_node_id = Some(new_id);
+        Ok(())
+    }
+
+    fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        if let Some(id) = self.created_arc_node_id.take() {
+            scene.remove_node(id);
+        }
+        Ok(())
+    }
+}
+
 
 
 

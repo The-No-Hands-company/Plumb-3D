@@ -424,6 +424,20 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                             close_menu = true;
                         }
                         ui.separator();
+                        ui.label(egui::RichText::new("CAD SPLINE TOOLS").small().color(egui::Color32::GRAY));
+                        if ui.button("Trim Curve (Keep Outside)").clicked() {
+                            actions.trigger_trim_curves = Some(false);
+                            close_menu = true;
+                        }
+                        if ui.button("Trim Curve (Keep Inside)").clicked() {
+                            actions.trigger_trim_curves = Some(true);
+                            close_menu = true;
+                        }
+                        if ui.button("Connect G1 Tangent Arc").clicked() {
+                            actions.trigger_connect_tangent_arc = true;
+                            close_menu = true;
+                        }
+                        ui.separator();
                         if ui.button("Exit to Object Mode (Tab)").clicked() {
                             state.interaction_mode = InteractionMode::Object;
                             close_menu = true;
