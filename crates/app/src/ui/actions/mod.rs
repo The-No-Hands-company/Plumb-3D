@@ -83,6 +83,7 @@ pub struct UiActions {
     pub trigger_relax_vertices: bool,
     pub trigger_rip_vertices: bool,
     pub trigger_un_bevel: bool,
+    pub trigger_dissolve_faces: bool,
     pub trigger_add_material_slot: bool,
     pub trigger_remove_material_slot: bool,
     pub trigger_assign_material_slot: Option<u32>,

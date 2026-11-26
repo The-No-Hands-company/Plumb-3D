@@ -217,4 +217,113 @@ impl Mesh {
         self.update_normals();
         Ok(new_vertices)
     }
+
+    /// Dissolve a contiguous set of adjacent faces into a single merged polygon (Blender Dissolve Faces).
+    pub fn dissolve_faces(&mut self, faces: &[FaceKey]) -> Result<FaceKey, MeshError> {
+        if faces.is_empty() {
+            return Err(MeshError::InvariantFailed("No faces to dissolve".into()));
+        }
+        if faces.len() == 1 {
+            return Ok(faces[0]);
+        }
+
+        let face_set: HashSet<FaceKey> = faces.iter().copied().collect();
+
+        // 1. Collect all directed boundary edges (origin -> target) of the face selection
+        let mut next_vertex: std::collections::HashMap<VertexKey, VertexKey> = std::collections::HashMap::new();
+        let mut boundary_origins = Vec::new();
+
+        for &fk in faces {
+            for &he_key in &self.face_half_edges(fk) {
+                let he = &self.half_edges[he_key];
+                let twin = &self.half_edges[he.twin];
+                let is_internal = twin.face.is_some_and(|tfk| face_set.contains(&tfk));
+                if !is_internal {
+                    next_vertex.insert(he.origin, he.target);
+                    boundary_origins.push(he.origin);
+                }
+            }
+        }
+
+        if boundary_origins.is_empty() {
+            return Err(MeshError::InvariantFailed("No boundary edges found for face set".into()));
+        }
+
+        // 2. Trace the outer boundary loop
+        let start_vk = boundary_origins[0];
+        let mut loop_verts = Vec::new();
+        let mut current_vk = start_vk;
+
+        for _ in 0..next_vertex.len() {
+            loop_verts.push(current_vk);
+            if let Some(&nxt) = next_vertex.get(&current_vk) {
+                if nxt == start_vk {
+                    break;
+                }
+                current_vk = nxt;
+            } else {
+                return Err(MeshError::InvariantFailed("Discontinuous boundary loop in dissolve_faces".into()));
+            }
+        }
+
+        if loop_verts.len() < 3 {
+            return Err(MeshError::DegenerateFace(loop_verts.len()));
+        }
+
+        // 3. Rebuild clean topology: keep all non-dissolved faces and add the merged boundary face
+        let mut new_mesh = Mesh::new();
+        let mut old_to_new_v = std::collections::HashMap::new();
+
+        for (vk, v) in &self.vertices {
+            let new_vk = new_mesh.add_vertex_with_uv_and_color(v.position, v.uv, v.color);
+            old_to_new_v.insert(vk, new_vk);
+        }
+
+        // Re-add non-dissolved faces
+        for (fk, f) in &self.faces {
+            if !face_set.contains(&fk) {
+                let f_verts = self.face_vertices(fk);
+                let new_f_verts: Vec<VertexKey> = f_verts.iter().map(|k| old_to_new_v[k]).collect();
+                if let Ok(new_fk) = new_mesh.add_face(&new_f_verts) {
+                    new_mesh.faces[new_fk].material_id = f.material_id;
+                }
+            }
+        }
+
+        // Add the merged boundary face
+        let new_loop_verts: Vec<VertexKey> = loop_verts.iter().map(|k| old_to_new_v[k]).collect();
+        let merged_fk = new_mesh.add_face(&new_loop_verts)?;
+
+        // Inherit material from the first dissolved face
+        if let Some(first_fk) = faces.first() {
+            if let Some(f) = self.faces.get(*first_fk) {
+                new_mesh.faces[merged_fk].material_id = f.material_id;
+            }
+        }
+
+        // Copy vertex groups
+        for vg in &self.vertex_groups {
+            let idx = new_mesh.add_vertex_group(&vg.name);
+            for (&vk, &w) in &vg.weights {
+                if let Some(&new_vk) = old_to_new_v.get(&vk) {
+                    new_mesh.vertex_groups[idx].set_weight(new_vk, w);
+                }
+            }
+        }
+
+        // Remove orphaned isolated vertices that have no half-edges
+        let orphaned: Vec<VertexKey> = new_mesh
+            .vertices
+            .iter()
+            .filter(|(_, v)| v.half_edges.is_empty())
+            .map(|(k, _)| k)
+            .collect();
+        for ovk in orphaned {
+            new_mesh.vertices.remove(ovk);
+        }
+
+        new_mesh.update_normals();
+        *self = new_mesh;
+        Ok(merged_fk)
+    }
 }

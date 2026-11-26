@@ -124,8 +124,11 @@ pub fn draw_mesh_tools_panel(
                                 if ui.button("Bevel Face (Ctrl+B)").clicked() {
                                     actions.trigger_bevel = true;
                                 }
-                                if ui.button("Un-Bevel Chamfer (Alt+Shift+B)").clicked() {
+                                if ui.button("Un-Bevel (Alt+Shift+B)").clicked() {
                                     actions.trigger_un_bevel = true;
+                                }
+                                if ui.button("Dissolve Faces").clicked() {
+                                    actions.trigger_dissolve_faces = true;
                                 }
                             });
 

@@ -387,6 +387,23 @@ use super::*;
     }
 
     #[test]
+    fn test_dissolve_faces_planar_grid() {
+        // Create 2x2 plane with 4 quad faces
+        let mut plane = Primitives::create_plane(2.0, 2.0, 2, 2);
+        assert_eq!(plane.face_count(), 4);
+        assert_eq!(plane.vertex_count(), 9);
+
+        let all_faces: Vec<_> = plane.faces.keys().collect();
+        let merged_fk = plane.dissolve_faces(&all_faces).unwrap();
+
+        assert!(plane.faces.contains_key(merged_fk));
+        assert_eq!(plane.face_count(), 1);
+        // The central internal vertex had no remaining faces and was eliminated!
+        assert_eq!(plane.vertex_count(), 8);
+        assert!(plane.validate().is_ok());
+    }
+
+    #[test]
     fn test_join_and_separate_faces() {
         let mut cube = Primitives::create_cube(2.0);
         assert_eq!(cube.face_count(), 6);

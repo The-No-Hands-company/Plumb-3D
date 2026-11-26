@@ -373,4 +373,30 @@ pub fn handle_topology_actions(state: &mut AppState, actions: &mut UiActions) {
             }
         }
     }
+
+    // Handle Dissolve Faces (Blender Dissolve Faces)
+    if actions.trigger_dissolve_faces {
+        if let Some(sel_id) = state.selected_node {
+            let target_faces: Vec<FaceKey> = state.selected_faces.iter().copied().collect();
+            if target_faces.len() >= 2 {
+                let cmd = Box::new(DissolveFacesCommand {
+                    node_id: sel_id,
+                    faces: target_faces.clone(),
+                    old_mesh: None,
+                });
+                match state.history.execute(cmd, &mut state.scene) {
+                    Ok(()) => {
+                        state.sync_gpu_meshes();
+                        state.set_status_message(format!("Dissolved {} faces into single n-gon (Ctrl+Z to Undo)", target_faces.len()));
+                        state.selected_faces.clear();
+                    }
+                    Err(e) => {
+                        state.set_status_message(format!("Dissolve faces failed: {}", e));
+                    }
+                }
+            } else {
+                state.set_status_message("Select at least 2 adjacent faces to dissolve");
+            }
+        }
+    }
 }

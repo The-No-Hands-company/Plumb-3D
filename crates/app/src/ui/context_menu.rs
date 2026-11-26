@@ -187,6 +187,10 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                                 actions.trigger_un_bevel = true;
                                 close_menu = true;
                             }
+                            if ui.button("Dissolve Faces").clicked() {
+                                actions.trigger_dissolve_faces = true;
+                                close_menu = true;
+                            }
                             if ui.button("Poke Face").clicked() {
                                 actions.trigger_poke_face = true;
                                 close_menu = true;

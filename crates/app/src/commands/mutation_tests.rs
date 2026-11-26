@@ -213,3 +213,63 @@ fn test_un_bevel_faces_command_and_undo() {
     };
     assert_eq!(face_count_redone, 6);
 }
+
+#[test]
+fn test_dissolve_faces_command_and_undo() {
+    use crate::commands::DissolveFacesCommand;
+    use geo_kernel::FaceKey;
+
+    let mut scene = SceneGraph::new();
+    let plane = Primitives::create_plane(2.0, 2.0, 2, 2);
+    assert_eq!(plane.faces.len(), 4);
+    assert_eq!(plane.vertices.len(), 9);
+
+    let all_faces: Vec<FaceKey> = plane.faces.keys().collect();
+    let node_id = scene.add_node(SceneNode::new_mesh("GridPlane", core_math::Transform::IDENTITY, plane));
+
+    let mut history = graph_engine::HistoryManager::new();
+    let cmd = Box::new(DissolveFacesCommand {
+        node_id,
+        faces: all_faces,
+        old_mesh: None,
+    });
+
+    history.execute(cmd, &mut scene).unwrap();
+
+    let (face_count_after, vert_count_after) = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            (base_mesh.faces.len(), base_mesh.vertices.len())
+        } else {
+            (0, 0)
+        }
+    };
+    // 4 quads merged into 1 single boundary n-gon; center isolated vertex removed
+    assert_eq!(face_count_after, 1);
+    assert_eq!(vert_count_after, 8);
+
+    // Test Undo
+    history.undo(&mut scene).unwrap();
+    let (face_count_undone, vert_count_undone) = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            (base_mesh.faces.len(), base_mesh.vertices.len())
+        } else {
+            (0, 0)
+        }
+    };
+    assert_eq!(face_count_undone, 4);
+    assert_eq!(vert_count_undone, 9);
+
+    // Test Redo
+    history.redo(&mut scene).unwrap();
+    let face_count_redone = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.faces.len()
+        } else {
+            0
+        }
+    };
+    assert_eq!(face_count_redone, 1);
+}
