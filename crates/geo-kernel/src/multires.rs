@@ -215,6 +215,7 @@ mod tests {
             strength: 0.8,
             falloff: BrushFalloff::Smooth,
             invert: false,
+            ..Default::default()
         };
 
         let affected = multires.apply_sculpt_stroke(
@@ -247,6 +248,7 @@ mod tests {
             strength: 0.5,
             falloff: BrushFalloff::Smooth,
             invert: false,
+            ..Default::default()
         };
         multires.apply_sculpt_stroke(vec3(0.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), &settings, None);
 

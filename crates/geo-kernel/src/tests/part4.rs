@@ -374,6 +374,7 @@ use super::*;
             strength: 1.0,
             falloff: crate::sculpt::BrushFalloff::Smooth,
             invert: false,
+            ..Default::default()
         };
         let affected = mesh.apply_sculpt_brush(center, Vec3::Y, &mask_settings, None);
         assert!(affected > 0);
@@ -392,6 +393,7 @@ use super::*;
             strength: 0.8,
             falloff: crate::sculpt::BrushFalloff::Smooth,
             invert: false,
+            ..Default::default()
         };
         mesh.apply_sculpt_brush(center, Vec3::Y, &inflate_settings, None);
 

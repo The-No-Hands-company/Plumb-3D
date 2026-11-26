@@ -253,6 +253,7 @@ mod tests {
             strength: 0.5,
             falloff: BrushFalloff::Smooth,
             invert: false,
+            ..Default::default()
         };
         let dyntopo_settings = DyntopoSettings {
             enabled: true,

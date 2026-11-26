@@ -65,7 +65,7 @@ pub use boolean::BooleanOp;
 pub use subdivision::CatmullClarkModifier;
 pub use decimate::{decimate_mesh, DecimateModifier, SymmQuadric};
 pub use spline::{BezierPoint, HandleType, ProfileShape, Spline};
-pub use sculpt::{BrushFalloff, SculptBrush, SculptSettings};
+pub use sculpt::{BrushAlphaTexture, BrushFalloff, SculptBrush, SculptSettings};
 pub use sculpt_dyntopo::{DyntopoDetailMode, DyntopoMode, DyntopoSettings, DyntopoStats};
 pub use texture_paint::{PaintBlendMode, PaintChannel, PaintTexture, TexturePaintBrush};
 pub use xpbd_cloth::{

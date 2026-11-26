@@ -39,6 +39,39 @@ pub enum BrushFalloff {
     Sharp,
 }
 
+/// Procedural and sampled alpha texture for sculpting brushes (ZBrush Alphas / Stencils)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum BrushAlphaTexture {
+    #[default]
+    None,
+    Tile,
+    Scales,
+    Noise,
+}
+
+impl BrushAlphaTexture {
+    #[inline]
+    pub fn evaluate(&self, u: f32, v: f32) -> f32 {
+        match self {
+            Self::None => 1.0,
+            Self::Tile => {
+                let su = (u * 6.0).sin();
+                let sv = (v * 6.0).sin();
+                (su * sv).abs().clamp(0.15, 1.0)
+            }
+            Self::Scales => {
+                let r = (u * u + v * v).sqrt() * 8.0;
+                let angle = v.atan2(u) * 5.0;
+                ((r.sin() + angle.cos()) * 0.5 + 0.5).clamp(0.1, 1.0)
+            }
+            Self::Noise => {
+                let n = ((u * 12.34 + v * 56.78).sin() * 43758.547).fract();
+                0.25 + 0.75 * n.abs()
+            }
+        }
+    }
+}
+
 impl BrushFalloff {
     #[inline]
     pub fn evaluate(&self, normalized_dist: f32) -> f32 {
@@ -65,6 +98,7 @@ pub struct SculptSettings {
     pub radius: f32,
     pub strength: f32,
     pub falloff: BrushFalloff,
+    pub alpha: BrushAlphaTexture,
     /// When true, inverts the stroke (e.g. Draw indents instead of extrudes, Deflate instead of Inflate)
     pub invert: bool,
 }
@@ -76,6 +110,7 @@ impl Default for SculptSettings {
             radius: 0.5,
             strength: 0.35,
             falloff: BrushFalloff::Smooth,
+            alpha: BrushAlphaTexture::None,
             invert: false,
         }
     }
@@ -102,7 +137,13 @@ impl Mesh {
             let dist = (v.position - hit_point).length();
             if dist <= r {
                 let norm_dist = dist / r;
-                let raw_weight = settings.falloff.evaluate(norm_dist);
+                let local_p = v.position - hit_point;
+                let normal_proj = hit_normal * local_p.dot(hit_normal);
+                let tangent_p = local_p - normal_proj;
+                let u = tangent_p.x / r;
+                let v_coord = tangent_p.z / r;
+                let alpha_val = settings.alpha.evaluate(u, v_coord);
+                let raw_weight = settings.falloff.evaluate(norm_dist) * alpha_val;
                 let unmasked = (1.0 - v.sculpt_mask).clamp(0.0, 1.0);
                 let weight = if settings.brush == SculptBrush::Mask { raw_weight } else { raw_weight * unmasked };
                 if weight > 1e-5 {
@@ -291,5 +332,28 @@ impl Mesh {
         if let Some(v) = self.vertices.get_mut(vk) {
             v.sculpt_mask = mask.clamp(0.0, 1.0);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_brush_alpha_textures() {
+        let none = BrushAlphaTexture::None;
+        assert_eq!(none.evaluate(0.5, 0.5), 1.0);
+
+        let tile = BrushAlphaTexture::Tile;
+        let v_tile = tile.evaluate(0.2, 0.3);
+        assert!(v_tile >= 0.1 && v_tile <= 1.0);
+
+        let scales = BrushAlphaTexture::Scales;
+        let v_scales = scales.evaluate(0.1, 0.2);
+        assert!(v_scales >= 0.05 && v_scales <= 1.0);
+
+        let noise = BrushAlphaTexture::Noise;
+        let v_noise = noise.evaluate(0.4, 0.7);
+        assert!(v_noise >= 0.25 && v_noise <= 1.0);
     }
 }

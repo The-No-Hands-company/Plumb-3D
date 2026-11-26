@@ -436,6 +436,7 @@ use super::*;
             strength: 0.5,
             falloff: BrushFalloff::Smooth,
             invert: false,
+            ..Default::default()
         };
         let affected = plane.apply_sculpt_brush(Vec3::ZERO, Vec3::Y, &settings, None);
         assert!(affected > 0);
@@ -459,6 +460,7 @@ use super::*;
             strength: 0.8,
             falloff: BrushFalloff::Smooth,
             invert: false,
+            ..Default::default()
         };
         let smoothed_count = plane.apply_sculpt_brush(Vec3::ZERO, Vec3::Y, &smooth_settings, None);
         assert!(smoothed_count > 0);
@@ -471,6 +473,7 @@ use super::*;
             strength: 1.0,
             falloff: BrushFalloff::Linear,
             invert: false,
+            ..Default::default()
         };
         plane.apply_sculpt_brush(Vec3::ZERO, Vec3::Y, &flatten_settings, None);
         assert!(plane.validate().is_ok());
@@ -482,6 +485,7 @@ use super::*;
             strength: 0.8,
             falloff: BrushFalloff::Smooth,
             invert: false,
+            ..Default::default()
         };
         let pinched = plane.apply_sculpt_brush(Vec3::ZERO, Vec3::Y, &pinch_settings, None);
         assert!(pinched > 0);
@@ -494,6 +498,7 @@ use super::*;
             strength: 0.7,
             falloff: BrushFalloff::Sharp,
             invert: false,
+            ..Default::default()
         };
         let creased = plane.apply_sculpt_brush(Vec3::ZERO, Vec3::Y, &crease_settings, None);
         assert!(creased > 0);
@@ -506,6 +511,7 @@ use super::*;
             strength: 0.9,
             falloff: BrushFalloff::Smooth,
             invert: false,
+            ..Default::default()
         };
         let snaked = plane.apply_sculpt_brush(Vec3::ZERO, Vec3::Y, &snake_settings, Some(Vec3::new(0.5, 0.2, 0.0)));
         assert!(snaked > 0);
@@ -518,6 +524,7 @@ use super::*;
             strength: 0.6,
             falloff: BrushFalloff::Smooth,
             invert: false,
+            ..Default::default()
         };
         let clayed = plane.apply_sculpt_brush(Vec3::ZERO, Vec3::Y, &clay_settings, None);
         assert!(clayed > 0);

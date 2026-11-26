@@ -1,5 +1,5 @@
 use crate::ui::actions::UiActions;
-use geo_kernel::{BrushFalloff, DyntopoMode, SculptBrush, SculptSettings, DyntopoSettings};
+use geo_kernel::{BrushAlphaTexture, BrushFalloff, DyntopoMode, SculptBrush, SculptSettings, DyntopoSettings};
 
 pub fn draw_sculpt_tools(
     ui: &mut egui::Ui,
@@ -42,6 +42,15 @@ pub fn draw_sculpt_tools(
             ui.selectable_value(&mut sculpt_settings.falloff, BrushFalloff::Spherical, "Spherical");
             ui.selectable_value(&mut sculpt_settings.falloff, BrushFalloff::Linear, "Linear");
             ui.selectable_value(&mut sculpt_settings.falloff, BrushFalloff::Sharp, "Sharp");
+        });
+
+    egui::ComboBox::from_label("Alpha Texture")
+        .selected_text(format!("{:?}", sculpt_settings.alpha))
+        .show_ui(ui, |ui| {
+            ui.selectable_value(&mut sculpt_settings.alpha, BrushAlphaTexture::None, "None");
+            ui.selectable_value(&mut sculpt_settings.alpha, BrushAlphaTexture::Tile, "Tile / Grid");
+            ui.selectable_value(&mut sculpt_settings.alpha, BrushAlphaTexture::Scales, "Scales / Cells");
+            ui.selectable_value(&mut sculpt_settings.alpha, BrushAlphaTexture::Noise, "Micro Noise");
         });
 
     ui.horizontal(|ui| {
