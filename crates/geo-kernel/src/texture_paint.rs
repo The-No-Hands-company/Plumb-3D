@@ -167,6 +167,69 @@ impl PaintTexture {
         }
         out
     }
+
+    /// Dilates painted pixels outward across unpainted seam margins by `radius_pixels`.
+    /// Eliminates black seam edges and mipmap bleeding across UV islands (Substance Painter style Seam Dilation).
+    pub fn dilate_seams(&mut self, radius_pixels: usize) {
+        if radius_pixels == 0 || self.width == 0 || self.height == 0 {
+            return;
+        }
+
+        let w = self.width;
+        let h = self.height;
+
+        for _ in 0..radius_pixels {
+            let mut new_data = self.data.clone();
+            let mut changed = false;
+
+            for y in 0..h {
+                for x in 0..w {
+                    let idx = y * w + x;
+                    if self.data[idx][3] == 0 {
+                        let mut sum_r = 0u32;
+                        let mut sum_g = 0u32;
+                        let mut sum_b = 0u32;
+                        let mut count = 0u32;
+
+                        let neighbors = [
+                            (x.wrapping_sub(1), y, x > 0),
+                            (x + 1, y, x + 1 < w),
+                            (x, y.wrapping_sub(1), y > 0),
+                            (x, y + 1, y + 1 < h),
+                        ];
+
+                        for &(nx, ny, valid) in &neighbors {
+                            if valid {
+                                let n_idx = ny * w + nx;
+                                let n_pix = self.data[n_idx];
+                                if n_pix[3] > 0 {
+                                    sum_r += n_pix[0] as u32;
+                                    sum_g += n_pix[1] as u32;
+                                    sum_b += n_pix[2] as u32;
+                                    count += 1;
+                                }
+                            }
+                        }
+
+                        if let Some(avg_r) = sum_r.checked_div(count) {
+                            new_data[idx] = [
+                                avg_r as u8,
+                                (sum_g / count) as u8,
+                                (sum_b / count) as u8,
+                                255,
+                            ];
+                            changed = true;
+                        }
+                    }
+                }
+            }
+
+            self.data = new_data;
+            if !changed {
+                break;
+            }
+        }
+    }
 }
 
 /// 3D Texture painting brush configuration
@@ -178,6 +241,7 @@ pub struct TexturePaintBrush {
     pub channel: PaintChannel,
     pub falloff: BrushFalloff,
     pub blend_mode: PaintBlendMode,
+    pub bleed_pixels: usize,
     pub symmetry_x: bool,
     pub symmetry_y: bool,
     pub symmetry_z: bool,
@@ -192,6 +256,7 @@ impl Default for TexturePaintBrush {
             channel: PaintChannel::Albedo,
             falloff: BrushFalloff::Smooth,
             blend_mode: PaintBlendMode::Mix,
+            bleed_pixels: 2,
             symmetry_x: false,
             symmetry_y: false,
             symmetry_z: false,
@@ -222,6 +287,9 @@ impl Mesh {
         if brush.symmetry_z && hit_point.z.abs() > 1e-4 {
             let sym_point = vec3(hit_point.x, hit_point.y, -hit_point.z);
             painted += self.paint_texture_pass(sym_point, brush, texture);
+        }
+        if brush.bleed_pixels > 0 && painted > 0 {
+            texture.dilate_seams(brush.bleed_pixels);
         }
         painted
     }
@@ -360,6 +428,7 @@ mod tests {
             channel: PaintChannel::Albedo,
             falloff: BrushFalloff::Smooth,
             blend_mode: PaintBlendMode::Mix,
+            bleed_pixels: 0,
             symmetry_x: false,
             symmetry_y: false,
             symmetry_z: false,
@@ -378,5 +447,22 @@ mod tests {
 
         tex.clear([50, 50, 50, 255]);
         assert_eq!(tex.get_pixel(32, 32), [50, 50, 50, 255]);
+    }
+
+    #[test]
+    fn test_seam_dilation() {
+        let mut tex = PaintTexture::new(16, 16, [0, 0, 0, 0]); // transparent canvas
+        tex.set_pixel(8, 8, [255, 100, 50, 255]); // 1 single painted pixel
+        assert_eq!(tex.get_pixel(9, 8)[3], 0);
+
+        tex.dilate_seams(1);
+        // Direct neighbor (9, 8) should now have received the bled color
+        assert_eq!(tex.get_pixel(9, 8), [255, 100, 50, 255]);
+        assert_eq!(tex.get_pixel(8, 7), [255, 100, 50, 255]);
+        // 2 pixels away should still be 0
+        assert_eq!(tex.get_pixel(10, 8)[3], 0);
+
+        tex.dilate_seams(1);
+        assert_eq!(tex.get_pixel(10, 8), [255, 100, 50, 255]);
     }
 }

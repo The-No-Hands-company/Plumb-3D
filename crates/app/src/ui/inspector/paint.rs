@@ -73,6 +73,7 @@ pub fn draw_texture_paint_tools(ui: &mut egui::Ui, state: &mut AppState) {
 
     ui.add(egui::Slider::new(&mut state.texture_paint_brush.radius, 0.02..=2.0).text("Radius"));
     ui.add(egui::Slider::new(&mut state.texture_paint_brush.strength, 0.01..=1.0).text("Strength"));
+    ui.add(egui::Slider::new(&mut state.texture_paint_brush.bleed_pixels, 0..=8).text("Seam Bleed (px)"));
 
     ui.horizontal(|ui| {
         ui.label("Symmetry:");
