@@ -164,7 +164,7 @@ impl Mesh {
     }
 
     /// Relaxes and smooths vertex UV coordinates using Laplacian diffusion to minimize texture distortion.
-    /// Pinned boundary vertices retain chart contours while interior UVs equalize tension.
+    /// Pinned vertices and island boundary vertices retain their fixed coordinates while unpinned UVs equalize tension.
     pub fn relax_uvs(&mut self, iterations: usize, factor: f32) {
         if self.vertices.len() < 3 || iterations == 0 {
             return;
@@ -191,12 +191,18 @@ impl Mesh {
             }
         }
 
+        let has_explicit_pins = self.vertices.values().any(|v| v.uv_pinned);
+
         for _ in 0..iterations {
             let mut new_uvs: HashMap<VertexKey, Vec2> = HashMap::with_capacity(self.vertices.len());
 
             for (vk, v) in &self.vertices {
-                // If boundary vertex, keep pinned to preserve UV island boundaries
-                if boundary_verts.contains(&vk) {
+                // If explicitly pinned, keep strictly locked
+                if v.uv_pinned {
+                    continue;
+                }
+                // If no explicit pins exist, preserve boundary vertices by default to prevent chart collapse
+                if !has_explicit_pins && boundary_verts.contains(&vk) {
                     continue;
                 }
 

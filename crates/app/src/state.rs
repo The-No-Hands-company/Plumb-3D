@@ -134,7 +134,7 @@ pub struct AppState {
     pub vertex_crease_modal_original_weights: Vec<(VertexKey, f32)>,
 
     // UV Editor Window & Tools (Blender / Maya Style), Cutter & Kitbash Modals
-    pub show_uv_editor: bool, pub smart_uv_angle_threshold: f32, pub smart_uv_margin: f32, pub uv_show_distortion: bool, pub uv_seam_cut_mode: bool,
+    pub show_uv_editor: bool, pub smart_uv_angle_threshold: f32, pub smart_uv_margin: f32, pub uv_show_distortion: bool, pub uv_seam_cut_mode: bool, pub uv_pin_mode: bool, pub uv_live_relax: bool,
     pub cutter_modal: Option<crate::modals::cutter::CutterModalState>,
     pub kitbash_modal: Option<crate::modals::kitbash::KitbashModalState>,
 
@@ -489,7 +489,7 @@ impl AppState {
             vertex_crease_modal_start_mouse: (0.0, 0.0),
             vertex_crease_modal_vertices: Vec::new(),
             vertex_crease_modal_original_weights: Vec::new(),
-            show_uv_editor: false, smart_uv_angle_threshold: 66.0, smart_uv_margin: 0.02, uv_show_distortion: false, uv_seam_cut_mode: false,
+            show_uv_editor: false, smart_uv_angle_threshold: 66.0, smart_uv_margin: 0.02, uv_show_distortion: false, uv_seam_cut_mode: false, uv_pin_mode: false, uv_live_relax: false,
             cutter_modal: None, kitbash_modal: None,
             show_outliner: true, show_inspector: true, show_left_toolbar: true, show_history_window: false, outliner_tab: 0,
             show_context_menu: false,

@@ -42,6 +42,8 @@ pub struct Vertex {
     pub crease_weight: f32,
     /// Sculpt mask weight in [0.0, 1.0] where 1.0 pins the vertex from deformation.
     pub sculpt_mask: f32,
+    /// Whether this vertex UV is pinned in the UV editor to prevent movement during relaxation.
+    pub uv_pinned: bool,
     /// List of outgoing half-edges originating from this vertex.
     pub half_edges: SmallVec<[HalfEdgeKey; 6]>,
 }
@@ -55,6 +57,7 @@ impl Vertex {
             color: [1.0, 1.0, 1.0, 1.0],
             crease_weight: 0.0,
             sculpt_mask: 0.0,
+            uv_pinned: false,
             half_edges: SmallVec::new(),
         }
     }
@@ -67,6 +70,7 @@ impl Vertex {
             color: [1.0, 1.0, 1.0, 1.0],
             crease_weight: 0.0,
             sculpt_mask: 0.0,
+            uv_pinned: false,
             half_edges: SmallVec::new(),
         }
     }
@@ -79,6 +83,7 @@ impl Vertex {
             color,
             crease_weight: 0.0,
             sculpt_mask: 0.0,
+            uv_pinned: false,
             half_edges: SmallVec::new(),
         }
     }

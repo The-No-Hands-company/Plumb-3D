@@ -44,7 +44,14 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                     let cut_btn = if state.uv_seam_cut_mode { "Cut Seams [ON]" } else { "Cut Seams" };
                     if ui.selectable_label(state.uv_seam_cut_mode, cut_btn).on_hover_text("Interactive 2D Seam Cut: Click edges in UV canvas to cut/remove seams").clicked() {
                         state.uv_seam_cut_mode = !state.uv_seam_cut_mode;
+                        if state.uv_seam_cut_mode { state.uv_pin_mode = false; }
                     }
+                    let pin_btn = if state.uv_pin_mode { "Pin Tool [P] (ON)" } else { "Pin Tool [P]" };
+                    if ui.selectable_label(state.uv_pin_mode, pin_btn).on_hover_text("Interactive UV Pin Tool: Click or press 'P' to pin/unpin UV vertices").clicked() {
+                        state.uv_pin_mode = !state.uv_pin_mode;
+                        if state.uv_pin_mode { state.uv_seam_cut_mode = false; }
+                    }
+                    ui.checkbox(&mut state.uv_live_relax, "Live Relax").on_hover_text("Iteratively relaxes unpinned UV coordinates in real-time as you drag vertices");
                 });
 
                 ui.horizontal(|ui| {
@@ -158,6 +165,50 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                         painter.line_segment([p0, p1], egui::Stroke::new(3.0_f32, egui::Color32::YELLOW));
                         if response.clicked() {
                             base_mesh.edges[ek].is_seam = !base_mesh.edges[ek].is_seam;
+                        }
+                    }
+                }
+
+                // Interactive UV vertex picking, pinning markers, and drag relaxation
+                let mut closest_vert = None;
+                let mut min_vert_dist = 12.0_f32;
+
+                for (vk, v) in &base_mesh.vertices {
+                    let vp = egui::pos2(rect.left() + v.uv.x * rect.width(), rect.top() + (1.0 - v.uv.y) * rect.height());
+                    if let Some(m) = mouse_pos {
+                        let d = (m - vp).length();
+                        if d < min_vert_dist {
+                            min_vert_dist = d;
+                            closest_vert = Some((vk, vp));
+                        }
+                    }
+
+                    if v.uv_pinned {
+                        // Draw red pushpin marker for pinned UV vertices
+                        painter.circle_filled(vp, 4.5_f32, egui::Color32::from_rgb(255, 45, 45));
+                        painter.circle_stroke(vp, 4.5_f32, egui::Stroke::new(1.5_f32, egui::Color32::WHITE));
+                        painter.circle_filled(vp, 1.5_f32, egui::Color32::WHITE);
+                    }
+                }
+
+                let p_pressed = ui.input(|i| i.key_pressed(egui::Key::P));
+                if let Some((cvk, cvp)) = closest_vert {
+                    painter.circle_stroke(cvp, 6.5_f32, egui::Stroke::new(1.5_f32, egui::Color32::YELLOW));
+                    if p_pressed || (state.uv_pin_mode && response.clicked()) {
+                        base_mesh.vertices[cvk].uv_pinned = !base_mesh.vertices[cvk].uv_pinned;
+                    }
+                }
+
+                // Dragging UV vertices with optional real-time live relaxation
+                if response.dragged() {
+                    if let Some(m) = mouse_pos {
+                        if let Some((cvk, _)) = closest_vert {
+                            let new_u = ((m.x - rect.left()) / rect.width()).clamp(0.0, 1.0);
+                            let new_v = (1.0 - (m.y - rect.top()) / rect.height()).clamp(0.0, 1.0);
+                            base_mesh.vertices[cvk].uv = core_math::vec2(new_u, new_v);
+                            if state.uv_live_relax {
+                                base_mesh.relax_uvs(2, 0.45);
+                            }
                         }
                     }
                 }

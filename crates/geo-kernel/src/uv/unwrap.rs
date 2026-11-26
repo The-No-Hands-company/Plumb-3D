@@ -199,15 +199,16 @@ impl Mesh {
             // Run 35 iterations of harmonic relaxation for interior vertices
             for _ in 0..35 {
                 for &vk in &chart_verts {
-                    if !boundary_set.contains(&vk) {
-                        if let Some(neighbors) = adj_graph.get(&vk) {
-                            if !neighbors.is_empty() {
-                                let mut sum_uv = Vec2::ZERO;
-                                for &nbr in neighbors {
-                                    sum_uv += uv_map.get(&nbr).copied().unwrap_or(Vec2::splat(0.5));
-                                }
-                                uv_map.insert(vk, sum_uv / (neighbors.len() as f32));
+                    if self.vertices[vk].uv_pinned || boundary_set.contains(&vk) {
+                        continue;
+                    }
+                    if let Some(neighbors) = adj_graph.get(&vk) {
+                        if !neighbors.is_empty() {
+                            let mut sum_uv = Vec2::ZERO;
+                            for &nbr in neighbors {
+                                sum_uv += uv_map.get(&nbr).copied().unwrap_or(Vec2::splat(0.5));
                             }
+                            uv_map.insert(vk, sum_uv / (neighbors.len() as f32));
                         }
                     }
                 }

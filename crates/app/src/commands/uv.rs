@@ -1,5 +1,5 @@
 use crate::types::UVProjectionType;
-use geo_kernel::{EdgeKey, Mesh};
+use geo_kernel::{EdgeKey, Mesh, VertexKey};
 use graph_engine::{Command, NodeData, NodeId, SceneGraph};
 
 #[derive(Debug)]
@@ -407,6 +407,99 @@ impl Command for RelaxUvsCommand {
             }
         } else {
             Err("No snapshot to restore".into())
+        }
+    }
+}
+
+/// Command to pin or unpin UV vertices in the 2D canvas to lock them during unwrapping or relaxation.
+#[derive(Debug)]
+pub struct PinUvsCommand {
+    pub node_id: NodeId,
+    pub vertices: Vec<VertexKey>,
+    pub pin: bool,
+    pub old_pinned_states: Vec<(VertexKey, bool)>,
+}
+
+impl Command for PinUvsCommand {
+    fn name(&self) -> &str {
+        if self.pin { "Pin UV Vertices" } else { "Unpin UV Vertices" }
+    }
+
+    fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
+        if let NodeData::Mesh { base_mesh, .. } = &mut node.data {
+            if self.old_pinned_states.is_empty() {
+                self.old_pinned_states = self.vertices.iter()
+                    .filter_map(|&vk| base_mesh.vertices.get(vk).map(|v| (vk, v.uv_pinned)))
+                    .collect();
+            }
+            for &vk in &self.vertices {
+                if let Some(v) = base_mesh.vertices.get_mut(vk) {
+                    v.uv_pinned = self.pin;
+                }
+            }
+            scene.mark_dirty(self.node_id);
+            Ok(())
+        } else {
+            Err("Node is not a mesh".into())
+        }
+    }
+
+    fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
+        if let NodeData::Mesh { base_mesh, .. } = &mut node.data {
+            for &(vk, was_pinned) in &self.old_pinned_states {
+                if let Some(v) = base_mesh.vertices.get_mut(vk) {
+                    v.uv_pinned = was_pinned;
+                }
+            }
+            scene.mark_dirty(self.node_id);
+            Ok(())
+        } else {
+            Err("Node is not a mesh".into())
+        }
+    }
+}
+
+/// Command to move UV vertex coordinates interactively with full undo/redo.
+#[derive(Debug)]
+pub struct MoveUvVertexCommand {
+    pub node_id: NodeId,
+    pub vertex: VertexKey,
+    pub new_uv: core_math::Vec2,
+    pub old_uv: core_math::Vec2,
+}
+
+impl Command for MoveUvVertexCommand {
+    fn name(&self) -> &str {
+        "Move UV Vertex"
+    }
+
+    fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
+        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+            if let Some(v) = base_mesh.vertices.get_mut(self.vertex) {
+                v.uv = self.new_uv;
+            }
+            *cached_render_mesh = None;
+            scene.mark_dirty(self.node_id);
+            Ok(())
+        } else {
+            Err("Node is not a mesh".into())
+        }
+    }
+
+    fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
+        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+            if let Some(v) = base_mesh.vertices.get_mut(self.vertex) {
+                v.uv = self.old_uv;
+            }
+            *cached_render_mesh = None;
+            scene.mark_dirty(self.node_id);
+            Ok(())
+        } else {
+            Err("Node is not a mesh".into())
         }
     }
 }

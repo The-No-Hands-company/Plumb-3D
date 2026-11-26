@@ -436,3 +436,71 @@ fn test_curve_fillet_g2_continuity_and_undo() {
     };
     assert_eq!(restored_count, 4);
 }
+
+#[test]
+fn test_uv_pinning_and_pinned_relaxation_command() {
+    use crate::commands::uv::{PinUvsCommand, RelaxUvsCommand};
+    use geo_kernel::Primitives;
+
+    let mut scene = SceneGraph::new();
+    let plane = Primitives::create_plane(2.0, 2.0, 3, 3);
+    let id = scene.add_node(SceneNode::new_mesh("Plane", core_math::Transform::IDENTITY, plane));
+
+    let mut history = graph_engine::HistoryManager::new();
+
+    // Pick one interior vertex
+    let (target_vk, original_uv) = {
+        let node = scene.nodes.get(id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            let vk = base_mesh.vertices.keys().next().unwrap();
+            (vk, base_mesh.vertices[vk].uv)
+        } else {
+            panic!("Expected mesh");
+        }
+    };
+
+    // Execute PinUvsCommand to pin this vertex
+    let pin_cmd = Box::new(PinUvsCommand {
+        node_id: id,
+        vertices: vec![target_vk],
+        pin: true,
+        old_pinned_states: Vec::new(),
+    });
+    history.execute(pin_cmd, &mut scene).unwrap();
+
+    {
+        let node = scene.nodes.get(id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            assert!(base_mesh.vertices[target_vk].uv_pinned);
+        }
+    }
+
+    // Run RelaxUvsCommand
+    let relax_cmd = Box::new(RelaxUvsCommand {
+        node_id: id,
+        iterations: 15,
+        factor: 0.8,
+        old_mesh: None,
+    });
+    history.execute(relax_cmd, &mut scene).unwrap();
+
+    // Verify pinned vertex UV remained exactly anchored
+    {
+        let node = scene.nodes.get(id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            assert_eq!(base_mesh.vertices[target_vk].uv, original_uv);
+        }
+    }
+
+    // Undo relax
+    history.undo(&mut scene).unwrap();
+
+    // Undo pin
+    history.undo(&mut scene).unwrap();
+    {
+        let node = scene.nodes.get(id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            assert!(!base_mesh.vertices[target_vk].uv_pinned);
+        }
+    }
+}
