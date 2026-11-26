@@ -102,15 +102,13 @@ pub fn render(state: &mut AppState) {
 
     // 1. Render Viewport Statistics Heads-Up Display (HUD)
     if state.show_viewport_hud {
-        let hud_x = if state.show_left_toolbar {
-            vp.min.x + 72.0
-        } else {
-            vp.min.x + 12.0
-        };
+        let hud_x = vp.min.x + 12.0;
+        let hud_y = vp.max.y - 12.0;
 
         egui::Window::new("Scene Statistics")
             .id(egui::Id::new("viewport_hud_overlay_window"))
-            .default_pos(egui::pos2(hud_x, top_y_offset))
+            .pivot(egui::Align2::LEFT_BOTTOM)
+            .default_pos(egui::pos2(hud_x, hud_y))
             .collapsible(true)
             .resizable(false)
             .title_bar(true)
