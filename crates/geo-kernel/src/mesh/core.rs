@@ -370,6 +370,17 @@ impl Mesh {
         }
     }
 
+    /// Deletes a vertex and all its incident faces from the mesh.
+    pub fn delete_vertex(&mut self, vertex_key: VertexKey) {
+        if self.vertices.contains_key(vertex_key) {
+            let incident_faces = self.vertex_faces(vertex_key);
+            for fk in incident_faces {
+                self.delete_face(fk);
+            }
+            self.vertices.remove(vertex_key);
+        }
+    }
+
     /// Retrieve all half-edges belonging to a face loop.
     pub fn face_half_edges(&self, face_key: FaceKey) -> Vec<HalfEdgeKey> {
         let mut hes = Vec::new();

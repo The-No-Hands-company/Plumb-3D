@@ -49,9 +49,40 @@ pub fn draw_outliner_inner(state: &mut AppState, actions: &mut UiActions, ui: &m
             state.outliner_filter.clear();
         }
     });
-    if ui.button("+ Group / Folder").clicked() {
-        actions.spawn_group = true;
-    }
+    ui.horizontal(|ui| {
+        if ui.button("+ Group / Folder").clicked() {
+            actions.spawn_group = true;
+        }
+    });
+
+    ui.collapsing("Hierarchy & Parenting", |ui| {
+        if let Some(prev) = state.previous_selected_node {
+            let prev_name = state.scene.nodes.get(prev).map(|n| n.name.as_str()).unwrap_or("None");
+            ui.label(format!("Parent Target: {}", prev_name));
+        } else {
+            ui.label("Parent Target: None");
+        }
+
+        ui.horizontal(|ui| {
+            let can_parent = state.selected_node.is_some()
+                && state.previous_selected_node.is_some()
+                && state.selected_node != state.previous_selected_node;
+            if ui.add_enabled(can_parent, egui::Button::new("Parent (P)")).clicked() {
+                actions.trigger_parent = true;
+            }
+            if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Unparent (Shift+P)")).clicked() {
+                actions.trigger_unparent = true;
+            }
+            if ui.add_enabled(can_parent, egui::Button::new("Join (Ctrl+J)")).clicked() {
+                actions.trigger_join_meshes = true;
+            }
+        });
+
+        if ui.button("Delete Selected (X)").clicked() {
+            actions.delete_selected = true;
+        }
+    });
+
     ui.separator();
 
     let mut node_to_select = None;
@@ -74,36 +105,6 @@ pub fn draw_outliner_inner(state: &mut AppState, actions: &mut UiActions, ui: &m
                     &state.outliner_filter,
                 );
             }
-
-            ui.add_space(8.0);
-            ui.separator();
-            ui.collapsing("Hierarchy & Parenting", |ui| {
-                if let Some(prev) = state.previous_selected_node {
-                    let prev_name = state.scene.nodes.get(prev).map(|n| n.name.as_str()).unwrap_or("None");
-                    ui.label(format!("Parent Target: {}", prev_name));
-                } else {
-                    ui.label("Parent Target: None");
-                }
-
-                ui.horizontal(|ui| {
-                    let can_parent = state.selected_node.is_some()
-                        && state.previous_selected_node.is_some()
-                        && state.selected_node != state.previous_selected_node;
-                    if ui.add_enabled(can_parent, egui::Button::new("Parent (P)")).clicked() {
-                        actions.trigger_parent = true;
-                    }
-                    if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Unparent (Shift+P)")).clicked() {
-                        actions.trigger_unparent = true;
-                    }
-                    if ui.add_enabled(can_parent, egui::Button::new("Join (Ctrl+J)")).clicked() {
-                        actions.trigger_join_meshes = true;
-                    }
-                });
-
-                if ui.button("Delete Selected (X)").clicked() {
-                    actions.delete_selected = true;
-                }
-            });
         });
 
     if let Some(new_sel) = node_to_select {

@@ -11,7 +11,8 @@ pub fn render(state: &mut AppState) {
 
     let ctx = state.egui_ctx.clone();
     let vp = state.egui_ctx.available_rect();
-    let panel_x = vp.min.x + 14.0;
+    let left_offset = if state.show_left_toolbar { 76.0 } else { 14.0 };
+    let panel_x = vp.min.x + left_offset;
     let panel_y = vp.max.y - 36.0;
 
     let op = state.last_operator.as_ref().unwrap().clone();

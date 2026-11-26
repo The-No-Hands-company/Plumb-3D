@@ -257,6 +257,18 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
                         state.selected_edges.clear();
                         state.selected_vertices.clear();
                         state.selected_faces.clear();
+                    } else if state.sub_element_level == SubElementLevel::Vertex && !state.selected_vertices.is_empty() {
+                        let verts: Vec<geo_kernel::VertexKey> = state.selected_vertices.iter().copied().collect();
+                        let cmd = Box::new(DeleteVerticesCommand {
+                            node_id: sel_id,
+                            vertices: verts,
+                            old_mesh: None,
+                        });
+                        if state.history.execute(cmd, &mut state.scene).is_ok() {
+                            state.selected_vertices.clear();
+                            state.selected_edges.clear();
+                            state.selected_faces.clear();
+                        }
                     }
                 }
             } else if state.interaction_mode == InteractionMode::CurveEdit {

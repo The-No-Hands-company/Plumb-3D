@@ -1,5 +1,5 @@
 use super::UiActions;
-use crate::commands::{AlignObjectsCommand, DeleteFacesCommand, DissolveEdgeCommand, GroupNodesCommand, SetParentCommand};
+use crate::commands::{AlignObjectsCommand, DeleteFacesCommand, DeleteVerticesCommand, DissolveEdgeCommand, GroupNodesCommand, SetParentCommand};
 use crate::state::AppState;
 use crate::types::{InteractionMode, SubElementLevel};
 use graph_engine::NodeData;
@@ -175,6 +175,18 @@ pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
                     state.selected_edges.clear();
                     state.selected_vertices.clear();
                     state.selected_faces.clear();
+                } else if state.sub_element_level == SubElementLevel::Vertex && !state.selected_vertices.is_empty() {
+                    let verts: Vec<geo_kernel::VertexKey> = state.selected_vertices.iter().copied().collect();
+                    let cmd = Box::new(DeleteVerticesCommand {
+                        node_id: sel_id,
+                        vertices: verts,
+                        old_mesh: None,
+                    });
+                    if state.history.execute(cmd, &mut state.scene).is_ok() {
+                        state.selected_vertices.clear();
+                        state.selected_edges.clear();
+                        state.selected_faces.clear();
+                    }
                 }
             }
         } else if let Some(sel_id) = state.selected_node {

@@ -298,3 +298,52 @@ impl Command for DeleteFacesCommand {
         }
     }
 }
+
+#[derive(Debug)]
+pub struct DeleteVerticesCommand {
+    pub node_id: NodeId,
+    pub vertices: Vec<VertexKey>,
+    pub old_mesh: Option<Mesh>,
+}
+
+impl Command for DeleteVerticesCommand {
+    fn name(&self) -> &str {
+        "Delete Vertices"
+    }
+
+    fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
+        match &mut node.data {
+            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                if self.old_mesh.is_none() {
+                    self.old_mesh = Some(base_mesh.clone());
+                }
+                for &vk in &self.vertices {
+                    base_mesh.delete_vertex(vk);
+                }
+                base_mesh.update_normals();
+                *cached_render_mesh = None;
+                scene.mark_dirty(self.node_id);
+                Ok(())
+            }
+            _ => Err("Node is not a mesh".into()),
+        }
+    }
+
+    fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        if let Some(old) = &self.old_mesh {
+            let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
+            match &mut node.data {
+                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                    *base_mesh = old.clone();
+                    *cached_render_mesh = None;
+                    scene.mark_dirty(self.node_id);
+                    Ok(())
+                }
+                _ => Err("Node is not a mesh".into()),
+            }
+        } else {
+            Err("No snapshot to restore".into())
+        }
+    }
+}
