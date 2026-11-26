@@ -1,3 +1,5 @@
+pub mod alembic;
+pub mod fbx;
 pub mod gltf;
 pub mod obj;
 pub mod plmb;
@@ -6,4 +8,5 @@ pub mod step;
 pub mod stl;
 pub mod usd;
 
+pub use alembic::AlembicCache;
 pub use plmb::*;

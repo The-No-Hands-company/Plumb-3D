@@ -52,6 +52,9 @@ pub fn draw_file_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
         if ui.button("Export SubD Limit Surface as Continuous NURBS CAD STEP (.step)").clicked() { actions.export_subd_nurbs_step = true; ui.close_menu(); }
         if ui.button("Export Full Scene as Pixar OpenUSD (.usda)").clicked() { actions.export_usd = true; ui.close_menu(); }
         if ui.button("Import Pixar OpenUSD Scene (.usda)...").clicked() { actions.import_usd = true; ui.close_menu(); }
+        if ui.button("Export Active Mesh as Autodesk FBX (.fbx)").clicked() { actions.export_fbx = true; ui.close_menu(); }
+        if ui.button("Import Autodesk FBX (.fbx)...").clicked() { actions.import_fbx = true; ui.close_menu(); }
+        if ui.button("Export Active Mesh as Alembic Cache (.abc)").clicked() { actions.export_alembic = true; ui.close_menu(); }
         if ui.button("Export Sliced G-Code for 3D Printing (.gcode)").clicked() { actions.export_gcode = true; ui.close_menu(); }
         if ui.button("3D Print & CAD Quality Inspector...").clicked() { state.print_inspector.show_dialog = true; ui.close_menu(); }
         ui.separator();

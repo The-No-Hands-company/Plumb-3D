@@ -85,6 +85,7 @@ fn main() {
         contrast: 1.12,
         saturation: 1.18,
         filmic_tonemap: true,
+        ..Default::default()
     };
 
     let output_path = "docs/images/castle_citadel_hero.png";

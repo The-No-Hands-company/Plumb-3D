@@ -216,6 +216,61 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         }
     }
 
+    // 12. Handle Autodesk FBX Export
+    if actions.export_fbx {
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Autodesk FBX (*.fbx)", &["fbx"])
+                .set_file_name(format!("{}.fbx", name))
+                .save_file()
+            {
+                if mesh.save_fbx(&path, &name).is_ok() {
+                    state.set_status_message(format!("Exported FBX to: {}", path.display()));
+                }
+            }
+        }
+    }
+
+    // 13. Handle Autodesk FBX Import
+    if actions.import_fbx {
+        if let Some(path) = rfd::FileDialog::new()
+            .add_filter("Autodesk FBX (*.fbx)", &["fbx"])
+            .pick_file()
+        {
+            match geo_kernel::mesh::Mesh::load_fbx(&path) {
+                Ok(mesh) => {
+                    let node_name = path.file_stem().and_then(|s| s.to_str()).unwrap_or("ImportedFBX");
+                    insert_mesh_into_scene(state, node_name, mesh);
+                    state.set_status_message(format!("Imported FBX model: {}", path.display()));
+                }
+                Err(err) => {
+                    state.set_status_message(format!("Failed to import FBX: {}", err));
+                }
+            }
+        }
+    }
+
+    // 14. Handle Alembic Point Cache Export
+    if actions.export_alembic {
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Alembic Point Cache (*.abc)", &["abc"])
+                .set_file_name(format!("{}.abc", name))
+                .save_file()
+            {
+                let cache = geo_kernel::io::AlembicCache::new(
+                    &mesh,
+                    &name,
+                    24.0,
+                    vec![mesh.vertices.values().map(|v| v.position).collect()],
+                );
+                if cache.save(&path).is_ok() {
+                    state.set_status_message(format!("Exported Alembic Point Cache to: {}", path.display()));
+                }
+            }
+        }
+    }
+
     // In-memory imports (for programmatic samples or drag-and-drop bytes)
     handle_direct_memory_imports(state, actions);
 }
