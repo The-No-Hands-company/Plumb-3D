@@ -25,13 +25,17 @@ pub fn render(state: &mut AppState) {
             let stroke_color = match state.interaction_mode {
                 InteractionMode::Sculpt => egui::Color32::from_rgb(255, 120, 60),
                 InteractionMode::WeightPaint => {
-                    let c = Mesh::weight_to_heatmap_rgb(state.weight_brush_target);
-                    egui::Color32::from_rgba_premultiplied(
-                        (c[0] * 255.0) as u8,
-                        (c[1] * 255.0) as u8,
-                        (c[2] * 255.0) as u8,
-                        255,
-                    )
+                    if state.weight_paint_tool == crate::types::WeightPaintTool::NormalizeBrush {
+                        egui::Color32::from_rgb(0, 220, 255)
+                    } else {
+                        let c = Mesh::weight_to_heatmap_rgb(state.weight_brush_target);
+                        egui::Color32::from_rgba_premultiplied(
+                            (c[0] * 255.0) as u8,
+                            (c[1] * 255.0) as u8,
+                            (c[2] * 255.0) as u8,
+                            255,
+                        )
+                    }
                 }
                 InteractionMode::VertexPaint => {
                     egui::Color32::from_rgba_premultiplied(

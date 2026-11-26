@@ -22,6 +22,7 @@ pub fn draw_status_bar(state: &mut AppState) {
                         let tool_str = match state.weight_paint_tool {
                             WeightPaintTool::Brush => format!("Brush W: {:.2}", state.weight_brush_target),
                             WeightPaintTool::LinearGradient => format!("Gradient: {:.2} -> {:.2}", state.weight_gradient_start_w, state.weight_gradient_end_w),
+                            WeightPaintTool::NormalizeBrush => "Normalize Bone Weights".to_string(),
                         };
                         egui::RichText::new(format!("WEIGHT PAINT: {} ({})", group, tool_str))
                             .strong()

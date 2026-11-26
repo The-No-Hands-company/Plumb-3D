@@ -52,6 +52,7 @@ pub enum TimelineViewMode {
 pub enum WeightPaintTool {
     Brush,
     LinearGradient,
+    NormalizeBrush,
 }
 
 /// Reference point alignment mode for Object Align Dialog (3ds Max / Maya).

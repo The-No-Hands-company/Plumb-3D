@@ -165,7 +165,15 @@ impl AppState {
                             }
                         }
 
-                        if let Some(ref group_name) = self.active_vertex_group {
+                        if self.weight_paint_tool == crate::types::WeightPaintTool::NormalizeBrush {
+                            base_mesh.apply_normalize_weight_brush(
+                                local_hit_point,
+                                self.weight_brush_radius,
+                                self.weight_brush_strength,
+                                self.weight_brush_falloff,
+                            );
+                            self.scene.mark_dirty(sel_id);
+                        } else if let Some(ref group_name) = self.active_vertex_group {
                             base_mesh.apply_weight_brush(
                                 group_name,
                                 local_hit_point,

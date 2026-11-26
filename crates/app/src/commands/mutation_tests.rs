@@ -504,3 +504,46 @@ fn test_uv_pinning_and_pinned_relaxation_command() {
         }
     }
 }
+
+#[test]
+fn test_interactive_bone_weight_normalization_brush() {
+    use geo_kernel::{sculpt::BrushFalloff, Primitives};
+
+    let mut mesh = Primitives::create_cube(2.0);
+    let g0 = mesh.add_vertex_group("Bone.UpperArm");
+    let g1 = mesh.add_vertex_group("Bone.Forearm");
+
+    let center_hit = core_math::vec3(1.0, 1.0, 1.0);
+    // Find closest vertex to center_hit
+    let (target_vk, _) = mesh.vertices.iter()
+        .min_by(|(_, a), (_, b)| {
+            let da = (a.position - center_hit).length_squared();
+            let db = (b.position - center_hit).length_squared();
+            da.partial_cmp(&db).unwrap()
+        })
+        .unwrap();
+
+    // Assign unnormalized bone weights summing to 1.4
+    mesh.vertex_groups[g0].set_weight(target_vk, 0.8);
+    mesh.vertex_groups[g1].set_weight(target_vk, 0.6);
+
+    let initial_sum = mesh.vertex_groups[g0].get_weight(target_vk) + mesh.vertex_groups[g1].get_weight(target_vk);
+    assert!((initial_sum - 1.4).abs() < 1e-4);
+
+    // Apply interactive normalize brush with strength = 1.0
+    let affected = mesh.apply_normalize_weight_brush(
+        center_hit,
+        1.5,
+        1.0,
+        BrushFalloff::Linear,
+    );
+    assert!(affected > 0);
+
+    // Verify weights now sum to exactly 1.0
+    let w0 = mesh.vertex_groups[g0].get_weight(target_vk);
+    let w1 = mesh.vertex_groups[g1].get_weight(target_vk);
+    let normalized_sum = w0 + w1;
+    assert!((normalized_sum - 1.0).abs() < 1e-4);
+    assert!((w0 - (0.8 / 1.4)).abs() < 1e-3);
+    assert!((w1 - (0.6 / 1.4)).abs() < 1e-3);
+}

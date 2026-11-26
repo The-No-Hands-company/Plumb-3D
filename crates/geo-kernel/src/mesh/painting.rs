@@ -202,4 +202,60 @@ impl Mesh {
             }
         }
     }
+
+    /// Interactive brush that normalizes vertex group weights (bone weights) around `hit_point`
+    /// within `radius` so the sum across all vertex groups equals 1.0.
+    pub fn apply_normalize_weight_brush(
+        &mut self,
+        hit_point: Vec3,
+        radius: f32,
+        strength: f32,
+        falloff: crate::sculpt::BrushFalloff,
+    ) -> usize {
+        let r_sq = radius * radius;
+        if self.vertex_groups.is_empty() {
+            return 0;
+        }
+
+        let to_update: Vec<(VertexKey, f32)> = self.vertices
+            .iter()
+            .filter_map(|(vk, v)| {
+                let d_sq = (v.position - hit_point).length_squared();
+                if d_sq <= r_sq {
+                    let dist = d_sq.sqrt();
+                    let f = falloff.evaluate(dist / radius.max(1e-4));
+                    Some((vk, f))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        let num_groups = self.vertex_groups.len();
+        let mut affected = 0;
+
+        for (vk, factor) in to_update {
+            let blend = (factor * strength).clamp(0.0, 1.0);
+            if blend <= 0.0 {
+                continue;
+            }
+
+            let sum: f32 = (0..num_groups)
+                .map(|g_idx| self.vertex_groups[g_idx].get_weight(vk))
+                .sum();
+
+            if sum > 1e-5 {
+                let inv_sum = 1.0 / sum;
+                for g_idx in 0..num_groups {
+                    let current = self.vertex_groups[g_idx].get_weight(vk);
+                    let normalized = current * inv_sum;
+                    let blended = current + (normalized - current) * blend;
+                    self.vertex_groups[g_idx].set_weight(vk, blended);
+                }
+                affected += 1;
+            }
+        }
+
+        affected
+    }
 }

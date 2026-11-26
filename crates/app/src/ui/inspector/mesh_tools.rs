@@ -534,7 +534,8 @@ pub fn draw_mesh_tools_panel(
 
                             ui.horizontal(|ui| {
                                 ui.selectable_value(&mut state.weight_paint_tool, WeightPaintTool::Brush, "Brush");
-                                ui.selectable_value(&mut state.weight_paint_tool, WeightPaintTool::LinearGradient, "Linear Gradient");
+                                ui.selectable_value(&mut state.weight_paint_tool, WeightPaintTool::LinearGradient, "Gradient");
+                                ui.selectable_value(&mut state.weight_paint_tool, WeightPaintTool::NormalizeBrush, "Normalize Brush");
                             });
 
                             if state.weight_paint_tool == WeightPaintTool::Brush {
@@ -558,6 +559,11 @@ pub fn draw_mesh_tools_panel(
                                         ui.selectable_value(&mut state.weight_brush_falloff, BrushFalloff::Linear, "Linear");
                                         ui.selectable_value(&mut state.weight_brush_falloff, BrushFalloff::Sharp, "Sharp");
                                     });
+                            } else if state.weight_paint_tool == WeightPaintTool::NormalizeBrush {
+                                ui.label(egui::RichText::new("Bone Weight Normalization Brush:").strong().color(egui::Color32::from_rgb(0, 210, 255)));
+                                ui.label(egui::RichText::new("Brushing vertices normalizes the sum of all bone vertex group weights to 1.0.").small().weak());
+                                ui.add(egui::Slider::new(&mut state.weight_brush_radius, 0.05..=3.0).text("Radius"));
+                                ui.add(egui::Slider::new(&mut state.weight_brush_strength, 0.01..=1.0).text("Strength"));
                             } else {
                                 ui.label("Drag across viewport mesh to apply 3D linear gradient:");
                                 ui.add(egui::Slider::new(&mut state.weight_gradient_start_w, 0.0..=1.0).text("Start Weight"));
