@@ -59,6 +59,11 @@ pub fn render_frame(state: &mut AppState) {
         if state.physics.is_simulating && !state.physics.bodies.is_empty() {
             state.physics.step(&mut state.scene, delta.min(0.05));
         }
+        if state.physics.is_simulating {
+            if let Some(ref mut fluid) = state.active_fluid_sim {
+                fluid.step(delta.min(0.033));
+            }
+        }
     }
 
     state.constraints.evaluate(&mut state.scene);

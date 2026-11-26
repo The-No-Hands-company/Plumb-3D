@@ -175,7 +175,17 @@ pub fn draw_modifiers_panel(
                                     }
 
                                     if let Some(skin_mod) = modifier.as_skin_mut() {
-                                        ui.label(format!("Bound Bones: {}", skin_mod.bones.len()));
+                                        ui.horizontal(|ui| {
+                                            ui.label(format!("Bound Bones: {}", skin_mod.bones.len()));
+                                            ui.separator();
+                                            let is_dqs = skin_mod.method == geo_kernel::modifiers::deform::skin::SkinningMethod::DualQuaternion;
+                                            if ui.selectable_label(!is_dqs, "LBS").clicked() {
+                                                skin_mod.method = geo_kernel::modifiers::deform::skin::SkinningMethod::LinearBlend;
+                                            }
+                                            if ui.selectable_label(is_dqs, "DQS").on_hover_text("Dual Quaternion Skinning prevents candy-wrapper joint twisting artifacts").clicked() {
+                                                skin_mod.method = geo_kernel::modifiers::deform::skin::SkinningMethod::DualQuaternion;
+                                            }
+                                        });
                                     }
 
                                     if let Some(bool_mod) = modifier.as_boolean_mut() {
