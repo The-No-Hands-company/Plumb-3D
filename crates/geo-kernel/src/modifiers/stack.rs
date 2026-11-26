@@ -126,6 +126,23 @@ impl ModifierStack {
         self.modifiers.remove(index)
     }
 
+    /// Moves a modifier from index `from` to index `to`, reordering the stack.
+    pub fn move_modifier(&mut self, from: usize, to: usize) {
+        if from < self.modifiers.len() && to < self.modifiers.len() && from != to {
+            let m = self.modifiers.remove(from);
+            self.modifiers.insert(to, m);
+            self.dirty = true;
+        }
+    }
+
+    /// Swaps the position of two modifiers in the stack.
+    pub fn swap_modifiers(&mut self, i: usize, j: usize) {
+        if i < self.modifiers.len() && j < self.modifiers.len() && i != j {
+            self.modifiers.swap(i, j);
+            self.dirty = true;
+        }
+    }
+
     pub fn clear(&mut self) {
         self.modifiers.clear();
         self.cached_output = None;
@@ -161,5 +178,27 @@ impl ModifierStack {
         self.cached_output = Some(current_mesh);
         self.dirty = false;
         Ok(self.cached_output.as_ref().unwrap())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_modifier_reorder_and_move() {
+        let mut stack = ModifierStack::default();
+        stack.add_modifier(Box::new(BevelModifier::new(0.1)));
+        stack.add_modifier(Box::new(SolidifyModifier::new(0.2)));
+        assert_eq!(stack.modifiers()[0].name(), "Bevel");
+        assert_eq!(stack.modifiers()[1].name(), "Solidify");
+
+        stack.move_modifier(0, 1);
+        assert_eq!(stack.modifiers()[0].name(), "Solidify");
+        assert_eq!(stack.modifiers()[1].name(), "Bevel");
+
+        stack.swap_modifiers(0, 1);
+        assert_eq!(stack.modifiers()[0].name(), "Bevel");
+        assert_eq!(stack.modifiers()[1].name(), "Solidify");
     }
 }

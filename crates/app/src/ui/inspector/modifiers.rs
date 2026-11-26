@@ -140,6 +140,7 @@ pub fn draw_modifiers_panel(
                             });
 
                             ui.separator();
+                            let mod_count = modifier_stack.modifiers().len();
                             for (i, modifier) in modifier_stack.modifiers_mut().iter_mut().enumerate() {
                                 ui.group(|ui| {
                                     ui.horizontal(|ui| {
@@ -154,6 +155,12 @@ pub fn draw_modifiers_panel(
                                             }
                                             if ui.small_button("Apply").on_hover_text("Bake modifier into base mesh").clicked() {
                                                 actions.apply_modifier_idx = Some((i, modifier.name().to_string()));
+                                            }
+                                            if i + 1 < mod_count && ui.small_button("▼").on_hover_text("Move Down").clicked() {
+                                                actions.reorder_modifier = Some((i, i + 1));
+                                            }
+                                            if i > 0 && ui.small_button("▲").on_hover_text("Move Up").clicked() {
+                                                actions.reorder_modifier = Some((i, i - 1));
                                             }
                                         });
                                     });

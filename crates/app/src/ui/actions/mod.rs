@@ -101,6 +101,7 @@ pub struct UiActions {
     pub spawn_group: bool,
     pub apply_modifier_idx: Option<(usize, String)>,
     pub remove_modifier_idx: Option<usize>,
+    pub reorder_modifier: Option<(usize, usize)>,
     pub collapse_modifiers: bool,
     pub add_mirror_to_selected: Option<MirrorAxis>,
     pub delete_selected: bool,

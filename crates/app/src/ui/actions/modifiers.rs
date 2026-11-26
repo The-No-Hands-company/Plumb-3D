@@ -363,6 +363,21 @@ pub fn handle_modifiers(state: &mut AppState, actions: &mut UiActions) {
         }
     }
 
+    if let Some((from, to)) = actions.reorder_modifier.take() {
+        if let Some(sel_id) = state.selected_node {
+            if let Some(node) = state.scene.nodes.get_mut(sel_id) {
+                if let NodeData::Mesh { modifier_stack, cached_render_mesh, .. } = &mut node.data {
+                    modifier_stack.move_modifier(from, to);
+                    *cached_render_mesh = None;
+                    node.is_dirty = true;
+                }
+            }
+            state.scene.mark_dirty(sel_id);
+            state.sync_gpu_meshes();
+            state.window.request_redraw();
+        }
+    }
+
     if actions.collapse_modifiers {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get(sel_id) {
