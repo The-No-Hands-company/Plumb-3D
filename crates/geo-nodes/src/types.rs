@@ -20,6 +20,7 @@ pub enum SocketType {
     Boolean,
     Transform,
     String,
+    Field,
 }
 
 impl SocketType {
@@ -33,6 +34,7 @@ impl SocketType {
             SocketType::Boolean => "Boolean",
             SocketType::Transform => "Transform",
             SocketType::String => "String",
+            SocketType::Field => "Field",
         }
     }
 
@@ -47,6 +49,7 @@ impl SocketType {
             SocketType::Boolean => [239, 68, 68, 255],   // Crimson Red
             SocketType::Transform => [249, 115, 22, 255],// Orange
             SocketType::String => [156, 163, 175, 255], // Gray
+            SocketType::Field => [14, 165, 233, 255],   // Cyan Field
         }
     }
 }
@@ -69,6 +72,85 @@ impl PointInstance {
     }
 }
 
+/// Domain for procedural attribute fields (Blender Geo Nodes style)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub enum AttributeDomain {
+    #[default]
+    Point,
+    Vertex,
+    Face,
+}
+
+/// Data buffer for per-element attribute values
+#[derive(Debug, Clone, PartialEq)]
+pub enum AttributeData {
+    Float(Vec<f32>),
+    Vector3(Vec<Vec3>),
+    Int(Vec<i32>),
+    Color(Vec<[f32; 4]>),
+}
+
+impl Default for AttributeData {
+    fn default() -> Self {
+        Self::Float(Vec::new())
+    }
+}
+
+/// A container of procedural attribute fields
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct AttributeContainer {
+    pub name: String,
+    pub domain: AttributeDomain,
+    pub data: AttributeData,
+}
+
+impl AttributeContainer {
+    pub fn new_float(name: impl Into<String>, domain: AttributeDomain, values: Vec<f32>) -> Self {
+        Self {
+            name: name.into(),
+            domain,
+            data: AttributeData::Float(values),
+        }
+    }
+
+    pub fn new_vector(name: impl Into<String>, domain: AttributeDomain, values: Vec<Vec3>) -> Self {
+        Self {
+            name: name.into(),
+            domain,
+            data: AttributeData::Vector3(values),
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        match &self.data {
+            AttributeData::Float(v) => v.len(),
+            AttributeData::Vector3(v) => v.len(),
+            AttributeData::Int(v) => v.len(),
+            AttributeData::Color(v) => v.len(),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn get_float(&self, index: usize) -> Option<f32> {
+        match &self.data {
+            AttributeData::Float(v) => v.get(index).copied(),
+            AttributeData::Int(v) => v.get(index).map(|&i| i as f32),
+            _ => None,
+        }
+    }
+
+    pub fn get_vector(&self, index: usize) -> Option<Vec3> {
+        match &self.data {
+            AttributeData::Vector3(v) => v.get(index).copied(),
+            AttributeData::Float(v) => v.get(index).map(|&f| Vec3::splat(f)),
+            _ => None,
+        }
+    }
+}
+
 /// Dynamic value flowing through sockets during graph evaluation
 #[derive(Debug, Clone)]
 pub enum SocketValue {
@@ -80,6 +162,7 @@ pub enum SocketValue {
     Boolean(bool),
     Transform(Transform),
     String(String),
+    Field(AttributeContainer),
 }
 
 impl Default for SocketValue {
@@ -99,6 +182,14 @@ impl SocketValue {
             SocketValue::Boolean(_) => SocketType::Boolean,
             SocketValue::Transform(_) => SocketType::Transform,
             SocketValue::String(_) => SocketType::String,
+            SocketValue::Field(_) => SocketType::Field,
+        }
+    }
+
+    pub fn as_field(&self) -> Option<&AttributeContainer> {
+        match self {
+            SocketValue::Field(f) => Some(f),
+            _ => None,
         }
     }
 
@@ -223,6 +314,10 @@ impl NodeSocket {
 
     pub fn transform(name: impl Into<String>) -> Self {
         Self::new(name, SocketType::Transform, SocketValue::Transform(Transform::IDENTITY))
+    }
+
+    pub fn field(name: impl Into<String>) -> Self {
+        Self::new(name, SocketType::Field, SocketValue::Field(AttributeContainer::default()))
     }
 }
 

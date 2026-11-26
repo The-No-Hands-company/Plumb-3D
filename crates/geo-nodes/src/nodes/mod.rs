@@ -1,3 +1,4 @@
+pub mod attributes;
 pub mod composition;
 pub mod curves;
 pub mod geometry_ops;
@@ -9,6 +10,7 @@ pub mod primitives;
 pub mod procedural;
 pub mod traits;
 
+pub use attributes::*;
 pub use composition::*;
 pub use curves::*;
 pub use geometry_ops::*;

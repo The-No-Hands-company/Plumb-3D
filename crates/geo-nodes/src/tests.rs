@@ -327,4 +327,53 @@ mod tests {
             panic!("Expected Geometry output from BevelNode");
         }
     }
+
+    #[test]
+    fn test_capture_and_transfer_attribute_nodes() {
+        use geo_kernel::Primitives;
+
+        let cube1 = Primitives::create_cube(2.0);
+        let cube2 = Primitives::create_cube(2.0);
+
+        // 1. Capture Attribute onto cube1
+        let capture_node = CaptureAttributeNode {
+            attribute_name: "Density".to_string(),
+            domain: AttributeDomain::Vertex,
+        };
+        let cap_res = capture_node.execute(&[
+            SocketValue::Geometry(Some(cube1)),
+            SocketValue::Float(0.75),
+        ]).expect("CaptureAttributeNode should succeed");
+
+        assert_eq!(cap_res.len(), 2);
+        let captured_field = match &cap_res[1] {
+            SocketValue::Field(f) => {
+                assert_eq!(f.name, "Density");
+                assert_eq!(f.len(), 8);
+                assert_eq!(f.get_float(0), Some(0.75));
+                f.clone()
+            }
+            _ => panic!("Expected Field output"),
+        };
+
+        // 2. Transfer Attribute from cube1 to cube2
+        let transfer_node = TransferAttributeNode {
+            attribute_name: "Density".to_string(),
+        };
+        let trans_res = transfer_node.execute(&[
+            SocketValue::Geometry(Some(cube2)),
+            cap_res[0].clone(),
+            SocketValue::Field(captured_field),
+        ]).expect("TransferAttributeNode should succeed");
+
+        assert_eq!(trans_res.len(), 2);
+        if let SocketValue::Geometry(Some(tgt_m)) = &trans_res[0] {
+            let vg = tgt_m.vertex_groups.iter().find(|g| g.name == "Density").expect("Transferred group must exist");
+            for vk in tgt_m.vertices.keys() {
+                assert!((vg.get_weight(vk) - 0.75).abs() < 1e-4);
+            }
+        } else {
+            panic!("Expected Geometry output");
+        }
+    }
 }
