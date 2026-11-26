@@ -77,7 +77,7 @@ pub fn draw_script_console(state: &mut AppState) {
 
     let mut open = state.show_script_console;
     let window_title = format!(
-        "Scripting Console — {}",
+        "Scripting Console - {}",
         state.script_console_state.language.name()
     );
 
@@ -86,149 +86,155 @@ pub fn draw_script_console(state: &mut AppState) {
         .default_size([650.0, 480.0])
         .min_size([450.0, 300.0])
         .show(&state.egui_ctx.clone(), |ui| {
-            // Top Toolbar
-            ui.horizontal(|ui| {
-                if ui
-                    .button("Run Script")
-                    .on_hover_text("Execute the current script in the selected runtime")
-                    .clicked()
-                {
-                    run_current_script(state);
-                }
-
-                ui.separator();
-
-                // Language selector
-                let current_lang = state.script_console_state.language;
-                egui::ComboBox::from_id_salt("script_lang_select")
-                    .selected_text(current_lang.name())
-                    .show_ui(ui, |ui| {
-                        if ui
-                            .selectable_value(
-                                &mut state.script_console_state.language,
-                                ScriptLanguage::Rhai,
-                                "Rhai (Native Rust)",
-                            )
-                            .clicked()
-                            && current_lang != ScriptLanguage::Rhai
-                        {
-                            state.script_console_state.script_buffer =
-                                PRESET_PROCEDURAL_BUILDING.to_string();
-                        }
-                        if ui
-                            .selectable_value(
-                                &mut state.script_console_state.language,
-                                ScriptLanguage::Python,
-                                "Python 3 (DCC Standard)",
-                            )
-                            .clicked()
-                            && current_lang != ScriptLanguage::Python
-                        {
-                            state.script_console_state.script_buffer =
-                                PRESET_PYTHON_GEAR.to_string();
-                        }
-                        if ui
-                            .selectable_value(
-                                &mut state.script_console_state.language,
-                                ScriptLanguage::Lua,
-                                "Lua (Embedded)",
-                            )
-                            .clicked()
-                            && current_lang != ScriptLanguage::Lua
-                        {
-                            state.script_console_state.script_buffer =
-                                PRESET_LUA_PYRAMID.to_string();
-                        }
-                    });
-
-                ui.separator();
-
-                ui.menu_button("Load Preset", |ui| {
-                    match state.script_console_state.language {
-                        ScriptLanguage::Rhai => {
-                            if ui.button("1. Procedural Building").clicked() {
-                                state.script_console_state.script_buffer =
-                                    PRESET_PROCEDURAL_BUILDING.to_string();
-                                ui.close_menu();
-                            }
-                            if ui.button("2. CSG Boolean Carve").clicked() {
-                                state.script_console_state.script_buffer =
-                                    PRESET_BOOLEAN_CARVE.to_string();
-                                ui.close_menu();
-                            }
-                            if ui.button("3. Parametric Column").clicked() {
-                                state.script_console_state.script_buffer =
-                                    PRESET_PARAMETRIC_COLUMN.to_string();
-                                ui.close_menu();
-                            }
-                        }
-                        ScriptLanguage::Python => {
-                            if ui.button("1. Procedural Mechanical Gear").clicked() {
-                                state.script_console_state.script_buffer =
-                                    PRESET_PYTHON_GEAR.to_string();
-                                ui.close_menu();
-                            }
-                        }
-                        ScriptLanguage::Lua => {
-                            if ui.button("1. Subdivided Polyhedral Mesh").clicked() {
-                                state.script_console_state.script_buffer =
-                                    PRESET_LUA_PYRAMID.to_string();
-                                ui.close_menu();
-                            }
-                        }
-                    }
-                });
-
-                if ui.button("Clear Logs").clicked() {
-                    state.script_console_state.output_logs.clear();
-                    state.script_console_state.execution_error = None;
-                }
-            });
-
-            ui.separator();
-
-            // Code Editor
-            ui.label(format!(
-                "{} Script Editor:",
-                state.script_console_state.language.name()
-            ));
-            let available_height = ui.available_height() - 130.0;
-            egui::ScrollArea::vertical()
-                .id_salt("script_editor_scroll")
-                .max_height(available_height.max(120.0))
-                .show(ui, |ui| {
-                    ui.add(
-                        egui::TextEdit::multiline(&mut state.script_console_state.script_buffer)
-                            .font(egui::TextStyle::Monospace)
-                            .desired_width(f32::INFINITY)
-                            .code_editor(),
-                    );
-                });
-
-            ui.separator();
-
-            // Output Logs / Console Status
-            ui.label("Console Output & Logs:");
-            egui::ScrollArea::vertical()
-                .id_salt("script_output_scroll")
-                .max_height(100.0)
-                .show(ui, |ui| {
-                    for log in &state.script_console_state.output_logs {
-                        ui.colored_label(
-                            egui::Color32::from_rgb(180, 220, 180),
-                            format!("> {}", log),
-                        );
-                    }
-                    if let Some(ref err) = state.script_console_state.execution_error {
-                        ui.colored_label(
-                            egui::Color32::from_rgb(255, 110, 110),
-                            format!("Error: {}", err),
-                        );
-                    }
-                });
+            draw_script_console_inner(state, ui);
         });
 
     state.show_script_console = open;
+}
+
+pub fn draw_script_console_inner(state: &mut AppState, ui: &mut egui::Ui) {
+    // Top Toolbar
+    ui.horizontal(|ui| {
+        if ui
+            .button("Run Script")
+            .on_hover_text("Execute the current script in the selected runtime")
+            .clicked()
+        {
+            run_current_script(state);
+        }
+
+        ui.separator();
+
+        // Language selector
+        let current_lang = state.script_console_state.language;
+        egui::ComboBox::from_id_salt("script_lang_select")
+            .selected_text(current_lang.name())
+            .show_ui(ui, |ui| {
+                if ui
+                    .selectable_value(
+                        &mut state.script_console_state.language,
+                        ScriptLanguage::Rhai,
+                        "Rhai (Native Rust)",
+                    )
+                    .clicked()
+                    && current_lang != ScriptLanguage::Rhai
+                {
+                    state.script_console_state.script_buffer =
+                        PRESET_PROCEDURAL_BUILDING.to_string();
+                }
+                if ui
+                    .selectable_value(
+                        &mut state.script_console_state.language,
+                        ScriptLanguage::Python,
+                        "Python 3 (PyScripting)",
+                    )
+                    .clicked()
+                    && current_lang != ScriptLanguage::Python
+                {
+                    state.script_console_state.script_buffer =
+                        PRESET_PYTHON_GEAR.to_string();
+                }
+                if ui
+                    .selectable_value(
+                        &mut state.script_console_state.language,
+                        ScriptLanguage::Lua,
+                        "Lua 5.4 (Embedded)",
+                    )
+                    .clicked()
+                    && current_lang != ScriptLanguage::Lua
+                {
+                    state.script_console_state.script_buffer =
+                        PRESET_LUA_PYRAMID.to_string();
+                }
+            });
+
+        ui.separator();
+
+        // Template Presets
+        egui::ComboBox::from_id_salt("script_preset_select")
+            .selected_text("Load Template Preset...")
+            .show_ui(ui, |ui| {
+                if ui.selectable_label(false, "Procedural Building (Rhai)").clicked() {
+                    state.script_console_state.language = ScriptLanguage::Rhai;
+                    state.script_console_state.script_buffer =
+                        PRESET_PROCEDURAL_BUILDING.to_string();
+                }
+                if ui.selectable_label(false, "Parametric Column (Rhai)").clicked() {
+                    state.script_console_state.language = ScriptLanguage::Rhai;
+                    state.script_console_state.script_buffer =
+                        PRESET_PARAMETRIC_COLUMN.to_string();
+                }
+                if ui.selectable_label(false, "Mechanical Gear (Python)").clicked() {
+                    state.script_console_state.language = ScriptLanguage::Python;
+                    state.script_console_state.script_buffer =
+                        PRESET_PYTHON_GEAR.to_string();
+                }
+                if ui.selectable_label(false, "Subdivided Model (Lua)").clicked() {
+                    state.script_console_state.language = ScriptLanguage::Lua;
+                    state.script_console_state.script_buffer =
+                        PRESET_LUA_PYRAMID.to_string();
+                }
+            });
+
+        if ui.button("Clear Output").clicked() {
+            state.script_console_state.output_logs.clear();
+            state.script_console_state.execution_error = None;
+        }
+    });
+
+    ui.separator();
+
+    // Split layout: Code Editor (top/left) + Output Terminal (bottom/right)
+    let available_height = ui.available_height();
+    let editor_height = (available_height * 0.65).max(120.0);
+
+    ui.group(|ui| {
+        ui.label(
+            egui::RichText::new("SCRIPT EDITOR")
+                .small()
+                .color(egui::Color32::from_rgb(140, 160, 200)),
+        );
+        egui::ScrollArea::vertical()
+            .id_salt("script_editor_scroll")
+            .max_height(editor_height)
+            .show(ui, |ui| {
+                ui.add(
+                    egui::TextEdit::multiline(&mut state.script_console_state.script_buffer)
+                        .font(egui::TextStyle::Monospace)
+                        .code_editor()
+                        .lock_focus(true)
+                        .desired_width(f32::INFINITY)
+                        .desired_rows(12),
+                );
+            });
+    });
+
+    ui.add_space(4.0);
+
+    ui.group(|ui| {
+        ui.horizontal(|ui| {
+            ui.label(
+                egui::RichText::new("CONSOLE OUTPUT / LOGS")
+                    .small()
+                    .color(egui::Color32::from_rgb(140, 160, 200)),
+            );
+            if let Some(ref err) = state.script_console_state.execution_error {
+                ui.colored_label(
+                    egui::Color32::from_rgb(255, 100, 100),
+                    format!("Error: {}", err),
+                );
+            }
+        });
+
+        egui::ScrollArea::vertical()
+            .id_salt("script_output_scroll")
+            .auto_shrink([false, false])
+            .show(ui, |ui| {
+                for log in &state.script_console_state.output_logs {
+                    ui.monospace(log);
+                }
+            });
+    });
 }
 
 fn run_current_script(state: &mut AppState) {

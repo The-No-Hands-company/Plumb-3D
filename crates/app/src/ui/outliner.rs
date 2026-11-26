@@ -8,10 +8,11 @@ pub fn draw_outliner(state: &mut AppState, actions: &mut UiActions) {
         return;
     }
 
+    let egui_ctx = state.egui_ctx.clone();
     egui::SidePanel::left("outliner_panel")
         .resizable(true)
         .default_width(220.0)
-        .show(&state.egui_ctx, |ui| {
+        .show(&egui_ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.heading("Scene Outliner");
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -21,100 +22,100 @@ pub fn draw_outliner(state: &mut AppState, actions: &mut UiActions) {
                 });
             });
             ui.separator();
+            draw_outliner_inner(state, actions, ui);
+        });
+}
+
+pub fn draw_outliner_inner(state: &mut AppState, actions: &mut UiActions, ui: &mut egui::Ui) {
+    ui.horizontal(|ui| {
+        ui.add(egui::TextEdit::singleline(&mut state.outliner_filter).hint_text("Search outliner..."));
+        if !state.outliner_filter.is_empty() && ui.small_button("X").clicked() {
+            state.outliner_filter.clear();
+        }
+    });
+    if ui.button("+ Group / Folder").clicked() {
+        actions.spawn_group = true;
+    }
+    ui.separator();
+
+    let mut node_to_select = None;
+    let mut toggle_vis = None;
+    let root_nodes = state.scene.root_nodes.clone();
+
+    egui::ScrollArea::vertical()
+        .auto_shrink([false, false])
+        .show(ui, |ui| {
+            for root_id in root_nodes {
+                draw_outliner_tree_node(
+                    ui,
+                    &state.scene,
+                    root_id,
+                    0,
+                    state.selected_node,
+                    &state.selected_nodes,
+                    &mut node_to_select,
+                    &mut toggle_vis,
+                    &state.outliner_filter,
+                );
+            }
+
+            ui.add_space(8.0);
+            ui.separator();
+            ui.collapsing("Hierarchy & Parenting", |ui| {
+                if let Some(prev) = state.previous_selected_node {
+                    let prev_name = state.scene.nodes.get(prev).map(|n| n.name.as_str()).unwrap_or("None");
+                    ui.label(format!("Parent Target: {}", prev_name));
+                } else {
+                    ui.label("Parent Target: None");
+                }
 
                 ui.horizontal(|ui| {
-                    ui.add(egui::TextEdit::singleline(&mut state.outliner_filter).hint_text("Search outliner..."));
-                    if !state.outliner_filter.is_empty() && ui.small_button("X").clicked() {
-                        state.outliner_filter.clear();
+                    let can_parent = state.selected_node.is_some()
+                        && state.previous_selected_node.is_some()
+                        && state.selected_node != state.previous_selected_node;
+                    if ui.add_enabled(can_parent, egui::Button::new("Parent (P)")).clicked() {
+                        actions.trigger_parent = true;
+                    }
+                    if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Unparent (Shift+P)")).clicked() {
+                        actions.trigger_unparent = true;
+                    }
+                    if ui.add_enabled(can_parent, egui::Button::new("Join (Ctrl+J)")).clicked() {
+                        actions.trigger_join_meshes = true;
                     }
                 });
-                if ui.button("+ Group / Folder").clicked() {
-                    actions.spawn_group = true;
-                }
-                ui.separator();
 
-                let mut node_to_select = None;
-                let mut toggle_vis = None;
-                let root_nodes = state.scene.root_nodes.clone();
-
-                egui::ScrollArea::vertical()
-                    .auto_shrink([false, false])
-                    .show(ui, |ui| {
-                        for root_id in root_nodes {
-                            draw_outliner_tree_node(
-                                ui,
-                                &state.scene,
-                                root_id,
-                                0,
-                                state.selected_node,
-                                &state.selected_nodes,
-                                &mut node_to_select,
-                                &mut toggle_vis,
-                                &state.outliner_filter,
-                            );
-                        }
-
-                        ui.add_space(8.0);
-                        ui.separator();
-                        ui.collapsing("Hierarchy & Parenting", |ui| {
-                            if let Some(prev) = state.previous_selected_node {
-                                let prev_name = state.scene.nodes.get(prev).map(|n| n.name.as_str()).unwrap_or("None");
-                                ui.label(format!("Parent Target: {}", prev_name));
-                            } else {
-                                ui.label("Parent Target: None");
-                            }
-
-                            ui.horizontal(|ui| {
-                                let can_parent = state.selected_node.is_some()
-                                    && state.previous_selected_node.is_some()
-                                    && state.selected_node != state.previous_selected_node;
-                                if ui.add_enabled(can_parent, egui::Button::new("Parent (P)")).clicked() {
-                                    actions.trigger_parent = true;
-                                }
-                                if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Unparent (Shift+P)")).clicked() {
-                                    actions.trigger_unparent = true;
-                                }
-                                if ui.add_enabled(can_parent, egui::Button::new("Join (Ctrl+J)")).clicked() {
-                                    actions.trigger_join_meshes = true;
-                                }
-                            });
-
-                            if ui.button("Delete Selected (X)").clicked() {
-                                actions.delete_selected = true;
-                            }
-                        });
-                    });
-
-                if let Some(new_sel) = node_to_select {
-                    if state.shift_pressed {
-                        if state.selected_nodes.contains(&new_sel) {
-                            state.selected_nodes.remove(&new_sel);
-                            if state.selected_node == Some(new_sel) {
-                                state.selected_node = state.selected_nodes.iter().copied().next();
-                            }
-                        } else {
-                            state.selected_nodes.insert(new_sel);
-                            state.previous_selected_node = state.selected_node;
-                            state.selected_node = Some(new_sel);
-                        }
-                    } else {
-                        state.selected_nodes.clear();
-                        state.selected_nodes.insert(new_sel);
-                        if state.selected_node != Some(new_sel) {
-                            state.previous_selected_node = state.selected_node;
-                            state.selected_node = Some(new_sel);
-                        }
-                    }
-                }
-                if let Some(vis_id) = toggle_vis {
-                    if let Some(node) = state.scene.nodes.get_mut(vis_id) {
-                        node.visible = !node.visible;
-                    }
+                if ui.button("Delete Selected (X)").clicked() {
+                    actions.delete_selected = true;
                 }
             });
+        });
 
-        // Right Panel: 3ds Max style Modifier Stack & Direct Modeling Operators
-
+    if let Some(new_sel) = node_to_select {
+        if state.shift_pressed {
+            if state.selected_nodes.contains(&new_sel) {
+                state.selected_nodes.remove(&new_sel);
+                if state.selected_node == Some(new_sel) {
+                    state.selected_node = state.selected_nodes.iter().copied().next();
+                }
+            } else {
+                state.selected_nodes.insert(new_sel);
+                state.previous_selected_node = state.selected_node;
+                state.selected_node = Some(new_sel);
+            }
+        } else {
+            state.selected_nodes.clear();
+            state.selected_nodes.insert(new_sel);
+            if state.selected_node != Some(new_sel) {
+                state.previous_selected_node = state.selected_node;
+                state.selected_node = Some(new_sel);
+            }
+        }
+    }
+    if let Some(vis_id) = toggle_vis {
+        if let Some(node) = state.scene.nodes.get_mut(vis_id) {
+            node.visible = !node.visible;
+        }
+    }
 }
 
 fn has_matching_child(scene: &SceneGraph, node_id: NodeId, filter: &str) -> bool {

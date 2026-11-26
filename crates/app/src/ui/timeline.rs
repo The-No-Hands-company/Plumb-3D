@@ -120,16 +120,23 @@ pub fn draw_status_bar(state: &mut AppState) {
 
 }
 
-pub fn draw_timeline(state: &mut AppState, _actions: &mut UiActions) {
+pub fn draw_timeline(state: &mut AppState, actions: &mut UiActions) {
     if state.timeline_expanded && state.current_workspace == WorkspaceTemplate::Animation {
-            let timeline_height = match state.timeline_mode {
-                TimelineViewMode::DopeSheet => 68.0,
-                TimelineViewMode::FCurve => 210.0,
-            };
-            egui::TopBottomPanel::bottom("timeline_panel")
-                .resizable(false)
-                .default_height(timeline_height)
-                .show(&state.egui_ctx, |ui| {
+        let timeline_height = match state.timeline_mode {
+            TimelineViewMode::DopeSheet => 68.0,
+            TimelineViewMode::FCurve => 210.0,
+        };
+        let egui_ctx = state.egui_ctx.clone();
+        egui::TopBottomPanel::bottom("timeline_panel")
+            .resizable(false)
+            .default_height(timeline_height)
+            .show(&egui_ctx, |ui| {
+                draw_timeline_inner(state, actions, ui);
+            });
+    }
+}
+
+pub fn draw_timeline_inner(state: &mut AppState, _actions: &mut UiActions, ui: &mut egui::Ui) {
                     ui.horizontal(|ui| {
                         ui.selectable_value(&mut state.timeline_mode, TimelineViewMode::DopeSheet, "Dope Sheet");
                         ui.selectable_value(&mut state.timeline_mode, TimelineViewMode::FCurve, "F-Curve Editor");
@@ -404,10 +411,4 @@ pub fn draw_timeline(state: &mut AppState, _actions: &mut UiActions) {
                             }
                         }
                     }
-                });
-        }
-
-
-        // Left Panel: Maya-style DAG Scene Outliner
-
 }

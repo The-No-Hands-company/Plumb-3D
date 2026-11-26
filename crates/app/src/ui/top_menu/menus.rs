@@ -562,6 +562,8 @@ pub fn draw_window_menu(state: &mut AppState, ui: &mut egui::Ui) {
             }
         });
         ui.separator();
+        ui.checkbox(&mut state.docking_state.is_enabled, "Drag-and-Drop Docking Workspace");
+        ui.separator();
         ui.checkbox(&mut state.show_outliner, "Scene Outliner");
         ui.checkbox(&mut state.show_inspector, "Properties Inspector");
         ui.checkbox(&mut state.show_left_toolbar, "Left Tool Strip");

@@ -4,6 +4,7 @@ pub mod bake_dialog;
 pub mod collab_dialog;
 pub mod command_palette;
 pub mod context_menu;
+pub mod docking;
 pub mod help_dialog;
 pub mod inspector;
 pub mod node_editor;
@@ -50,13 +51,19 @@ pub fn draw_ui(state: &mut AppState) {
 
     top_menu::draw_top_menu(state, &mut actions);
     timeline::draw_status_bar(state);
-    timeline::draw_timeline(state, &mut actions);
-    outliner::draw_outliner(state, &mut actions);
-    inspector::draw_inspector(state, &mut actions);
-    uv_editor::draw_uv_editor(state, &mut actions);
+
+    if state.docking_state.is_enabled {
+        docking::draw_dock_area(state, &mut actions);
+    } else {
+        timeline::draw_timeline(state, &mut actions);
+        outliner::draw_outliner(state, &mut actions);
+        inspector::draw_inspector(state, &mut actions);
+        uv_editor::draw_uv_editor(state, &mut actions);
+        node_editor::draw_node_editor(state);
+        draw_script_console(state);
+    }
+
     align_dialog::draw_align_dialog(state, &mut actions);
-    node_editor::draw_node_editor(state);
-    draw_script_console(state);
     render_dialog::draw_render_dialog(state);
     bake_dialog::draw_bake_dialog(state);
     print_inspector::draw_print_inspector(state);

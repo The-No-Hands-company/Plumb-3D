@@ -38,6 +38,7 @@ render-viewport = { path = "crates/render-viewport" }
 wgpu = "22.0"
 winit = "0.30"
 egui = "0.29"
+egui_dock = { version = "0.14", features = ["serde"] }
 egui-wgpu = "0.29"
 egui-winit = "0.29"
 pollster = "0.4"

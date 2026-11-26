@@ -15,6 +15,7 @@ graph-engine = { workspace = true }
 render-pathtracer = { workspace = true }
 render-viewport = { workspace = true }
 rhai = { workspace = true }
+serde = { workspace = true }
 image = { workspace = true }
 rfd = { workspace = true }
 winit = { workspace = true }
@@ -25,3 +26,4 @@ egui-winit = { workspace = true }
 pollster = { workspace = true }
 log = { workspace = true }
 env_logger = { workspace = true }
+egui_dock = { workspace = true }

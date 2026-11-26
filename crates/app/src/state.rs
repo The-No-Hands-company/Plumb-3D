@@ -15,7 +15,6 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::time::Instant;
 use winit::window::Window;
-
 use crate::types::*;
 
 pub struct AppState {
@@ -153,6 +152,7 @@ pub struct AppState {
     pub geo_node_graph: geo_nodes::GeoNodeGraph,
     pub node_canvas_state: crate::ui::node_editor::NodeCanvasState,
     pub show_node_editor: bool,
+    pub docking_state: crate::ui::docking::AppDockState,
 
     // Embedded Rhai Scripting Engine & Console
     pub script_console_state: crate::scripting::ScriptConsoleState,
@@ -502,6 +502,7 @@ impl AppState {
             geo_node_graph: geo_nodes::GeoNodeGraph::default(),
             node_canvas_state: crate::ui::node_editor::NodeCanvasState::default(),
             show_node_editor: false,
+            docking_state: crate::ui::docking::AppDockState::default(),
             script_console_state: crate::scripting::ScriptConsoleState::default(),
             show_script_console: false,
             sculpt_settings: SculptSettings::default(),

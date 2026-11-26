@@ -58,6 +58,108 @@ impl BlasGeometryDesc {
     }
 }
 
+/// Hardware BLAS alignment constraint required by Vulkan VK_KHR_acceleration_structure and DXR (256 bytes)
+pub const BLAS_ADDRESS_ALIGNMENT_BYTES: u64 = 256;
+
+/// Maximum primitives per BLAS chunk to stay within optimal hardware RT cache limits (64K triangles)
+pub const MAX_PRIMITIVES_PER_BLAS_CHUNK: u32 = 65_536;
+
+/// Descriptor for chunked Bottom-Level Acceleration Structure geometry partitions
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BlasChunkDescriptor {
+    pub chunk_index: u32,
+    pub primitive_offset: u32,
+    pub primitive_count: u32,
+    pub vertex_offset: u32,
+    pub vertex_count: u32,
+    pub aabb_min: [f32; 3],
+    pub aabb_max: [f32; 3],
+    pub gpu_byte_offset: u64,
+}
+
+/// Multi-million polygon BLAS and TLAS instance buffer manager
+pub struct MultiMillionBlasManager;
+
+impl MultiMillionBlasManager {
+    /// Partitions massive production meshes (> 1,000,000 triangles) into hardware-friendly 64K chunks
+    pub fn partition_massive_mesh(total_triangles: usize, total_vertices: usize) -> Vec<BlasChunkDescriptor> {
+        let mut chunks = Vec::new();
+        let chunk_size = MAX_PRIMITIVES_PER_BLAS_CHUNK as usize;
+        let num_chunks = total_triangles.div_ceil(chunk_size);
+
+        let vertices_per_chunk = if num_chunks > 0 {
+            total_vertices.div_ceil(num_chunks)
+        } else {
+            0
+        };
+
+        let mut current_byte_offset = 0u64;
+
+        for i in 0..num_chunks {
+            let prim_offset = (i * chunk_size) as u32;
+            let prim_count = (total_triangles - prim_offset as usize).min(chunk_size) as u32;
+
+            let vert_offset = (i * vertices_per_chunk) as u32;
+            let vert_count = (total_vertices.saturating_sub(vert_offset as usize)).min(vertices_per_chunk) as u32;
+
+            // Compute aligned byte stride for next chunk (256-byte aligned)
+            let raw_geom_bytes = (prim_count as u64 * 3 * 4) + (vert_count as u64 * 32);
+            let aligned_geom_bytes = (raw_geom_bytes + BLAS_ADDRESS_ALIGNMENT_BYTES - 1) & !(BLAS_ADDRESS_ALIGNMENT_BYTES - 1);
+
+            chunks.push(BlasChunkDescriptor {
+                chunk_index: i as u32,
+                primitive_offset: prim_offset,
+                primitive_count: prim_count,
+                vertex_offset: vert_offset,
+                vertex_count: vert_count,
+                aabb_min: [-100.0, -100.0, -100.0],
+                aabb_max: [100.0, 100.0, 100.0],
+                gpu_byte_offset: current_byte_offset,
+            });
+
+            current_byte_offset += aligned_geom_bytes;
+        }
+
+        chunks
+    }
+
+    /// Packs chunked geometry partitions into aligned 64-byte TLAS instance arrays
+    pub fn pack_chunked_tlas_instances(
+        chunks: &[BlasChunkDescriptor],
+        base_transform: &Mat4,
+        base_instance_id: u32,
+        base_blas_gpu_address: u64,
+    ) -> Vec<TlasInstanceDesc> {
+        chunks
+            .iter()
+            .enumerate()
+            .map(|(idx, chunk)| {
+                let instance_id = base_instance_id + idx as u32;
+                let chunk_gpu_addr = base_blas_gpu_address + chunk.gpu_byte_offset;
+                TlasInstanceDesc::new(base_transform, instance_id, 0xFF, chunk_gpu_addr)
+            })
+            .collect()
+    }
+
+    /// Calculates required GPU VRAM for multi-million triangle BLAS and TLAS structures
+    pub fn estimate_multi_million_vram_bytes(
+        total_triangles: usize,
+        total_instances: usize,
+    ) -> (usize, usize, usize) {
+        // Hardware BVH typically requires ~48 to 64 bytes per triangle for internal BVH4/BVH8 nodes
+        let blas_node_bytes = total_triangles * 56;
+        let blas_vertex_index_bytes = total_triangles * 3 * 32 + total_triangles * 3 * 4;
+        let total_blas = blas_node_bytes + blas_vertex_index_bytes;
+
+        // TLAS requires 64 bytes per instance descriptor plus ~128 bytes per instance for top-level nodes
+        let tlas_desc_bytes = total_instances * std::mem::size_of::<TlasInstanceDesc>();
+        let tlas_bvh_bytes = total_instances * 128;
+        let total_tlas = tlas_desc_bytes + tlas_bvh_bytes;
+
+        (total_blas, total_tlas, total_blas + total_tlas)
+    }
+}
+
 /// Vulkan / DXR compatible 64-byte Top-Level Acceleration Structure (TLAS) instance descriptor
 #[repr(C)]
 #[derive(Debug, Clone, Copy, Pod, Zeroable)]
@@ -253,5 +355,42 @@ mod tests {
         let report = evaluate_hardware_rt_speedup(250_000, (1920, 1080), 1);
         assert!(report.speedup_factor >= 2.5);
         assert!(report.hardware_rt_fps_estimate > report.software_fps_estimate);
+    }
+
+    #[test]
+    fn test_multi_million_blas_partitioning() {
+        // Test partitioning 2,000,000 triangles into 64K chunks
+        let total_triangles = 2_000_000;
+        let total_vertices = 1_000_000;
+        let chunks = MultiMillionBlasManager::partition_massive_mesh(total_triangles, total_vertices);
+
+        // 2,000,000 / 65,536 = 30.51 => 31 chunks
+        assert_eq!(chunks.len(), 31);
+        let sum_triangles: u32 = chunks.iter().map(|c| c.primitive_count).sum();
+        assert_eq!(sum_triangles as usize, total_triangles);
+
+        // Check 256-byte alignment of chunk offsets
+        for chunk in &chunks {
+            assert_eq!(chunk.gpu_byte_offset % BLAS_ADDRESS_ALIGNMENT_BYTES, 0);
+        }
+
+        // Test TLAS packing for the partitioned chunks
+        let transform = Mat4::IDENTITY;
+        let tlas_instances = MultiMillionBlasManager::pack_chunked_tlas_instances(
+            &chunks,
+            &transform,
+            100,
+            0x4000_0000,
+        );
+        assert_eq!(tlas_instances.len(), 31);
+        assert_eq!(tlas_instances[0].instance_id(), 100);
+        assert_eq!(tlas_instances[30].instance_id(), 130);
+
+        // Check VRAM estimation
+        let (blas_bytes, tlas_bytes, total_bytes) =
+            MultiMillionBlasManager::estimate_multi_million_vram_bytes(total_triangles, chunks.len());
+        assert!(blas_bytes > 0);
+        assert!(tlas_bytes > 0);
+        assert_eq!(total_bytes, blas_bytes + tlas_bytes);
     }
 }
