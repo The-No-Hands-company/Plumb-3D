@@ -121,6 +121,16 @@ impl PaintTexture {
         ];
     }
 
+    /// Clears the entire texture canvas with a solid color.
+    pub fn clear(&mut self, color: [u8; 4]) {
+        self.data.fill(color);
+    }
+
+    /// Returns the raw contiguous RGBA byte slice for GPU buffer upload or file export.
+    pub fn as_rgba8_slice(&self) -> &[u8] {
+        bytemuck::cast_slice(&self.data)
+    }
+
     /// Samples the texture at normalized coordinates (u, v) in [0, 1].
     pub fn sample_uv(&self, uv: Vec2) -> [u8; 4] {
         let u = uv.x.rem_euclid(1.0);
@@ -128,6 +138,34 @@ impl PaintTexture {
         let x = ((u * self.width as f32) as usize).min(self.width.saturating_sub(1));
         let y = ((v * self.height as f32) as usize).min(self.height.saturating_sub(1));
         self.get_pixel(x, y)
+    }
+
+    /// Samples the texture at normalized coordinates (u, v) using bilinear interpolation.
+    pub fn sample_uv_bilinear(&self, uv: Vec2) -> [u8; 4] {
+        let u = uv.x.rem_euclid(1.0) * self.width as f32 - 0.5;
+        let v = uv.y.rem_euclid(1.0) * self.height as f32 - 0.5;
+
+        let x0 = (u.floor() as usize).min(self.width.saturating_sub(1));
+        let y0 = (v.floor() as usize).min(self.height.saturating_sub(1));
+        let x1 = (x0 + 1).min(self.width.saturating_sub(1));
+        let y1 = (y0 + 1).min(self.height.saturating_sub(1));
+
+        let fx = u - u.floor();
+        let fy = v - v.floor();
+
+        let c00 = self.get_pixel(x0, y0);
+        let c10 = self.get_pixel(x1, y0);
+        let c01 = self.get_pixel(x0, y1);
+        let c11 = self.get_pixel(x1, y1);
+
+        let mut out = [0u8; 4];
+        for i in 0..4 {
+            let top = (c00[i] as f32) * (1.0 - fx) + (c10[i] as f32) * fx;
+            let bot = (c01[i] as f32) * (1.0 - fx) + (c11[i] as f32) * fx;
+            let val = top * (1.0 - fy) + bot * fy;
+            out[i] = val.round().clamp(0.0, 255.0) as u8;
+        }
+        out
     }
 }
 
@@ -141,6 +179,8 @@ pub struct TexturePaintBrush {
     pub falloff: BrushFalloff,
     pub blend_mode: PaintBlendMode,
     pub symmetry_x: bool,
+    pub symmetry_y: bool,
+    pub symmetry_z: bool,
 }
 
 impl Default for TexturePaintBrush {
@@ -153,6 +193,8 @@ impl Default for TexturePaintBrush {
             falloff: BrushFalloff::Smooth,
             blend_mode: PaintBlendMode::Mix,
             symmetry_x: false,
+            symmetry_y: false,
+            symmetry_z: false,
         }
     }
 }
@@ -171,6 +213,14 @@ impl Mesh {
         let mut painted = self.paint_texture_pass(hit_point, brush, texture);
         if brush.symmetry_x && hit_point.x.abs() > 1e-4 {
             let sym_point = vec3(-hit_point.x, hit_point.y, hit_point.z);
+            painted += self.paint_texture_pass(sym_point, brush, texture);
+        }
+        if brush.symmetry_y && hit_point.y.abs() > 1e-4 {
+            let sym_point = vec3(hit_point.x, -hit_point.y, hit_point.z);
+            painted += self.paint_texture_pass(sym_point, brush, texture);
+        }
+        if brush.symmetry_z && hit_point.z.abs() > 1e-4 {
+            let sym_point = vec3(hit_point.x, hit_point.y, -hit_point.z);
             painted += self.paint_texture_pass(sym_point, brush, texture);
         }
         painted
@@ -311,6 +361,8 @@ mod tests {
             falloff: BrushFalloff::Smooth,
             blend_mode: PaintBlendMode::Mix,
             symmetry_x: false,
+            symmetry_y: false,
+            symmetry_z: false,
         };
 
         let pixels = plane.paint_texture_3d(vec3(0.0, 0.0, 0.0), &brush, &mut tex);
@@ -320,5 +372,11 @@ mod tests {
         let center_color = tex.sample_uv(vec2(0.5, 0.5));
         assert!(center_color[0] > 240);
         assert!(center_color[1] < 50);
+
+        let filtered = tex.sample_uv_bilinear(vec2(0.5, 0.5));
+        assert!(filtered[0] > 200);
+
+        tex.clear([50, 50, 50, 255]);
+        assert_eq!(tex.get_pixel(32, 32), [50, 50, 50, 255]);
     }
 }

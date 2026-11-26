@@ -31,7 +31,8 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
                 InteractionMode::Edit => InteractionMode::Sculpt,
                 InteractionMode::Sculpt => InteractionMode::WeightPaint,
                 InteractionMode::WeightPaint => InteractionMode::VertexPaint,
-                InteractionMode::VertexPaint => InteractionMode::Pose,
+                InteractionMode::VertexPaint => InteractionMode::TexturePaint,
+                InteractionMode::TexturePaint => InteractionMode::Pose,
                 InteractionMode::Pose => InteractionMode::Object,
                 InteractionMode::CurveEdit => InteractionMode::Object,
             };

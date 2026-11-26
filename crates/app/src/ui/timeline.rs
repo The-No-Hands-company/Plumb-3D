@@ -32,6 +32,11 @@ pub fn draw_status_bar(state: &mut AppState) {
                             .strong()
                             .color(egui::Color32::from_rgb(255, 120, 180))
                     }
+                    InteractionMode::TexturePaint => {
+                        egui::RichText::new(format!("TEXTURE PAINT: {:?} ({:?})", state.texture_paint_brush.channel, state.texture_paint_brush.blend_mode))
+                            .strong()
+                            .color(egui::Color32::from_rgb(255, 180, 50))
+                    }
                     InteractionMode::Pose => egui::RichText::new("POSE MODE (RIGGING)").strong().color(egui::Color32::from_rgb(80, 240, 200)),
                     InteractionMode::CurveEdit => egui::RichText::new("CURVE EDIT MODE").strong().color(egui::Color32::from_rgb(100, 220, 255)),
                 };

@@ -117,6 +117,11 @@ pub fn handle_mouse_left_down(state: &mut AppState) {
         if let Some((x, y)) = state.last_mouse_pos {
             state.vertex_paint_step(x, y);
         }
+    } else if state.interaction_mode == InteractionMode::TexturePaint {
+        state.is_texture_painting = true;
+        if let Some((x, y)) = state.last_mouse_pos {
+            state.texture_paint_step(x, y);
+        }
     } else if state.is_box_selecting {
         if let Some((x, y)) = state.last_mouse_pos {
             state.box_select_start = Some((x as f32, y as f32));
@@ -208,6 +213,8 @@ pub fn handle_mouse_left_up(state: &mut AppState) {
                 }
             }
         }
+    } else if state.interaction_mode == InteractionMode::TexturePaint {
+        state.is_texture_painting = false;
     } else if let (Some(start), Some(curr)) = (state.box_select_start.take(), state.box_select_current.take()) {
         if (start.0 - curr.0).abs() > 3.0 || (start.1 - curr.1).abs() > 3.0 {
             state.select_in_marquee_box(start, curr);

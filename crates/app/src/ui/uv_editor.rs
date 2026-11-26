@@ -60,6 +60,14 @@ pub fn draw_uv_editor(state: &mut AppState, actions: &mut UiActions) {
                                 });
 
                                 ui.horizontal(|ui| {
+                                    ui.label(egui::RichText::new("Projections:").weak());
+                                    if ui.button("📐 Planar Y").clicked() { actions.trigger_planar_uv = true; }
+                                    if ui.button("📦 Box Map").clicked() { actions.trigger_box_uv = true; }
+                                    if ui.button("🥫 Cylinder").clicked() { actions.trigger_cylindrical_uv = true; }
+                                    if ui.button("🌐 Sphere").clicked() { actions.trigger_spherical_uv = true; }
+                                });
+
+                                ui.horizontal(|ui| {
                                     ui.add(egui::Slider::new(&mut state.smart_uv_angle_threshold, 15.0..=89.0).text("Angle Thresh (°)"));
                                     ui.add(egui::Slider::new(&mut state.smart_uv_margin, 0.005..=0.1).text("Margin"));
                                 });

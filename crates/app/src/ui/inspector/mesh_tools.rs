@@ -533,38 +533,11 @@ pub fn draw_mesh_tools_panel(
                         }
 
                         if state.interaction_mode == InteractionMode::VertexPaint {
-                            ui.heading("Vertex Paint (Polypaint)");
-                            let mut rgb = [
-                                state.vertex_paint_color[0],
-                                state.vertex_paint_color[1],
-                                state.vertex_paint_color[2],
-                            ];
-                            ui.horizontal(|ui| {
-                                ui.label("Brush Color:");
-                                if ui.color_edit_button_rgb(&mut rgb).changed() {
-                                    state.vertex_paint_color[0] = rgb[0];
-                                    state.vertex_paint_color[1] = rgb[1];
-                                    state.vertex_paint_color[2] = rgb[2];
-                                }
-                            });
+                            super::paint::draw_vertex_paint_tools(ui, state, actions);
+                        }
 
-                            ui.add(egui::Slider::new(&mut state.vertex_paint_radius, 0.05..=3.0).text("Radius"));
-                            ui.add(egui::Slider::new(&mut state.vertex_paint_strength, 0.01..=1.0).text("Strength"));
-
-                            egui::ComboBox::from_id_salt("vp_falloff_combo")
-                                .selected_text(format!("{:?}", state.vertex_paint_falloff))
-                                .show_ui(ui, |ui| {
-                                    ui.selectable_value(&mut state.vertex_paint_falloff, BrushFalloff::Smooth, "Smooth");
-                                    ui.selectable_value(&mut state.vertex_paint_falloff, BrushFalloff::Spherical, "Spherical");
-                                    ui.selectable_value(&mut state.vertex_paint_falloff, BrushFalloff::Linear, "Linear");
-                                    ui.selectable_value(&mut state.vertex_paint_falloff, BrushFalloff::Sharp, "Sharp");
-                                });
-
-                            if ui.button("Fill Mesh with Color").clicked() {
-                                actions.trigger_fill_vertex_color = true;
-                            }
-
-                            ui.separator();
+                        if state.interaction_mode == InteractionMode::TexturePaint {
+                            super::paint::draw_texture_paint_tools(ui, state);
                         }
     }
 }

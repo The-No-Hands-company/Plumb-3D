@@ -8,6 +8,7 @@ pub enum InteractionMode {
     Sculpt,
     WeightPaint,
     VertexPaint,
+    TexturePaint,
     Pose,
     CurveEdit,
 }

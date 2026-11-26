@@ -256,9 +256,11 @@ pub struct AppState {
     pub weight_gradient_start: Option<Vec3>, pub weight_gradient_end: Option<Vec3>,
     pub weight_gradient_start_w: f32, pub weight_gradient_end_w: f32, pub weight_paint_stroke_start_mesh: Option<Mesh>,
 
-    // Vertex Color / Polypaint Mode (ZBrush / Blender Style)
+    // Vertex Color & Texture Painting Mode
     pub vertex_paint_color: [f32; 4], pub vertex_paint_radius: f32, pub vertex_paint_strength: f32,
     pub vertex_paint_falloff: BrushFalloff, pub is_vertex_painting: bool,
+    pub texture_paint_brush: geo_kernel::TexturePaintBrush, pub is_texture_painting: bool,
+    pub paint_textures: HashMap<NodeId, geo_kernel::PaintTexture>,
 
     // 3D Measurement Tool (Maya Distance / Blender Measure) & Face-Aligned Workplane
     pub measure_mode: bool, pub measure_points: Vec<Vec3>,
@@ -574,6 +576,8 @@ impl AppState {
             weight_gradient_start_w: 1.0, weight_gradient_end_w: 0.0, weight_paint_stroke_start_mesh: None,
             vertex_paint_color: [1.0, 0.2, 0.2, 1.0], vertex_paint_radius: 0.8,
             vertex_paint_strength: 0.5, vertex_paint_falloff: BrushFalloff::Smooth, is_vertex_painting: false,
+            texture_paint_brush: geo_kernel::TexturePaintBrush::default(), is_texture_painting: false,
+            paint_textures: HashMap::new(),
             measure_mode: false, measure_points: Vec::new(),
             workplane: core_math::Workplane::default(),
             curve_pen_active: false, curve_pen_points: Vec::new(),

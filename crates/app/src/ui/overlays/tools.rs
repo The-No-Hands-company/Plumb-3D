@@ -28,6 +28,7 @@ pub fn render(state: &mut AppState) {
     if state.interaction_mode == InteractionMode::Sculpt
         || state.interaction_mode == InteractionMode::WeightPaint
         || state.interaction_mode == InteractionMode::VertexPaint
+        || state.interaction_mode == InteractionMode::TexturePaint
     {
         if let Some((hit_pos, _)) = state.last_sculpt_hit {
             let width = state.surface_config.width as f32;
@@ -36,6 +37,7 @@ pub fn render(state: &mut AppState) {
                 InteractionMode::Sculpt => state.sculpt_settings.radius,
                 InteractionMode::WeightPaint => state.weight_brush_radius,
                 InteractionMode::VertexPaint => state.vertex_paint_radius,
+                InteractionMode::TexturePaint => state.texture_paint_brush.radius,
                 _ => 0.5,
             };
             let stroke_color = match state.interaction_mode {
@@ -55,6 +57,14 @@ pub fn render(state: &mut AppState) {
                         (state.vertex_paint_color[1] * 255.0) as u8,
                         (state.vertex_paint_color[2] * 255.0) as u8,
                         (state.vertex_paint_color[3] * 255.0) as u8,
+                    )
+                }
+                InteractionMode::TexturePaint => {
+                    egui::Color32::from_rgba_premultiplied(
+                        (state.texture_paint_brush.color[0] * 255.0) as u8,
+                        (state.texture_paint_brush.color[1] * 255.0) as u8,
+                        (state.texture_paint_brush.color[2] * 255.0) as u8,
+                        255,
                     )
                 }
                 _ => egui::Color32::WHITE,

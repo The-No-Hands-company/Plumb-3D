@@ -68,6 +68,8 @@ pub fn handle_painting_cursor_moved(state: &mut AppState, position: PhysicalPosi
         }
     } else if state.interaction_mode == InteractionMode::VertexPaint && state.is_vertex_painting {
         state.vertex_paint_step(position.x, position.y);
+    } else if state.interaction_mode == InteractionMode::TexturePaint && state.is_texture_painting {
+        state.texture_paint_step(position.x, position.y);
     }
 
     state.last_mouse_pos = Some((position.x, position.y));
@@ -199,6 +201,29 @@ impl AppState {
                             self.vertex_paint_falloff,
                         );
                         *cached_render_mesh = None;
+                        self.scene.mark_dirty(sel_id);
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn texture_paint_step(&mut self, x: f64, y: f64) {
+        let ray = self.get_screen_ray(x, y);
+        if let Some(sel_id) = self.selected_node {
+            if let Some(node) = self.scene.nodes.get_mut(sel_id) {
+                let world_mat = node.world_matrix;
+                let inv_mat = world_mat.inverse();
+                if let NodeData::Mesh { base_mesh, .. } = &mut node.data {
+                    if let Some(hit) = base_mesh.raycast(&ray, &world_mat) {
+                        self.last_sculpt_hit = Some((hit.point, hit.normal));
+                        let local_hit_point = inv_mat.transform_point3(hit.point);
+
+                        let tex = self.paint_textures.entry(sel_id).or_insert_with(|| {
+                            geo_kernel::PaintTexture::new(1024, 1024, [220, 220, 220, 255])
+                        });
+
+                        base_mesh.paint_texture_3d(local_hit_point, &self.texture_paint_brush, tex);
                         self.scene.mark_dirty(sel_id);
                     }
                 }

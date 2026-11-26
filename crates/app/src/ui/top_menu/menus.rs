@@ -305,6 +305,11 @@ pub fn draw_mode_menu(state: &mut AppState, ui: &mut egui::Ui) {
             if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
             ui.close_menu();
         }
+        if ui.selectable_label(state.interaction_mode == InteractionMode::TexturePaint, "🎨 Texture Paint Mode").clicked() {
+            state.interaction_mode = InteractionMode::TexturePaint;
+            if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
+            ui.close_menu();
+        }
         if ui.selectable_label(state.interaction_mode == InteractionMode::Pose, "Pose Mode (Rigging)").clicked() {
             state.interaction_mode = InteractionMode::Pose;
             if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
