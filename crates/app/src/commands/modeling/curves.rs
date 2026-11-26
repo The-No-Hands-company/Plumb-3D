@@ -199,6 +199,7 @@ pub struct FilletCurveCommand {
     pub node_id: NodeId,
     pub radius: f32,
     pub selected_knots: Option<Vec<usize>>,
+    pub continuity: geo_kernel::FilletContinuity,
     pub old_spline: Option<Spline>,
 }
 
@@ -208,6 +209,7 @@ impl FilletCurveCommand {
             node_id,
             radius,
             selected_knots: None,
+            continuity: geo_kernel::FilletContinuity::G1Tangent,
             old_spline: None,
         }
     }
@@ -217,6 +219,22 @@ impl FilletCurveCommand {
             node_id,
             radius,
             selected_knots: Some(selected_knots),
+            continuity: geo_kernel::FilletContinuity::G1Tangent,
+            old_spline: None,
+        }
+    }
+
+    pub fn with_continuity(
+        node_id: NodeId,
+        radius: f32,
+        selected_knots: Option<Vec<usize>>,
+        continuity: geo_kernel::FilletContinuity,
+    ) -> Self {
+        Self {
+            node_id,
+            radius,
+            selected_knots,
+            continuity,
             old_spline: None,
         }
     }
@@ -233,9 +251,10 @@ impl Command for FilletCurveCommand {
             NodeData::Curve { spline, cached_render_mesh, .. } => {
                 self.old_spline = Some(spline.clone());
                 if let Some(knots) = &self.selected_knots {
-                    *spline = spline.fillet_selected_corners(knots, self.radius);
+                    *spline = spline.fillet_selected_corners_continuity(knots, self.radius, self.continuity);
                 } else {
-                    *spline = spline.fillet_all_corners(self.radius);
+                    let all: Vec<usize> = (0..spline.points.len()).collect();
+                    *spline = spline.fillet_selected_corners_continuity(&all, self.radius, self.continuity);
                 }
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);

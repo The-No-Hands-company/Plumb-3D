@@ -391,3 +391,48 @@ fn test_bevel_edge_command_multi_segment_profile_and_undo() {
     };
     assert_eq!(restored_face_count, initial_face_count);
 }
+
+#[test]
+fn test_curve_fillet_g2_continuity_and_undo() {
+    use crate::commands::FilletCurveCommand;
+    use core_math::Vec3;
+    use geo_kernel::{FilletContinuity, Spline};
+
+    let mut scene = SceneGraph::new();
+    let rect = Spline::polyline(&[
+        Vec3::new(0.0, 0.0, 0.0),
+        Vec3::new(2.0, 0.0, 0.0),
+        Vec3::new(2.0, 0.0, 2.0),
+        Vec3::new(0.0, 0.0, 2.0),
+    ], true);
+
+    let id = scene.add_node(SceneNode::new_curve("Rect", core_math::Transform::IDENTITY, rect));
+
+    let mut history = graph_engine::HistoryManager::new();
+    // G2 continuity inserts smooth apex knot at each corner (3 knots per corner instead of 2 in G1)
+    let cmd = Box::new(FilletCurveCommand::with_continuity(
+        id,
+        0.4,
+        None,
+        FilletContinuity::G2Curvature,
+    ));
+
+    history.execute(cmd, &mut scene).unwrap();
+    let pt_count = {
+        let node = scene.nodes.get(id).unwrap();
+        if let NodeData::Curve { spline, .. } = &node.data {
+            spline.points.len()
+        } else { 0 }
+    };
+    // 4 corners * 3 knots = 12 knots for G2 fillet
+    assert_eq!(pt_count, 12);
+
+    history.undo(&mut scene).unwrap();
+    let restored_count = {
+        let node = scene.nodes.get(id).unwrap();
+        if let NodeData::Curve { spline, .. } = &node.data {
+            spline.points.len()
+        } else { 0 }
+    };
+    assert_eq!(restored_count, 4);
+}

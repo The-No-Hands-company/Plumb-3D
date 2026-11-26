@@ -265,6 +265,30 @@ impl Spline {
         })
     }
 
+    /// Computes an exact 3-point circular CAD arc passing through p1, p2, and p3.
+    pub fn arc_3point(p1: Vec3, p2: Vec3, p3: Vec3) -> Option<Spline> {
+        let a = p2 - p1;
+        let b = p3 - p1;
+        let axb = a.cross(b);
+        let n_sq = axb.length_squared();
+        if n_sq < 1e-8 {
+            return None; // Collinear points
+        }
+        let norm = axb / n_sq.sqrt();
+        let center = p1 + (b * a.length_squared() - a * b.length_squared()).cross(axb) / (2.0 * n_sq);
+        let radius = (p1 - center).length();
+
+        let arc1 = TangentArc { center, radius, start_point: p1, end_point: p2, normal: norm }.to_spline();
+        let arc2 = TangentArc { center, radius, start_point: p2, end_point: p3, normal: norm }.to_spline();
+
+        let mut pts = arc1.points;
+        if pts.len() >= 2 && arc2.points.len() >= 2 {
+            pts.pop();
+            pts.extend(arc2.points);
+        }
+        Some(Spline::with_points(pts, false))
+    }
+
     /// Finds the nearest tangent snap point along this spline from an external cursor or reference point.
     pub fn snap_tangent_to_curve(&self, cursor_pt: Vec3) -> Option<(usize, f32, Vec3)> {
         let seg_count = if self.is_closed { self.points.len() } else { self.points.len().saturating_sub(1) };
@@ -405,5 +429,16 @@ mod tests {
         // Tangent from point outside circle at (4, 0, 0)
         let snap = circle.snap_tangent_to_curve(Vec3::new(4.0, 0.0, 0.0));
         assert!(snap.is_some());
+    }
+
+    #[test]
+    fn test_3point_arc() {
+        let p1 = Vec3::new(1.0, 0.0, 0.0);
+        let p2 = Vec3::new(0.0, 1.0, 0.0);
+        let p3 = Vec3::new(-1.0, 0.0, 0.0);
+        let arc = Spline::arc_3point(p1, p2, p3).expect("Valid 3-point arc");
+        assert!(!arc.points.is_empty());
+        assert!((arc.points[0].position - p1).length() < 1e-4);
+        assert!((arc.points.last().unwrap().position - p3).length() < 1e-4);
     }
 }

@@ -248,6 +248,44 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
             state.print_inspector.show_dialog = true;
         }),
     },
+    PaletteItem {
+        name: "Fillet Spline Corners (G2 Curvature)",
+        category: "CAD",
+        shortcut: "Curve > Fillet",
+        keywords: &["fillet", "curvature", "g2", "spline", "smooth corners", "plasticity"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            if let Some(id) = state.selected_node {
+                let cmd = Box::new(crate::commands::FilletCurveCommand::with_continuity(
+                    id,
+                    0.5,
+                    None,
+                    geo_kernel::FilletContinuity::G2Curvature,
+                ));
+                let _ = state.history.execute(cmd, &mut state.scene);
+                state.set_status_message("Fillet G2 Curvature Applied to Spline");
+            }
+        }),
+    },
+    PaletteItem {
+        name: "Spawn CAD 3-Point Circular Arc",
+        category: "Add",
+        shortcut: "Add > Curve",
+        keywords: &["arc", "3-point", "circular", "cad", "spline", "curve"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            let p1 = core_math::Vec3::new(-1.0, 0.0, 0.0);
+            let p2 = core_math::Vec3::new(0.0, 1.0, 0.0);
+            let p3 = core_math::Vec3::new(1.0, 0.0, 0.0);
+            if let Some(arc) = geo_kernel::Spline::arc_3point(p1, p2, p3) {
+                let cmd = Box::new(crate::commands::CreateCurveNodeCommand {
+                    name: "Arc3Point".into(),
+                    spline: arc,
+                    created_node_id: None,
+                });
+                let _ = state.history.execute(cmd, &mut state.scene);
+                state.set_status_message("CAD 3-Point Circular Arc Created");
+            }
+        }),
+    },
     // --- File & Project ---
     PaletteItem {
         name: "Save Plumb Project (.plmb)",

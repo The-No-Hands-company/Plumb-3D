@@ -1,6 +1,7 @@
 //! CAD 2D/3D Curve Fillet & Chamfer Engine (Plasticity / Rhino Style).
 //! Rounds sharp corners of Bézier spline polylines with circular G1-continuous fillets.
 
+use crate::operators::variable_bevel::FilletContinuity;
 use crate::spline::types::{BezierPoint, HandleType, Spline};
 use core_math::Vec3;
 use std::collections::HashMap;
@@ -16,15 +17,34 @@ impl Spline {
 
     /// Applies a precision CAD circular fillet to only the specified corner knot indices.
     pub fn fillet_selected_corners(&self, selected_knots: &[usize], radius: f32) -> Spline {
+        self.fillet_selected_corners_continuity(selected_knots, radius, FilletContinuity::G1Tangent)
+    }
+
+    /// Applies a precision CAD fillet with explicit continuity (G0 Chamfer, G1 Tangent, G2 Curvature).
+    pub fn fillet_selected_corners_continuity(
+        &self,
+        selected_knots: &[usize],
+        radius: f32,
+        continuity: FilletContinuity,
+    ) -> Spline {
         let mut radii = HashMap::new();
         for &idx in selected_knots {
             radii.insert(idx, radius);
         }
-        self.fillet_corners_variable(&radii)
+        self.fillet_corners_variable_continuity(&radii, continuity)
     }
 
     /// Applies variable per-corner radius fillets based on a map of `(corner_index -> radius)`.
     pub fn fillet_corners_variable(&self, radii: &HashMap<usize, f32>) -> Spline {
+        self.fillet_corners_variable_continuity(radii, FilletContinuity::G1Tangent)
+    }
+
+    /// Applies variable per-corner radius fillets with G1 Tangent or G2 Curvature continuity.
+    pub fn fillet_corners_variable_continuity(
+        &self,
+        radii: &HashMap<usize, f32>,
+        continuity: FilletContinuity,
+    ) -> Spline {
         let n = self.points.len();
         if n < 3 || radii.is_empty() {
             return self.clone();
@@ -100,8 +120,24 @@ impl Spline {
                 HandleType::Aligned,
             );
 
-            out_points.push(p1);
-            out_points.push(p2);
+            if continuity == FilletContinuity::G2Curvature {
+                let bisector = (u1 + u2).normalize_or_zero();
+                let apex_dist = effective_radius * (1.0 / half_angle.sin() - 1.0);
+                let apex_pos = curr + bisector * apex_dist;
+                let apex_tangent = (u2 - u1).normalize_or_zero() * (handle_len * 0.65);
+                let p_apex = BezierPoint::with_type(
+                    apex_pos,
+                    -apex_tangent,
+                    apex_tangent,
+                    HandleType::Aligned,
+                );
+                out_points.push(p1);
+                out_points.push(p_apex);
+                out_points.push(p2);
+            } else {
+                out_points.push(p1);
+                out_points.push(p2);
+            }
         }
 
         if !is_closed {
