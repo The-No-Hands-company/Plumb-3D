@@ -54,6 +54,7 @@ pub struct ScriptConsoleState {
     pub language: ScriptLanguage,
     pub output_logs: Vec<String>,
     pub execution_error: Option<String>,
+    pub macro_recorder: super::macro_recorder::MacroRecorder,
 }
 
 impl Default for ScriptConsoleState {
@@ -65,6 +66,7 @@ impl Default for ScriptConsoleState {
                 "Multi-engine scripting runtime initialized (Rhai / Python 3 / Lua).".to_string(),
             ],
             execution_error: None,
+            macro_recorder: super::macro_recorder::MacroRecorder::default(),
         }
     }
 }
@@ -93,6 +95,16 @@ pub fn draw_script_console(state: &mut AppState) {
 }
 
 pub fn draw_script_console_inner(state: &mut AppState, ui: &mut egui::Ui) {
+    // Synchronize macro recorder with history manager
+    if state.script_console_state.macro_recorder.is_recording {
+        if state.history.command_counter > state.script_console_state.macro_recorder.last_recorded_counter {
+            if let Some(cmd_name) = state.history.undo_name() {
+                state.script_console_state.macro_recorder.record_command_name(cmd_name);
+                state.script_console_state.macro_recorder.last_recorded_counter = state.history.command_counter;
+            }
+        }
+    }
+
     // Top Toolbar
     ui.horizontal(|ui| {
         if ui
@@ -101,6 +113,31 @@ pub fn draw_script_console_inner(state: &mut AppState, ui: &mut egui::Ui) {
             .clicked()
         {
             run_current_script(state);
+        }
+
+        ui.separator();
+
+        // Macro Recorder Controls
+        let is_rec = state.script_console_state.macro_recorder.is_recording;
+        if is_rec {
+            if ui.button(egui::RichText::new("Stop [■]").color(egui::Color32::from_rgb(255, 60, 60))).on_hover_text("Stop macro recording").clicked() {
+                state.script_console_state.macro_recorder.stop_recording();
+            }
+        } else if ui.button("Record [●]").on_hover_text("Record viewport actions into an executable script").clicked() {
+            state.script_console_state.macro_recorder.last_recorded_counter = state.history.command_counter;
+            state.script_console_state.macro_recorder.start_recording();
+        }
+
+        let entries_count = state.script_console_state.macro_recorder.entries.len();
+        if entries_count > 0 {
+            if ui.button(format!("Insert Macro ({})", entries_count)).on_hover_text("Insert recorded macro script into editor buffer").clicked() {
+                let lang = state.script_console_state.language;
+                let script = state.script_console_state.macro_recorder.generate_script(lang);
+                state.script_console_state.script_buffer = script;
+            }
+            if ui.small_button("Clear").clicked() {
+                state.script_console_state.macro_recorder.clear();
+            }
         }
 
         ui.separator();

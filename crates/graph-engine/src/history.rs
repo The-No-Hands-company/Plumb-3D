@@ -12,6 +12,7 @@ pub struct HistoryManager {
     undo_stack: Vec<Box<dyn Command>>,
     redo_stack: Vec<Box<dyn Command>>,
     pub max_history: usize,
+    pub command_counter: usize,
 }
 
 impl Default for HistoryManager {
@@ -20,6 +21,7 @@ impl Default for HistoryManager {
             undo_stack: Vec::new(),
             redo_stack: Vec::new(),
             max_history: 64,
+            command_counter: 0,
         }
     }
 }
@@ -52,6 +54,7 @@ impl HistoryManager {
         scene: &mut SceneGraph,
     ) -> Result<(), String> {
         command.execute(scene)?;
+        self.command_counter += 1;
         if self.undo_stack.len() >= self.max_history {
             self.undo_stack.remove(0);
         }
