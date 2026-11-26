@@ -45,6 +45,7 @@ pub enum TimelineViewMode {
     #[default]
     DopeSheet,
     FCurve,
+    NlaEditor,
 }
 
 /// Weight paint tool modes.

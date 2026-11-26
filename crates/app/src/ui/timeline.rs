@@ -126,6 +126,7 @@ pub fn draw_timeline(state: &mut AppState, actions: &mut UiActions) {
         let timeline_height = match state.timeline_mode {
             TimelineViewMode::DopeSheet => 68.0,
             TimelineViewMode::FCurve => 210.0,
+            TimelineViewMode::NlaEditor => 160.0,
         };
         let egui_ctx = state.egui_ctx.clone();
         egui::TopBottomPanel::bottom("timeline_panel")
@@ -141,6 +142,7 @@ pub fn draw_timeline_inner(state: &mut AppState, _actions: &mut UiActions, ui: &
                     ui.horizontal(|ui| {
                         ui.selectable_value(&mut state.timeline_mode, TimelineViewMode::DopeSheet, "Dope Sheet");
                         ui.selectable_value(&mut state.timeline_mode, TimelineViewMode::FCurve, "F-Curve Editor");
+                        ui.selectable_value(&mut state.timeline_mode, TimelineViewMode::NlaEditor, "NLA Editor");
                         ui.separator();
 
                         let play_text = if state.animation.is_playing {
@@ -223,6 +225,22 @@ pub fn draw_timeline_inner(state: &mut AppState, _actions: &mut UiActions, ui: &
                                             ));
                                         }
                                     }
+                                }
+                            }
+
+                            // Audio scrub waveform visualization
+                            if let Some(ref audio) = state.animation.audio_track {
+                                let bins = audio.waveform_slice(state.animation.start_frame, state.animation.end_frame, state.animation.fps, 48);
+                                let rect = slider_resp.rect;
+                                let painter = ui.painter();
+                                for (i, &amp) in bins.iter().enumerate() {
+                                    let x = rect.left() + (i as f32 / bins.len() as f32) * rect.width();
+                                    let h = (amp * (rect.height() * 0.45)).max(1.0);
+                                    let y_mid = rect.center().y;
+                                    painter.line_segment(
+                                        [egui::pos2(x, y_mid - h), egui::pos2(x, y_mid + h)],
+                                        egui::Stroke::new(1.5_f32, egui::Color32::from_rgba_unmultiplied(60, 200, 255, 120)),
+                                    );
                                 }
                             }
                         }
@@ -409,6 +427,65 @@ pub fn draw_timeline_inner(state: &mut AppState, _actions: &mut UiActions, ui: &
 
                             if let Some(f) = scrubbed_f {
                                 state.animation.scrub_to_frame(f, &mut state.scene);
+                            }
+                        }
+                        TimelineViewMode::NlaEditor => {
+                            ui.horizontal(|ui| {
+                                ui.label(egui::RichText::new("NLA Track Stacks:").strong());
+                                if ui.button("+ Add Track").clicked() {
+                                    let idx = state.animation.nla_mixer.tracks.len() + 1;
+                                    state.animation.nla_mixer.add_track(graph_engine::NlaTrack::new(format!("NlaTrack.{:03}", idx)));
+                                }
+                                if ui.button("Push Action to NLA").on_hover_text("Bakes active keyframed action into an NLA clip").clicked() {
+                                    if let Some(sel_id) = state.selected_node {
+                                        if let Some(track) = state.animation.tracks.get(&sel_id) {
+                                            let mut clip = graph_engine::NlaClip::new("Clip.Action", state.animation.start_frame, state.animation.end_frame);
+                                            clip.blend_in = 5.0;
+                                            clip.blend_out = 5.0;
+                                            clip.node_tracks.insert(sel_id, track.clone());
+                                            if state.animation.nla_mixer.tracks.is_empty() {
+                                                state.animation.nla_mixer.add_track(graph_engine::NlaTrack::new("NlaTrack.001"));
+                                            }
+                                            state.animation.nla_mixer.tracks[0].add_clip(clip);
+                                            state.set_status_message("Pushed keyframe action to NLA clip.");
+                                        }
+                                    }
+                                }
+                                if state.animation.audio_track.is_none() {
+                                    if ui.small_button("Add Audio Track").on_hover_text("Adds 440Hz reference audio track for scrubbing").clicked() {
+                                        state.animation.audio_track = Some(graph_engine::AudioScrubTrack::synthetic_sine_tone("BeepTrack", 44100, 5.0, 440.0));
+                                    }
+                                }
+                            });
+
+                            let (resp, painter) = ui.allocate_painter(
+                                egui::Vec2::new(ui.available_width(), 90.0),
+                                egui::Sense::click_and_drag(),
+                            );
+                            let rect = resp.rect;
+                            painter.rect_filled(rect, 4.0, egui::Color32::from_rgb(22, 24, 28));
+                            painter.rect_stroke(rect, 4.0, egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(55, 60, 70)));
+
+                            let total_f = (state.animation.end_frame - state.animation.start_frame).max(1.0);
+                            let row_h = 24.0_f32;
+                            for (t_idx, track) in state.animation.nla_mixer.tracks.iter().enumerate() {
+                                let row_y = rect.top() + 6.0 + (t_idx as f32) * (row_h + 4.0);
+                                painter.text(
+                                    egui::pos2(rect.left() + 6.0, row_y + 4.0),
+                                    egui::Align2::LEFT_TOP,
+                                    &track.name,
+                                    egui::FontId::proportional(11.0),
+                                    egui::Color32::from_rgb(180, 200, 220),
+                                );
+
+                                for clip in &track.clips {
+                                    let x0 = rect.left() + 90.0 + ((clip.start_frame - state.animation.start_frame) / total_f).clamp(0.0, 1.0) * (rect.width() - 95.0);
+                                    let x1 = rect.left() + 90.0 + ((clip.end_frame - state.animation.start_frame) / total_f).clamp(0.0, 1.0) * (rect.width() - 95.0);
+                                    let clip_rect = egui::Rect::from_min_max(egui::pos2(x0, row_y), egui::pos2(x1.max(x0 + 15.0), row_y + row_h));
+                                    painter.rect_filled(clip_rect, 3.0, egui::Color32::from_rgb(45, 115, 195));
+                                    painter.rect_stroke(clip_rect, 3.0, egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(90, 170, 245)));
+                                    painter.text(clip_rect.center(), egui::Align2::CENTER_CENTER, &clip.name, egui::FontId::proportional(10.0), egui::Color32::WHITE);
+                                }
                             }
                         }
                     }

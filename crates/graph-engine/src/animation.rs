@@ -234,6 +234,8 @@ impl TransformTrack {
 pub struct AnimationManager {
     pub tracks: HashMap<NodeId, TransformTrack>,
     pub scalar_tracks: HashMap<(NodeId, String), AnimationTrack<f32>>,
+    pub nla_mixer: crate::nla::NlaMixer,
+    pub audio_track: Option<crate::nla::AudioScrubTrack>,
     pub current_frame: f32,
     pub start_frame: f32,
     pub end_frame: f32,
@@ -247,6 +249,8 @@ impl Default for AnimationManager {
         Self {
             tracks: HashMap::new(),
             scalar_tracks: HashMap::new(),
+            nla_mixer: crate::nla::NlaMixer::default(),
+            audio_track: None,
             current_frame: 0.0,
             start_frame: 0.0,
             end_frame: 100.0,
@@ -349,9 +353,25 @@ impl AnimationManager {
                 continue;
             }
             if let Some(node) = scene.nodes.get_mut(node_id) {
-                let new_transform = track.evaluate(frame, node.local_transform);
+                let mut new_transform = track.evaluate(frame, node.local_transform);
+                new_transform = self.nla_mixer.blend_transforms(node_id, frame, new_transform);
                 node.local_transform = new_transform;
                 scene.mark_dirty(node_id);
+            }
+        }
+
+        // Also evaluate nodes animated exclusively via NLA
+        for track in &self.nla_mixer.tracks {
+            for clip in &track.clips {
+                for &node_id in clip.node_tracks.keys() {
+                    if !self.tracks.contains_key(&node_id) {
+                        if let Some(node) = scene.nodes.get_mut(node_id) {
+                            let new_transform = self.nla_mixer.blend_transforms(node_id, frame, node.local_transform);
+                            node.local_transform = new_transform;
+                            scene.mark_dirty(node_id);
+                        }
+                    }
+                }
             }
         }
 

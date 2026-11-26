@@ -224,7 +224,7 @@ pub struct AppState {
 
     // Animation & Keyframe Timeline (Maya / Blender Style)
     pub animation: AnimationManager,
-    pub timeline_expanded: bool, pub timeline_mode: TimelineViewMode,
+    pub timeline_expanded: bool, pub timeline_mode: TimelineViewMode, pub show_nla: bool, pub audio_scrub_enabled: bool,
     pub fcurve_show_tx: bool, pub fcurve_show_ty: bool, pub fcurve_show_tz: bool,
     pub fcurve_show_sx: bool, pub fcurve_show_sy: bool, pub fcurve_show_sz: bool,
     pub fcurve_show_rot: bool, pub fcurve_val_min: f32, pub fcurve_val_max: f32,
@@ -555,7 +555,7 @@ impl AppState {
             cap_holes_triangulate: false, grid_fill_span_count: 2,
             animation: AnimationManager::new(),
             timeline_expanded: false,
-            timeline_mode: TimelineViewMode::default(),
+            timeline_mode: TimelineViewMode::default(), show_nla: false, audio_scrub_enabled: false,
             fcurve_show_tx: true, fcurve_show_ty: true, fcurve_show_tz: true,
             fcurve_show_sx: false, fcurve_show_sy: false, fcurve_show_sz: false,
             fcurve_show_rot: false, fcurve_val_min: -5.0, fcurve_val_max: 5.0,
