@@ -16,7 +16,7 @@ pub fn draw_node_editor(state: &mut AppState) {
     }
 
     let mut open = state.show_node_editor;
-    egui::Window::new("🌿 Geometry Nodes (Visual DAG)")
+    egui::Window::new("Geometry Nodes (Visual DAG)")
         .open(&mut open)
         .default_size([760.0, 480.0])
         .min_size([500.0, 320.0])
@@ -34,7 +34,7 @@ pub fn draw_node_editor(state: &mut AppState) {
 
                 ui.separator();
 
-                if ui.button("▶ Evaluate to Viewport").on_hover_text("Evaluate geometry DAG and sync into active scene mesh").clicked() {
+                if ui.button("Evaluate to Viewport").on_hover_text("Evaluate geometry DAG and sync into active scene mesh").clicked() {
                     match state.geo_node_graph.evaluate() {
                         Ok(Some(mesh)) => {
                             state.node_canvas_state.eval_error = None;
@@ -65,7 +65,7 @@ pub fn draw_node_editor(state: &mut AppState) {
                     }
                 }
 
-                if ui.button("🔄 Reset Graph").on_hover_text("Reset to standard procedural starter graph").clicked() {
+                if ui.button("Reset Graph").on_hover_text("Reset to standard procedural starter graph").clicked() {
                     state.geo_node_graph = geo_nodes::GeoNodeGraph::default();
                     state.node_canvas_state = NodeCanvasState::default();
                 }
@@ -78,7 +78,7 @@ pub fn draw_node_editor(state: &mut AppState) {
                 ui.label(format!("Nodes: {} | Links: {}", node_count, link_count));
 
                 if let Some(ref err) = state.node_canvas_state.eval_error {
-                    ui.colored_label(egui::Color32::from_rgb(255, 100, 100), format!("⚠ {}", err));
+                    ui.colored_label(egui::Color32::from_rgb(255, 100, 100), format!("Error: {}", err));
                 }
             });
 

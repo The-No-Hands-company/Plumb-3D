@@ -66,7 +66,7 @@ pub fn draw_print_inspector(state: &mut AppState) {
         state.print_inspector.report = None;
     }
 
-    egui::Window::new("🖨 3D Print Quality Inspector & CAM Slicer Studio")
+    egui::Window::new("3D Print Quality Inspector & CAM Slicer Studio")
         .open(&mut open)
         .default_size(egui::vec2(500.0, 600.0))
         .resizable(true)
@@ -93,14 +93,14 @@ pub fn draw_print_inspector(state: &mut AppState) {
                     if report.is_watertight {
                         ui.group(|ui| {
                             ui.horizontal(|ui| {
-                                ui.label(egui::RichText::new("✔ 100% Watertight Solid (2-Manifold)").color(egui::Color32::from_rgb(80, 220, 100)).strong());
+                                ui.label(egui::RichText::new("[OK] 100% Watertight Solid (2-Manifold)").color(egui::Color32::from_rgb(80, 220, 100)).strong());
                             });
                             ui.label(egui::RichText::new("Zero boundary holes or degenerate faces. Certified ready for slicing.").small().weak());
                         });
                     } else {
                         ui.group(|ui| {
                             ui.horizontal(|ui| {
-                                ui.label(egui::RichText::new("✖ Non-Watertight / Boundary Holes").color(egui::Color32::from_rgb(255, 80, 80)).strong());
+                                ui.label(egui::RichText::new("[!] Non-Watertight / Boundary Holes").color(egui::Color32::from_rgb(255, 80, 80)).strong());
                             });
                             if report.open_boundary_edges > 0 {
                                 ui.label(format!("• Open boundary half-edges: {}", report.open_boundary_edges));
@@ -161,7 +161,7 @@ pub fn draw_print_inspector(state: &mut AppState) {
 
                     // 4. Direct CAM 3D Print Slicer Settings
                     ui.group(|ui| {
-                        ui.label(egui::RichText::new("⚙ Direct CAM Slicer Parameters").strong());
+                        ui.label(egui::RichText::new("Direct CAM Slicer Parameters").strong());
 
                         ui.horizontal(|ui| {
                             ui.label("Layer Height:");
@@ -211,7 +211,7 @@ pub fn draw_print_inspector(state: &mut AppState) {
                         });
 
                         ui.add_space(4.0);
-                        if ui.button("🖨 Slice Mesh & Export G-Code (.gcode)").on_hover_text("Directly slices geometry and outputs CNC G-code toolpath file").clicked() {
+                        if ui.button("Slice Mesh & Export G-Code (.gcode)").on_hover_text("Directly slices geometry and outputs CNC G-code toolpath file").clicked() {
                             trigger_gcode_export = true;
                         }
                     });
@@ -221,10 +221,10 @@ pub fn draw_print_inspector(state: &mut AppState) {
                     // 5. General Actions
                     ui.horizontal(|ui| {
                         if !report.is_watertight
-                            && ui.button("🛠 Auto-Fix Solid for 3D Printing").on_hover_text("Cap holes, weld degenerates, and align outward normals").clicked() {
+                            && ui.button("Auto-Fix Solid for 3D Printing").on_hover_text("Cap holes, weld degenerates, and align outward normals").clicked() {
                                 trigger_autofix = true;
                             }
-                        if ui.button("💾 Export Binary STL (.stl)").clicked() {
+                        if ui.button("Export Binary STL (.stl)").clicked() {
                             trigger_stl_export = true;
                         }
                     });

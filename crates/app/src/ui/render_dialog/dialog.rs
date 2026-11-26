@@ -16,7 +16,7 @@ pub fn draw_render_dialog(state: &mut AppState) {
     let ctx = state.egui_ctx.clone();
     let mut show = state.production_render.show_dialog;
 
-    egui::Window::new("📷 Production Path Tracer (Cycles / Arnold)")
+    egui::Window::new("Production Path Tracer (Cycles / Arnold)")
         .open(&mut show)
         .default_width(920.0)
         .default_height(640.0)
@@ -50,7 +50,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
     ui.add_space(8.0);
 
     // Resolution Presets
-    egui::CollapsingHeader::new("📐 Resolution")
+    egui::CollapsingHeader::new("Resolution")
         .default_open(true)
         .show(ui, |ui| {
             let current_preset = state.production_render.resolution_preset;
@@ -90,7 +90,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
     ui.add_space(4.0);
 
     // Quality & Sampling
-    egui::CollapsingHeader::new("✨ Quality & Sampling")
+    egui::CollapsingHeader::new("Quality & Sampling")
         .default_open(true)
         .show(ui, |ui| {
             let current_sample_preset = state.production_render.sample_preset;
@@ -128,7 +128,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
     ui.add_space(4.0);
 
     // Camera Selection
-    egui::CollapsingHeader::new("🎥 Camera Source")
+    egui::CollapsingHeader::new("Camera Source")
         .default_open(true)
         .show(ui, |ui| {
             let has_scene_camera = state.active_camera_node.is_some();
@@ -148,7 +148,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
     ui.add_space(4.0);
 
     // Depth of Field (DoF) & Bokeh
-    egui::CollapsingHeader::new("🔍 Depth of Field (Bokeh)")
+    egui::CollapsingHeader::new("Depth of Field (Bokeh)")
         .default_open(false)
         .show(ui, |ui| {
             ui.checkbox(&mut state.production_render.dof_enabled, "Enable Optical Blur");
@@ -161,7 +161,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
                     ui.label("Focus Dist:");
                     ui.add(egui::DragValue::new(&mut state.production_render.focus_distance).range(0.1..=100.0).speed(0.1).suffix(" m"));
                 });
-                if ui.button("🎯 Autofocus to Target").clicked() {
+                if ui.button("Autofocus to Target").clicked() {
                     let eye = state.camera.eye_position();
                     let target = state.camera.target;
                     state.production_render.focus_distance = (eye - target).length().max(0.1);
@@ -172,7 +172,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
     ui.add_space(4.0);
 
     // Post-Production & LookDev (VFB Compositor)
-    egui::CollapsingHeader::new("✨ Post-Production & LookDev")
+    egui::CollapsingHeader::new("Post-Production & LookDev")
         .default_open(true)
         .show(ui, |ui| {
             ui.checkbox(&mut state.production_render.post_process.enabled, "Enable Post-Processing");
@@ -216,20 +216,20 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
 
     if !is_rendering {
         let btn_text = if state.production_render.buffer.is_some() {
-            "🔄 Re-render (F12)"
+            "Re-render (F12)"
         } else {
-            "▶ Start Render (F12)"
+            "Start Render (F12)"
         };
         if ui.add_sized([ui.available_width(), 32.0], egui::Button::new(egui::RichText::new(btn_text).strong().size(14.0))).clicked() {
             start_production_render(state);
         }
     } else {
         ui.horizontal(|ui| {
-            let pause_label = if is_paused { "▶ Resume" } else { "⏸ Pause" };
+            let pause_label = if is_paused { "Resume" } else { "Pause" };
             if ui.button(pause_label).clicked() {
                 state.production_render.is_paused = !is_paused;
             }
-            if ui.button("⏹ Stop").clicked() {
+            if ui.button("Stop").clicked() {
                 state.production_render.is_rendering = false;
                 state.production_render.status_message = "Render stopped by user".to_string();
             }
@@ -248,7 +248,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
 
         let elapsed = state.production_render.total_elapsed_secs;
         let sps = if elapsed > 0.05 { current as f32 / elapsed } else { 0.0 };
-        ui.label(egui::RichText::new(format!("⏱ Elapsed: {:.1}s  |  ⚡ Speed: {:.1} spp/s", elapsed, sps)).size(11.0).color(egui::Color32::LIGHT_GRAY));
+        ui.label(egui::RichText::new(format!("Elapsed: {:.1}s  |  Speed: {:.1} spp/s", elapsed, sps)).size(11.0).color(egui::Color32::LIGHT_GRAY));
     }
 
     ui.add_space(8.0);
@@ -256,7 +256,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
     ui.add_space(4.0);
 
     // File Export Panel
-    egui::CollapsingHeader::new("💾 Export Image")
+    egui::CollapsingHeader::new("Export Image")
         .default_open(true)
         .show(ui, |ui| {
             ui.horizontal(|ui| {
@@ -264,7 +264,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
                 ui.text_edit_singleline(&mut state.production_render.export_path);
             });
             let can_save = state.production_render.buffer.as_ref().is_some_and(|b| b.samples_rendered > 0);
-            if ui.add_enabled(can_save, egui::Button::new("💾 Save Image as PNG")).clicked() {
+            if ui.add_enabled(can_save, egui::Button::new("Save Image as PNG")).clicked() {
                 if let Some(buf) = &state.production_render.buffer {
                     let path = state.production_render.export_path.clone();
                     let res = if state.production_render.post_process.enabled {
@@ -310,7 +310,7 @@ fn draw_preview_canvas(state: &mut AppState, ui: &mut egui::Ui) {
             ui.centered_and_justified(|ui| {
                 ui.vertical_centered(|ui| {
                     ui.add_space(available_size.y * 0.35);
-                    ui.label(egui::RichText::new("📷 Production Ray Tracer").size(20.0).color(egui::Color32::GRAY));
+                    ui.label(egui::RichText::new("Production Ray Tracer").size(20.0).color(egui::Color32::GRAY));
                     ui.label(egui::RichText::new("Click 'Start Render (F12)' to begin Monte Carlo sample passes").size(13.0).color(egui::Color32::DARK_GRAY));
                 });
             });

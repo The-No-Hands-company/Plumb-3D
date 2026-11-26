@@ -7,7 +7,7 @@ use core_math::vec2;
 use egui::Ui;
 
 pub fn draw_motion_panel(ui: &mut Ui, state: &mut AppState) {
-    ui.heading("🏃 Motion Matching Locomotion Pad");
+    ui.heading("Motion Matching Locomotion Pad");
     ui.label(
         egui::RichText::new("AAA database query locomotion with quintic inertialization blend.")
             .small()
@@ -20,35 +20,35 @@ pub fn draw_motion_panel(ui: &mut Ui, state: &mut AppState) {
         ui.label(egui::RichText::new("Directional Input Vector").strong());
 
         ui.vertical_centered(|ui| {
-            if ui.button("⬆ Forward").clicked() {
+            if ui.button("Forward (W / Up)").clicked() {
                 state.motion_stick = vec2(0.0, if state.motion_sprint { 1.0 } else { 0.5 });
             }
 
             ui.horizontal(|ui| {
-                ui.add_space(ui.available_width() * 0.2);
-                if ui.button("⬅ Left").clicked() {
+                ui.add_space(ui.available_width() * 0.15);
+                if ui.button("Left (A)").clicked() {
                     state.motion_stick = vec2(-0.8, 0.0);
                 }
-                if ui.button("⏹ Stop").clicked() {
+                if ui.button("Stop").clicked() {
                     state.motion_stick = vec2(0.0, 0.0);
                 }
-                if ui.button("➡ Right").clicked() {
+                if ui.button("Right (D)").clicked() {
                     state.motion_stick = vec2(0.8, 0.0);
                 }
             });
 
-            if ui.button("⬇ Backward").clicked() {
+            if ui.button("Backward (S / Down)").clicked() {
                 state.motion_stick = vec2(0.0, -0.5);
             }
         });
 
         ui.add_space(4.0);
         ui.horizontal(|ui| {
-            ui.checkbox(&mut state.motion_sprint, "⚡ Sprint Mode (Shift)");
+            ui.checkbox(&mut state.motion_sprint, "Sprint Mode (Shift)");
             ui.label(format!("Stick: ({:.2}, {:.2})", state.motion_stick.x, state.motion_stick.y));
         });
 
-        if ui.button("▶ Step Locomotion Engine (16ms)").clicked() {
+        if ui.button("Step Locomotion Engine (16ms)").clicked() {
             state.motion_matching.step(0.016, state.motion_stick);
         }
     });
@@ -63,13 +63,13 @@ pub fn draw_motion_panel(ui: &mut Ui, state: &mut AppState) {
         let right_planted = state.motion_matching.is_right_foot_planted();
 
         ui.horizontal(|ui| {
-            let left_text = if left_planted { "🦶 Left Foot: PLANTED" } else { "🦶 Left Foot: SWING" };
+            let left_text = if left_planted { "Left Foot: PLANTED" } else { "Left Foot: SWING" };
             let left_color = if left_planted { egui::Color32::from_rgb(80, 220, 100) } else { egui::Color32::from_rgb(200, 200, 200) };
             ui.label(egui::RichText::new(left_text).color(left_color).strong());
 
             ui.separator();
 
-            let right_text = if right_planted { "🦶 Right Foot: PLANTED" } else { "🦶 Right Foot: SWING" };
+            let right_text = if right_planted { "Right Foot: PLANTED" } else { "Right Foot: SWING" };
             let right_color = if right_planted { egui::Color32::from_rgb(80, 220, 100) } else { egui::Color32::from_rgb(200, 200, 200) };
             ui.label(egui::RichText::new(right_text).color(right_color).strong());
         });

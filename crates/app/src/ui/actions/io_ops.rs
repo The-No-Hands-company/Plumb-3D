@@ -57,7 +57,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
                     state.selected_node = Some(id);
                     state.project_file_path = Some(path.clone());
                     state.sync_gpu_meshes();
-                    state.set_status_message(format!("📂 Opened project: {}", path.display()));
+                    state.set_status_message(format!("Opened project: {}", path.display()));
                 }
             }
         }
@@ -86,7 +86,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
             {
                 let content = mesh.to_gltf(&name);
                 let _ = std::fs::write(&path, content);
-                state.set_status_message(format!("🌐 Exported glTF to: {}", path.display()));
+                state.set_status_message(format!("Exported glTF to: {}", path.display()));
             }
         }
     }
@@ -101,7 +101,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
             {
                 let content = mesh.to_obj(&name);
                 let _ = std::fs::write(&path, content);
-                state.set_status_message(format!("📦 Exported OBJ to: {}", path.display()));
+                state.set_status_message(format!("Exported OBJ to: {}", path.display()));
             }
         }
     }
@@ -116,7 +116,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
             {
                 let bytes = mesh.to_stl_binary();
                 let _ = std::fs::write(&path, bytes);
-                state.set_status_message(format!("🖨 Exported Binary STL to: {}", path.display()));
+                state.set_status_message(format!("Exported Binary STL to: {}", path.display()));
             }
         }
     }
@@ -131,7 +131,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
             {
                 let bytes = mesh.to_ply_binary();
                 let _ = std::fs::write(&path, bytes);
-                state.set_status_message(format!("☁ Exported Binary PLY to: {}", path.display()));
+                state.set_status_message(format!("Exported Binary PLY to: {}", path.display()));
             }
         }
     }
@@ -145,7 +145,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
                 .save_file()
             {
                 if mesh.export_step_file(&path).is_ok() {
-                    state.set_status_message(format!("📐 Exported CAD Solid STEP to: {}", path.display()));
+                    state.set_status_message(format!("Exported CAD Solid STEP to: {}", path.display()));
                 }
             }
         }
@@ -160,7 +160,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
                 .save_file()
             {
                 if mesh.export_subd_nurbs_step_file(&path).is_ok() {
-                    state.set_status_message(format!("📐 Exported Continuous SubD-to-NURBS STEP Solid to: {}", path.display()));
+                    state.set_status_message(format!("Exported Continuous SubD-to-NURBS STEP Solid to: {}", path.display()));
                 }
             }
         }
@@ -174,7 +174,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
             .save_file()
         {
             if graph_engine::export_scene_to_usda_file(&state.scene, &path).is_ok() {
-                state.set_status_message(format!("🎬 Exported Pixar OpenUSD Scene to: {}", path.display()));
+                state.set_status_message(format!("Exported Pixar OpenUSD Scene to: {}", path.display()));
             }
         }
     }
@@ -191,7 +191,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
                         state.selected_node = Some(first);
                     }
                     state.sync_gpu_meshes();
-                    state.set_status_message(format!("🎬 Imported {} nodes from USDA: {}", nodes.len(), path.display()));
+                    state.set_status_message(format!("Imported {} nodes from USDA: {}", nodes.len(), path.display()));
                 }
                 Err(err) => {
                     state.set_status_message(format!("Failed to import USDA: {}", err));
@@ -210,7 +210,7 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
             {
                 let settings = geo_kernel::SlicerSettings::default();
                 if mesh.export_gcode_file(&path, &settings).is_ok() {
-                    state.set_status_message(format!("🖨 Exported 3D Print G-code to: {}", path.display()));
+                    state.set_status_message(format!("Exported 3D Print G-code to: {}", path.display()));
                 }
             }
         }
@@ -224,7 +224,7 @@ fn save_current_project_to(state: &mut AppState, path: &Path) {
     if let Some((name, mesh)) = get_active_mesh(state) {
         let bytes = mesh.to_plmb(&name);
         if std::fs::write(path, bytes).is_ok() {
-            state.set_status_message(format!("💾 Saved project to: {}", path.display()));
+            state.set_status_message(format!("Saved project to: {}", path.display()));
         }
     }
 }
@@ -264,7 +264,7 @@ pub fn import_model_from_file(state: &mut AppState, path: &Path) {
             if let Ok(bytes) = std::fs::read(path) {
                 if let Ok((mesh, meta)) = Mesh::from_plmb(&bytes) {
                     insert_mesh_into_scene(state, &meta.model_name, mesh);
-                    state.set_status_message(format!("📂 Loaded .plmb: {}", path.display()));
+                    state.set_status_message(format!("Loaded .plmb: {}", path.display()));
                 }
             }
         }
@@ -272,7 +272,7 @@ pub fn import_model_from_file(state: &mut AppState, path: &Path) {
             if let Ok(src) = std::fs::read_to_string(path) {
                 if let Ok(mesh) = Mesh::from_obj(&src) {
                     insert_mesh_into_scene(state, file_stem, mesh);
-                    state.set_status_message(format!("📦 Imported OBJ: {}", path.display()));
+                    state.set_status_message(format!("Imported OBJ: {}", path.display()));
                 }
             }
         }
@@ -280,7 +280,7 @@ pub fn import_model_from_file(state: &mut AppState, path: &Path) {
             if let Ok(bytes) = std::fs::read(path) {
                 if let Ok(mesh) = Mesh::from_stl(&bytes) {
                     insert_mesh_into_scene(state, file_stem, mesh);
-                    state.set_status_message(format!("🖨 Imported STL: {}", path.display()));
+                    state.set_status_message(format!("Imported STL: {}", path.display()));
                 }
             }
         }
@@ -288,7 +288,7 @@ pub fn import_model_from_file(state: &mut AppState, path: &Path) {
             if let Ok(bytes) = std::fs::read(path) {
                 if let Ok(mesh) = Mesh::from_ply(&bytes) {
                     insert_mesh_into_scene(state, file_stem, mesh);
-                    state.set_status_message(format!("☁ Imported PLY: {}", path.display()));
+                    state.set_status_message(format!("Imported PLY: {}", path.display()));
                 }
             }
         }
@@ -296,12 +296,12 @@ pub fn import_model_from_file(state: &mut AppState, path: &Path) {
             if let Ok(src) = std::fs::read_to_string(path) {
                 if let Ok(mesh) = Mesh::from_gltf(&src) {
                     insert_mesh_into_scene(state, file_stem, mesh);
-                    state.set_status_message(format!("🌐 Imported glTF: {}", path.display()));
+                    state.set_status_message(format!("Imported glTF: {}", path.display()));
                 }
             }
         }
         _ => {
-            state.set_status_message(format!("⚠ Unsupported file format: .{}", ext));
+            state.set_status_message(format!("Unsupported file format: .{}", ext));
         }
     }
 }

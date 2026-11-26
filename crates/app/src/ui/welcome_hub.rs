@@ -115,7 +115,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                 );
                 ui.add_space(2.0);
                 ui.label(
-                    egui::RichText::new("🏰 Medieval Citadel & Fortress • Plumb 3D v1.0.0 Official Release Splash Artwork")
+                    egui::RichText::new("Medieval Citadel & Fortress • Plumb 3D v1.0.0 Official Release Splash Artwork")
                         .size(10.0)
                         .italics()
                         .color(egui::Color32::from_rgb(130, 140, 160)),
@@ -130,7 +130,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                     ui.label(egui::RichText::new("Precision & Hard-Surface DCC Suite • v1.0.0").size(12.0).color(egui::Color32::from_rgb(160, 170, 190)));
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.button("❌ Close").clicked() {
+                    if ui.button("Close").clicked() {
                         close = true;
                     }
                 });
@@ -146,7 +146,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                     .inner_margin(egui::Margin::symmetric(10.0, 6.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("💾 Unsaved Session Recovery Available").strong().color(egui::Color32::from_rgb(255, 215, 0)));
+                            ui.label(egui::RichText::new("Unsaved Session Recovery Available").strong().color(egui::Color32::from_rgb(255, 215, 0)));
                             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                                 if ui.button(egui::RichText::new("Restore Session").strong().color(egui::Color32::from_rgb(226, 179, 87))).clicked() {
                                     let mut autosave = std::mem::take(&mut state.autosave);
@@ -166,15 +166,15 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
 
             ui.columns(2, |columns| {
                 // Left Column: New Project Starter Templates
-                columns[0].label(egui::RichText::new("✨ New Project Templates").strong().size(14.0).color(egui::Color32::WHITE));
+                columns[0].label(egui::RichText::new("New Project Templates").strong().size(14.0).color(egui::Color32::WHITE));
                 columns[0].add_space(4.0);
 
                 let templates = [
-                    (ProjectTemplate::General, "📦 General 3D", "Standard scene with default cube and studio lighting"),
-                    (ProjectTemplate::HardSurface, "🔨 Hard-Surface Modeling", "Sub-d quad mesh, face mode, wireframe active"),
-                    (ProjectTemplate::CadPrecision, "📐 CAD Precision Drafting", "1mm grid snapping, calipers active, orthogonal camera"),
-                    (ProjectTemplate::Sculpting, "🗿 Organic Sculpting", "Sculpting sphere, MatCap Clay, brush tools active"),
-                    (ProjectTemplate::CastleTower, "🏰 Medieval Castle Tower", "Architectural cylinder base with double inset & crenels"),
+                    (ProjectTemplate::General, "General 3D", "Standard scene with default cube and studio lighting"),
+                    (ProjectTemplate::HardSurface, "Hard-Surface Modeling", "Sub-d quad mesh, face mode, wireframe active"),
+                    (ProjectTemplate::CadPrecision, "CAD Precision Drafting", "1mm grid snapping, calipers active, orthogonal camera"),
+                    (ProjectTemplate::Sculpting, "Organic Sculpting", "Sculpting sphere, MatCap Clay, brush tools active"),
+                    (ProjectTemplate::CastleTower, "Medieval Castle Tower", "Architectural cylinder base with double inset & crenels"),
                 ];
 
                 for (tmpl, title, desc) in templates {
@@ -197,7 +197,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                 }
 
                 // Right Column: Getting Started & Settings
-                columns[1].label(egui::RichText::new("🚀 Getting Started").strong().size(14.0).color(egui::Color32::WHITE));
+                columns[1].label(egui::RichText::new("Getting Started").strong().size(14.0).color(egui::Color32::WHITE));
                 columns[1].add_space(4.0);
 
                 let doc_frame = egui::Frame::none()
@@ -207,26 +207,26 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                     .inner_margin(egui::Margin::same(10.0));
 
                 doc_frame.show(&mut columns[1], |ui| {
-                    if ui.button("📖 Open User Manual (F1)").clicked() {
+                    if ui.button("Open User Manual (F1)").clicked() {
                         state.show_help_dialog = true;
                         state.help_dialog_tab = 0;
                         close = true;
                     }
                     ui.add_space(4.0);
-                    if ui.button("🎓 Beginner Step-by-Step Tutorials").clicked() {
+                    if ui.button("Beginner Step-by-Step Tutorials").clicked() {
                         state.show_help_dialog = true;
                         state.help_dialog_tab = 1;
                         close = true;
                     }
                     ui.add_space(4.0);
-                    if ui.button("🔍 Search Commands (F3 / Ctrl+K)").clicked() {
+                    if ui.button("Search Commands (F3 / Ctrl+K)").clicked() {
                         state.command_palette.is_open = true;
                         close = true;
                     }
                 });
 
                 columns[1].add_space(10.0);
-                columns[1].label(egui::RichText::new("⌨ Navigation Keymap Style").strong().size(13.0).color(egui::Color32::WHITE));
+                columns[1].label(egui::RichText::new("Navigation Keymap Style").strong().size(13.0).color(egui::Color32::WHITE));
                 columns[1].add_space(2.0);
 
                 egui::ComboBox::from_id_salt("welcome_keymap_combo")
@@ -242,7 +242,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                     });
 
                 columns[1].add_space(10.0);
-                columns[1].label(egui::RichText::new("🖥 UI Density").strong().size(13.0).color(egui::Color32::WHITE));
+                columns[1].label(egui::RichText::new("UI Density").strong().size(13.0).color(egui::Color32::WHITE));
                 columns[1].horizontal(|ui| {
                     if ui.selectable_value(&mut state.preferences.ui_density, UiDensity::Comfortable, "Comfortable").clicked() {
                         crate::ui::preferences::apply_ui_density(&state.egui_ctx, UiDensity::Comfortable);

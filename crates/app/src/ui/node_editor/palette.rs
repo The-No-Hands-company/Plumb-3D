@@ -139,8 +139,8 @@ impl SpawnNodeAction {
 pub fn show_add_node_menu(ui: &mut egui::Ui) -> Option<SpawnNodeAction> {
     let mut selected = None;
 
-    ui.menu_button("➕ Add Node", |ui| {
-        ui.menu_button("🧊 Primitives", |ui| {
+    ui.menu_button("Add Node", |ui| {
+        ui.menu_button("Primitives", |ui| {
             if ui.button("Cube").clicked() {
                 selected = Some(SpawnNodeAction::Cube);
                 ui.close_menu();
@@ -163,7 +163,7 @@ pub fn show_add_node_menu(ui: &mut egui::Ui) -> Option<SpawnNodeAction> {
             }
         });
 
-        ui.menu_button("⚡ Geometry Ops", |ui| {
+        ui.menu_button("Geometry Ops", |ui| {
             if ui.button("Transform Geometry").clicked() {
                 selected = Some(SpawnNodeAction::Transform);
                 ui.close_menu();
@@ -206,7 +206,7 @@ pub fn show_add_node_menu(ui: &mut egui::Ui) -> Option<SpawnNodeAction> {
             }
         });
 
-        ui.menu_button("✨ Points & Instances", |ui| {
+        ui.menu_button("Points & Instances", |ui| {
             if ui.button("Mesh to Points").clicked() {
                 selected = Some(SpawnNodeAction::MeshToPoints);
                 ui.close_menu();
@@ -221,7 +221,7 @@ pub fn show_add_node_menu(ui: &mut egui::Ui) -> Option<SpawnNodeAction> {
             }
         });
 
-        ui.menu_button("➰ Curves", |ui| {
+        ui.menu_button("Curves", |ui| {
             if ui.button("Spline Circle").clicked() {
                 selected = Some(SpawnNodeAction::SplineCircle);
                 ui.close_menu();
@@ -240,7 +240,7 @@ pub fn show_add_node_menu(ui: &mut egui::Ui) -> Option<SpawnNodeAction> {
             }
         });
 
-        ui.menu_button("📐 Math & Procedural", |ui| {
+        ui.menu_button("Math & Procedural", |ui| {
             if ui.button("Math").clicked() {
                 selected = Some(SpawnNodeAction::Math);
                 ui.close_menu();
@@ -263,7 +263,7 @@ pub fn show_add_node_menu(ui: &mut egui::Ui) -> Option<SpawnNodeAction> {
             }
         });
 
-        ui.menu_button("🎛 Inputs & Output", |ui| {
+        ui.menu_button("Inputs & Output", |ui| {
             if ui.button("Group Input").clicked() {
                 selected = Some(SpawnNodeAction::GroupInput);
                 ui.close_menu();

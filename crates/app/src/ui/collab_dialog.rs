@@ -12,7 +12,7 @@ pub fn draw_collab_dialog(state: &mut AppState) {
     }
 
     let mut open = state.show_collab_dialog;
-    egui::Window::new("👥 Live Collaboration Session (Figma for 3D)")
+    egui::Window::new("Live Collaboration Session (Figma for 3D)")
         .open(&mut open)
         .default_size([460.0, 520.0])
         .min_size([380.0, 360.0])

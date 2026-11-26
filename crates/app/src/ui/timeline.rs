@@ -52,10 +52,10 @@ pub fn draw_status_bar(state: &mut AppState) {
                 ui.separator();
 
                 let orient_label = match state.transform_orientation {
-                    TransformOrientation::Global => "🌐 Global",
-                    TransformOrientation::Local => "📦 Local",
-                    TransformOrientation::Normal => "📐 Normal",
-                    TransformOrientation::View => "👁 View",
+                    TransformOrientation::Global => "Global",
+                    TransformOrientation::Local => "Local",
+                    TransformOrientation::Normal => "Normal",
+                    TransformOrientation::View => "View",
                 };
                 if ui.button(format!("Space (,): {}", orient_label)).clicked() {
                     state.transform_orientation = match state.transform_orientation {
@@ -104,7 +104,7 @@ pub fn draw_status_bar(state: &mut AppState) {
 
                 if let Some(ref display) = state.autosave.last_autosave_display {
                     ui.separator();
-                    ui.label(egui::RichText::new(format!("💾 Auto: {}", display)).size(11.0).color(egui::Color32::from_rgb(140, 160, 190)));
+                    ui.label(egui::RichText::new(format!("Auto: {}", display)).size(11.0).color(egui::Color32::from_rgb(140, 160, 190)));
                 }
 
                 if let Some((ref msg, time)) = state.status_toast {
@@ -131,28 +131,28 @@ pub fn draw_timeline(state: &mut AppState, _actions: &mut UiActions) {
                 .default_height(timeline_height)
                 .show(&state.egui_ctx, |ui| {
                     ui.horizontal(|ui| {
-                        ui.selectable_value(&mut state.timeline_mode, TimelineViewMode::DopeSheet, "⏱ Dope Sheet");
-                        ui.selectable_value(&mut state.timeline_mode, TimelineViewMode::FCurve, "📈 F-Curve Editor");
+                        ui.selectable_value(&mut state.timeline_mode, TimelineViewMode::DopeSheet, "Dope Sheet");
+                        ui.selectable_value(&mut state.timeline_mode, TimelineViewMode::FCurve, "F-Curve Editor");
                         ui.separator();
 
                         let play_text = if state.animation.is_playing {
-                            egui::RichText::new("⏸ Pause (Space)").strong().color(egui::Color32::from_rgb(255, 180, 50))
+                            egui::RichText::new("Pause (Space)").strong().color(egui::Color32::from_rgb(255, 180, 50))
                         } else {
-                            egui::RichText::new("▶ Play (Space)").strong().color(egui::Color32::from_rgb(100, 220, 100))
+                            egui::RichText::new("Play (Space)").strong().color(egui::Color32::from_rgb(100, 220, 100))
                         };
                         if ui.button(play_text).clicked() {
                             state.animation.is_playing = !state.animation.is_playing;
                         }
-                        if ui.button("⏮ Start").clicked() {
+                        if ui.button("|< Start").clicked() {
                             state.animation.scrub_to_frame(state.animation.start_frame, &mut state.scene);
                         }
-                        if ui.button("⏭ End").clicked() {
+                        if ui.button(">| End").clicked() {
                             state.animation.scrub_to_frame(state.animation.end_frame, &mut state.scene);
                         }
                         ui.checkbox(&mut state.animation.loop_playback, "Loop");
 
                         ui.separator();
-                        let key_btn = ui.button(egui::RichText::new("🔑 Key (I)").strong().color(egui::Color32::from_rgb(255, 215, 0)));
+                        let key_btn = ui.button(egui::RichText::new("Key (I)").strong().color(egui::Color32::from_rgb(255, 215, 0)));
                         if key_btn.clicked() {
                             if let Some(sel_id) = state.selected_node {
                                 if let Some(node) = state.scene.nodes.get(sel_id) {

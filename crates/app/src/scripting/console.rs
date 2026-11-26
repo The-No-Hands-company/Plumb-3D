@@ -77,7 +77,7 @@ pub fn draw_script_console(state: &mut AppState) {
 
     let mut open = state.show_script_console;
     let window_title = format!(
-        "📜 Scripting Console — {}",
+        "Scripting Console — {}",
         state.script_console_state.language.name()
     );
 
@@ -89,7 +89,7 @@ pub fn draw_script_console(state: &mut AppState) {
             // Top Toolbar
             ui.horizontal(|ui| {
                 if ui
-                    .button("▶ Run Script")
+                    .button("Run Script")
                     .on_hover_text("Execute the current script in the selected runtime")
                     .clicked()
                 {
@@ -143,7 +143,7 @@ pub fn draw_script_console(state: &mut AppState) {
 
                 ui.separator();
 
-                ui.menu_button("📂 Load Preset", |ui| {
+                ui.menu_button("Load Preset", |ui| {
                     match state.script_console_state.language {
                         ScriptLanguage::Rhai => {
                             if ui.button("1. Procedural Building").clicked() {
@@ -179,7 +179,7 @@ pub fn draw_script_console(state: &mut AppState) {
                     }
                 });
 
-                if ui.button("🗑 Clear Logs").clicked() {
+                if ui.button("Clear Logs").clicked() {
                     state.script_console_state.output_logs.clear();
                     state.script_console_state.execution_error = None;
                 }

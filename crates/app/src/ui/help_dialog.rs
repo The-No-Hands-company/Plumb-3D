@@ -8,7 +8,7 @@ pub fn draw_help_dialog(state: &mut AppState) {
 
     let mut open = state.show_help_dialog;
     let egui_ctx = state.egui_ctx.clone();
-    egui::Window::new("📖 User Manual, Tutorials & Shortcuts Reference (F1)")
+    egui::Window::new("User Manual, Tutorials & Shortcuts Reference (F1)")
         .open(&mut open)
         .default_width(780.0)
         .default_height(600.0)
@@ -18,7 +18,7 @@ pub fn draw_help_dialog(state: &mut AppState) {
         .show(&egui_ctx, |ui| {
             // Search Bar
             ui.horizontal(|ui| {
-                ui.label(egui::RichText::new("🔍 Search Manual:").strong());
+                ui.label(egui::RichText::new("Search Manual:").strong());
                 ui.add(
                     egui::TextEdit::singleline(&mut state.help_search_query)
                         .hint_text("Search hotkeys, tutorials, tools, nodes, scripts, rendering...")
@@ -32,14 +32,14 @@ pub fn draw_help_dialog(state: &mut AppState) {
 
             // Tab Navigation Bar
             ui.horizontal_wrapped(|ui| {
-                ui.selectable_value(&mut state.help_dialog_tab, 0, "⌨ Shortcuts");
-                ui.selectable_value(&mut state.help_dialog_tab, 1, "🎓 Tutorials");
-                ui.selectable_value(&mut state.help_dialog_tab, 2, "🛠 Modeling");
-                ui.selectable_value(&mut state.help_dialog_tab, 3, "🌿 Geo Nodes");
-                ui.selectable_value(&mut state.help_dialog_tab, 4, "📜 Rhai Scripts");
-                ui.selectable_value(&mut state.help_dialog_tab, 5, "📷 Path Tracer");
-                ui.selectable_value(&mut state.help_dialog_tab, 6, "🖨 3D Printing");
-                ui.selectable_value(&mut state.help_dialog_tab, 7, "ℹ About");
+                ui.selectable_value(&mut state.help_dialog_tab, 0, "Shortcuts");
+                ui.selectable_value(&mut state.help_dialog_tab, 1, "Tutorials");
+                ui.selectable_value(&mut state.help_dialog_tab, 2, "Modeling");
+                ui.selectable_value(&mut state.help_dialog_tab, 3, "Geo Nodes");
+                ui.selectable_value(&mut state.help_dialog_tab, 4, "Rhai Scripts");
+                ui.selectable_value(&mut state.help_dialog_tab, 5, "Path Tracer");
+                ui.selectable_value(&mut state.help_dialog_tab, 6, "3D Printing");
+                ui.selectable_value(&mut state.help_dialog_tab, 7, "About");
             });
             ui.separator();
 
@@ -64,13 +64,13 @@ pub fn draw_help_dialog(state: &mut AppState) {
 
 #[allow(clippy::type_complexity)]
 fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
-    ui.heading("🎓 Beginner 3D Modeling Tutorials");
+    ui.heading("Beginner 3D Modeling Tutorials");
     ui.label("Hands-on, step-by-step walkthroughs to teach you how to build various styles of 3D models from scratch.");
     ui.add_space(8.0);
 
     let tutorials: &[(&str, &str, &str, &[(&str, &str)])] = &[
         (
-            "📦 1. Sci-Fi Storage Crate (Box Modeling)",
+            "1. Sci-Fi Storage Crate (Box Modeling)",
             "Hard-Surface / Game Prop",
             "Learn core polygonal box modeling: Inset, Extrude, Bevel, and Modifier-based edge chamfering.",
             &[
@@ -84,7 +84,7 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
             ],
         ),
         (
-            "🏰 2. Medieval Castle Tower (Architectural)",
+            "2. Medieval Castle Tower (Architectural)",
             "Environment & Architecture",
             "Construct a castle battlement tower using Cylinder primitives, double Inset, and Walkway Ring Extrusion.",
             &[
@@ -98,12 +98,12 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
             ],
         ),
         (
-            "👽 3. Creature / Character Bust (Organic Sculpting)",
+            "3. Creature / Character Bust (Organic Sculpting)",
             "Organic Character Art",
             "Sculpt a dynamic creature head using the pure-Rust digital sculpting engine and brush falloffs.",
             &[
                 ("1. Base Sphere", "Add a UV Sphere (Add Primitive -> Sphere) with 32 segments and 16 rings. In Inspector, add a Subdivision modifier (level 2) to supply dense sculptable vertices."),
-                ("2. Enter Sculpt Mode", "In the top ribbon header, click the '🎨 Sculpt' mode pill (or switch via Mode dropdown)."),
+                ("2. Enter Sculpt Mode", "In the top ribbon header, click the 'Sculpt' mode pill (or switch via Mode dropdown)."),
                 ("3. Overall Silhouette (Grab Brush)", "Select the 'Grab' brush from the left tool strip or RMB menu. Increase Radius slider to ~1.2m. Click and drag the chin down and the cranium back to establish the skull silhouette."),
                 ("4. Facial Features (Clay & Draw)", "Switch to 'Clay' or 'Draw' brush. Decrease radius to 0.3m. Stroke outward along the brow line, cheekbones, and snout to build up anatomical clay mass."),
                 ("5. Eye Sockets & Horns", "Use 'Inflate' (or hold Shift to invert) to carve deep orbital eye sockets. Use 'SnakeHook' brush to pull organic horns and tentacles straight out of the skull!"),
@@ -111,12 +111,12 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
             ],
         ),
         (
-            "🔧 4. Industrial Pipe & Wiring Harness (Curves)",
+            "4. Industrial Pipe & Wiring Harness (Curves)",
             "Precision Industrial Design",
             "Create smooth, sweepable 3D pipes and hydraulic lines using Bézier spline curves.",
             &[
                 ("1. Add Spline Curve", "Click 'Add Curve -> 3D Spline Curve'. A parametric Bézier curve appears in the viewport."),
-                ("2. Curve Edit Mode", "In the top ribbon, click '〰 Curve' mode. The spline's control knots and tangent handles become visible."),
+                ("2. Curve Edit Mode", "In the top ribbon, click 'Curve' mode. The spline's control knots and tangent handles become visible."),
                 ("3. Shape the Curve", "Select knot points and move them with the 3D Gizmo ('W'). Select the tangent handle tips to rotate and curve the path in 3D space."),
                 ("4. Extrude Knots ('E')", "Select the last knot and press 'E' to extrude new sequential knots following your pipe path."),
                 ("5. Turn Curve to 3D Pipe Mesh", "In the Inspector under 'Curve Properties', set 'Bevel Radius' to 0.15m and 'Bevel Resolution' to 12. The engine instantly sweeps a watertight pipe mesh along the path!"),
@@ -124,18 +124,18 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
             ],
         ),
         (
-            "🏙 5. Procedural City / Sci-Fi Blocks (Geo Nodes)",
+            "5. Procedural City / Sci-Fi Blocks (Geo Nodes)",
             "Procedural Generation",
             "Generate complex procedural geometry networks using the visual node canvas.",
             &[
-                ("1. Open Geo Nodes Canvas", "Click '🌿 Geo Nodes' in the top bar. An infinite node editor canvas opens."),
+                ("1. Open Geo Nodes Canvas", "Click 'Nodes' in the top bar or tool strip. An infinite node editor canvas opens."),
                 ("2. Add Nodes", "Right-click the canvas or click '+ Add Node'. Add: 'Grid Primitive', 'Noise Displace', and 'Group Output'."),
                 ("3. Wire the Pipeline", "Drag from the green Mesh output socket of the Grid node to the input socket of the Noise Displace node. Connect the output of Noise Displace to the Group Output node."),
                 ("4. Procedural Modifiers", "In the 3D Inspector on your object, click 'Modifiers -> + Geo Nodes'. The procedural node graph is now live and non-destructively displacing your object in real time!"),
             ],
         ),
         (
-            "📷 6. Studio Lighting & Bokeh Render (Path Tracer)",
+            "6. Studio Lighting & Bokeh Render (Path Tracer)",
             "Production Rendering",
             "Set up 3-point photographic lighting and render with physical optical depth of field.",
             &[
@@ -143,11 +143,11 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
                 ("2. 3-Point Studio Lights", "Go to 'Add -> Light': Add a Sun light from top-left (Key), a warm Point light on the right (Fill), and a cool Spot light behind the subject (Rim / Hair light)."),
                 ("3. Optical Bokeh Camera", "Select the scene Camera in the Outliner. In Inspector, set 'Aperture Radius' to 0.08m and set 'Focal Distance' to the distance to your model to produce authentic optical bokeh."),
                 ("4. Render (F12)", "Press 'F12' or select 'Render -> Render Image'. Choose '1080p Full HD' and 128 SPP samples."),
-                ("5. Save PNG", "Watch the progressive Monte Carlo ray bounces accumulate clean indirect lighting. Click '💾 Save Image (PNG)' to export to disk."),
+                ("5. Save PNG", "Watch the progressive Monte Carlo ray bounces accumulate clean indirect lighting. Click 'Save Image (PNG)' to export to disk."),
             ],
         ),
         (
-            "🏺 7. Watertight Geometric Vase for 3D Printing",
+            "7. Watertight Geometric Vase for 3D Printing",
             "3D Printing & CAD",
             "Model a hollow, manifold geometric vase and export clean STL for 3D slicers.",
             &[
