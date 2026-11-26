@@ -10,9 +10,9 @@ pub fn render(state: &mut AppState) {
     }
 
     let ctx = state.egui_ctx.clone();
-    let height = state.surface_config.height as f32;
-    let panel_x = if state.show_outliner { 250.0 } else { 20.0 };
-    let panel_y = height - 70.0;
+    let vp = state.egui_ctx.available_rect();
+    let panel_x = vp.min.x + 14.0;
+    let panel_y = vp.max.y - 36.0;
 
     let op = state.last_operator.as_ref().unwrap().clone();
     let op_title = match &op {
@@ -40,7 +40,7 @@ pub fn render(state: &mut AppState) {
     let mut close_panel = false;
 
     egui::Area::new(egui::Id::new("adjust_last_operator_panel"))
-        .fixed_pos(egui::pos2(panel_x, panel_y - 120.0))
+        .fixed_pos(egui::pos2(panel_x, vp.max.y - 200.0))
         .order(egui::Order::Middle)
         .show(&ctx, |ui| {
             egui::Frame::window(ui.style())

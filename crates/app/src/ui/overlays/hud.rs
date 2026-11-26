@@ -97,11 +97,16 @@ fn draw_viewport_orientation_compass(camera: &mut ViewportCamera, ui: &mut egui:
 }
 
 pub fn render(state: &mut AppState) {
-    let top_y_offset = 75.0_f32;
+    let vp = state.egui_ctx.available_rect();
+    let top_y_offset = vp.min.y + 12.0;
 
     // 1. Render Viewport Statistics Heads-Up Display (HUD)
     if state.show_viewport_hud {
-        let hud_x = if state.show_outliner { 240.0 } else { 20.0 };
+        let hud_x = if state.show_left_toolbar {
+            vp.min.x + 58.0
+        } else {
+            vp.min.x + 12.0
+        };
         egui::Area::new(egui::Id::new("viewport_hud_overlay"))
             .fixed_pos(egui::pos2(hud_x, top_y_offset))
             .order(egui::Order::Middle)
@@ -173,8 +178,7 @@ pub fn render(state: &mut AppState) {
     }
 
     // 2. Render 3D Viewport Navigation Orbit Gizmo in top-right overlay area
-    let right_margin = if state.show_inspector { 300.0 } else { 20.0 };
-    let compass_x = (state.surface_config.width as f32 - right_margin - 85.0).max(250.0);
+    let compass_x = vp.max.x - 88.0;
     let camera = &mut state.camera;
     let mut compass_changed = false;
     egui::Area::new(egui::Id::new("viewport_compass_area"))

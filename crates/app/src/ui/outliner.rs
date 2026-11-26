@@ -37,8 +37,9 @@ pub fn draw_outliner(state: &mut AppState, actions: &mut UiActions) {
                 let mut toggle_vis = None;
                 let root_nodes = state.scene.root_nodes.clone();
 
+                let avail_h = (ui.available_height() - 100.0).max(180.0);
                 egui::ScrollArea::vertical()
-                    .max_height(350.0)
+                    .max_height(avail_h)
                     .auto_shrink([false, false])
                     .show(ui, |ui| {
                         for root_id in root_nodes {

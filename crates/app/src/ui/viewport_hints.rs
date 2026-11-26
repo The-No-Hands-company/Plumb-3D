@@ -79,17 +79,11 @@ pub fn draw_viewport_hints(state: &mut AppState) {
         )
     };
 
-    let y_offset = if state.timeline_expanded {
-        match state.timeline_mode {
-            TimelineViewMode::DopeSheet => -102.0_f32,
-            TimelineViewMode::FCurve => -244.0_f32,
-        }
-    } else {
-        -36.0_f32
-    };
+    let vp = state.egui_ctx.available_rect();
 
     egui::Area::new(egui::Id::new("viewport_action_hints_area"))
-        .anchor(egui::Align2::CENTER_BOTTOM, egui::vec2(0.0_f32, y_offset))
+        .pivot(egui::Align2::CENTER_BOTTOM)
+        .fixed_pos(egui::pos2(vp.center().x, vp.max.y - 10.0))
         .show(&ctx, |ui| {
             egui::Frame::none()
                 .fill(egui::Color32::from_rgba_premultiplied(16, 20, 28, 225))

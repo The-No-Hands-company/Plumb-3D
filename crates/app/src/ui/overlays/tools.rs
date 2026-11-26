@@ -511,9 +511,11 @@ pub fn render(state: &mut AppState) {
         let mut toggle_cutter = false;
         let mut toggle_push_pull = false;
         let mut toggle_kitbash = false;
-        let left_offset = if state.show_outliner { 235.0 } else { 15.0 };
+        let vp = state.egui_ctx.available_rect();
+        let tool_x = vp.min.x + 12.0;
+        let tool_y = vp.min.y + 12.0;
         egui::Area::new(egui::Id::new("left_viewport_tool_strip"))
-            .fixed_pos(egui::pos2(left_offset, 75.0))
+            .fixed_pos(egui::pos2(tool_x, tool_y))
             .order(egui::Order::Middle)
             .show(&state.egui_ctx, |ui| {
                 egui::Frame::popup(ui.style())

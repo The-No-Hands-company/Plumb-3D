@@ -13,16 +13,6 @@ pub fn draw_top_menu(state: &mut AppState, actions: &mut UiActions) {
     // 1. Application Main Menu Bar
     egui::TopBottomPanel::top("top_app_menu_bar").show(&ctx, |ui| {
         egui::menu::bar(ui, |ui| {
-            draw_file_menu(state, actions, ui);
-            draw_edit_menu(state, actions, ui);
-            draw_add_menu(actions, ui);
-            draw_render_menu(state, ui);
-            draw_window_menu(state, ui);
-            draw_help_menu(state, ui);
-
-            ui.separator();
-            crate::ui::workspaces::draw_workspace_bar(state, ui);
-
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if ui.button("🔍 Search (F3)").on_hover_text("Open Omnipresent Command Palette (F3 / Ctrl+K)").clicked() {
                     state.command_palette.is_open = true;
@@ -38,6 +28,18 @@ pub fn draw_top_menu(state: &mut AppState, actions: &mut UiActions) {
                     state.production_render.show_dialog = true;
                     crate::ui::render_dialog::start_production_render(state);
                 }
+
+                ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                    draw_file_menu(state, actions, ui);
+                    draw_edit_menu(state, actions, ui);
+                    draw_add_menu(actions, ui);
+                    draw_render_menu(state, ui);
+                    draw_window_menu(state, ui);
+                    draw_help_menu(state, ui);
+
+                    ui.separator();
+                    crate::ui::workspaces::draw_workspace_bar(state, ui);
+                });
             });
         });
     });
