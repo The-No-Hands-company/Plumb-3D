@@ -291,6 +291,28 @@ pub fn render(state: &mut AppState) {
                                         changed |= ui.add(egui::DragValue::new(segments).range(8..=48)).changed();
                                     });
                                 }
+                                PrimitiveParams::GeodesicDome { radius, frequency } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("Radius:");
+                                        changed |= ui.add(egui::DragValue::new(radius).speed(0.01).range(0.1..=50.0)).changed();
+                                        ui.label("Frequency (V):");
+                                        changed |= ui.add(egui::DragValue::new(frequency).range(1..=6)).changed();
+                                    });
+                                }
+                                PrimitiveParams::PipeThread { major_diameter, pitch, thread_length, segments_per_turn } => {
+                                    ui.horizontal(|ui| {
+                                        ui.label("Major Dia:");
+                                        changed |= ui.add(egui::DragValue::new(major_diameter).speed(0.01).range(0.1..=20.0)).changed();
+                                        ui.label("Pitch:");
+                                        changed |= ui.add(egui::DragValue::new(pitch).speed(0.005).range(0.05..=5.0)).changed();
+                                    });
+                                    ui.horizontal(|ui| {
+                                        ui.label("Length:");
+                                        changed |= ui.add(egui::DragValue::new(thread_length).speed(0.01).range(0.1..=50.0)).changed();
+                                        ui.label("Segs/Turn:");
+                                        changed |= ui.add(egui::DragValue::new(segments_per_turn).range(8..=64)).changed();
+                                    });
+                                }
                             }
                             if changed {
                                 updated_op = Some(LastOperatorInfo::AddPrimitive { node_id, params: p });

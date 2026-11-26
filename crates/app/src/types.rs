@@ -134,6 +134,8 @@ pub enum PrimitiveParams {
     Capsule { radius: f32, cylinder_height: f32, segments: u32, hemisphere_rings: u32 },
     IcoSphere { radius: f32, subdivisions: u32 },
     PlumbBob { segments: usize },
+    GeodesicDome { radius: f32, frequency: u32 },
+    PipeThread { major_diameter: f32, pitch: f32, thread_length: f32, segments_per_turn: u32 },
 }
 
 impl PrimitiveParams {
@@ -149,6 +151,8 @@ impl PrimitiveParams {
             Self::Capsule { .. } => "Add Capsule / Pill",
             Self::IcoSphere { .. } => "Add IcoSphere",
             Self::PlumbBob { .. } => "Add Plumb Bob",
+            Self::GeodesicDome { .. } => "Add Geodesic Dome",
+            Self::PipeThread { .. } => "Add Pipe / Screw Thread",
         }
     }
 
@@ -183,6 +187,12 @@ impl PrimitiveParams {
             }
             Self::PlumbBob { segments } => {
                 geo_kernel::Primitives::create_plumb_bob_detailed(*segments)
+            }
+            Self::GeodesicDome { radius, frequency } => {
+                geo_kernel::Primitives::create_geodesic_dome(*radius, *frequency)
+            }
+            Self::PipeThread { major_diameter, pitch, thread_length, segments_per_turn } => {
+                geo_kernel::Primitives::create_pipe_thread(*major_diameter, *pitch, *thread_length, *segments_per_turn)
             }
         }
     }

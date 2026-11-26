@@ -383,6 +383,24 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
             }
         }),
     },
+    PaletteItem {
+        name: "Spawn Geodesic Dome",
+        category: "Add",
+        shortcut: "Add > Mesh",
+        keywords: &["geodesic", "dome", "hemisphere", "sphere", "architecture"],
+        action: PaletteAction::TriggerAction(|_, a| {
+            a.spawn_mesh = Some(("GeodesicDome", geo_kernel::Primitives::create_geodesic_dome(2.0, 2)));
+        }),
+    },
+    PaletteItem {
+        name: "Spawn Pipe / Screw Thread",
+        category: "Add",
+        shortcut: "Add > Mesh",
+        keywords: &["pipe", "thread", "screw", "helix", "cad", "mechanical"],
+        action: PaletteAction::TriggerAction(|_, a| {
+            a.spawn_mesh = Some(("PipeThread", geo_kernel::Primitives::create_pipe_thread(1.2, 0.3, 2.0, 16)));
+        }),
+    },
     // --- Themes ---
     PaletteItem {
         name: "Theme: Plumb Slate (Default Gold)",

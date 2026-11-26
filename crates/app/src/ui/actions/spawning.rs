@@ -36,6 +36,8 @@ pub fn handle_spawning(state: &mut AppState, actions: &mut UiActions) {
             "Capsule" => Some(crate::types::PrimitiveParams::Capsule { radius: 0.8, cylinder_height: 1.8, segments: 16, hemisphere_rings: 6 }),
             "IcoSphere" => Some(crate::types::PrimitiveParams::IcoSphere { radius: 1.2, subdivisions: 2 }),
             "PlumbBob" => Some(crate::types::PrimitiveParams::PlumbBob { segments: 24 }),
+            "GeodesicDome" => Some(crate::types::PrimitiveParams::GeodesicDome { radius: 2.0, frequency: 2 }),
+            "PipeThread" => Some(crate::types::PrimitiveParams::PipeThread { major_diameter: 1.2, pitch: 0.3, thread_length: 2.0, segments_per_turn: 16 }),
             _ => None,
         };
 

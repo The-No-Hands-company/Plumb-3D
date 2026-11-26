@@ -508,6 +508,16 @@ fn draw_quick_add_menu(actions: &mut UiActions, close_menu: &mut bool, ui: &mut 
             *close_menu = true;
         }
     });
+    ui.horizontal(|ui| {
+        if ui.button("Dome").clicked() {
+            actions.spawn_mesh = Some(("GeodesicDome", Primitives::create_geodesic_dome(2.0, 2)));
+            *close_menu = true;
+        }
+        if ui.button("Pipe Thread").clicked() {
+            actions.spawn_mesh = Some(("PipeThread", Primitives::create_pipe_thread(1.2, 0.3, 2.0, 16)));
+            *close_menu = true;
+        }
+    });
 
     ui.separator();
     ui.label(egui::RichText::new("LIGHTS & CAMERAS").small().color(egui::Color32::GRAY));

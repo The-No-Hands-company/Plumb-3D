@@ -205,6 +205,8 @@ pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
             if ui.button("Pyramid").clicked() { actions.spawn_mesh = Some(("Pyramid", Primitives::create_pyramid(2.0, 2.5))); ui.close_menu(); }
             if ui.button("Capsule / Pill").clicked() { actions.spawn_mesh = Some(("Capsule", Primitives::create_capsule(0.8, 1.8, 16, 6))); ui.close_menu(); }
             if ui.button("IcoSphere (Geodesic)").clicked() { actions.spawn_mesh = Some(("IcoSphere", Primitives::create_icosphere(1.2, 2))); ui.close_menu(); }
+            if ui.button("Geodesic Dome").clicked() { actions.spawn_mesh = Some(("GeodesicDome", Primitives::create_geodesic_dome(2.0, 2))); ui.close_menu(); }
+            if ui.button("Pipe / Screw Thread").clicked() { actions.spawn_mesh = Some(("PipeThread", Primitives::create_pipe_thread(1.2, 0.3, 2.0, 16))); ui.close_menu(); }
             if ui.button("Plumb Bob (Mascot)").clicked() { actions.spawn_mesh = Some(("PlumbBob", Primitives::create_plumb_bob())); ui.close_menu(); }
         });
         ui.menu_button("Bio-Vegetation (L-System)", |ui| {

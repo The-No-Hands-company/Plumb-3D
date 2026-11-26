@@ -1,9 +1,11 @@
 //! Standard and Parametric 3D Mesh Primitives.
 
+pub mod architectural;
 pub mod box_plane;
 pub mod curved;
 pub mod polyhedral;
 
+pub use architectural::{create_geodesic_dome, create_pipe_thread};
 pub use box_plane::{create_box_parametric, create_cube, create_plane};
 pub use curved::{
     create_capsule, create_cone, create_cone_parametric, create_cylinder, create_cylinder_parametric,
@@ -91,6 +93,21 @@ impl Primitives {
     pub fn create_plumb_bob_detailed(segments: usize) -> Mesh {
         create_plumb_bob_detailed(segments)
     }
+
+    #[inline]
+    pub fn create_geodesic_dome(radius: f32, frequency: u32) -> Mesh {
+        create_geodesic_dome(radius, frequency)
+    }
+
+    #[inline]
+    pub fn create_pipe_thread(
+        major_diameter: f32,
+        pitch: f32,
+        thread_length: f32,
+        segments_per_turn: u32,
+    ) -> Mesh {
+        create_pipe_thread(major_diameter, pitch, thread_length, segments_per_turn)
+    }
 }
 
 #[cfg(test)]
@@ -109,5 +126,21 @@ mod tests {
         let frustum = Primitives::create_cone_parametric(2.0, 1.0, 3.0, 16, CapFillType::Ngon);
         assert!(frustum.validate().is_ok());
         assert_eq!(frustum.faces.len(), 18); // 16 sides + 2 caps
+    }
+
+    #[test]
+    fn test_geodesic_dome() {
+        let dome = Primitives::create_geodesic_dome(2.0, 2);
+        assert!(!dome.vertices.is_empty());
+        assert!(!dome.faces.is_empty());
+        assert!(dome.validate().is_ok());
+    }
+
+    #[test]
+    fn test_pipe_thread() {
+        let thread = Primitives::create_pipe_thread(1.0, 0.2, 0.6, 16);
+        assert!(!thread.vertices.is_empty());
+        assert!(!thread.faces.is_empty());
+        assert!(thread.validate().is_ok());
     }
 }
