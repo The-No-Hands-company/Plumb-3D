@@ -199,6 +199,14 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                                 actions.trigger_separate_faces = true;
                                 close_menu = true;
                             }
+                            if ui.button("Cap Holes (Alt+F)").clicked() {
+                                actions.trigger_cap_holes = true;
+                                close_menu = true;
+                            }
+                            if ui.button("Grid Fill").clicked() {
+                                actions.trigger_grid_fill = true;
+                                close_menu = true;
+                            }
                             if ui.button("Flip Normals (Alt+N)").clicked() {
                                 actions.trigger_flip_normals = true;
                                 close_menu = true;
@@ -305,6 +313,10 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
                             }
                         });
                         ui.separator();
+                        if ui.button("Delete Selected (X)").clicked() {
+                            actions.delete_selected = true;
+                            close_menu = true;
+                        }
                         if ui.button("Return to Object Mode (Tab)").clicked() {
                             state.interaction_mode = InteractionMode::Object;
                             close_menu = true;

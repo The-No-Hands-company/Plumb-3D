@@ -263,6 +263,62 @@ impl Command for FilletCurveCommand {
     }
 }
 
+#[derive(Debug)]
+pub struct ChamferCurveCommand {
+    pub node_id: NodeId,
+    pub distance: f32,
+    pub selected_knots: Vec<usize>,
+    pub old_spline: Option<Spline>,
+}
+
+impl ChamferCurveCommand {
+    pub fn new(node_id: NodeId, distance: f32, selected_knots: Vec<usize>) -> Self {
+        Self {
+            node_id,
+            distance,
+            selected_knots,
+            old_spline: None,
+        }
+    }
+}
+
+impl Command for ChamferCurveCommand {
+    fn name(&self) -> &str {
+        "Chamfer Curve Corners"
+    }
+
+    fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        let node = scene.nodes.get_mut(self.node_id).ok_or("Curve node not found")?;
+        match &mut node.data {
+            NodeData::Curve { spline, cached_render_mesh, .. } => {
+                self.old_spline = Some(spline.clone());
+                *spline = spline.chamfer_selected_corners(&self.selected_knots, self.distance);
+                *cached_render_mesh = None;
+                scene.mark_dirty(self.node_id);
+                Ok(())
+            }
+            _ => Err("Node is not a curve".into()),
+        }
+    }
+
+    fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
+        if let Some(old) = self.old_spline.take() {
+            let node = scene.nodes.get_mut(self.node_id).ok_or("Curve node not found")?;
+            match &mut node.data {
+                NodeData::Curve { spline, cached_render_mesh, .. } => {
+                    *spline = old;
+                    *cached_render_mesh = None;
+                    scene.mark_dirty(self.node_id);
+                    Ok(())
+                }
+                _ => Err("Node is not a curve".into()),
+            }
+        } else {
+            Err("No previous spline data to restore".into())
+        }
+    }
+}
+
 /// Sets Bézier knot handle constraint type (Free, Aligned, Vector, Auto).
 #[derive(Debug)]
 pub struct SetKnotHandleTypeCommand {

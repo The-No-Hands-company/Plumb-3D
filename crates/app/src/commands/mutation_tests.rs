@@ -114,3 +114,45 @@ fn test_dissolve_edge_command_undo_redo() {
     };
     assert_eq!(e_undone, edge_count_orig);
 }
+
+#[test]
+fn test_chamfer_curve_command_execution_and_undo() {
+    use core_math::Vec3;
+    use geo_kernel::{BezierPoint, Spline};
+    use crate::commands::ChamferCurveCommand;
+
+    let mut scene = SceneGraph::new();
+    let p0 = BezierPoint::sharp(Vec3::new(0.0, 0.0, 0.0));
+    let p1 = BezierPoint::sharp(Vec3::new(2.0, 0.0, 0.0));
+    let p2 = BezierPoint::sharp(Vec3::new(2.0, 2.0, 0.0));
+    let spline = Spline::with_points(vec![p0, p1, p2], false);
+
+    let node_id = scene.add_node(SceneNode::new_curve("TestCurve", core_math::Transform::IDENTITY, spline));
+
+    let mut history = graph_engine::HistoryManager::new();
+    let cmd = Box::new(ChamferCurveCommand::new(node_id, 0.5, vec![1]));
+
+    history.execute(cmd, &mut scene).unwrap();
+
+    let pt_count_after = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Curve { spline, .. } = &node.data {
+            spline.points.len()
+        } else {
+            0
+        }
+    };
+    // Chamfering corner index 1 splits it into 2 points -> 4 points total
+    assert_eq!(pt_count_after, 4);
+
+    history.undo(&mut scene).unwrap();
+    let pt_count_undone = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Curve { spline, .. } = &node.data {
+            spline.points.len()
+        } else {
+            0
+        }
+    };
+    assert_eq!(pt_count_undone, 3);
+}

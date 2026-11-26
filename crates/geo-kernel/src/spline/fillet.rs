@@ -113,4 +113,69 @@ impl Spline {
             is_closed,
         }
     }
+
+    /// Applies a precision CAD linear chamfer to specified corner knot indices.
+    /// Replaces sharp vertices with straight setback bevel segments.
+    pub fn chamfer_selected_corners(&self, selected_knots: &[usize], distance: f32) -> Spline {
+        let n = self.points.len();
+        if n < 3 || selected_knots.is_empty() || distance <= 1e-4 {
+            return self.clone();
+        }
+
+        let mut out_points = Vec::new();
+        let is_closed = self.is_closed;
+
+        let start_idx = if is_closed { 0 } else { 1 };
+        let end_idx = if is_closed { n } else { n - 1 };
+
+        if !is_closed {
+            out_points.push(self.points[0]);
+        }
+
+        for i in start_idx..end_idx {
+            if !selected_knots.contains(&i) {
+                out_points.push(self.points[i]);
+                continue;
+            }
+
+            let prev_idx = if i == 0 { n - 1 } else { i - 1 };
+            let next_idx = (i + 1) % n;
+
+            let curr = self.points[i].position;
+            let prev = self.points[prev_idx].position;
+            let next = self.points[next_idx].position;
+
+            let v1 = prev - curr;
+            let v2 = next - curr;
+
+            let l1 = v1.length();
+            let l2 = v2.length();
+
+            if l1 < 1e-4 || l2 < 1e-4 {
+                out_points.push(self.points[i]);
+                continue;
+            }
+
+            let u1 = v1 / l1;
+            let u2 = v2 / l2;
+
+            let max_d = (l1.min(l2) * 0.45).max(1e-4);
+            let d = distance.min(max_d);
+
+            let t1 = curr + u1 * d;
+            let t2 = curr + u2 * d;
+
+            out_points.push(BezierPoint::sharp(t1));
+            out_points.push(BezierPoint::sharp(t2));
+        }
+
+        if !is_closed {
+            out_points.push(self.points[n - 1]);
+        }
+
+        Spline {
+            points: out_points,
+            is_closed,
+        }
+    }
 }
