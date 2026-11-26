@@ -35,8 +35,16 @@ fn vs_main(in: VertexInput) -> VertexOutput {
 
 fn grid_line(coord: vec2<f32>, scale: f32) -> f32 {
     let scaled = coord / scale;
-    let g = abs(fract(scaled - 0.5) - 0.5) / max(fwidth(scaled), vec2<f32>(1e-5, 1e-5));
-    return 1.0 - min(min(g.x, g.y), 1.0);
+    let fw = max(fwidth(scaled), vec2<f32>(1e-5, 1e-5));
+    let g = abs(fract(scaled - 0.5) - 0.5) / fw;
+    let line_val = 1.0 - min(min(g.x, g.y), 1.0);
+
+    // Anti-aliased LOD fade: when cells become smaller than 4 screen pixels,
+    // fade the line to 0 so it never blurs into a solid gray fog wash when zooming out!
+    let cell_pixels = 1.0 / max(max(fw.x, fw.y), 1e-5);
+    let lod_fade = smoothstep(3.0, 10.0, cell_pixels);
+
+    return line_val * lod_fade;
 }
 
 @fragment
@@ -52,13 +60,16 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     let world_pos = in.near_world + t * ray_dir;
     let clip = camera.view_proj * vec4<f32>(world_pos, 1.0);
+    if clip.w <= 0.0 {
+        discard;
+    }
     let frag_depth = clip.z / clip.w;
     if frag_depth < 0.0 || frag_depth > 1.0 {
         discard;
     }
 
     let p = world_pos.xz;
-    let dist = length(camera.eye_pos.xz - p);
+    let eye_dist = length(camera.eye_pos.xyz - world_pos);
 
     let d = max(fwidth(p.x), fwidth(p.y));
     let log_val = log(max(d * 18.0, 0.0001)) / 2.302585;
@@ -94,10 +105,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     let eye_height = max(abs(camera.eye_pos.y), 1.0);
     let view_dist = length(camera.eye_pos.xyz);
-    let max_fade_dist = max(eye_height * 40.0, max(view_dist * 10.0, 1000.0));
+    let max_fade_dist = max(eye_height * 60.0, max(view_dist * 25.0, 5000.0));
     let view_dir = normalize(camera.eye_pos.xyz - world_pos);
-    let grazing_fade = smoothstep(0.005, 0.08, abs(view_dir.y));
-    let dist_fade = 1.0 - smoothstep(max_fade_dist * 0.5, max_fade_dist, dist);
+    let grazing_fade = smoothstep(0.003, 0.05, abs(view_dir.y));
+    let dist_fade = 1.0 - smoothstep(max_fade_dist * 0.5, max_fade_dist, eye_dist);
     color.a *= grazing_fade * dist_fade;
 
     if color.a < 0.005 {
@@ -116,5 +127,8 @@ mod tests {
         assert!(GRID_SHADER.contains("inv_view_proj"));
         assert!(GRID_SHADER.contains("unproject_point"));
         assert!(GRID_SHADER.contains("grid_line"));
+        assert!(GRID_SHADER.contains("lod_fade"));
+        assert!(GRID_SHADER.contains("cell_pixels"));
+        assert!(GRID_SHADER.contains("eye_dist"));
     }
 }
