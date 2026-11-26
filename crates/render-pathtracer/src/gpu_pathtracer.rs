@@ -184,6 +184,10 @@ pub fn pack_scene_for_gpu(scene: &PathTracerScene) -> (Vec<GpuBvhNode>, Vec<GpuT
                 base_color.evaluate(Vec2::ZERO, Vec3::ZERO, Vec3::Y),
                 *roughness, *metallic, emission.x.max(emission.y).max(emission.z), *transmission, *ior,
             ),
+            Material::Subsurface { albedo, roughness, ior, .. } => (
+                albedo.evaluate(Vec2::ZERO, Vec3::ZERO, Vec3::Y),
+                *roughness, 0.0, 0.0, 0.15, *ior,
+            ),
         };
 
         gpu_materials.push(GpuMaterial {

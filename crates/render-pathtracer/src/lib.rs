@@ -17,6 +17,7 @@
 pub mod baker;
 pub mod bvh;
 pub mod camera;
+pub mod denoiser;
 pub mod gpu_pathtracer;
 pub mod hardware_rt;
 pub mod integrator;
@@ -31,6 +32,7 @@ mod tests;
 pub use baker::{bake_texture, BakeMapType, BakeSettings};
 pub use bvh::{BvhNode, RayHit, Triangle};
 pub use camera::PathtracerCamera;
+pub use denoiser::{denoise_radiance, DenoiseSettings};
 pub use gpu_pathtracer::{
     pack_scene_for_gpu, GpuBvhNode, GpuCameraUniform, GpuMaterial, GpuTriangle,
     GPU_PATHTRACER_WGSL,

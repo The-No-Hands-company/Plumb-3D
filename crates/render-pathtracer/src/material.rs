@@ -163,6 +163,14 @@ pub enum Material {
         transmission: f32,
         emission: Vec3,
     },
+    /// Subsurface scattering (BSSRDF dipole/random-walk approximation for skin, marble, jade, wax)
+    Subsurface {
+        albedo: TextureSource,
+        subsurface_color: TextureSource,
+        radius: Vec3,
+        ior: f32,
+        roughness: f32,
+    },
 }
 
 impl Default for Material {
@@ -218,6 +226,22 @@ impl Material {
         }
     }
 
+    pub fn subsurface(
+        albedo: impl Into<TextureSource>,
+        subsurface_color: impl Into<TextureSource>,
+        radius: Vec3,
+        ior: f32,
+        roughness: f32,
+    ) -> Self {
+        Self::Subsurface {
+            albedo: albedo.into(),
+            subsurface_color: subsurface_color.into(),
+            radius: radius.max(Vec3::splat(1e-4)),
+            ior: ior.max(1.0),
+            roughness: roughness.clamp(0.001, 1.0),
+        }
+    }
+
     /// Evaluates base albedo color for lighting integration
     pub fn albedo(&self, uv: Vec2, hit_pos: Vec3, normal: Vec3) -> Vec3 {
         match self {
@@ -225,6 +249,7 @@ impl Material {
             Material::Metal { albedo, .. } => albedo.evaluate(uv, hit_pos, normal),
             Material::Dielectric { albedo, .. } => albedo.evaluate(uv, hit_pos, normal),
             Material::Principled { base_color, .. } => base_color.evaluate(uv, hit_pos, normal),
+            Material::Subsurface { albedo, .. } => albedo.evaluate(uv, hit_pos, normal),
             Material::Emissive { .. } => Vec3::ZERO,
         }
     }
@@ -387,9 +412,76 @@ impl Material {
                     })
                 }
             }
+            Material::Subsurface {
+                albedo,
+                subsurface_color,
+                radius,
+                ior,
+                roughness,
+            } => {
+                let albedo_eval = albedo.evaluate(uv, hit_pos, normal);
+                let sss_eval = subsurface_color.evaluate(uv, hit_pos, normal);
+                let unit_dir = ray_in.direction.normalize();
+
+                let cos_theta = (-unit_dir).dot(normal).clamp(0.0, 1.0);
+                let f0 = reflectance(cos_theta, *ior);
+
+                if rng() < f0 {
+                    // Surface specular boundary reflection
+                    let r = roughness.clamp(0.001, 1.0);
+                    let reflected = reflect(unit_dir, normal);
+                    let scatter_dir = reflected + random_in_unit_sphere(rng) * r;
+                    if scatter_dir.dot(normal) > 0.0 {
+                        Some(BsdfSample {
+                            scattered_ray: Ray::new(hit_pos + normal * 1e-4, scatter_dir.normalize()),
+                            attenuation: Vec3::ONE,
+                            is_specular: true,
+                        })
+                    } else {
+                        None
+                    }
+                } else {
+                    // Internal volume diffusion: sample radial displacement along local tangent disk
+                    let mfp = (radius.x + radius.y + radius.z) / 3.0;
+                    let xi1 = rng().clamp(1e-4, 0.9999);
+                    let r = -mfp * (1.0 - xi1).ln();
+                    let phi = rng() * std::f32::consts::TAU;
+
+                    let (tangent, bitangent) = create_tangent_basis(normal);
+                    let exit_pos = hit_pos + tangent * (r * phi.cos()) + bitangent * (r * phi.sin());
+
+                    let random_unit = random_in_unit_sphere(rng);
+                    let mut scatter_dir = normal + random_unit;
+                    if scatter_dir.length_squared() < 1e-6 {
+                        scatter_dir = normal;
+                    } else {
+                        scatter_dir = scatter_dir.normalize();
+                    }
+
+                    let absorption = Vec3::new(
+                        (-r / radius.x.max(1e-3)).exp(),
+                        (-r / radius.y.max(1e-3)).exp(),
+                        (-r / radius.z.max(1e-3)).exp(),
+                    );
+                    let attenuation = albedo_eval * sss_eval * absorption;
+
+                    Some(BsdfSample {
+                        scattered_ray: Ray::new(exit_pos + normal * 1e-4, scatter_dir),
+                        attenuation,
+                        is_specular: false,
+                    })
+                }
+            }
             Material::Emissive { .. } => None,
         }
     }
+}
+
+fn create_tangent_basis(n: Vec3) -> (Vec3, Vec3) {
+    let up = if n.y.abs() < 0.99 { Vec3::Y } else { Vec3::X };
+    let tangent = n.cross(up).normalize();
+    let bitangent = n.cross(tangent).normalize();
+    (tangent, bitangent)
 }
 
 fn reflect(v: Vec3, n: Vec3) -> Vec3 {

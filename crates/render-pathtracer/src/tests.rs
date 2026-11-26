@@ -315,4 +315,33 @@ mod tests {
         let ca_bytes = apply_post_processing(&pattern_radiance, width, height, 1, &ca_settings);
         assert_eq!(ca_bytes.len(), (width * height * 4) as usize);
     }
+
+    #[test]
+    fn test_subsurface_scattering_diffusion_and_attenuation() {
+        let sss_mat = Material::subsurface(
+            Vec3::new(0.9, 0.8, 0.7), // Jade / marble skin base
+            Vec3::new(1.0, 0.4, 0.2), // Subsurface red/amber inner tint
+            Vec3::new(0.05, 0.02, 0.01), // Mean free path scatter radii
+            1.4,                      // IOR
+            0.1,                      // Roughness
+        );
+
+        let mut seed = 42_u64;
+        let mut rng = || {
+            seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            ((seed >> 32) as u32 as f32) / (u32::MAX as f32)
+        };
+
+        let ray = Ray::new(Vec3::new(0.0, 1.0, 0.0), Vec3::new(0.0, -1.0, 0.0));
+        let hit_pos = Vec3::ZERO;
+        let normal = Vec3::Y;
+
+        let sample = sss_mat.sample(&ray, hit_pos, normal, Vec2::ZERO, &mut rng);
+        assert!(sample.is_some());
+        let bsdf = sample.unwrap();
+
+        // Verify valid attenuation and ray direction
+        assert!(bsdf.attenuation.x > 0.0);
+        assert!(bsdf.scattered_ray.direction.length() > 0.9);
+    }
 }

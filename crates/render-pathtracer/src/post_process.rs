@@ -15,6 +15,8 @@ pub struct PostProcessSettings {
     pub contrast: f32,
     pub saturation: f32,
     pub filmic_tonemap: bool,
+    pub denoise_enabled: bool,
+    pub denoise_settings: crate::denoiser::DenoiseSettings,
 }
 
 impl Default for PostProcessSettings {
@@ -32,6 +34,8 @@ impl Default for PostProcessSettings {
             contrast: 1.08,
             saturation: 1.12,
             filmic_tonemap: true,
+            denoise_enabled: false,
+            denoise_settings: crate::denoiser::DenoiseSettings::default(),
         }
     }
 }
@@ -53,6 +57,11 @@ pub fn apply_post_processing(
         .iter()
         .map(|&rad| rad * inv_samples * settings.exposure.max(0.01))
         .collect();
+
+    // 0. Wavelet Denoising (OIDN / Edge-Avoiding Â-Trous Bilateral filter)
+    if settings.enabled && settings.denoise_enabled {
+        linear_colors = crate::denoiser::denoise_radiance(&linear_colors, width, height, &settings.denoise_settings);
+    }
 
     // 1. Bloom Extraction & Multi-pass Separable Gaussian Blur
     if settings.enabled && settings.bloom_enabled && settings.bloom_intensity > 0.001 {
