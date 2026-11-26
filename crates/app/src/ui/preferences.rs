@@ -2,6 +2,66 @@ use crate::state::AppState;
 use crate::types::*;
 use crate::ui::theme::ThemePreset;
 
+/// Configurable keybinding definition with category, description, and conflict tracking.
+#[derive(Debug, Clone, PartialEq)]
+pub struct KeybindingEntry {
+    pub action_id: String,
+    pub category: String,
+    pub description: String,
+    pub key: String,
+    pub default_key: String,
+}
+
+impl KeybindingEntry {
+    pub fn new(action_id: &str, category: &str, description: &str, key: &str) -> Self {
+        Self {
+            action_id: action_id.to_string(),
+            category: category.to_string(),
+            description: description.to_string(),
+            key: key.to_string(),
+            default_key: key.to_string(),
+        }
+    }
+}
+
+/// Returns the factory default keybinding map across all DCC operational domains.
+pub fn default_keybindings() -> Vec<KeybindingEntry> {
+    vec![
+        // Modeling
+        KeybindingEntry::new("model.extrude", "Modeling", "Extrude Region / Faces", "E"),
+        KeybindingEntry::new("model.inset", "Modeling", "Inset Polygons", "I"),
+        KeybindingEntry::new("model.bevel", "Modeling", "Bevel Edges / Vertices", "Ctrl+B"),
+        KeybindingEntry::new("model.loop_cut", "Modeling", "Loop Cut and Slide", "Ctrl+R"),
+        KeybindingEntry::new("model.knife", "Modeling", "Interactive Knife Topology Cut", "K"),
+        KeybindingEntry::new("model.delete", "Modeling", "Delete / Dissolve Sub-Elements", "X"),
+        KeybindingEntry::new("model.bridge", "Modeling", "Bridge Edge Loops", "Alt+B"),
+        KeybindingEntry::new("model.subdivide", "Modeling", "Subdivide Selected", "W"),
+
+        // Navigation & Gizmo
+        KeybindingEntry::new("nav.translate", "Navigation", "Translate Manipulator Gizmo", "G"),
+        KeybindingEntry::new("nav.rotate", "Navigation", "Rotate Manipulator Gizmo", "R"),
+        KeybindingEntry::new("nav.scale", "Navigation", "Scale Manipulator Gizmo", "S"),
+        KeybindingEntry::new("nav.frame_selected", "Navigation", "Frame / Focus Selected Object", "Numpad ."),
+
+        // Selection
+        KeybindingEntry::new("select.box", "Selection", "Box Selection Mode", "B"),
+        KeybindingEntry::new("select.circle", "Selection", "Circle / Paint Selection Brush", "C"),
+        KeybindingEntry::new("select.lasso", "Selection", "Lasso Selection Mode", "Shift+Space"),
+        KeybindingEntry::new("select.invert", "Selection", "Invert Current Selection", "Ctrl+I"),
+        KeybindingEntry::new("select.all", "Selection", "Select / Deselect All", "A"),
+
+        // General & Interface
+        KeybindingEntry::new("general.mode_toggle", "General", "Toggle Object / Edit Mode", "Tab"),
+        KeybindingEntry::new("general.palette", "General", "Omnipresent Command Palette", "F3"),
+        KeybindingEntry::new("general.help", "General", "In-Software Help Reference Manual", "F1"),
+        KeybindingEntry::new("general.snap", "General", "Toggle Snapping to Grid/Vertices", "Shift+Tab"),
+        KeybindingEntry::new("general.undo", "General", "Undo Last Action", "Ctrl+Z"),
+        KeybindingEntry::new("general.redo", "General", "Redo Action", "Ctrl+Y"),
+        KeybindingEntry::new("general.save", "General", "Save Project File", "Ctrl+S"),
+        KeybindingEntry::new("general.render", "General", "Render Production Viewport", "F12"),
+    ]
+}
+
 /// Persistent preferences state for user customization and personal layout.
 #[derive(Debug, Clone)]
 pub struct PreferencesState {
@@ -12,6 +72,9 @@ pub struct PreferencesState {
     pub show_viewport_hints: bool,
     pub undo_depth_limit: usize,
     pub custom_workspace_name: String,
+    pub keybindings: Vec<KeybindingEntry>,
+    pub keybinding_filter: String,
+    pub editing_binding_idx: Option<usize>,
 }
 
 impl Default for PreferencesState {
@@ -24,6 +87,9 @@ impl Default for PreferencesState {
             show_viewport_hints: true,
             undo_depth_limit: 64,
             custom_workspace_name: String::new(),
+            keybindings: default_keybindings(),
+            keybinding_filter: String::new(),
+            editing_binding_idx: None,
         }
     }
 }
@@ -57,7 +123,7 @@ pub fn draw_preferences_dialog(state: &mut AppState) {
 
     egui::Window::new("Plumb 3D -- Preferences & Customization")
         .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
-        .fixed_size(egui::vec2(580.0, 420.0))
+        .fixed_size(egui::vec2(640.0, 500.0))
         .collapsible(false)
         .resizable(false)
         .frame(
@@ -119,25 +185,114 @@ pub fn draw_preferences_dialog(state: &mut AppState) {
                     ui.checkbox(&mut state.show_viewport_hud, "Show scene statistics HUD (Vertices, Edges, Faces)");
                 }
                 1 => {
-                    // Keymap Navigation Tab
+                    // Keymap Navigation & Visual Editor Tab
                     ui.label(egui::RichText::new("Navigation Keymap Preset").strong().size(13.0));
-                    ui.radio_value(&mut state.preferences.keymap_style, KeymapStyle::PlumbStandard, "Plumb 3D Native (W/E/R Translate/Rotate/Scale, Tab Edit Mode)");
-                    ui.radio_value(&mut state.preferences.keymap_style, KeymapStyle::BlenderVeteran, "Blender Veteran (G Grab, S Scale, R Rotate, Shift+A Add, Tab Edit)");
-                    ui.radio_value(&mut state.preferences.keymap_style, KeymapStyle::MayaStudio, "Maya Studio (Alt+LMB Orbit, Alt+MMB Pan, W/E/R Manipulators)");
+                    ui.horizontal(|ui| {
+                        ui.radio_value(&mut state.preferences.keymap_style, KeymapStyle::PlumbStandard, "Plumb Native");
+                        ui.radio_value(&mut state.preferences.keymap_style, KeymapStyle::BlenderVeteran, "Blender Veteran");
+                        ui.radio_value(&mut state.preferences.keymap_style, KeymapStyle::MayaStudio, "Maya Studio");
+                    });
 
-                    ui.add_space(10.0);
+                    ui.add_space(8.0);
                     ui.separator();
-                    ui.add_space(10.0);
+                    ui.add_space(6.0);
 
-                    ui.label(egui::RichText::new("Quick Shortcut Reference").strong().size(13.0));
-                    egui::Grid::new("pref_shortcut_grid").num_columns(2).spacing([20.0, 4.0]).show(ui, |ui| {
-                        ui.label(egui::RichText::new("F3 or Ctrl+K").strong()); ui.label("Omnipresent Command Palette"); ui.end_row();
-                        ui.label(egui::RichText::new("F1").strong()); ui.label("In-Software Manual & Help Reference"); ui.end_row();
-                        ui.label(egui::RichText::new("Tab").strong()); ui.label("Toggle Object / Edit Mode"); ui.end_row();
-                        ui.label(egui::RichText::new("1, 2, 3").strong()); ui.label("Vertex, Edge, Face Select Level"); ui.end_row();
-                        ui.label(egui::RichText::new("E, I, Ctrl+B").strong()); ui.label("Extrude, Inset, Bevel"); ui.end_row();
-                        ui.label(egui::RichText::new("K, Ctrl+R").strong()); ui.label("Knife Tool, Loop Cut and Slide"); ui.end_row();
-                        ui.label(egui::RichText::new("Shift+Tab").strong()); ui.label("Toggle Snapping to Grid/Vertices"); ui.end_row();
+                    // Conflict detection pass
+                    let mut conflicts = std::collections::HashSet::new();
+                    for i in 0..state.preferences.keybindings.len() {
+                        let k1 = state.preferences.keybindings[i].key.trim().to_uppercase();
+                        if k1.is_empty() {
+                            continue;
+                        }
+                        for j in (i + 1)..state.preferences.keybindings.len() {
+                            let k2 = state.preferences.keybindings[j].key.trim().to_uppercase();
+                            if k1 == k2 {
+                                conflicts.insert(i);
+                                conflicts.insert(j);
+                            }
+                        }
+                    }
+
+                    ui.horizontal(|ui| {
+                        ui.label(egui::RichText::new("Visual Hotkey Keymap Editor").strong().size(13.0));
+                        if !conflicts.is_empty() {
+                            ui.label(
+                                egui::RichText::new(format!("⚠️ {} Key Conflicts Detected!", conflicts.len()))
+                                    .color(egui::Color32::from_rgb(255, 120, 80))
+                                    .strong(),
+                            );
+                        }
+                    });
+
+                    ui.horizontal(|ui| {
+                        ui.label("Filter:");
+                        ui.add(
+                            egui::TextEdit::singleline(&mut state.preferences.keybinding_filter)
+                                .hint_text("Search action or key..."),
+                        );
+                        if ui.button("Clear").clicked() {
+                            state.preferences.keybinding_filter.clear();
+                        }
+                        if ui.button("Reset All to Defaults").clicked() {
+                            state.preferences.keybindings = default_keybindings();
+                        }
+                    });
+
+                    ui.add_space(6.0);
+
+                    // Scrollable Table of Keybindings
+                    egui::ScrollArea::vertical().max_height(240.0).show(ui, |ui| {
+                        let filter = state.preferences.keybinding_filter.trim().to_lowercase();
+                        let mut reset_idx = None;
+
+                        egui::Grid::new("visual_keymap_grid")
+                            .num_columns(4)
+                            .spacing([12.0, 6.0])
+                            .striped(true)
+                            .show(ui, |ui| {
+                                ui.label(egui::RichText::new("Category").strong().color(egui::Color32::GRAY));
+                                ui.label(egui::RichText::new("Action / Description").strong().color(egui::Color32::GRAY));
+                                ui.label(egui::RichText::new("Assigned Key").strong().color(egui::Color32::GRAY));
+                                ui.label(egui::RichText::new("Reset").strong().color(egui::Color32::GRAY));
+                                ui.end_row();
+
+                                for (idx, entry) in state.preferences.keybindings.iter_mut().enumerate() {
+                                    if !filter.is_empty()
+                                        && !entry.description.to_lowercase().contains(&filter)
+                                        && !entry.category.to_lowercase().contains(&filter)
+                                        && !entry.key.to_lowercase().contains(&filter)
+                                    {
+                                        continue;
+                                    }
+
+                                    let has_conflict = conflicts.contains(&idx);
+
+                                    ui.label(&entry.category);
+                                    ui.label(&entry.description);
+
+                                    // Shortcut field with conflict highlight
+                                    ui.horizontal(|ui| {
+                                        let text_edit = egui::TextEdit::singleline(&mut entry.key)
+                                            .desired_width(90.0);
+                                        if has_conflict {
+                                            ui.add(text_edit.text_color(egui::Color32::from_rgb(255, 120, 80)));
+                                            ui.label(egui::RichText::new("⚠️").small());
+                                        } else {
+                                            ui.add(text_edit);
+                                        }
+                                    });
+
+                                    if ui.button("↺").on_hover_text("Reset this shortcut to default").clicked() {
+                                        reset_idx = Some(idx);
+                                    }
+                                    ui.end_row();
+                                }
+                            });
+
+                        if let Some(r_idx) = reset_idx {
+                            state.preferences.keybindings[r_idx].key =
+                                state.preferences.keybindings[r_idx].default_key.clone();
+                        }
                     });
                 }
                 2 => {
@@ -231,5 +386,39 @@ mod tests {
         assert_eq!(p.keymap_style, KeymapStyle::PlumbStandard);
         assert!(p.show_viewport_hints);
         assert_eq!(p.undo_depth_limit, 64);
+        assert!(!p.keybindings.is_empty());
+    }
+
+    #[test]
+    fn test_visual_keymap_editor_and_conflict_detection() {
+        let mut p = PreferencesState::default();
+        let initial_count = p.keybindings.len();
+        assert!(initial_count >= 15);
+
+        // Intentionally create a duplicate keybinding to test conflict detection
+        p.keybindings[0].key = "E".to_string();
+        p.keybindings[1].key = "E".to_string();
+
+        let mut conflicts = std::collections::HashSet::new();
+        for i in 0..p.keybindings.len() {
+            let k1 = p.keybindings[i].key.trim().to_uppercase();
+            if k1.is_empty() {
+                continue;
+            }
+            for j in (i + 1)..p.keybindings.len() {
+                let k2 = p.keybindings[j].key.trim().to_uppercase();
+                if k1 == k2 {
+                    conflicts.insert(i);
+                    conflicts.insert(j);
+                }
+            }
+        }
+
+        assert!(conflicts.contains(&0));
+        assert!(conflicts.contains(&1));
+
+        // Reset individual binding
+        p.keybindings[1].key = p.keybindings[1].default_key.clone();
+        assert_ne!(p.keybindings[1].key, "E");
     }
 }
