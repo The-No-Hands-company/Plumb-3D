@@ -61,7 +61,7 @@ pub fn render(state: &mut AppState) {
         painter.text(
             banner_rect.center(),
             egui::Align2::CENTER_CENTER,
-            format!("✂ KNIFE MULTI-CUT: {} points | Click: Add Point | Enter: Confirm | Esc: Cancel", state.knife_points.len()),
+            format!("KNIFE MULTI-CUT: {} points | Click: Add Point | Enter: Confirm | Esc: Cancel", state.knife_points.len()),
             egui::FontId::proportional(12.5),
             egui::Color32::from_rgb(240, 255, 255),
         );
@@ -117,9 +117,9 @@ pub fn render(state: &mut AppState) {
         };
         painter.rect_stroke(banner_rect, 5.0, egui::Stroke::new(1.0_f32, border_color));
         let banner_text = if !state.loop_cut_sliding {
-            format!("✂ LOOP CUT: Hover edge | Scroll: Cuts ({}) | Left-Click: Slide | Esc: Cancel", state.loop_cut_num_cuts)
+            format!("LOOP CUT: Hover edge | Scroll: Cuts ({}) | Left-Click: Slide | Esc: Cancel", state.loop_cut_num_cuts)
         } else {
-            format!("↔ SLIDE LOOP: Factor: {:.1}% | Left-Click / Enter: Confirm | Esc: Cancel", state.loop_cut_factor * 100.0)
+            format!("SLIDE LOOP: Factor: {:.1}% | Left-Click / Enter: Confirm | Esc: Cancel", state.loop_cut_factor * 100.0)
         };
         painter.text(
             banner_rect.center(),
@@ -188,7 +188,7 @@ pub fn render(state: &mut AppState) {
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("⤊ EXTRUDE").strong().color(egui::Color32::from_rgb(255, 215, 0)));
+                            ui.label(egui::RichText::new("EXTRUDE").strong().color(egui::Color32::from_rgb(255, 215, 0)));
                             ui.separator();
                             ui.label("Distance:");
                             if ui.add(egui::DragValue::new(&mut state.extrude_modal_distance).speed(0.02).suffix(" m")).changed() {
@@ -212,10 +212,10 @@ pub fn render(state: &mut AppState) {
                                 ui.label(egui::RichText::new(format!("Input: [{}]", state.modal_numeric_buffer)).monospace().strong().color(egui::Color32::YELLOW));
                             }
                             ui.separator();
-                            if ui.button("✓ Confirm (Enter)").clicked() {
+                            if ui.button("Confirm (Enter)").clicked() {
                                 commit_extrude = true;
                             }
-                            if ui.button("✕ Cancel (Esc)").clicked() {
+                            if ui.button("Cancel (Esc)").clicked() {
                                 cancel_extrude = true;
                             }
                         });
@@ -276,7 +276,7 @@ pub fn render(state: &mut AppState) {
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("❖ BEVEL").strong().color(egui::Color32::from_rgb(0, 230, 255)));
+                            ui.label(egui::RichText::new("BEVEL").strong().color(egui::Color32::from_rgb(0, 230, 255)));
                             ui.separator();
                             ui.label("Width:");
                             if ui.add(egui::DragValue::new(&mut state.bevel_modal_width).speed(0.005).suffix(" m").range(0.001..=5.0)).changed() {
@@ -288,10 +288,10 @@ pub fn render(state: &mut AppState) {
                                 ui.label(egui::RichText::new(format!("Input: [{}]", state.modal_numeric_buffer)).monospace().strong().color(egui::Color32::YELLOW));
                             }
                             ui.separator();
-                            if ui.button("✓ Confirm (Enter)").clicked() {
+                            if ui.button("Confirm (Enter)").clicked() {
                                 commit_bevel = true;
                             }
-                            if ui.button("✕ Cancel (Esc)").clicked() {
+                            if ui.button("Cancel (Esc)").clicked() {
                                 cancel_bevel = true;
                             }
                         });
@@ -370,7 +370,7 @@ pub fn render(state: &mut AppState) {
             painter.rect_filled(banner_rect, 5.0, egui::Color32::from_black_alpha(220));
             painter.rect_stroke(banner_rect, 5.0, egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(255, 180, 50)));
             let banner_text = format!(
-                "⤹ LINEAR WEIGHT GRADIENT: Drag Start -> End | W: {:.2} -> {:.2} | Release to Apply",
+                "LINEAR WEIGHT GRADIENT: Drag Start -> End | W: {:.2} -> {:.2} | Release to Apply",
                 state.weight_gradient_start_w, state.weight_gradient_end_w
             );
             painter.text(
@@ -445,7 +445,7 @@ pub fn render(state: &mut AppState) {
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("◱ INSET").strong().color(egui::Color32::from_rgb(255, 180, 0)));
+                            ui.label(egui::RichText::new("INSET").strong().color(egui::Color32::from_rgb(255, 180, 0)));
                             ui.separator();
                             ui.label("Thickness:");
                             let r = state.inset_modal_initial_radius.max(0.001);
@@ -471,10 +471,10 @@ pub fn render(state: &mut AppState) {
                                 ui.label(egui::RichText::new(format!("Input: [{}]", state.modal_numeric_buffer)).monospace().strong().color(egui::Color32::YELLOW));
                             }
                             ui.separator();
-                            if ui.button("✓ Confirm (Enter)").clicked() {
+                            if ui.button("Confirm (Enter)").clicked() {
                                 commit_inset = true;
                             }
-                            if ui.button("✕ Cancel (Esc)").clicked() {
+                            if ui.button("Cancel (Esc)").clicked() {
                                 cancel_inset = true;
                             }
                         });
@@ -507,7 +507,7 @@ pub fn render(state: &mut AppState) {
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("✦ EDGE CREASE").strong().color(egui::Color32::from_rgb(217, 70, 239)));
+                            ui.label(egui::RichText::new("EDGE CREASE").strong().color(egui::Color32::from_rgb(217, 70, 239)));
                             ui.separator();
                             ui.label("Weight:");
                             let mut pct = state.edge_crease_modal_weight * 100.0;
@@ -515,8 +515,8 @@ pub fn render(state: &mut AppState) {
                                 state.edge_crease_modal_weight = (pct / 100.0).clamp(0.0, 1.0);
                             }
                             ui.separator();
-                            if ui.button("✓ Confirm (Enter)").clicked() { commit_edge_crease = true; }
-                            if ui.button("✕ Cancel (Esc)").clicked() { cancel_edge_crease = true; }
+                            if ui.button("Confirm (Enter)").clicked() { commit_edge_crease = true; }
+                            if ui.button("Cancel (Esc)").clicked() { cancel_edge_crease = true; }
                         });
                     });
             });
@@ -541,7 +541,7 @@ pub fn render(state: &mut AppState) {
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("◈ VERTEX CREASE").strong().color(egui::Color32::from_rgb(56, 189, 248)));
+                            ui.label(egui::RichText::new("VERTEX CREASE").strong().color(egui::Color32::from_rgb(56, 189, 248)));
                             ui.separator();
                             ui.label("Weight:");
                             let mut pct = state.vertex_crease_modal_weight * 100.0;
@@ -549,8 +549,8 @@ pub fn render(state: &mut AppState) {
                                 state.vertex_crease_modal_weight = (pct / 100.0).clamp(0.0, 1.0);
                             }
                             ui.separator();
-                            if ui.button("✓ Confirm (Enter)").clicked() { commit_vertex_crease = true; }
-                            if ui.button("✕ Cancel (Esc)").clicked() { cancel_vertex_crease = true; }
+                            if ui.button("Confirm (Enter)").clicked() { commit_vertex_crease = true; }
+                            if ui.button("Cancel (Esc)").clicked() { cancel_vertex_crease = true; }
                         });
                     });
             });
@@ -579,15 +579,15 @@ pub fn render(state: &mut AppState) {
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("🔩 HARDWARE INSERT").strong().color(egui::Color32::from_rgb(255, 180, 50)));
+                            ui.label(egui::RichText::new("HARDWARE INSERT").strong().color(egui::Color32::from_rgb(255, 180, 50)));
                             ui.separator();
                             ui.label(egui::RichText::new(hw_label).strong());
                             ui.label(format!("Scale: {:.2}x", scale));
-                            let mode_txt = if is_sub { "✂ Socket Cut (B)" } else { "➕ Union (B)" };
+                            let mode_txt = if is_sub { "Socket Cut (B)" } else { "Union (B)" };
                             if ui.button(mode_txt).clicked() { toggle_sub = true; }
                             ui.separator();
                             ui.label(egui::RichText::new("LMB: Drop | Wheel: Scale | Tab: Cycle").weak().small());
-                            if ui.button("✕ Exit (Esc)").clicked() { exit_kb = true; }
+                            if ui.button("Exit (Esc)").clicked() { exit_kb = true; }
                         });
                     });
             });
