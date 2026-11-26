@@ -341,6 +341,41 @@ pub fn draw_mesh_tools_panel(
                                     });
                                 }
 
+                                if state.sub_element_level == SubElementLevel::Vertex && !state.selected_vertices.is_empty() {
+                                    ui.group(|ui| {
+                                        ui.label("Vertex Creasing (OpenSubdiv):");
+                                        let mut crease_val = 0.0_f32;
+                                        if let Some(&first_vk) = state.selected_vertices.iter().next() {
+                                            if let Some(vertex) = base_mesh.vertices.get(first_vk) {
+                                                crease_val = vertex.crease_weight;
+                                            }
+                                        }
+                                        if ui.add(egui::Slider::new(&mut crease_val, 0.0..=1.0).text("Crease Weight")).changed() {
+                                            for &vk in &state.selected_vertices {
+                                                base_mesh.set_vertex_crease(vk, crease_val);
+                                            }
+                                            node.is_dirty = true;
+                                        }
+                                        ui.horizontal(|ui| {
+                                            if ui.button("Max Crease (1.0)").clicked() {
+                                                for &vk in &state.selected_vertices {
+                                                    base_mesh.set_vertex_crease(vk, 1.0);
+                                                }
+                                                node.is_dirty = true;
+                                            }
+                                            if ui.button("Clear Crease (0.0)").clicked() {
+                                                for &vk in &state.selected_vertices {
+                                                    base_mesh.set_vertex_crease(vk, 0.0);
+                                                }
+                                                node.is_dirty = true;
+                                            }
+                                            if ui.button("Merge Center (M)").clicked() {
+                                                actions.trigger_merge_vertices = true;
+                                            }
+                                        });
+                                    });
+                                }
+
                                 ui.separator();
 
                                 ui.collapsing("2D UV Texture Coordinate Editor", |ui| {
