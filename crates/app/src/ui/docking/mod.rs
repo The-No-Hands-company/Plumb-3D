@@ -17,11 +17,11 @@ impl Default for AppDockState {
     fn default() -> Self {
         let mut dock_state = DockState::new(vec![DockTab::Viewport]);
 
-        // Split left: Outliner
+        // Split left: Outliner and History
         let [_left, center] = dock_state.main_surface_mut().split_left(
             NodeIndex::root(),
             0.20,
-            vec![DockTab::Outliner],
+            vec![DockTab::Outliner, DockTab::History],
         );
 
         // Split right from center: Inspector
@@ -77,6 +77,7 @@ mod tests {
         assert!(!app_dock.is_enabled);
         assert_eq!(DockTab::Viewport.title(), "3D Viewport");
         assert_eq!(DockTab::Outliner.title(), "Scene Outliner");
+        assert_eq!(DockTab::History.title(), "Action History");
         assert_eq!(DockTab::Inspector.title(), "Inspector");
         assert_eq!(DockTab::NodeEditor.title(), "Geometry Nodes");
     }

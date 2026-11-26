@@ -28,6 +28,22 @@ pub fn draw_outliner(state: &mut AppState, actions: &mut UiActions) {
 
 pub fn draw_outliner_inner(state: &mut AppState, actions: &mut UiActions, ui: &mut egui::Ui) {
     ui.horizontal(|ui| {
+        if ui.selectable_label(state.outliner_tab == 0, "Scene Tree").clicked() {
+            state.outliner_tab = 0;
+        }
+        let history_title = format!("Action History ({})", state.history.undo_count());
+        if ui.selectable_label(state.outliner_tab == 1, history_title).clicked() {
+            state.outliner_tab = 1;
+        }
+    });
+    ui.separator();
+
+    if state.outliner_tab == 1 {
+        crate::ui::history_panel::draw_history_inner(state, ui);
+        return;
+    }
+
+    ui.horizontal(|ui| {
         ui.add(egui::TextEdit::singleline(&mut state.outliner_filter).hint_text("Search outliner..."));
         if !state.outliner_filter.is_empty() && ui.small_button("X").clicked() {
             state.outliner_filter.clear();

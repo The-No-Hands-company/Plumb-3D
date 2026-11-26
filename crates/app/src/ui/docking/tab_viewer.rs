@@ -6,6 +6,7 @@ use crate::ui::actions::UiActions;
 pub enum DockTab {
     Viewport,
     Outliner,
+    History,
     Inspector,
     NodeEditor,
     UvEditor,
@@ -18,6 +19,7 @@ impl DockTab {
         match self {
             DockTab::Viewport => "3D Viewport",
             DockTab::Outliner => "Scene Outliner",
+            DockTab::History => "Action History",
             DockTab::Inspector => "Inspector",
             DockTab::NodeEditor => "Geometry Nodes",
             DockTab::UvEditor => "2D UV Editor",
@@ -50,6 +52,9 @@ impl<'a> TabViewer for PlumbTabViewer<'a> {
             }
             DockTab::Outliner => {
                 crate::ui::outliner::draw_outliner_inner(self.state, self.actions, ui);
+            }
+            DockTab::History => {
+                crate::ui::history_panel::draw_history_inner(self.state, ui);
             }
             DockTab::Inspector => {
                 crate::ui::inspector::draw_inspector_inner(self.state, self.actions, ui);

@@ -1,6 +1,7 @@
 use super::UiActions;
-use crate::commands::{AlignObjectsCommand, GroupNodesCommand, SetParentCommand};
+use crate::commands::{AlignObjectsCommand, DeleteFacesCommand, DissolveEdgeCommand, GroupNodesCommand, SetParentCommand};
 use crate::state::AppState;
+use crate::types::{InteractionMode, SubElementLevel};
 use graph_engine::NodeData;
 
 pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
@@ -147,7 +148,36 @@ pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
 
     // Handle Delete
     if actions.delete_selected {
-        if let Some(sel_id) = state.selected_node {
+        if state.interaction_mode == InteractionMode::Edit {
+            if let Some(sel_id) = state.selected_node {
+                if state.sub_element_level == SubElementLevel::Face && !state.selected_faces.is_empty() {
+                    let faces: Vec<geo_kernel::FaceKey> = state.selected_faces.iter().copied().collect();
+                    let cmd = Box::new(DeleteFacesCommand {
+                        node_id: sel_id,
+                        faces,
+                        old_mesh: None,
+                    });
+                    if state.history.execute(cmd, &mut state.scene).is_ok() {
+                        state.selected_faces.clear();
+                        state.selected_vertices.clear();
+                        state.selected_edges.clear();
+                    }
+                } else if state.sub_element_level == SubElementLevel::Edge && !state.selected_edges.is_empty() {
+                    let edges: Vec<geo_kernel::EdgeKey> = state.selected_edges.iter().copied().collect();
+                    for ek in edges {
+                        let cmd = Box::new(DissolveEdgeCommand {
+                            node_id: sel_id,
+                            edge_key: ek,
+                            old_mesh: None,
+                        });
+                        let _ = state.history.execute(cmd, &mut state.scene);
+                    }
+                    state.selected_edges.clear();
+                    state.selected_vertices.clear();
+                    state.selected_faces.clear();
+                }
+            }
+        } else if let Some(sel_id) = state.selected_node {
             state.scene.nodes.remove(sel_id);
             state.scene.root_nodes.retain(|&r| r != sel_id);
             state.gpu_mesh_cache.remove(&sel_id);

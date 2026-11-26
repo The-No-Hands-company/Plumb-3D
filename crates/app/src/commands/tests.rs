@@ -547,5 +547,53 @@ fn test_variable_corner_fillet_and_loft_splines() {
     assert!(!loft_mesh.faces.is_empty());
 }
 
+#[test]
+fn test_delete_faces_command_and_undo() {
+    let mut scene = SceneGraph::new();
+    let cube = Primitives::create_cube(2.0);
+    assert_eq!(cube.faces.len(), 6);
+
+    let node_id = scene.add_node(SceneNode::new_mesh("TestCube", core_math::Transform::IDENTITY, cube));
+    let face_to_delete = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.faces.iter().next().map(|(k, _)| k).unwrap()
+        } else {
+            panic!("Expected mesh");
+        }
+    };
+
+    let mut history = graph_engine::HistoryManager::new();
+    let cmd = Box::new(DeleteFacesCommand {
+        node_id,
+        faces: vec![face_to_delete],
+        old_mesh: None,
+    });
+
+    history.execute(cmd, &mut scene).unwrap();
+
+    let count_after = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.faces.len()
+        } else {
+            0
+        }
+    };
+    assert_eq!(count_after, 5);
+
+    // Test Undo
+    history.undo(&mut scene).unwrap();
+    let count_undone = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.faces.len()
+        } else {
+            0
+        }
+    };
+    assert_eq!(count_undone, 6);
+}
+
 
 

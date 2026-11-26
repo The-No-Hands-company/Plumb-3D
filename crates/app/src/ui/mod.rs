@@ -6,6 +6,7 @@ pub mod command_palette;
 pub mod context_menu;
 pub mod docking;
 pub mod help_dialog;
+pub mod history_panel;
 pub mod inspector;
 pub mod node_editor;
 pub mod outliner;
@@ -28,6 +29,7 @@ pub use collab_dialog::*;
 pub use command_palette::*;
 pub use context_menu::*;
 pub use help_dialog::*;
+pub use history_panel::*;
 pub use inspector::*;
 pub use node_editor::*;
 pub use outliner::*;
@@ -75,6 +77,7 @@ pub fn draw_ui(state: &mut AppState) {
         viewport_hints::draw_viewport_hints(state);
     }
     command_palette::draw_command_palette(state, &mut actions);
+    history_panel::draw_history_window(state);
     welcome_hub::draw_welcome_hub(state, &mut actions);
     preferences::draw_preferences_dialog(state);
 

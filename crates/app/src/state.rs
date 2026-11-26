@@ -136,7 +136,7 @@ pub struct AppState {
     pub kitbash_modal: Option<crate::modals::kitbash::KitbashModalState>,
 
     // Viewport Shelves & Sidebars
-    pub show_outliner: bool, pub show_inspector: bool, pub show_left_toolbar: bool,
+    pub show_outliner: bool, pub show_inspector: bool, pub show_left_toolbar: bool, pub show_history_window: bool, pub outliner_tab: usize,
 
     // RMB Context Menu (Blender / Maya / Plasticity Style)
     pub show_context_menu: bool,
@@ -492,7 +492,7 @@ impl AppState {
             vertex_crease_modal_original_weights: Vec::new(),
             show_uv_editor: false, smart_uv_angle_threshold: 66.0, smart_uv_margin: 0.02, uv_show_distortion: false, uv_seam_cut_mode: false,
             cutter_modal: None, kitbash_modal: None,
-            show_outliner: true, show_inspector: true, show_left_toolbar: true,
+            show_outliner: true, show_inspector: true, show_left_toolbar: true, show_history_window: false, outliner_tab: 0,
             show_context_menu: false,
             context_menu_pos: None,
             show_help_dialog: false,

@@ -62,7 +62,13 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
             true
         }
         KeyCode::KeyZ => {
-            let _ = state.history.undo(&mut state.scene);
+            if state.ctrl_pressed && state.alt_pressed {
+                state.show_history_window = !state.show_history_window;
+            } else if state.ctrl_pressed && state.shift_pressed {
+                let _ = state.history.redo(&mut state.scene);
+            } else {
+                let _ = state.history.undo(&mut state.scene);
+            }
             state.window.request_redraw();
             true
         }
@@ -224,17 +230,33 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
                 state.window.request_redraw();
                 return true;
             }
-            if state.interaction_mode == InteractionMode::Edit && state.sub_element_level == SubElementLevel::Edge && !state.selected_edges.is_empty() {
+            if state.interaction_mode == InteractionMode::Edit {
                 if let Some(sel_id) = state.selected_node {
-                    if let Some(&ek) = state.selected_edges.iter().next() {
-                        let cmd = Box::new(DissolveEdgeCommand {
+                    if state.sub_element_level == SubElementLevel::Face && !state.selected_faces.is_empty() {
+                        let faces: Vec<FaceKey> = state.selected_faces.iter().copied().collect();
+                        let cmd = Box::new(DeleteFacesCommand {
                             node_id: sel_id,
-                            edge_key: ek,
+                            faces,
                             old_mesh: None,
                         });
                         if state.history.execute(cmd, &mut state.scene).is_ok() {
+                            state.selected_faces.clear();
+                            state.selected_vertices.clear();
                             state.selected_edges.clear();
                         }
+                    } else if state.sub_element_level == SubElementLevel::Edge && !state.selected_edges.is_empty() {
+                        let edges_to_dissolve: Vec<geo_kernel::EdgeKey> = state.selected_edges.iter().copied().collect();
+                        for ek in edges_to_dissolve {
+                            let cmd = Box::new(DissolveEdgeCommand {
+                                node_id: sel_id,
+                                edge_key: ek,
+                                old_mesh: None,
+                            });
+                            let _ = state.history.execute(cmd, &mut state.scene);
+                        }
+                        state.selected_edges.clear();
+                        state.selected_vertices.clear();
+                        state.selected_faces.clear();
                     }
                 }
             } else if state.interaction_mode == InteractionMode::CurveEdit {

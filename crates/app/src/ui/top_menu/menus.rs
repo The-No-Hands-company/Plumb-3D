@@ -99,6 +99,10 @@ pub fn draw_edit_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
             actions.trigger_redo = true;
             ui.close_menu();
         }
+        if ui.button("Undo History... (Ctrl+Alt+Z)").clicked() {
+            state.show_history_window = true;
+            ui.close_menu();
+        }
         if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Duplicate Object (Shift+D)")).clicked() {
             actions.trigger_duplicate_node = true;
             ui.close_menu();
