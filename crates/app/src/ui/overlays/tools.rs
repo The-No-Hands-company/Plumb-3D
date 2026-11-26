@@ -514,69 +514,72 @@ pub fn render(state: &mut AppState) {
         let vp = state.egui_ctx.available_rect();
         let tool_x = vp.min.x + 12.0;
         let tool_y = vp.min.y + 12.0;
-        egui::Area::new(egui::Id::new("left_viewport_tool_strip"))
-            .fixed_pos(egui::pos2(tool_x, tool_y))
-            .order(egui::Order::Middle)
+
+        egui::Window::new("Tools")
+            .id(egui::Id::new("left_viewport_tool_strip_window"))
+            .default_pos(egui::pos2(tool_x, tool_y))
+            .default_width(52.0)
+            .resizable(false)
+            .collapsible(true)
+            .title_bar(true)
+            .frame(egui::Frame::popup(state.egui_ctx.style().as_ref())
+                .fill(egui::Color32::from_rgba_premultiplied(22, 24, 29, 230))
+                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_white_alpha(30)))
+                .rounding(egui::Rounding::same(8.0))
+                .inner_margin(egui::Margin::symmetric(4.0, 6.0)))
             .show(&state.egui_ctx, |ui| {
-                egui::Frame::popup(ui.style())
-                    .fill(egui::Color32::from_rgba_premultiplied(22, 24, 29, 230))
-                    .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_white_alpha(30)))
-                    .rounding(egui::Rounding::same(8.0))
-                    .inner_margin(egui::Margin::symmetric(5.0, 7.0))
-                    .show(ui, |ui| {
-                        ui.vertical(|ui| {
-                            if ui.selectable_label(state.is_box_selecting, "⬚").on_hover_text("Marquee Box Select (B)").clicked() {
-                                state.is_box_selecting = !state.is_box_selecting;
-                            }
-                            if ui.selectable_label(state.gizmo.mode == render_viewport::GizmoMode::Translate, "✥").on_hover_text("Move Tool (W)").clicked() {
-                                state.gizmo.mode = render_viewport::GizmoMode::Translate;
-                            }
-                            if ui.selectable_label(state.gizmo.mode == render_viewport::GizmoMode::Rotate, "⟲").on_hover_text("Rotate Tool (E)").clicked() {
-                                state.gizmo.mode = render_viewport::GizmoMode::Rotate;
-                            }
-                            if ui.selectable_label(state.gizmo.mode == render_viewport::GizmoMode::Scale, "⤢").on_hover_text("Scale Tool (R)").clicked() {
-                                state.gizmo.mode = render_viewport::GizmoMode::Scale;
-                            }
-                            ui.separator();
-                            if ui.selectable_label(state.measure_mode, "📏").on_hover_text("Tape Measure Tool (M)").clicked() {
-                                state.measure_mode = !state.measure_mode;
-                            }
-                            if ui.button("📐").on_hover_text("Align Objects (Alt+A)").clicked() {
-                                state.show_align_dialog = !state.show_align_dialog;
-                            }
-                            if ui.selectable_label(state.cutter_modal.is_some(), "✂").on_hover_text("Interactive Direct Cutter (C)").clicked() {
-                                toggle_cutter = true;
-                            }
-                            if ui.selectable_label(state.push_pull_tool, "⤒").on_hover_text("Direct Push-Pull (Shift+E / Click-Drag Face)").clicked() {
-                                toggle_push_pull = true;
-                            }
-                            if ui.selectable_label(state.kitbash_modal.is_some(), "🔩").on_hover_text("Hardware Kitbash Tool (K / Shift+K)").clicked() {
-                                toggle_kitbash = true;
-                            }
-                            if state.current_workspace == WorkspaceTemplate::Sculpting || state.interaction_mode == InteractionMode::Sculpt {
-                                if ui.selectable_label(state.interaction_mode == InteractionMode::Sculpt, "🖌").on_hover_text("Sculpt Brush").clicked() {
-                                    state.interaction_mode = InteractionMode::Sculpt;
-                                }
-                            }
-                            if ui.selectable_label(state.curve_pen_active, "✒").on_hover_text("Bézier Curve Pen Tool (P)").clicked() {
-                                state.curve_pen_active = !state.curve_pen_active;
-                                if state.curve_pen_active {
-                                    state.curve_pen_points.clear();
-                                    state.curve_pen_is_closed = false;
-                                }
-                            }
-                            ui.separator();
-                            if ui.selectable_label(state.show_node_editor, "🌿").on_hover_text("Geometry Nodes Canvas").clicked() {
-                                state.show_node_editor = !state.show_node_editor;
-                            }
-                            if ui.selectable_label(state.show_uv_editor, "🗺").on_hover_text("2D UV Texture Editor").clicked() {
-                                state.show_uv_editor = !state.show_uv_editor;
-                            }
-                            if ui.selectable_label(state.show_script_console, "📜").on_hover_text("Scripting Console (Rhai)").clicked() {
-                                state.show_script_console = !state.show_script_console;
-                            }
-                        });
-                    });
+                ui.vertical_centered(|ui| {
+                    if ui.selectable_label(state.is_box_selecting, "Box").on_hover_text("Marquee Box Select (B)").clicked() {
+                        state.is_box_selecting = !state.is_box_selecting;
+                    }
+                    if ui.selectable_label(state.gizmo.mode == render_viewport::GizmoMode::Translate, "Move").on_hover_text("Move Tool (W)").clicked() {
+                        state.gizmo.mode = render_viewport::GizmoMode::Translate;
+                    }
+                    if ui.selectable_label(state.gizmo.mode == render_viewport::GizmoMode::Rotate, "Rot").on_hover_text("Rotate Tool (E)").clicked() {
+                        state.gizmo.mode = render_viewport::GizmoMode::Rotate;
+                    }
+                    if ui.selectable_label(state.gizmo.mode == render_viewport::GizmoMode::Scale, "Scale").on_hover_text("Scale Tool (R)").clicked() {
+                        state.gizmo.mode = render_viewport::GizmoMode::Scale;
+                    }
+                    ui.separator();
+                    if ui.selectable_label(state.measure_mode, "Meas").on_hover_text("Tape Measure Tool (M)").clicked() {
+                        state.measure_mode = !state.measure_mode;
+                    }
+                    if ui.button("Align").on_hover_text("Align Objects (Alt+A)").clicked() {
+                        state.show_align_dialog = !state.show_align_dialog;
+                    }
+                    if ui.selectable_label(state.cutter_modal.is_some(), "Cut").on_hover_text("Interactive Direct Cutter (C)").clicked() {
+                        toggle_cutter = true;
+                    }
+                    if ui.selectable_label(state.push_pull_tool, "Extr").on_hover_text("Direct Push-Pull (Shift+E / Click-Drag Face)").clicked() {
+                        toggle_push_pull = true;
+                    }
+                    if ui.selectable_label(state.kitbash_modal.is_some(), "Kit").on_hover_text("Hardware Kitbash Tool (K / Shift+K)").clicked() {
+                        toggle_kitbash = true;
+                    }
+                    if state.current_workspace == WorkspaceTemplate::Sculpting || state.interaction_mode == InteractionMode::Sculpt {
+                        if ui.selectable_label(state.interaction_mode == InteractionMode::Sculpt, "Brush").on_hover_text("Sculpt Brush").clicked() {
+                            state.interaction_mode = InteractionMode::Sculpt;
+                        }
+                    }
+                    if ui.selectable_label(state.curve_pen_active, "Pen").on_hover_text("Bézier Curve Pen Tool (P)").clicked() {
+                        state.curve_pen_active = !state.curve_pen_active;
+                        if state.curve_pen_active {
+                            state.curve_pen_points.clear();
+                            state.curve_pen_is_closed = false;
+                        }
+                    }
+                    ui.separator();
+                    if ui.selectable_label(state.show_node_editor, "Nodes").on_hover_text("Geometry Nodes Canvas").clicked() {
+                        state.show_node_editor = !state.show_node_editor;
+                    }
+                    if ui.selectable_label(state.show_uv_editor, "UV").on_hover_text("2D UV Texture Editor").clicked() {
+                        state.show_uv_editor = !state.show_uv_editor;
+                    }
+                    if ui.selectable_label(state.show_script_console, "CLI").on_hover_text("Scripting Console (Rhai)").clicked() {
+                        state.show_script_console = !state.show_script_console;
+                    }
+                });
             });
 
         if toggle_cutter {

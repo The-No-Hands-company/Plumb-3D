@@ -26,10 +26,10 @@ impl StudioDomain {
 
     pub fn label(&self) -> &'static str {
         match self {
-            Self::HardSurfaceCad => "🛠 Hard-Surface & CAD",
-            Self::Animation => "🎬 Animation & Rigging",
-            Self::Sculpting => "🗿 Digital Sculpting",
-            Self::CompleteSuite => "🌐 Complete Suite",
+            Self::HardSurfaceCad => "Hard-Surface & CAD",
+            Self::Animation => "Animation & Rigging",
+            Self::Sculpting => "Digital Sculpting",
+            Self::CompleteSuite => "Complete Suite",
         }
     }
 
@@ -108,13 +108,13 @@ impl WorkspaceTemplate {
 
     pub fn label(&self) -> &'static str {
         match self {
-            Self::General => "📐 Layout",
-            Self::HardSurface => "🔨 Hard-Surface",
-            Self::CadPrecision => "📐 CAD Precision",
-            Self::Sculpting => "🗿 Sculpting",
-            Self::UvRetopo => "🗺 UV & Retopo",
-            Self::LookDev => "🎨 LookDev",
-            Self::Animation => "🎬 Animation",
+            Self::General => "Layout",
+            Self::HardSurface => "Hard-Surface",
+            Self::CadPrecision => "CAD Precision",
+            Self::Sculpting => "Sculpting",
+            Self::UvRetopo => "UV & Retopo",
+            Self::LookDev => "LookDev",
+            Self::Animation => "Animation",
         }
     }
 

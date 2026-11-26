@@ -103,77 +103,78 @@ pub fn render(state: &mut AppState) {
     // 1. Render Viewport Statistics Heads-Up Display (HUD)
     if state.show_viewport_hud {
         let hud_x = if state.show_left_toolbar {
-            vp.min.x + 58.0
+            vp.min.x + 72.0
         } else {
             vp.min.x + 12.0
         };
-        egui::Area::new(egui::Id::new("viewport_hud_overlay"))
-            .fixed_pos(egui::pos2(hud_x, top_y_offset))
-            .order(egui::Order::Middle)
+
+        egui::Window::new("Scene Statistics")
+            .id(egui::Id::new("viewport_hud_overlay_window"))
+            .default_pos(egui::pos2(hud_x, top_y_offset))
+            .collapsible(true)
+            .resizable(false)
+            .title_bar(true)
+            .frame(egui::Frame::popup(state.egui_ctx.style().as_ref())
+                .fill(egui::Color32::from_rgba_premultiplied(22, 24, 29, 230))
+                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_white_alpha(30)))
+                .rounding(egui::Rounding::same(8.0))
+                .inner_margin(egui::Margin::symmetric(10.0, 7.0)))
             .show(&state.egui_ctx, |ui| {
-                egui::Frame::popup(ui.style())
-                    .fill(egui::Color32::from_rgba_premultiplied(22, 24, 29, 220))
-                    .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_white_alpha(30)))
-                    .rounding(egui::Rounding::same(8.0))
-                    .inner_margin(egui::Margin::symmetric(10.0, 7.0))
-                    .show(ui, |ui| {
-                        ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("📊 Scene Statistics").strong().color(egui::Color32::from_rgb(100, 180, 255)));
-                            ui.separator();
-                            ui.label(egui::RichText::new(format!("Mode: {:?}", state.interaction_mode)).small().color(egui::Color32::LIGHT_GRAY));
-                        });
-                        ui.separator();
+                ui.horizontal(|ui| {
+                    ui.label(egui::RichText::new("Mode:").small().weak());
+                    ui.label(egui::RichText::new(format!("{:?}", state.interaction_mode)).small().color(egui::Color32::LIGHT_GRAY));
+                });
+                ui.separator();
 
-                        let mut total_verts = 0;
-                        let mut total_edges = 0;
-                        let mut total_faces = 0;
-                        let mut active_mesh_stats: Option<(String, usize, usize, usize, Vec3, Vec3)> = None;
+                let mut total_verts = 0;
+                let mut total_edges = 0;
+                let mut total_faces = 0;
+                let mut active_mesh_stats: Option<(String, usize, usize, usize, Vec3, Vec3)> = None;
 
-                        for (node_id, node) in &state.scene.nodes {
-                            if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                                let v_cnt = base_mesh.vertices.len();
-                                let e_cnt = base_mesh.edges.len();
-                                let f_cnt = base_mesh.faces.len();
-                                total_verts += v_cnt;
-                                total_edges += e_cnt;
-                                total_faces += f_cnt;
+                for (node_id, node) in &state.scene.nodes {
+                    if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                        let v_cnt = base_mesh.vertices.len();
+                        let e_cnt = base_mesh.edges.len();
+                        let f_cnt = base_mesh.faces.len();
+                        total_verts += v_cnt;
+                        total_edges += e_cnt;
+                        total_faces += f_cnt;
 
-                                if Some(node_id) == state.selected_node {
-                                    active_mesh_stats = Some((
-                                        node.name.clone(),
-                                        v_cnt,
-                                        e_cnt,
-                                        f_cnt,
-                                        base_mesh.bounding_dimensions(),
-                                        base_mesh.bounding_center(),
-                                    ));
-                                }
-                            }
+                        if Some(node_id) == state.selected_node {
+                            active_mesh_stats = Some((
+                                node.name.clone(),
+                                v_cnt,
+                                e_cnt,
+                                f_cnt,
+                                base_mesh.bounding_dimensions(),
+                                base_mesh.bounding_center(),
+                            ));
                         }
+                    }
+                }
 
-                        if let Some((name, v, e, f, dims, _center)) = active_mesh_stats {
-                            ui.label(egui::RichText::new(format!("Active: {}", name)).color(egui::Color32::WHITE).strong());
-                            ui.horizontal(|ui| {
-                                ui.monospace(format!("Verts: {} | Edges: {} | Faces: {}", v, e, f));
-                            });
-                            ui.horizontal(|ui| {
-                                ui.monospace(format!("Dims: [{:.2}, {:.2}, {:.2}]", dims.x, dims.y, dims.z));
-                            });
-                            if state.interaction_mode == InteractionMode::Edit {
-                                ui.horizontal(|ui| {
-                                    ui.label(egui::RichText::new(format!(
-                                        "Selected: {} v | {} e | {} f",
-                                        state.selected_vertices.len(),
-                                        state.selected_edges.len(),
-                                        state.selected_faces.len()
-                                    )).color(egui::Color32::YELLOW));
-                                });
-                            }
-                        } else {
-                            ui.label(egui::RichText::new("Total Scene Mesh Stats").color(egui::Color32::WHITE));
-                            ui.monospace(format!("Verts: {} | Edges: {} | Faces: {}", total_verts, total_edges, total_faces));
-                        }
+                if let Some((name, v, e, f, dims, _center)) = active_mesh_stats {
+                    ui.label(egui::RichText::new(format!("Active: {}", name)).color(egui::Color32::WHITE).strong());
+                    ui.horizontal(|ui| {
+                        ui.monospace(format!("Verts: {} | Edges: {} | Faces: {}", v, e, f));
                     });
+                    ui.horizontal(|ui| {
+                        ui.monospace(format!("Dims: [{:.2}, {:.2}, {:.2}]", dims.x, dims.y, dims.z));
+                    });
+                    if state.interaction_mode == InteractionMode::Edit {
+                        ui.horizontal(|ui| {
+                            ui.label(egui::RichText::new(format!(
+                                "Selected: {} v | {} e | {} f",
+                                state.selected_vertices.len(),
+                                state.selected_edges.len(),
+                                state.selected_faces.len()
+                            )).color(egui::Color32::YELLOW));
+                        });
+                    }
+                } else {
+                    ui.label(egui::RichText::new("Total Scene Mesh Stats").color(egui::Color32::WHITE));
+                    ui.monospace(format!("Verts: {} | Edges: {} | Faces: {}", total_verts, total_edges, total_faces));
+                }
             });
     }
 
