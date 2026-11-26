@@ -120,9 +120,14 @@ pub fn draw_mesh_tools_panel(
                             ui.add_space(5.0);
                             ui.add(egui::Slider::new(&mut state.bevel_offset, 0.05..=1.5).text("Bevel Offset"));
                             ui.add(egui::Slider::new(&mut state.bevel_inset, 0.05..=1.0).text("Bevel Inset"));
-                            if ui.button("Bevel Face (B)").clicked() {
-                                actions.trigger_bevel = true;
-                            }
+                            ui.horizontal(|ui| {
+                                if ui.button("Bevel Face (Ctrl+B)").clicked() {
+                                    actions.trigger_bevel = true;
+                                }
+                                if ui.button("Un-Bevel Chamfer (Alt+Shift+B)").clicked() {
+                                    actions.trigger_un_bevel = true;
+                                }
+                            });
 
                             ui.add_space(5.0);
                             ui.collapsing("Bisect / Slice Plane (3ds Max / Blender)", |ui| {

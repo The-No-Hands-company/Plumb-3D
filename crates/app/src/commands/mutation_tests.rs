@@ -156,3 +156,60 @@ fn test_chamfer_curve_command_execution_and_undo() {
     };
     assert_eq!(pt_count_undone, 3);
 }
+
+#[test]
+fn test_un_bevel_faces_command_and_undo() {
+    use crate::commands::UnBevelFacesCommand;
+
+    let mut scene = SceneGraph::new();
+    let mut cube = Primitives::create_cube(2.0);
+    let edge = cube.edges.keys().next().unwrap();
+    let bevel_faces = cube.bevel_edge_with_segments(edge, 0.2, 1).expect("bevel edge");
+    assert_eq!(bevel_faces.len(), 1);
+
+    let node_id = scene.add_node(SceneNode::new_mesh("BeveledCube", core_math::Transform::IDENTITY, cube));
+
+    let mut history = graph_engine::HistoryManager::new();
+    let cmd = Box::new(UnBevelFacesCommand {
+        node_id,
+        faces: bevel_faces.clone(),
+        old_mesh: None,
+    });
+
+    history.execute(cmd, &mut scene).unwrap();
+
+    let face_count_after = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.faces.len()
+        } else {
+            0
+        }
+    };
+    // The bevel face was dissolved and collapsed back to the sharp edge
+    assert_eq!(face_count_after, 6);
+
+    // Test Undo
+    history.undo(&mut scene).unwrap();
+    let face_count_undone = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.faces.len()
+        } else {
+            0
+        }
+    };
+    assert_eq!(face_count_undone, 7);
+
+    // Test Redo
+    history.redo(&mut scene).unwrap();
+    let face_count_redone = {
+        let node = scene.nodes.get(node_id).unwrap();
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.faces.len()
+        } else {
+            0
+        }
+    };
+    assert_eq!(face_count_redone, 6);
+}

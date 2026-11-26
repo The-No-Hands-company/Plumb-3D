@@ -352,4 +352,25 @@ pub fn handle_topology_actions(state: &mut AppState, actions: &mut UiActions) {
             }
         }
     }
+
+    // Handle Un-Bevel Faces (MeshMachine / HardOps Alt+Shift+B)
+    if actions.trigger_un_bevel {
+        if let Some(sel_id) = state.selected_node {
+            let target_faces: Vec<FaceKey> = state.selected_faces.iter().copied().collect();
+            if !target_faces.is_empty() {
+                let cmd = Box::new(UnBevelFacesCommand {
+                    node_id: sel_id,
+                    faces: target_faces.clone(),
+                    old_mesh: None,
+                });
+                if state.history.execute(cmd, &mut state.scene).is_ok() {
+                    state.sync_gpu_meshes();
+                    state.set_status_message(format!("Un-Beveled {} chamfer face(s) back to crisp edge! (Ctrl+Z to Undo)", target_faces.len()));
+                    state.selected_faces.clear();
+                }
+            } else {
+                state.set_status_message("Select bevel/chamfer face(s) to un-bevel (Alt+Shift+B)");
+            }
+        }
+    }
 }

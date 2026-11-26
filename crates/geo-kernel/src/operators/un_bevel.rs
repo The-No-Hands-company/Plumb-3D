@@ -45,14 +45,12 @@ impl Mesh {
         }
 
         if collapsed_count > 0 {
-            // Remove dissolved bevel faces
-            for &fk in bevel_faces {
-                self.faces.remove(fk);
-            }
-
-            // Remap vertices in remaining faces and remove degeneracies
-            let remaining_faces: Vec<FaceKey> = self.faces.keys().collect();
-            for fk in remaining_faces {
+            // Collect remapped vertex loops for all non-bevel faces
+            let mut new_face_vertex_loops: Vec<Vec<VertexKey>> = Vec::new();
+            for (fk, _) in &self.faces {
+                if bevel_faces.contains(&fk) {
+                    continue;
+                }
                 let fverts = self.face_vertices(fk);
                 let remapped: Vec<VertexKey> = fverts
                     .iter()
@@ -68,14 +66,27 @@ impl Mesh {
                 if clean_verts.len() > 1 && clean_verts.first() == clean_verts.last() {
                     clean_verts.pop();
                 }
-
                 if clean_verts.len() >= 3 {
-                    let _ = self.add_face(&clean_verts);
+                    new_face_vertex_loops.push(clean_verts);
                 }
-                self.faces.remove(fk);
             }
 
-            let _ = self.weld_vertices_by_distance(0.001);
+            // Clear old topological elements while preserving vertex coordinates
+            self.faces.clear();
+            self.edges.clear();
+            self.half_edges.clear();
+            for v in self.vertices.values_mut() {
+                v.half_edges.clear();
+            }
+
+            // Reconstruct manifold faces
+            for vloop in new_face_vertex_loops {
+                let _ = self.add_face(&vloop);
+            }
+
+            if let Ok(welded) = self.weld_vertices_by_distance(0.001) {
+                *self = welded;
+            }
             self.update_face_weighted_normals(true);
         }
 
@@ -96,6 +107,7 @@ mod tests {
 
         let un_beveled = cube.un_bevel_faces(&bevel_faces).expect("un-bevel faces");
         assert_eq!(un_beveled, 1);
+        assert_eq!(cube.faces.len(), 6);
         assert!(cube.validate().is_ok());
     }
 }
