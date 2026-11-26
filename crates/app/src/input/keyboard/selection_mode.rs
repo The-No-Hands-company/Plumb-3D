@@ -187,8 +187,10 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
                                 SubElementLevel::Face => {
                                     let mut updated = HashSet::new();
                                     for &fk in &state.selected_faces {
-                                        let faces = if state.alt_pressed {
+                                        let faces = if state.alt_pressed && state.ctrl_pressed {
                                             base_mesh.select_coplanar_faces(fk, 1.5)
+                                        } else if state.alt_pressed {
+                                            base_mesh.select_face_loop(fk)
                                         } else {
                                             base_mesh.select_linked(fk)
                                         };

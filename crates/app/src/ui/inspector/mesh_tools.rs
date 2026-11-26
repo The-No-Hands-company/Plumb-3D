@@ -59,10 +59,12 @@ pub fn draw_mesh_tools_panel(
                                 if ui.button("Shrink (-)").clicked() {
                                     actions.trigger_shrink_selection = true;
                                 }
-                                if state.sub_element_level == SubElementLevel::Edge {
-                                    if ui.button("Loop (Alt+L)").clicked() {
+                                if state.sub_element_level == SubElementLevel::Face || state.sub_element_level == SubElementLevel::Edge {
+                                    if ui.button("Loop (Alt+L)").on_hover_text("Select full Face loop or Edge loop (or Double-Click in viewport)").clicked() {
                                         actions.trigger_edge_loop = true;
                                     }
+                                }
+                                if state.sub_element_level == SubElementLevel::Edge {
                                     if ui.button("Ring (Alt+R)").clicked() {
                                         actions.trigger_edge_ring = true;
                                     }

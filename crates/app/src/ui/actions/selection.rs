@@ -113,12 +113,12 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
             }
         }
 
-    // Handle Edge Loop Selection
-    if actions.trigger_edge_loop
-        && state.interaction_mode == InteractionMode::Edit && state.sub_element_level == SubElementLevel::Edge {
-            if let Some(sel_id) = state.selected_node {
-                if let Some(node) = state.scene.nodes.get(sel_id) {
-                    if let NodeData::Mesh { base_mesh, .. } = &node.data {
+    // Handle Loop Selection (Edge Loop or Face Loop)
+    if actions.trigger_edge_loop && state.interaction_mode == InteractionMode::Edit {
+        if let Some(sel_id) = state.selected_node {
+            if let Some(node) = state.scene.nodes.get(sel_id) {
+                if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                    if state.sub_element_level == SubElementLevel::Edge {
                         let mut full_loop = HashSet::new();
                         for &ek in &state.selected_edges {
                             for edge in base_mesh.select_edge_loop(ek) {
@@ -128,10 +128,21 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
                         if !full_loop.is_empty() {
                             state.selected_edges = full_loop;
                         }
+                    } else if state.sub_element_level == SubElementLevel::Face {
+                        let mut full_loop = HashSet::new();
+                        for &fk in &state.selected_faces {
+                            for face in base_mesh.select_face_loop(fk) {
+                                full_loop.insert(face);
+                            }
+                        }
+                        if !full_loop.is_empty() {
+                            state.selected_faces = full_loop;
+                        }
                     }
                 }
             }
         }
+    }
 
     // Handle Edge Ring Selection
     if actions.trigger_edge_ring

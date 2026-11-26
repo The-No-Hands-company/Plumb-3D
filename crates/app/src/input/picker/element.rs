@@ -8,6 +8,15 @@ impl AppState {
     pub fn pick_at_screen_pos(&mut self, x: f64, y: f64) {
         let ray = self.get_screen_ray(x, y);
 
+        let now = std::time::Instant::now();
+        let is_double_click = if let (Some(last_time), Some((lx, ly))) = (self.last_click_instant, self.last_click_pos) {
+            now.duration_since(last_time).as_millis() < 350 && ((lx - x).powi(2) + (ly - y).powi(2)) < 64.0
+        } else {
+            false
+        };
+        self.last_click_instant = Some(now);
+        self.last_click_pos = Some((x, y));
+
         if self.interaction_mode == InteractionMode::CurveEdit {
             if let Some(sel_id) = self.selected_node {
                 if let Some(node) = self.scene.nodes.get(sel_id) {
@@ -92,8 +101,8 @@ impl AppState {
                                         for e in ring_edges {
                                             self.selected_edges.insert(e);
                                         }
-                                    } else if self.alt_pressed {
-                                        // Blender Alt+Click: Edge Loop selection
+                                    } else if is_double_click || self.alt_pressed {
+                                        // Double-Click or Alt+Click: Edge Loop selection
                                         let loop_edges = base_mesh.select_edge_loop(ek);
                                         if !self.shift_pressed {
                                             self.selected_edges.clear();
@@ -124,8 +133,8 @@ impl AppState {
                                         for f in coplanar {
                                             self.selected_faces.insert(f);
                                         }
-                                    } else if self.alt_pressed {
-                                        // Blender Alt+Click: Face Loop / Ring selection
+                                    } else if is_double_click || self.alt_pressed {
+                                        // Double-Click or Alt+Click: Face Loop / Ring selection
                                         let loop_faces = base_mesh.select_face_loop(fk);
                                         if !self.shift_pressed {
                                             self.selected_faces.clear();
@@ -215,6 +224,17 @@ impl AppState {
         }
 
         if let Some((node_id, face_key, _)) = closest_hit {
+            if is_double_click && self.interaction_mode == InteractionMode::Object {
+                self.selected_nodes.clear();
+                self.selected_nodes.insert(node_id);
+                self.selected_node = Some(node_id);
+                self.interaction_mode = InteractionMode::Edit;
+                self.selected_faces.clear();
+                if let Some(fk) = face_key {
+                    self.selected_faces.insert(fk);
+                }
+                return;
+            }
             if self.shift_pressed {
                 if self.selected_nodes.contains(&node_id) {
                     self.selected_nodes.remove(&node_id);

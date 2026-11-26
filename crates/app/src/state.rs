@@ -195,10 +195,8 @@ pub struct AppState {
     pub live_pathtracer_tex_handle: Option<egui::TextureHandle>,
 
     // Mouse Interaction for Viewport
-    pub last_mouse_pos: Option<(f64, f64)>,
-    pub mouse_drag_distance: f32,
-    pub is_orbiting: bool,
-    pub is_panning: bool,
+    pub last_mouse_pos: Option<(f64, f64)>, pub last_click_instant: Option<std::time::Instant>, pub last_click_pos: Option<(f64, f64)>,
+    pub mouse_drag_distance: f32, pub is_orbiting: bool, pub is_panning: bool,
 
     // Direct modeling parameters
     pub extrude_distance: f32, pub bevel_offset: f32, pub bevel_inset: f32,
@@ -531,10 +529,8 @@ impl AppState {
             live_pathtracer_last_eye_target: (Vec3::ZERO, Vec3::ZERO),
             live_pathtracer_max_samples: 64,
             live_pathtracer_tex_handle: None,
-            last_mouse_pos: None,
-            mouse_drag_distance: 0.0,
-            is_orbiting: false,
-            is_panning: false,
+            last_mouse_pos: None, last_click_instant: None, last_click_pos: None,
+            mouse_drag_distance: 0.0, is_orbiting: false, is_panning: false,
             extrude_distance: 0.75,
             bevel_offset: 0.2,
             bevel_inset: 0.2,
