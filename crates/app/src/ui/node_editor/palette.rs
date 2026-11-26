@@ -14,6 +14,8 @@ pub enum SpawnNodeAction {
     Solidify,
     Decimate,
     VoxelRemesh,
+    Mirror,
+    Bevel,
     JoinGeometry,
     SetMaterial,
     MeshToPoints,
@@ -73,6 +75,12 @@ impl SpawnNodeAction {
             }
             Self::VoxelRemesh => {
                 graph.add_node(Box::new(VoxelRemeshNode), pos);
+            }
+            Self::Mirror => {
+                graph.add_node(Box::new(MirrorNode), pos);
+            }
+            Self::Bevel => {
+                graph.add_node(Box::new(BevelNode), pos);
             }
             Self::JoinGeometry => {
                 graph.add_node(Box::new(JoinGeometryNode), pos);
@@ -190,6 +198,14 @@ pub fn show_add_node_menu(ui: &mut egui::Ui) -> Option<SpawnNodeAction> {
             }
             if ui.button("Voxel Remesh (DynaMesh)").clicked() {
                 selected = Some(SpawnNodeAction::VoxelRemesh);
+                ui.close_menu();
+            }
+            if ui.button("Mirror Geometry").clicked() {
+                selected = Some(SpawnNodeAction::Mirror);
+                ui.close_menu();
+            }
+            if ui.button("Bevel Geometry").clicked() {
+                selected = Some(SpawnNodeAction::Bevel);
                 ui.close_menu();
             }
             if ui.button("Displace Geometry").clicked() {

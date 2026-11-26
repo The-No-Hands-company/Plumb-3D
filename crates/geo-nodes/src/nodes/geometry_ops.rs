@@ -1,7 +1,7 @@
 use crate::nodes::traits::GeoNodeOp;
 use crate::types::*;
 use core_math::{EulerRot, Quat, Transform, Vec3};
-use geo_kernel::{decimate_mesh, BooleanOp, CatmullClarkModifier, Modifier, SolidifyModifier};
+use geo_kernel::{decimate_mesh, BevelModifier, BooleanOp, CatmullClarkModifier, MirrorAxis, MirrorModifier, Modifier, SolidifyModifier};
 
 #[derive(Debug, Clone)]
 pub struct TransformGeometryNode;
@@ -360,6 +360,90 @@ impl GeoNodeOp for VoxelRemeshNode {
         }
 
         Ok(vec![SocketValue::Geometry(Some(remeshed))])
+    }
+
+    fn clone_box(&self) -> Box<dyn GeoNodeOp> {
+        Box::new(self.clone())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MirrorNode;
+
+impl GeoNodeOp for MirrorNode {
+    fn name(&self) -> &str {
+        "Mirror Geometry"
+    }
+
+    fn category(&self) -> NodeCategory {
+        NodeCategory::GeometryOps
+    }
+
+    fn inputs(&self) -> Vec<NodeSocket> {
+        vec![
+            NodeSocket::geometry("Geometry"),
+            NodeSocket::int("Axis (0:X, 1:Y, 2:Z)", 0),
+        ]
+    }
+
+    fn outputs(&self) -> Vec<NodeSocket> {
+        vec![NodeSocket::geometry("Geometry")]
+    }
+
+    fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
+        let Some(mesh) = inputs.first().and_then(|v| v.as_geometry()) else {
+            return Ok(vec![SocketValue::Geometry(None)]);
+        };
+
+        let axis_code = inputs.get(1).map(|v| v.as_int()).unwrap_or(0);
+        let axis = match axis_code {
+            1 => MirrorAxis::Y,
+            2 => MirrorAxis::Z,
+            _ => MirrorAxis::X,
+        };
+
+        let modifier = MirrorModifier::new(axis);
+        let res = modifier.apply(mesh).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        Ok(vec![SocketValue::Geometry(Some(res))])
+    }
+
+    fn clone_box(&self) -> Box<dyn GeoNodeOp> {
+        Box::new(self.clone())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct BevelNode;
+
+impl GeoNodeOp for BevelNode {
+    fn name(&self) -> &str {
+        "Bevel Geometry"
+    }
+
+    fn category(&self) -> NodeCategory {
+        NodeCategory::GeometryOps
+    }
+
+    fn inputs(&self) -> Vec<NodeSocket> {
+        vec![
+            NodeSocket::geometry("Geometry"),
+            NodeSocket::float("Offset", 0.05),
+        ]
+    }
+
+    fn outputs(&self) -> Vec<NodeSocket> {
+        vec![NodeSocket::geometry("Geometry")]
+    }
+
+    fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
+        let Some(mesh) = inputs.first().and_then(|v| v.as_geometry()) else {
+            return Ok(vec![SocketValue::Geometry(None)]);
+        };
+
+        let offset = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.05).max(0.001);
+        let modifier = BevelModifier::new(offset);
+        let res = modifier.apply(mesh).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        Ok(vec![SocketValue::Geometry(Some(res))])
     }
 
     fn clone_box(&self) -> Box<dyn GeoNodeOp> {

@@ -293,4 +293,38 @@ mod tests {
             panic!("Expected Geometry output");
         }
     }
+
+    #[test]
+    fn test_mirror_and_bevel_nodes() {
+        use geo_kernel::Primitives;
+
+        let cube = Primitives::create_cube(2.0);
+        assert_eq!(cube.faces.len(), 6);
+
+        // Test MirrorNode across X axis
+        let mirror_node = MirrorNode;
+        let mirror_res = mirror_node.execute(&[
+            SocketValue::Geometry(Some(cube.clone())),
+            SocketValue::Int(0), // X axis
+        ]).expect("MirrorNode should succeed");
+
+        if let SocketValue::Geometry(Some(m)) = &mirror_res[0] {
+            assert_eq!(m.faces.len(), 12);
+        } else {
+            panic!("Expected Geometry output from MirrorNode");
+        }
+
+        // Test BevelNode
+        let bevel_node = BevelNode;
+        let bevel_res = bevel_node.execute(&[
+            SocketValue::Geometry(Some(cube)),
+            SocketValue::Float(0.1),
+        ]).expect("BevelNode should succeed");
+
+        if let SocketValue::Geometry(Some(m)) = &bevel_res[0] {
+            assert!(m.faces.len() > 6);
+        } else {
+            panic!("Expected Geometry output from BevelNode");
+        }
+    }
 }
