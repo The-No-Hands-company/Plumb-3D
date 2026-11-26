@@ -112,6 +112,11 @@ pub fn draw_constraints_panel(
                                         }
                                     });
                             });
+                            let mut pole_deg = ik.pole_angle.to_degrees();
+                            if ui.add(egui::Slider::new(&mut pole_deg, -180.0..=180.0).text("Pole Twist Angle (deg)")).changed() {
+                                ik.pole_angle = pole_deg.to_radians();
+                            }
+                            ui.add(egui::Slider::new(&mut ik.weight, 0.0..=1.0).text("IK Weight / Blend"));
                             ui.label(format!("Chain Length: {} joints ({})", ik.chain.len(), if ik.chain.len() == 3 { "2-Bone Analytic" } else { "CCD Multi-Bone" }));
                         }
                     }

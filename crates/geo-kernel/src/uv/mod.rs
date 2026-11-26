@@ -1,7 +1,9 @@
+pub mod distortion;
 pub mod pack;
 pub mod projection;
 pub mod unwrap;
 
+pub use distortion::*;
 pub use projection::ProjectionAxis;
 
 #[cfg(test)]

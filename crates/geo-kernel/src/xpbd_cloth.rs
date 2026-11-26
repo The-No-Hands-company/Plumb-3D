@@ -58,6 +58,8 @@ pub struct XpbdClothSimulator {
     pub ground_y: Option<f32>,
     pub substeps: usize,
     pub pin_group: Option<String>,
+    pub self_collision: bool,
+    pub particle_radius: f32,
     pub is_initialized: bool,
 }
 
@@ -78,6 +80,8 @@ impl Default for XpbdClothSimulator {
             ground_y: Some(0.0),
             substeps: 4,
             pin_group: None,
+            self_collision: true,
+            particle_radius: 0.025,
             is_initialized: false,
         }
     }
@@ -294,9 +298,68 @@ impl XpbdClothSimulator {
                 }
             }
 
-            // 8. Update particle velocities
+            // 8. Spatial Hash Grid Self-Collision Resolution
+            if self.self_collision && self.particle_radius > 1e-4 {
+                self.resolve_self_collisions();
+            }
+
+            // 9. Update particle velocities
             for p in &mut self.particles {
                 p.velocity = (p.position - p.previous_position) / s_dt;
+            }
+        }
+    }
+
+    /// Resolves particle-particle self collisions using a fast spatial hash grid
+    pub fn resolve_self_collisions(&mut self) {
+        let diam = self.particle_radius * 2.0;
+        let diam_sq = diam * diam;
+        let cell_size = diam.max(0.01);
+        let inv_cell = 1.0 / cell_size;
+
+        let mut grid: HashMap<(i32, i32, i32), Vec<usize>> = HashMap::with_capacity(self.particles.len());
+        for (i, p) in self.particles.iter().enumerate() {
+            let cx = (p.position.x * inv_cell).floor() as i32;
+            let cy = (p.position.y * inv_cell).floor() as i32;
+            let cz = (p.position.z * inv_cell).floor() as i32;
+            grid.entry((cx, cy, cz)).or_default().push(i);
+        }
+
+        for i in 0..self.particles.len() {
+            let pi_pos = self.particles[i].position;
+            let pi_inv_m = self.particles[i].inv_mass;
+            let cx = (pi_pos.x * inv_cell).floor() as i32;
+            let cy = (pi_pos.y * inv_cell).floor() as i32;
+            let cz = (pi_pos.z * inv_cell).floor() as i32;
+
+            for dx in -1..=1 {
+                for dy in -1..=1 {
+                    for dz in -1..=1 {
+                        if let Some(neighbors) = grid.get(&(cx + dx, cy + dy, cz + dz)) {
+                            for &j in neighbors {
+                                if j <= i {
+                                    continue;
+                                }
+                                let pj_pos = self.particles[j].position;
+                                let diff = pi_pos - pj_pos;
+                                let dist_sq = diff.length_squared();
+                                if dist_sq < diam_sq && dist_sq > 1e-8 {
+                                    let dist = dist_sq.sqrt();
+                                    let normal = diff / dist;
+                                    let penetration = diam - dist;
+
+                                    let pj_inv_m = self.particles[j].inv_mass;
+                                    let w_sum = pi_inv_m + pj_inv_m;
+                                    if w_sum > 0.0 {
+                                        let impulse = normal * (penetration / w_sum);
+                                        self.particles[i].position += impulse * pi_inv_m;
+                                        self.particles[j].position -= impulse * pj_inv_m;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -380,5 +443,31 @@ mod tests {
             let dist = (p.position - vec3(0.0, -0.5, 0.0)).length();
             assert!(dist >= 0.79);
         }
+    }
+
+    #[test]
+    fn test_xpbd_cloth_self_collision() {
+        let mut sim = XpbdClothSimulator::new();
+        sim.self_collision = true;
+        sim.particle_radius = 0.1;
+        sim.particles = vec![
+            XpbdParticle {
+                position: vec3(0.0, 0.0, 0.0),
+                previous_position: vec3(0.0, 0.0, 0.0),
+                velocity: Vec3::ZERO,
+                inv_mass: 1.0,
+            },
+            XpbdParticle {
+                position: vec3(0.05, 0.0, 0.0), // Penetrating: dist 0.05 < 0.20
+                previous_position: vec3(0.05, 0.0, 0.0),
+                velocity: Vec3::ZERO,
+                inv_mass: 1.0,
+            },
+        ];
+
+        sim.resolve_self_collisions();
+
+        let dist = (sim.particles[0].position - sim.particles[1].position).length();
+        assert!(dist >= 0.199, "Expected particles pushed apart to ~0.20, got {}", dist);
     }
 }

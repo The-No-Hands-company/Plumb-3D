@@ -21,6 +21,19 @@ pub fn solve_two_bone_ik(
     target_pos: Vec3,
     pole_pos: Vec3,
 ) -> Option<TwoBoneIkResult> {
+    solve_two_bone_ik_advanced(root_pos, mid_pos, tip_pos, target_pos, pole_pos, 0.0, 1.0)
+}
+
+/// Advanced analytic 2-bone IK solver supporting arbitrary pole vector angle twist and FK/IK blend weights
+pub fn solve_two_bone_ik_advanced(
+    root_pos: Vec3,
+    mid_pos: Vec3,
+    tip_pos: Vec3,
+    target_pos: Vec3,
+    pole_pos: Vec3,
+    pole_angle: f32,
+    weight: f32,
+) -> Option<TwoBoneIkResult> {
     let a = (mid_pos - root_pos).length();
     let b = (tip_pos - mid_pos).length();
 
@@ -42,20 +55,13 @@ pub fn solve_two_bone_ik(
         Vec3::Z
     };
 
-    // Law of Cosines:
-    // c^2 = a^2 + b^2 - 2ab * cos(beta)  => mid angle
-    // b^2 = a^2 + c^2 - 2ac * cos(alpha) => root interior angle
     let cos_alpha = ((a * a + clamped_dist * clamped_dist - b * b) / (2.0 * a * clamped_dist)).clamp(-1.0, 1.0);
     let alpha = cos_alpha.acos();
-
-    let cos_beta = ((a * a + b * b - clamped_dist * clamped_dist) / (2.0 * a * b)).clamp(-1.0, 1.0);
-    let beta = cos_beta.acos();
 
     // Compute the bend plane normal using pole vector
     let pole_dir = pole_pos - root_pos;
     let mut bend_normal = target_dir.cross(pole_dir);
     if bend_normal.length_squared() < 1e-6 {
-        // Fallback axis if pole vector is colinear with target
         bend_normal = target_dir.cross(Vec3::Y);
         if bend_normal.length_squared() < 1e-6 {
             bend_normal = target_dir.cross(Vec3::X);
@@ -64,7 +70,11 @@ pub fn solve_two_bone_ik(
     bend_normal = bend_normal.normalize();
 
     // Perpendicular vector within the bend plane pointing towards the pole
-    let bend_up = bend_normal.cross(target_dir).normalize();
+    let mut bend_up = bend_normal.cross(target_dir).normalize();
+    if pole_angle.abs() > 1e-4 {
+        let twist = Quat::from_axis_angle(target_dir, pole_angle);
+        bend_up = twist * bend_up;
+    }
 
     // Solved mid joint position in 3D world space
     let solved_mid = root_pos + target_dir * (a * cos_alpha) + bend_up * (a * alpha.sin());
@@ -77,13 +87,17 @@ pub fn solve_two_bone_ik(
     // Compute rotation adjustments relative to original bone directions
     let orig_bone1 = (mid_pos - root_pos).normalize();
     let new_bone1 = (solved_mid - root_pos).normalize();
-    let root_rot = Quat::from_rotation_arc(orig_bone1, new_bone1);
+    let mut root_rot = Quat::from_rotation_arc(orig_bone1, new_bone1);
 
     let orig_bone2 = (tip_pos - mid_pos).normalize();
     let new_bone2 = (solved_tip - solved_mid).normalize();
-    let mid_rot = Quat::from_rotation_arc(orig_bone2, new_bone2);
+    let mut mid_rot = Quat::from_rotation_arc(orig_bone2, new_bone2);
 
-    let _ = beta; // Verified by cosine triangle
+    let clamped_w = weight.clamp(0.0, 1.0);
+    if clamped_w < 1.0 {
+        root_rot = Quat::IDENTITY.slerp(root_rot, clamped_w);
+        mid_rot = Quat::IDENTITY.slerp(mid_rot, clamped_w);
+    }
 
     Some(TwoBoneIkResult {
         root_rot,
@@ -194,6 +208,8 @@ pub struct IkConstraint {
     pub chain: Vec<NodeId>,
     pub target: NodeId,
     pub pole_target: Option<NodeId>,
+    pub pole_angle: f32,
+    pub weight: f32,
     pub enabled: bool,
 }
 
@@ -203,12 +219,24 @@ impl IkConstraint {
             chain,
             target,
             pole_target: None,
+            pole_angle: 0.0,
+            weight: 1.0,
             enabled: true,
         }
     }
 
     pub fn with_pole(mut self, pole: NodeId) -> Self {
         self.pole_target = Some(pole);
+        self
+    }
+
+    pub fn with_pole_angle(mut self, angle: f32) -> Self {
+        self.pole_angle = angle;
+        self
+    }
+
+    pub fn with_weight(mut self, weight: f32) -> Self {
+        self.weight = weight.clamp(0.0, 1.0);
         self
     }
 
@@ -241,7 +269,7 @@ impl IkConstraint {
                 mid_pos + Vec3::Z
             };
 
-            if let Some(res) = solve_two_bone_ik(root_pos, mid_pos, tip_pos, target_pos, pole_pos) {
+            if let Some(res) = solve_two_bone_ik_advanced(root_pos, mid_pos, tip_pos, target_pos, pole_pos, self.pole_angle, self.weight) {
                 if let Some(root_node) = scene.nodes.get_mut(root_id) {
                     root_node.local_transform.rotation = (res.root_rot * root_node.local_transform.rotation).normalize();
                     scene.mark_dirty(root_id);
@@ -324,5 +352,26 @@ mod tests {
 
         let final_tip_pos = scene.nodes[tip_id].world_matrix.transform_point3(Vec3::ZERO);
         assert!((final_tip_pos - target).length() < 0.05);
+    }
+
+    #[test]
+    fn test_analytic_two_bone_ik_pole_angle_and_weight() {
+        let root = Vec3::new(0.0, 0.0, 0.0);
+        let mid = Vec3::new(0.0, 2.0, 0.0);
+        let tip = Vec3::new(0.0, 4.0, 0.0);
+        let target = Vec3::new(0.0, 2.5, 2.0);
+        let pole = Vec3::new(0.0, 2.0, 5.0);
+
+        // Standard solve
+        let res_std = solve_two_bone_ik_advanced(root, mid, tip, target, pole, 0.0, 1.0).unwrap();
+
+        // 90 degree pole angle twist
+        let res_twist = solve_two_bone_ik_advanced(root, mid, tip, target, pole, std::f32::consts::FRAC_PI_2, 1.0).unwrap();
+        assert!((res_std.solved_mid_pos - res_twist.solved_mid_pos).length() > 0.1);
+
+        // 0.0 weight: zero rotation delta
+        let res_fk = solve_two_bone_ik_advanced(root, mid, tip, target, pole, 0.0, 0.0).unwrap();
+        assert_eq!(res_fk.root_rot, Quat::IDENTITY);
+        assert_eq!(res_fk.mid_rot, Quat::IDENTITY);
     }
 }

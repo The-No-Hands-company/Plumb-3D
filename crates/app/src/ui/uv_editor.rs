@@ -21,8 +21,8 @@ pub fn draw_uv_editor(state: &mut AppState, actions: &mut UiActions) {
 
 pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &mut egui::Ui) {
     if let Some(sel_id) = state.selected_node {
-        if let Some(node) = state.scene.nodes.get(sel_id) {
-            if let NodeData::Mesh { base_mesh, .. } = &node.data {
+        if let Some(node) = state.scene.nodes.get_mut(sel_id) {
+            if let NodeData::Mesh { base_mesh, .. } = &mut node.data {
                 ui.horizontal(|ui| {
                     if ui.button("Unwrap Seams").clicked() {
                         actions.trigger_unwrap_seams = true;
@@ -38,6 +38,12 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                     }
                     if ui.button("Clear All").clicked() {
                         actions.trigger_clear_all_seams = true;
+                    }
+                    ui.separator();
+                    ui.checkbox(&mut state.uv_show_distortion, "Heatmap");
+                    let cut_btn = if state.uv_seam_cut_mode { "Cut Seams [ON]" } else { "Cut Seams" };
+                    if ui.selectable_label(state.uv_seam_cut_mode, cut_btn).on_hover_text("Interactive 2D Seam Cut: Click edges in UV canvas to cut/remove seams").clicked() {
+                        state.uv_seam_cut_mode = !state.uv_seam_cut_mode;
                     }
                 });
 
@@ -70,7 +76,7 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
 
                 ui.separator();
 
-                let (response, painter) = ui.allocate_painter(egui::vec2(ui.available_width(), 380.0), egui::Sense::drag());
+                let (response, painter) = ui.allocate_painter(egui::vec2(ui.available_width(), 380.0), egui::Sense::click_and_drag());
                 let rect = response.rect;
 
                 painter.rect_filled(rect, 4.0, egui::Color32::from_rgb(20, 22, 26));
@@ -82,6 +88,23 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                     let gy = rect.top() + (i as f32 / grid_lines as f32) * rect.height();
                     painter.line_segment([egui::pos2(gx, rect.top()), egui::pos2(gx, rect.bottom())], egui::Stroke::new(0.5_f32, egui::Color32::from_white_alpha(15)));
                     painter.line_segment([egui::pos2(rect.left(), gy), egui::pos2(rect.right(), gy)], egui::Stroke::new(0.5_f32, egui::Color32::from_white_alpha(15)));
+                }
+
+                // Render ABF++ angle and area distortion heatmap overlay
+                if state.uv_show_distortion {
+                    let heatmaps = base_mesh.compute_uv_distortion_rgba();
+                    for (fk, rgba) in heatmaps {
+                        let verts = base_mesh.face_vertices(fk);
+                        let mut poly_pts = Vec::with_capacity(verts.len());
+                        for vk in verts {
+                            let uv = base_mesh.vertices[vk].uv;
+                            poly_pts.push(egui::pos2(rect.left() + uv.x * rect.width(), rect.top() + (1.0 - uv.y) * rect.height()));
+                        }
+                        if poly_pts.len() >= 3 {
+                            let fill_c = egui::Color32::from_rgba_unmultiplied(rgba[0], rgba[1], rgba[2], rgba[3]);
+                            painter.add(egui::Shape::convex_polygon(poly_pts, fill_c, egui::Stroke::NONE));
+                        }
+                    }
                 }
 
                 for (fk, _face) in &base_mesh.faces {
@@ -103,24 +126,63 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                     }
                 }
 
-                for (_ek, edge) in &base_mesh.edges {
+                // Seam cut detection and rendering
+                let mouse_pos = response.hover_pos();
+                let mut closest_edge = None;
+                let mut min_edge_dist = 8.0_f32;
+
+                for (ek, edge) in &base_mesh.edges {
+                    let he = &base_mesh.half_edges[edge.half_edge];
+                    let uv0 = base_mesh.vertices[he.origin].uv;
+                    let uv1 = base_mesh.vertices[he.target].uv;
+                    let p0 = egui::pos2(rect.left() + uv0.x * rect.width(), rect.top() + (1.0 - uv0.y) * rect.height());
+                    let p1 = egui::pos2(rect.left() + uv1.x * rect.width(), rect.top() + (1.0 - uv1.y) * rect.height());
+
+                    if state.uv_seam_cut_mode {
+                        if let Some(m) = mouse_pos {
+                            let d = distance_to_segment(m, p0, p1);
+                            if d < min_edge_dist {
+                                min_edge_dist = d;
+                                closest_edge = Some((ek, p0, p1));
+                            }
+                        }
+                    }
+
                     if edge.is_seam {
-                        let he = &base_mesh.half_edges[edge.half_edge];
-                        let uv0 = base_mesh.vertices[he.origin].uv;
-                        let uv1 = base_mesh.vertices[he.target].uv;
-                        let p0 = egui::pos2(rect.left() + uv0.x * rect.width(), rect.top() + (1.0 - uv0.y) * rect.height());
-                        let p1 = egui::pos2(rect.left() + uv1.x * rect.width(), rect.top() + (1.0 - uv1.y) * rect.height());
                         painter.line_segment([p0, p1], egui::Stroke::new(2.5_f32, egui::Color32::from_rgb(255, 50, 50)));
                     }
                 }
 
+                if state.uv_seam_cut_mode {
+                    if let Some((ek, p0, p1)) = closest_edge {
+                        painter.line_segment([p0, p1], egui::Stroke::new(3.0_f32, egui::Color32::YELLOW));
+                        if response.clicked() {
+                            base_mesh.edges[ek].is_seam = !base_mesh.edges[ek].is_seam;
+                        }
+                    }
+                }
+
                 ui.separator();
+                let summary = base_mesh.summarize_uv_distortion();
                 ui.horizontal(|ui| {
-                    ui.label(format!("Object: {} | Verts: {} | Faces: {}", node.name, base_mesh.vertices.len(), base_mesh.faces.len()));
+                    ui.label(format!("Mesh: {} | V: {} | F: {}", node.name, base_mesh.vertices.len(), base_mesh.faces.len()));
+                    ui.separator();
+                    ui.label(egui::RichText::new(format!("Angle Err: {:.1} deg | Area Stretch: {:.2}x", summary.mean_angle_error_deg, summary.mean_area_stretch)).small().color(egui::Color32::from_rgb(180, 200, 230)));
                 });
             }
         }
     } else {
         ui.label("Select a mesh object in the 3D scene to view and edit its UV coordinates.");
     }
+}
+
+fn distance_to_segment(p: egui::Pos2, a: egui::Pos2, b: egui::Pos2) -> f32 {
+    let ab = b - a;
+    let len_sq = ab.length_sq();
+    if len_sq < 1e-6 {
+        return (p - a).length();
+    }
+    let t = ((p - a).dot(ab) / len_sq).clamp(0.0, 1.0);
+    let proj = a + ab * t;
+    (p - proj).length()
 }
