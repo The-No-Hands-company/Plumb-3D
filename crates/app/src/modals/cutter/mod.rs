@@ -32,6 +32,8 @@ pub struct CutterModalState {
     pub radial_count: usize,
     pub symmetry_mirror: Option<MirrorAxis>,
     pub is_ghost: bool,
+    pub auto_bevel: bool,
+    pub auto_bevel_width: f32,
 }
 
 impl Default for CutterModalState {
@@ -51,6 +53,8 @@ impl Default for CutterModalState {
             radial_count: 1,
             symmetry_mirror: None,
             is_ghost: false,
+            auto_bevel: false,
+            auto_bevel_width: 0.04,
         }
     }
 }
@@ -143,13 +147,22 @@ pub fn commit(state: &mut AppState) {
 
                 base_mesh.stash_normals();
                 if let Ok(mut new_mesh) = base_mesh.boolean(&local_cutter, cutter.operation) {
+                    if cutter.auto_bevel {
+                        use geo_kernel::Modifier;
+                        let bevel_mod = geo_kernel::BevelModifier::new(cutter.auto_bevel_width);
+                        if let Ok(beveled) = bevel_mod.apply(&new_mesh) {
+                            new_mesh = beveled;
+                        }
+                    }
                     new_mesh.stashed_normals = base_mesh.stashed_normals.clone();
                     new_mesh.transfer_stashed_normals(0.25);
                     new_mesh.update_face_weighted_normals(true);
                     *base_mesh = new_mesh;
                     state.sync_gpu_meshes();
                     state.scene.mark_dirty(sel_id);
-                    state.set_status_message(if cutter.radial_count > 1 {
+                    state.set_status_message(if cutter.auto_bevel {
+                        "Cut with Auto-Bevel Applied! (Ctrl+Z to Undo)".to_string()
+                    } else if cutter.radial_count > 1 {
                         format!(
                             "Radial Array Cut (N={}) Applied! (Ctrl+Z to Undo)",
                             cutter.radial_count
@@ -217,6 +230,10 @@ pub fn commit(state: &mut AppState) {
                     cutter_name,
                 );
                 modifier_stack.add_modifier(Box::new(bool_mod));
+                if cutter.auto_bevel {
+                    let bevel_mod = geo_kernel::BevelModifier::new(cutter.auto_bevel_width);
+                    modifier_stack.add_modifier(Box::new(bevel_mod));
+                }
                 *cached_render_mesh = None;
                 state.scene.mark_dirty(sel_id);
             }
@@ -319,5 +336,15 @@ mod tests {
         // 10 orig + 10 mirrored = 20 vertices
         assert_eq!(mirrored.vertices.len(), 20);
         assert_eq!(mirrored.faces.len(), 14);
+    }
+
+    #[test]
+    fn test_cutter_auto_bevel_configuration() {
+        let mut cutter = CutterModalState::default();
+        assert!(!cutter.auto_bevel);
+        cutter.auto_bevel = true;
+        cutter.auto_bevel_width = 0.05;
+        assert!(cutter.auto_bevel);
+        assert!((cutter.auto_bevel_width - 0.05).abs() < 1e-4);
     }
 }

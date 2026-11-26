@@ -178,6 +178,23 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
             }
             true
         }
+        KeyCode::KeyB => {
+            let is_on = if let Some(cutter) = &mut state.cutter_modal {
+                cutter.auto_bevel = !cutter.auto_bevel;
+                Some(cutter.auto_bevel)
+            } else {
+                None
+            };
+            if let Some(on) = is_on {
+                state.set_status_message(if on {
+                    "Cutter Auto-Bevel: ON"
+                } else {
+                    "Cutter Auto-Bevel: OFF"
+                });
+                state.window.request_redraw();
+            }
+            true
+        }
         KeyCode::KeyM => {
             if let Some(cutter) = &mut state.cutter_modal {
                 cutter.symmetry_mirror = match cutter.symmetry_mirror {
