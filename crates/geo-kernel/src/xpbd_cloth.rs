@@ -55,6 +55,9 @@ pub struct XpbdClothSimulator {
     pub rest_volume: f32,
     pub damping: f32,
     pub gravity: Vec3,
+    pub wind: Vec3,
+    pub turbulence: f32,
+    pub time: f32,
     pub ground_y: Option<f32>,
     pub substeps: usize,
     pub pin_group: Option<String>,
@@ -77,6 +80,9 @@ impl Default for XpbdClothSimulator {
             rest_volume: 0.0,
             damping: 0.01,
             gravity: vec3(0.0, -9.81, 0.0),
+            wind: Vec3::ZERO,
+            turbulence: 0.0,
+            time: 0.0,
             ground_y: Some(0.0),
             substeps: 4,
             pin_group: None,
@@ -185,17 +191,31 @@ impl XpbdClothSimulator {
             return;
         }
 
+        self.time += dt;
         let substeps = self.substeps.max(1);
         let s_dt = dt / substeps as f32;
         let s_dt_sq = s_dt * s_dt;
 
         for _ in 0..substeps {
-            // 1. Predict unconstrained positions
-            for p in &mut self.particles {
+            // 1. Predict unconstrained positions with gravity, aerodynamic wind, and turbulence
+            for (i, p) in self.particles.iter_mut().enumerate() {
                 if p.inv_mass == 0.0 {
                     continue;
                 }
-                p.velocity += self.gravity * s_dt;
+                let mut ext_force = self.gravity;
+                if self.wind.length_squared() > 1e-4 {
+                    let phase = self.time * 2.8 + (i as f32) * 0.35 + p.position.x * 0.5 + p.position.z * 0.7;
+                    let turb_offset = vec3(
+                        (phase * 1.3).sin() * self.turbulence,
+                        (phase * 0.9).cos() * (self.turbulence * 0.5),
+                        (phase * 1.7).sin() * self.turbulence,
+                    );
+                    let local_wind = self.wind + turb_offset;
+                    let rel_vel = local_wind - p.velocity;
+                    let drag = rel_vel * 0.8;
+                    ext_force += drag;
+                }
+                p.velocity += ext_force * s_dt;
                 p.velocity *= 1.0 - self.damping;
                 p.previous_position = p.position;
                 p.position += p.velocity * s_dt;
@@ -469,5 +489,28 @@ mod tests {
 
         let dist = (sim.particles[0].position - sim.particles[1].position).length();
         assert!(dist >= 0.199, "Expected particles pushed apart to ~0.20, got {}", dist);
+    }
+
+    #[test]
+    fn test_xpbd_cloth_wind_and_turbulence() {
+        let plane = Primitives::create_plane(1.0, 1.0, 1, 1);
+        let mut sim = XpbdClothSimulator::new();
+        sim.wind = vec3(5.0, 0.0, 2.0);
+        sim.turbulence = 1.5;
+        sim.initialize(&plane);
+
+        for _ in 0..10 {
+            sim.step(1.0 / 60.0);
+        }
+
+        // Particles should have accelerated along the wind direction (positive X and Z)
+        let mut moved_in_wind = false;
+        for p in &sim.particles {
+            if p.position.x > 0.01 && p.position.z > 0.01 {
+                moved_in_wind = true;
+                break;
+            }
+        }
+        assert!(moved_in_wind, "Cloth particles must be displaced in positive wind direction");
     }
 }

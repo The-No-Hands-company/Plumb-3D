@@ -311,11 +311,44 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
         ui.add(egui::Slider::new(&mut state.cloth_compliance, 0.0..=0.01).text("m/N"));
     });
 
+    let vertex_groups: Vec<String> = if let Some(node) = state.scene.nodes.get(sel_id) {
+        if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            base_mesh.vertex_groups.iter().map(|g| g.name.clone()).collect()
+        } else {
+            Vec::new()
+        }
+    } else {
+        Vec::new()
+    };
+
+    ui.horizontal(|ui| {
+        ui.label("Pin Group:");
+        let current_pin = state.cloth_pin_group.as_deref().unwrap_or("None (Unpinned)");
+        egui::ComboBox::from_id_salt("cloth_pin_group")
+            .selected_text(current_pin)
+            .show_ui(ui, |ui| {
+                if ui.selectable_label(state.cloth_pin_group.is_none(), "None (Unpinned)").clicked() {
+                    state.cloth_pin_group = None;
+                }
+                for gname in &vertex_groups {
+                    let is_sel = state.cloth_pin_group.as_deref() == Some(gname.as_str());
+                    if ui.selectable_label(is_sel, gname).clicked() {
+                        state.cloth_pin_group = Some(gname.clone());
+                    }
+                }
+            });
+    });
+
     ui.horizontal(|ui| {
         ui.label("Wind Vector:");
-        ui.add(egui::DragValue::new(&mut state.cloth_wind.x).speed(0.1).prefix("X: "));
-        ui.add(egui::DragValue::new(&mut state.cloth_wind.y).speed(0.1).prefix("Y: "));
-        ui.add(egui::DragValue::new(&mut state.cloth_wind.z).speed(0.1).prefix("Z: "));
+        ui.add(egui::DragValue::new(&mut state.cloth_wind.x).speed(0.1_f32).prefix("X: "));
+        ui.add(egui::DragValue::new(&mut state.cloth_wind.y).speed(0.1_f32).prefix("Y: "));
+        ui.add(egui::DragValue::new(&mut state.cloth_wind.z).speed(0.1_f32).prefix("Z: "));
+    });
+
+    ui.horizontal(|ui| {
+        ui.label("Turbulence Gusts:");
+        ui.add(egui::Slider::new(&mut state.cloth_turbulence, 0.0_f32..=5.0_f32).text("m/s²"));
     });
 
     ui.add_space(6.0);
@@ -331,7 +364,10 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
         if ui.button("+ Add Cloth Modifier to Active Mesh").clicked() {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
                 if let NodeData::Mesh { modifier_stack, .. } = &mut node.data {
-                    modifier_stack.add_modifier(Box::new(ClothModifier::new()));
+                    let mut modifier = ClothModifier::new();
+                    modifier.wind = state.cloth_wind;
+                    modifier.pin_group = state.cloth_pin_group.clone();
+                    modifier_stack.add_modifier(Box::new(modifier));
                     state.scene.mark_dirty(sel_id);
                     state.set_status_message("Added Cloth modifier to active mesh.");
                 }
@@ -352,9 +388,12 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
                     if let NodeData::Mesh { base_mesh, .. } = &node.data {
                         let mut sim = XpbdClothSimulator::new();
                         sim.stretch_compliance = state.cloth_compliance;
+                        sim.wind = state.cloth_wind;
+                        sim.turbulence = state.cloth_turbulence;
+                        sim.pin_group = state.cloth_pin_group.clone();
                         sim.initialize(base_mesh);
                         state.active_cloth_sim = Some(sim);
-                        state.set_status_message("Initialized XPBD cloth simulator from active mesh.");
+                        state.set_status_message("Initialized XPBD cloth simulator with pin constraints.");
                     }
                 }
             }
@@ -378,6 +417,9 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
         state.active_cloth_sim = None;
     } else if step_cloth {
         if let Some(ref mut sim) = state.active_cloth_sim {
+            sim.wind = state.cloth_wind;
+            sim.turbulence = state.cloth_turbulence;
+            sim.stretch_compliance = state.cloth_compliance;
             sim.step(0.016);
         }
     } else if apply_cloth {
