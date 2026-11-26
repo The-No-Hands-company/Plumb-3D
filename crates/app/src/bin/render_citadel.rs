@@ -79,6 +79,8 @@ fn main() {
         bloom_threshold: 1.05,
         bloom_radius: 12,
         vignette_intensity: 0.32,
+        chromatic_aberration: 0.12,
+        temperature: 0.05,
         exposure: 1.15,
         contrast: 1.12,
         saturation: 1.18,

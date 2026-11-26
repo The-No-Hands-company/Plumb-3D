@@ -193,6 +193,14 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
                     ui.add(egui::Slider::new(&mut state.production_render.post_process.vignette_intensity, 0.0..=0.8));
                 });
                 ui.horizontal(|ui| {
+                    ui.label("Chromatic Aberr:");
+                    ui.add(egui::Slider::new(&mut state.production_render.post_process.chromatic_aberration, 0.0..=1.0));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Temperature:");
+                    ui.add(egui::Slider::new(&mut state.production_render.post_process.temperature, -1.0..=1.0));
+                });
+                ui.horizontal(|ui| {
                     ui.label("Exposure EV:");
                     ui.add(egui::Slider::new(&mut state.production_render.post_process.exposure, 0.2..=3.0));
                 });

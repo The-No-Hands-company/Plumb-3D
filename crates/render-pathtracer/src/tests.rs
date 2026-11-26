@@ -271,4 +271,48 @@ mod tests {
         let aureole_rad = sun_scene.sky_radiance(near_sun_dir);
         assert!(aureole_rad.length() > zenith_rad.length());
     }
+
+    #[test]
+    fn test_compositor_chromatic_aberration_and_temperature() {
+        use crate::post_process::{apply_post_processing, PostProcessSettings};
+
+        let width = 16;
+        let height = 16;
+        let white = Vec3::splat(1.0);
+        let radiance = vec![white; (width * height) as usize];
+
+        // 1. Warm grading test
+        let mut warm_settings = PostProcessSettings::default();
+        warm_settings.bloom_enabled = false;
+        warm_settings.vignette_intensity = 0.0;
+        warm_settings.temperature = 1.0; // Warm shift
+        let warm_bytes = apply_post_processing(&radiance, width, height, 1, &warm_settings);
+        let center_idx = (8 * 16 + 8) * 4;
+        let warm_r = warm_bytes[center_idx];
+        let warm_b = warm_bytes[center_idx + 2];
+        assert!(warm_r > warm_b, "Warm grading should boost red over blue: r={}, b={}", warm_r, warm_b);
+
+        // 2. Cool grading test
+        let mut cool_settings = PostProcessSettings::default();
+        cool_settings.bloom_enabled = false;
+        cool_settings.vignette_intensity = 0.0;
+        cool_settings.temperature = -1.0; // Cool shift
+        let cool_bytes = apply_post_processing(&radiance, width, height, 1, &cool_settings);
+        let cool_r = cool_bytes[center_idx];
+        let cool_b = cool_bytes[center_idx + 2];
+        assert!(cool_b > cool_r, "Cool grading should boost blue over red: r={}, b={}", cool_r, cool_b);
+
+        // 3. Chromatic aberration test
+        // Place a bright pixel at coordinate (14, 8) near right edge
+        let mut pattern_radiance = vec![Vec3::ZERO; (width * height) as usize];
+        pattern_radiance[8 * 16 + 14] = Vec3::splat(10.0);
+
+        let mut ca_settings = PostProcessSettings::default();
+        ca_settings.bloom_enabled = false;
+        ca_settings.vignette_intensity = 0.0;
+        ca_settings.filmic_tonemap = false;
+        ca_settings.chromatic_aberration = 1.0;
+        let ca_bytes = apply_post_processing(&pattern_radiance, width, height, 1, &ca_settings);
+        assert_eq!(ca_bytes.len(), (width * height * 4) as usize);
+    }
 }

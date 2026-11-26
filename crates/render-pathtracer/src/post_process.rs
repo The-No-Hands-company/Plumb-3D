@@ -9,6 +9,8 @@ pub struct PostProcessSettings {
     pub bloom_intensity: f32,
     pub bloom_radius: usize,
     pub vignette_intensity: f32,
+    pub chromatic_aberration: f32,
+    pub temperature: f32,
     pub exposure: f32,
     pub contrast: f32,
     pub saturation: f32,
@@ -24,6 +26,8 @@ impl Default for PostProcessSettings {
             bloom_intensity: 0.35,
             bloom_radius: 12,
             vignette_intensity: 0.28,
+            chromatic_aberration: 0.0,
+            temperature: 0.0,
             exposure: 1.0,
             contrast: 1.08,
             saturation: 1.12,
@@ -103,7 +107,7 @@ pub fn apply_post_processing(
         }
     }
 
-    // 2. Vignette, Color Grading, Tone Mapping, Gamma
+    // 2. Vignette, Chromatic Aberration, Color Grading, Tone Mapping, Gamma
     let mut out_bytes = Vec::with_capacity(size * 4);
     let cx = w as f32 * 0.5;
     let cy = h as f32 * 0.5;
@@ -113,15 +117,49 @@ pub fn apply_post_processing(
         let dy = y as f32 - cy;
         for x in 0..w {
             let dx = x as f32 - cx;
-            let mut color = linear_colors[y * w + x];
+            let dist_sq = dx * dx + dy * dy;
+
+            // Chromatic Aberration: radial channel displacement
+            let mut color = if settings.enabled && settings.chromatic_aberration > 0.001 {
+                let r_norm = (dist_sq / max_dist_sq).sqrt();
+                let shift = settings.chromatic_aberration * 4.0 * r_norm;
+                let inv_dist = if dist_sq > 1e-4 { 1.0 / dist_sq.sqrt() } else { 0.0 };
+                let dir_x = dx * inv_dist;
+                let dir_y = dy * inv_dist;
+                let rx = ((x as f32 + dir_x * shift).round() as isize).clamp(0, w as isize - 1) as usize;
+                let ry = ((y as f32 + dir_y * shift).round() as isize).clamp(0, h as isize - 1) as usize;
+                let bx = ((x as f32 - dir_x * shift).round() as isize).clamp(0, w as isize - 1) as usize;
+                let by = ((y as f32 - dir_y * shift).round() as isize).clamp(0, h as isize - 1) as usize;
+
+                let r_sample = linear_colors[ry * w + rx].x;
+                let g_sample = linear_colors[y * w + x].y;
+                let b_sample = linear_colors[by * w + bx].z;
+                vec3(r_sample, g_sample, b_sample)
+            } else {
+                linear_colors[y * w + x]
+            };
 
             if settings.enabled {
                 // Vignette: smooth falloff toward screen corners
                 if settings.vignette_intensity > 0.001 {
-                    let dist_sq = dx * dx + dy * dy;
                     let vig_factor = (dist_sq / max_dist_sq).clamp(0.0, 1.0);
                     let vig = 1.0 - vig_factor * settings.vignette_intensity.clamp(0.0, 0.95);
                     color *= vig;
+                }
+
+                // White Balance / Temperature grading (-1.0 cool/blue to +1.0 warm/amber)
+                if settings.temperature.abs() > 0.001 {
+                    let t = settings.temperature.clamp(-1.0, 1.0);
+                    if t > 0.0 {
+                        color.x *= 1.0 + t * 0.25;
+                        color.y *= 1.0 + t * 0.08;
+                        color.z *= (1.0 - t * 0.18).max(0.0);
+                    } else {
+                        let ct = -t;
+                        color.x *= (1.0 - ct * 0.18).max(0.0);
+                        color.y *= 1.0 + ct * 0.05;
+                        color.z *= 1.0 + ct * 0.28;
+                    }
                 }
 
                 // Color Grading: Saturation
