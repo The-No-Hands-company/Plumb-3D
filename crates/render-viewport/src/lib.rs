@@ -19,12 +19,14 @@ pub mod rtao;
 pub mod npr;
 pub mod shaders;
 pub mod spatial_xr;
+pub mod ssr_dof;
 pub mod types;
 
 pub use camera::{CameraProjection, StandardView, ViewportCamera};
 pub use gizmo::{GizmoAxis, GizmoMode, TransformGizmo, TransformOrientation};
 pub use renderer::ViewportRenderer;
 pub use rtao::{RtaoKernel, RtaoSettings};
+pub use ssr_dof::{DofKernel, DofSettings, SsrRaymarcher, SsrSettings};
 pub use npr::{NprPipeline, NprSettings};
 pub use spatial_xr::{SpatialController, SpatialModelingSession, SpatialToolMode, StereoRig};
 pub use types::{

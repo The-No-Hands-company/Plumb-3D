@@ -467,6 +467,13 @@ pub fn draw_shading_menu(state: &mut AppState, ui: &mut egui::Ui) {
         ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Zebra, "Zebra Surfacing (Class-A Reflection)");
         ui.separator();
         ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Rendered, "Rendered (Live Path Tracer)");
+        ui.separator();
+        ui.checkbox(&mut state.ssr.enabled, "Screen-Space Reflections (SSR)");
+        ui.checkbox(&mut state.dof.enabled, "Depth of Field (DoF)");
+        if state.dof.enabled {
+            ui.add(egui::Slider::new(&mut state.dof.focus_distance, 0.5..=20.0).text("Focus Dist (m)"));
+            ui.add(egui::Slider::new(&mut state.dof.f_stop, 1.2..=16.0).text("f-stop"));
+        }
     });
 }
 

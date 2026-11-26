@@ -8,7 +8,7 @@ use graph_engine::{
     NodeId, SceneGraph, SceneNode,
 };
 use render_viewport::{
-    GizmoAxis, GpuMesh, TonemappingMode,
+    DofSettings, GizmoAxis, GpuMesh, SsrSettings, TonemappingMode,
     TransformGizmo, ViewportCamera, ViewportRenderer, ViewportShadingMode,
 };
 use std::collections::{HashMap, HashSet};
@@ -184,7 +184,7 @@ pub struct AppState {
     pub show_viewport_hud: bool,
     pub show_face_normals: bool, pub show_vertex_normals: bool, pub normal_display_length: f32,
     pub exposure: f32, pub tonemapping: TonemappingMode,
-    pub show_cavity: bool, pub cavity_intensity: f32,
+    pub show_cavity: bool, pub cavity_intensity: f32, pub ssr: SsrSettings, pub dof: DofSettings,
     pub live_pathtracer_buffer: Option<render_pathtracer::RenderBuffer>,
     pub live_pathtracer_scene: Option<render_pathtracer::PathTracerScene>,
     pub live_pathtracer_camera: Option<render_pathtracer::PathtracerCamera>,
@@ -523,7 +523,7 @@ impl AppState {
             show_viewport_hud: true,
             show_face_normals: false, show_vertex_normals: false, normal_display_length: 0.25,
             exposure: 1.0, tonemapping: TonemappingMode::Aces,
-            show_cavity: true, cavity_intensity: 0.5,
+            show_cavity: true, cavity_intensity: 0.5, ssr: SsrSettings::default(), dof: DofSettings::default(),
             live_pathtracer_buffer: None,
             live_pathtracer_scene: None,
             live_pathtracer_camera: None,
