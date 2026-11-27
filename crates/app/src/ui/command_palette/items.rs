@@ -551,6 +551,17 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         keywords: &["render", "path tracer", "raytracing", "production renderer", "global illumination"],
         action: PaletteAction::SetShading(ViewportShadingMode::Rendered),
     },
+    PaletteItem {
+        name: "Direct PBR Snapshot Render",
+        category: "Rendering",
+        shortcut: "F11",
+        keywords: &["render", "snapshot", "pbr", "instant", "hardware", "viewport"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.production_render.engine = crate::ui::render_dialog::RenderEngine::DirectPbr;
+            state.production_render.show_dialog = true;
+            crate::ui::render_dialog::start_production_render(state);
+        }),
+    },
     // --- Help ---
     PaletteItem {
         name: "User Manual & Shortcuts Guide",

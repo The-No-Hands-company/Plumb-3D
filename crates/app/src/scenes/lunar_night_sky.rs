@@ -41,7 +41,7 @@ pub fn build_lunar_night_sky_graph() -> (SceneGraph, ViewportCamera, NodeId, Nod
         "Sun_KeyLight",
         Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.2, 0.65, 0.0)),
         vec3(1.0, 0.98, 0.95),
-        12.0,
+        2.5,
     );
     scene.add_node(sun_node);
 
@@ -50,7 +50,7 @@ pub fn build_lunar_night_sky_graph() -> (SceneGraph, ViewportCamera, NodeId, Nod
         "Earthshine_Fill",
         Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, 0.1, -0.8, 0.0)),
         vec3(0.12, 0.18, 0.32),
-        0.8,
+        0.25,
     );
     scene.add_node(earthshine_node);
 
@@ -97,15 +97,17 @@ pub fn build_lunar_night_sky_scene(state: &mut AppState) {
     state.dof.f_stop = 4.0;
     state.ssr.enabled = false;
 
-    // Default Production Render Settings (960x540 64 SPP with glowing lunar bloom)
+    // Default Production Render Settings (960x540 64 SPP with balanced astrophotography exposure)
     state.production_render.settings.width = 960;
     state.production_render.settings.height = 540;
     state.production_render.settings.target_samples = 64;
     state.production_render.focus_distance = 8.5;
     state.production_render.use_scene_camera = true;
     state.production_render.post_process.bloom_enabled = true;
-    state.production_render.post_process.bloom_threshold = 0.85;
-    state.production_render.post_process.bloom_intensity = 0.45;
+    state.production_render.post_process.bloom_threshold = 1.35;
+    state.production_render.post_process.bloom_intensity = 0.15;
+    state.production_render.post_process.exposure = 0.85;
+    state.production_render.post_process.contrast = 1.15;
 
     // Launch the friendly In-Viewport Guided Walkthrough
     state.walkthrough = WalkthroughState::lunar_night_sky();
@@ -143,13 +145,29 @@ mod tests {
 
         let mut rng = || 0.5_f32;
         let color = render_pathtracer::integrator::trace_path(&pt_scene, &center_ray, 4, &mut rng);
-        assert!(color.length() > 1.0, "Moon surface must be brightly illuminated by sunlight: {:?}", color);
+        println!("Calibrated Moon Radiance: {:?}", color);
+        assert!(color.length() > 0.1, "Moon surface must be illuminated by sunlight: {:?}", color);
 
         // Render 160x90 test frame to verify complete render output
         let mut buffer = render_pathtracer::RenderBuffer::new(160, 90);
         buffer.render_sample_pass(&pt_scene, &pt_cam, 4, None);
         assert!(buffer.samples_rendered == 1);
-        let has_lit_pixels = buffer.accumulated_radiance.iter().any(|p| p.length() > 1.0);
+        let has_lit_pixels = buffer.accumulated_radiance.iter().any(|p| p.length() > 0.1);
         assert!(has_lit_pixels, "Render buffer must contain illuminated moon pixels");
+
+        let post_process = render_pathtracer::PostProcessSettings {
+            bloom_enabled: true,
+            bloom_threshold: 1.35,
+            bloom_intensity: 0.15,
+            exposure: 0.85,
+            contrast: 1.15,
+            ..Default::default()
+        };
+        let rgba = buffer.to_rgba8_post_processed(&post_process);
+        let lit_pixels: Vec<_> = rgba.chunks_exact(4).filter(|p| p[0] > 10).collect();
+        assert!(!lit_pixels.is_empty(), "Must have illuminated moon pixels");
+        let blown_out = lit_pixels.iter().filter(|p| p[0] == 255 && p[1] == 255 && p[2] == 255).count();
+        let blown_ratio = blown_out as f32 / lit_pixels.len() as f32;
+        assert!(blown_ratio < 0.05, "Calibrated render must not blow out to solid white (got {:.2}%)", blown_ratio * 100.0);
     }
 }

@@ -70,10 +70,15 @@ impl TextureSource {
                 let py = ((v * (*height as f32 - 1.0)).round() as usize).min(*height as usize - 1);
                 let idx = (py * *width as usize + px) * 4;
                 if idx + 3 <= data.len() {
+                    // Decode sRGB texture bytes into physical linear radiance
+                    let to_linear = |b: u8| -> f32 {
+                        let c = b as f32 / 255.0;
+                        if c <= 0.04045 { c / 12.92 } else { ((c + 0.055) / 1.055).powf(2.4) }
+                    };
                     Vec3::new(
-                        data[idx] as f32 / 255.0,
-                        data[idx + 1] as f32 / 255.0,
-                        data[idx + 2] as f32 / 255.0,
+                        to_linear(data[idx]),
+                        to_linear(data[idx + 1]),
+                        to_linear(data[idx + 2]),
                     )
                 } else {
                     Vec3::ONE

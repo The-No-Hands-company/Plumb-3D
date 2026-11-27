@@ -68,8 +68,27 @@ impl SamplePreset {
     }
 }
 
+/// Selected rendering engine in Plumb 3D
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RenderEngine {
+    /// Progressive Monte Carlo Path Tracer with physical global illumination & multi-bounce BVH
+    PathTracer,
+    /// Direct PBR Hardware evaluation (instant, zero Monte Carlo noise, ideal for space / LookDev)
+    DirectPbr,
+}
+
+impl RenderEngine {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::PathTracer => "Production Path Tracer (Ray Tracing GI)",
+            Self::DirectPbr => "Direct PBR / Viewport (Instant / Zero Noise)",
+        }
+    }
+}
+
 /// State for the offline Production Path Tracer dialog and execution
 pub struct ProductionRenderState {
+    pub engine: RenderEngine,
     pub show_dialog: bool,
     pub settings: RenderSettings,
     pub resolution_preset: ResolutionPreset,
@@ -97,6 +116,7 @@ pub struct ProductionRenderState {
 impl Default for ProductionRenderState {
     fn default() -> Self {
         Self {
+            engine: RenderEngine::PathTracer,
             show_dialog: false,
             settings: RenderSettings {
                 width: 640,

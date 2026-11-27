@@ -208,7 +208,15 @@ pub fn handle_view_camera_key(state: &mut AppState, key_code: KeyCode) -> bool {
             state.window.request_redraw();
             true
         }
+        KeyCode::F11 => {
+            state.production_render.engine = crate::ui::render_dialog::RenderEngine::DirectPbr;
+            state.production_render.show_dialog = true;
+            crate::ui::render_dialog::start_production_render(state);
+            state.window.request_redraw();
+            true
+        }
         KeyCode::F12 => {
+            state.production_render.engine = crate::ui::render_dialog::RenderEngine::PathTracer;
             state.production_render.show_dialog = true;
             crate::ui::render_dialog::start_production_render(state);
             state.window.request_redraw();

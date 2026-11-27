@@ -1,8 +1,10 @@
 pub mod menus;
 pub mod quick_controls;
+pub mod render_menu;
 
 pub use menus::*;
 pub use quick_controls::*;
+pub use render_menu::*;
 
 use crate::state::AppState;
 use crate::ui::actions::UiActions;

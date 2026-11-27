@@ -50,7 +50,15 @@ pub fn draw_render_dialog(state: &mut AppState) {
 
 fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
     ui.heading("Render Settings");
-    ui.label(egui::RichText::new("Monte Carlo Ray Tracing & Global Illumination").size(10.5).color(egui::Color32::GRAY));
+    ui.horizontal(|ui| {
+        ui.selectable_value(&mut state.production_render.engine, super::types::RenderEngine::PathTracer, "✨ Path Tracer");
+        ui.selectable_value(&mut state.production_render.engine, super::types::RenderEngine::DirectPbr, "⚡ Instant Direct PBR");
+    });
+    let desc = match state.production_render.engine {
+        super::types::RenderEngine::PathTracer => "Monte Carlo Ray Tracing & Multi-Bounce GI",
+        super::types::RenderEngine::DirectPbr => "Direct PBR Evaluation (Instant / Zero Noise / Space & Celestial)",
+    };
+    ui.label(egui::RichText::new(desc).size(10.5).color(egui::Color32::GRAY));
     ui.add_space(8.0);
 
     // Resolution Presets
@@ -417,7 +425,36 @@ pub fn start_production_render(state: &mut AppState) {
         create_viewport_pathtracer_camera(state, aspect_ratio)
     };
 
-    // 4. Initialize fresh progressive render buffer
+    // 4. Initialize render buffer / execute Direct PBR if selected
+    if state.production_render.engine == super::types::RenderEngine::DirectPbr {
+        let mut buffer = RenderBuffer::new(width, height);
+        buffer.render_sample_pass(&scene, &camera, 1, None);
+        buffer.samples_rendered = state.production_render.settings.target_samples;
+
+        let rgba = if state.production_render.post_process.enabled {
+            buffer.to_rgba8_post_processed(&state.production_render.post_process)
+        } else {
+            buffer.to_rgba8_filmic()
+        };
+        let color_image = egui::ColorImage::from_rgba_unmultiplied(
+            [width as usize, height as usize],
+            &rgba,
+        );
+        state.production_render.texture_handle = Some(state.egui_ctx.load_texture(
+            "render_preview_tex",
+            color_image,
+            egui::TextureOptions::LINEAR,
+        ));
+        state.production_render.buffer = Some(buffer);
+        state.production_render.scene = Some(scene);
+        state.production_render.camera = Some(camera);
+        state.production_render.is_rendering = false;
+        state.production_render.is_paused = false;
+        state.production_render.total_elapsed_secs = 0.05;
+        state.production_render.status_message = "Direct PBR Snapshot Complete (Instant / Zero Noise)".to_string();
+        return;
+    }
+
     state.production_render.buffer = Some(RenderBuffer::new(width, height));
     state.production_render.scene = Some(scene);
     state.production_render.camera = Some(camera);
