@@ -165,6 +165,7 @@ pub enum Material {
     /// Disney / Unreal Engine Principled PBR BSDF with microfacet reflection, refraction, and emission
     Principled {
         base_color: TextureSource,
+        normal_map: Option<TextureSource>,
         metallic: f32,
         roughness: f32,
         ior: f32,
@@ -224,13 +225,44 @@ impl Material {
         transmission: f32,
         emission: Vec3,
     ) -> Self {
+        Self::principled_with_normal(base_color, None, metallic, roughness, ior, transmission, emission)
+    }
+
+    pub fn principled_with_normal(
+        base_color: impl Into<TextureSource>,
+        normal_map: Option<TextureSource>,
+        metallic: f32,
+        roughness: f32,
+        ior: f32,
+        transmission: f32,
+        emission: Vec3,
+    ) -> Self {
         Self::Principled {
             base_color: base_color.into(),
+            normal_map,
             metallic: metallic.clamp(0.0, 1.0),
             roughness: roughness.clamp(0.001, 1.0),
             ior: ior.max(1.0),
             transmission: transmission.clamp(0.0, 1.0),
             emission,
+        }
+    }
+
+    /// Evaluates perturbed tangent-space normal vector if normal map is active
+    pub fn perturbed_normal(&self, uv: Vec2, hit_pos: Vec3, normal: Vec3) -> Vec3 {
+        match self {
+            Material::Principled { normal_map: Some(n_map), .. } => {
+                let sample = n_map.evaluate(uv, hit_pos, normal);
+                let tangent_normal = sample * 2.0 - Vec3::ONE;
+                let (tangent, bitangent) = create_tangent_basis(normal);
+                let perturbed = tangent * tangent_normal.x + bitangent * tangent_normal.y + normal * tangent_normal.z;
+                if perturbed.length_squared() > 1e-4 {
+                    perturbed.normalize()
+                } else {
+                    normal
+                }
+            }
+            _ => normal,
         }
     }
 
@@ -360,24 +392,25 @@ impl Material {
                 transmission,
                 ..
             } => {
-                let albedo_eval = base_color.evaluate(uv, hit_pos, normal);
+                let eff_normal = self.perturbed_normal(uv, hit_pos, normal);
+                let albedo_eval = base_color.evaluate(uv, hit_pos, eff_normal);
                 let unit_dir = ray_in.direction.normalize();
 
                 // 1. Specular Transmission (Refraction / Glass)
                 if *transmission > 0.001 && rng() < *transmission {
-                    let cos_theta = (-unit_dir).dot(normal).clamp(0.0, 1.0);
+                    let cos_theta = (-unit_dir).dot(eff_normal).clamp(0.0, 1.0);
                     let sin_theta = (1.0 - cos_theta * cos_theta).max(0.0).sqrt();
-                    let refraction_ratio = if unit_dir.dot(normal) > 0.0 { *ior } else { 1.0 / *ior };
+                    let refraction_ratio = if unit_dir.dot(eff_normal) > 0.0 { *ior } else { 1.0 / *ior };
                     let cannot_refract = refraction_ratio * sin_theta > 1.0;
                     let direction = if cannot_refract || reflectance(cos_theta, refraction_ratio) > rng() {
-                        reflect(unit_dir, normal)
+                        reflect(unit_dir, eff_normal)
                     } else {
-                        refract(unit_dir, normal, refraction_ratio)
+                        refract(unit_dir, eff_normal, refraction_ratio)
                     };
-                    let normal_offset = if direction.dot(normal) > 0.0 {
-                        normal * 1e-4
+                    let normal_offset = if direction.dot(eff_normal) > 0.0 {
+                        eff_normal * 1e-4
                     } else {
-                        -normal * 1e-4
+                        -eff_normal * 1e-4
                     };
                     return Some(BsdfSample {
                         scattered_ray: Ray::new(hit_pos + normal_offset, direction.normalize()),
@@ -392,12 +425,12 @@ impl Material {
 
                 if is_specular_bounce {
                     let r = roughness.clamp(0.001, 1.0);
-                    let reflected = reflect(unit_dir, normal);
+                    let reflected = reflect(unit_dir, eff_normal);
                     let scatter_dir = reflected + random_in_unit_sphere(rng) * r;
-                    if scatter_dir.dot(normal) > 0.0 {
+                    if scatter_dir.dot(eff_normal) > 0.0 {
                         let tint = albedo_eval * *metallic + Vec3::ONE * (1.0 - *metallic);
                         Some(BsdfSample {
-                            scattered_ray: Ray::new(hit_pos + normal * 1e-4, scatter_dir.normalize()),
+                            scattered_ray: Ray::new(hit_pos + eff_normal * 1e-4, scatter_dir.normalize()),
                             attenuation: tint,
                             is_specular: true,
                         })
@@ -407,14 +440,14 @@ impl Material {
                 } else {
                     // Diffuse Lambertian
                     let random_unit = random_in_unit_sphere(rng);
-                    let mut scatter_dir = normal + random_unit;
+                    let mut scatter_dir = eff_normal + random_unit;
                     if scatter_dir.length_squared() < 1e-6 {
-                        scatter_dir = normal;
+                        scatter_dir = eff_normal;
                     } else {
                         scatter_dir = scatter_dir.normalize();
                     }
                     Some(BsdfSample {
-                        scattered_ray: Ray::new(hit_pos + normal * 1e-4, scatter_dir),
+                        scattered_ray: Ray::new(hit_pos + eff_normal * 1e-4, scatter_dir),
                         attenuation: albedo_eval * (1.0 - *metallic),
                         is_specular: false,
                     })

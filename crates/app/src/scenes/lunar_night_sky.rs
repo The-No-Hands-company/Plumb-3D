@@ -11,16 +11,18 @@ use crate::ui::overlays::walkthrough::WalkthroughState;
 pub fn build_lunar_night_sky_graph() -> (SceneGraph, ViewportCamera, NodeId, NodeId) {
     let mut scene = SceneGraph::new();
 
-    // 1. Lunar Regolith PBR Material
-    // Authentic lunar regolith: low albedo, high roughness (0.85), procedural basalt maria & crater pattern
-    let mat_regolith = Material::new(
+    // 1. Authentic Lunar Regolith PBR Material with 2K Albedo & Normal Relief Maps
+    let (albedo_path, normal_path) = crate::scenes::lunar_textures::ensure_lunar_textures_exist();
+    let mut mat_regolith = Material::new(
         "LunarRegolith",
-        [0.85, 0.86, 0.88, 1.0],
+        [1.0, 1.0, 1.0, 1.0],
         0.0,  // Pure dielectric dust
-        0.85, // Matte surface
+        0.88, // Authentic matte regolith surface
         0.0,  // Non-emissive (reflects sunlight)
-        5,    // Marble / turbulent crater noise pattern
+        0,
     );
+    mat_regolith.albedo_texture_path = Some(albedo_path);
+    mat_regolith.normal_texture_path = Some(normal_path);
 
     // 2. The Celestial Body: Clean UV Sphere (No complex sculpting required)
     let moon_mesh = Primitives::create_uv_sphere(3.0, 36, 36);

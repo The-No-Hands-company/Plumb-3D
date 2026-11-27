@@ -165,8 +165,24 @@ impl PathTracerScene {
                             let transmission = if m.base_color[3] < 0.99 { 1.0 - m.base_color[3] } else { 0.0 };
                             let emission = if m.emissive > 0.01 { base_col * (m.emissive * 10.0) } else { Vec3::ZERO };
 
-                            materials.push(Material::principled(
+                            let norm_src = if let Some(ref path) = m.normal_texture_path {
+                                if let Ok(img) = image::open(path) {
+                                    let rgba = img.to_rgba8();
+                                    Some(TextureSource::Image {
+                                        width: rgba.width(),
+                                        height: rgba.height(),
+                                        data: std::sync::Arc::new(rgba.into_raw()),
+                                    })
+                                } else {
+                                    None
+                                }
+                            } else {
+                                None
+                            };
+
+                            materials.push(Material::principled_with_normal(
                                 tex_src,
+                                norm_src,
                                 m.metallic,
                                 m.roughness,
                                 1.5,

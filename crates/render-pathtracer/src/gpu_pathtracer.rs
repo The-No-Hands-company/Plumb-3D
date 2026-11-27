@@ -180,7 +180,7 @@ pub fn pack_scene_for_gpu(scene: &PathTracerScene) -> (Vec<GpuBvhNode>, Vec<GpuT
                 *radiance,
                 1.0, 0.0, radiance.x.max(radiance.y).max(radiance.z), 0.0, 1.0,
             ),
-            Material::Principled { base_color, metallic, roughness, ior, transmission, emission } => (
+            Material::Principled { base_color, metallic, roughness, ior, transmission, emission, .. } => (
                 base_color.evaluate(Vec2::ZERO, Vec3::ZERO, Vec3::Y),
                 *roughness, *metallic, emission.x.max(emission.y).max(emission.z), *transmission, *ior,
             ),

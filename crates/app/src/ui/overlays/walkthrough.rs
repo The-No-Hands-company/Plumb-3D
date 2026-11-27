@@ -38,11 +38,11 @@ impl WalkthroughState {
                     tip: Some("Hold Middle-Mouse-Button or Alt+Left-Click to orbit around the moon and observe its shape.".to_string()),
                 },
                 WalkthroughStep {
-                    title: "Step 2: Lunar Regolith Material".to_string(),
-                    subtitle: "Authentic matte planetary surface".to_string(),
-                    body: "Notice the silvery-gray surface with dark patches. That's our procedural Lunar Regolith material: low albedo, high roughness (0.85), and marble noise producing dark basalt 'maria' (lunar seas) and bright crater highlands.".to_string(),
+                    title: "Step 2: 2K Lunar Surface Maps & Regolith".to_string(),
+                    subtitle: "Authentic planetary cartography".to_string(),
+                    body: "Notice the intricate lunar features across the sphere! The moon is mapped with 2K PBR surface maps: dark volcanic basalt maria (Sea of Tranquility, Ocean of Storms), reflective anorthosite highlands, and ray crater systems (Tycho, Copernicus) paired with normal maps for physical crater relief.".to_string(),
                     hotkey: Some("Right Panel -> Materials Tab".to_string()),
-                    tip: Some("Real moon dust is non-glossy. High roughness gives the authentic soft lunar appearance.".to_string()),
+                    tip: Some("The normal relief map gives 3D crater walls that catch direct sunlight across the terminator line.".to_string()),
                 },
                 WalkthroughStep {
                     title: "Step 3: Solar Illumination & The Terminator".to_string(),
