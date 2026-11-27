@@ -8,7 +8,7 @@ use crate::types::*;
 use crate::ui::overlays::walkthrough::WalkthroughState;
 
 /// Builds the clean, beginner-friendly Lunar Night Sky scene graph and telephoto camera setup.
-pub fn build_lunar_night_sky_graph() -> (SceneGraph, ViewportCamera, NodeId) {
+pub fn build_lunar_night_sky_graph() -> (SceneGraph, ViewportCamera, NodeId, NodeId) {
     let mut scene = SceneGraph::new();
 
     // 1. Lunar Regolith PBR Material
@@ -52,26 +52,36 @@ pub fn build_lunar_night_sky_graph() -> (SceneGraph, ViewportCamera, NodeId) {
     );
     scene.add_node(earthshine_node);
 
-    // 5. Telephoto Astrophotography Camera (Narrow FOV for cinematic lunar compression)
+    // 5. Astrophotography Camera Node (Dedicated Scene Camera)
+    let cam_node = SceneNode::new_camera(
+        "Astrophotography_Camera",
+        Transform::from_translation(vec3(0.0, 0.0, 8.5)),
+        40.0_f32.to_radians(),
+        16.0 / 9.0,
+    );
+    let cam_id = scene.add_node(cam_node);
+
+    // 6. Viewport Telephoto Camera Setup (Framed colossally against deep space)
     let camera = ViewportCamera {
         target: vec3(0.0, 0.0, 0.0),
-        distance: 16.0,
+        distance: 8.5,
         pitch: 0.0,
         yaw: 0.0,
-        fov_y: 22.0_f32.to_radians(), // Narrow 180mm telephoto lens compression
+        fov_y: 40.0_f32.to_radians(),
         projection: CameraProjection::Perspective,
         ..Default::default()
     };
 
-    (scene, camera, moon_id)
+    (scene, camera, moon_id, cam_id)
 }
 
 /// Populates and activates the complete Lunar Night Sky beginner journey in the app state.
 pub fn build_lunar_night_sky_scene(state: &mut AppState) {
-    let (scene, camera, moon_id) = build_lunar_night_sky_graph();
+    let (scene, camera, moon_id, cam_id) = build_lunar_night_sky_graph();
     state.scene = scene;
     state.camera = camera;
     state.selected_node = Some(moon_id);
+    state.active_camera_node = Some(cam_id);
     state.interaction_mode = InteractionMode::Object;
     state.viewport_shading = ViewportShadingMode::Pbr;
     state.show_wireframe = false;
@@ -81,9 +91,19 @@ pub fn build_lunar_night_sky_scene(state: &mut AppState) {
 
     // Configure Optics & Atmosphere
     state.dof.enabled = true;
-    state.dof.focus_distance = 16.0;
+    state.dof.focus_distance = 8.5;
     state.dof.f_stop = 4.0;
     state.ssr.enabled = false;
+
+    // Default Production Render Settings (960x540 64 SPP with glowing lunar bloom)
+    state.production_render.settings.width = 960;
+    state.production_render.settings.height = 540;
+    state.production_render.settings.target_samples = 64;
+    state.production_render.focus_distance = 8.5;
+    state.production_render.use_scene_camera = true;
+    state.production_render.post_process.bloom_enabled = true;
+    state.production_render.post_process.bloom_threshold = 0.85;
+    state.production_render.post_process.bloom_intensity = 0.45;
 
     // Launch the friendly In-Viewport Guided Walkthrough
     state.walkthrough = WalkthroughState::lunar_night_sky();
@@ -98,10 +118,11 @@ mod tests {
 
     #[test]
     fn test_lunar_night_sky_graph_initialization() {
-        let (scene, camera, moon_id) = build_lunar_night_sky_graph();
-        assert_eq!(scene.nodes.len(), 3); // Moon + Sun + Earthshine
+        let (scene, camera, moon_id, cam_id) = build_lunar_night_sky_graph();
+        assert_eq!(scene.nodes.len(), 4); // Moon + Sun + Earthshine + Camera
         assert!(scene.nodes.get(moon_id).is_some());
+        assert!(scene.nodes.get(cam_id).is_some());
         assert_eq!(camera.target, core_math::Vec3::ZERO);
-        assert!((camera.fov_y.to_degrees() - 22.0).abs() < 1e-3);
+        assert!((camera.fov_y.to_degrees() - 40.0).abs() < 1e-3);
     }
 }

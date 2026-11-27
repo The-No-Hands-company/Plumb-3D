@@ -48,6 +48,14 @@ impl PathTracerScene {
         self
     }
 
+    /// Configures the scene for deep celestial nocturnal space with zero daytime glare.
+    pub fn with_night_sky(mut self) -> Self {
+        self.background_zenith = Some(Vec3::new(0.001, 0.002, 0.004));
+        self.background_horizon = Some(Vec3::new(0.002, 0.003, 0.006));
+        self.background_ground = Some(Vec3::splat(0.0005));
+        self
+    }
+
     /// Sets the physical sun direction, color, and intensity for atmospheric sky evaluation.
     pub fn with_sun(mut self, direction: Vec3, color: Vec3, intensity: f32) -> Self {
         self.sun_direction = Some(direction.normalize_or_zero());
@@ -173,9 +181,10 @@ impl PathTracerScene {
             }
         }
 
-        // Add soft ceiling area light if no emissive lights exist
+        // Only add soft ceiling area light if NO emissive meshes AND NO directional lights exist
         let has_emissive = triangles.iter().any(|t| materials.get(t.material_id).is_some_and(|m| m.is_emissive()));
-        if !has_emissive {
+        let has_illumination = has_emissive || sun_direction.is_some();
+        if !has_illumination {
             let light_y = 6.0_f32;
             let light_size = 2.0_f32;
             let mat_light = materials.len();
@@ -195,6 +204,16 @@ impl PathTracerScene {
         if let Some(sun_dir) = sun_direction {
             pt_scene = pt_scene.with_sun(sun_dir, sun_color, sun_intensity);
         }
+
+        // Automatic celestial night-sky detection for lunar or nocturnal scenes
+        let is_night_scene = scene.nodes.values().any(|n| {
+            let name = n.name.to_lowercase();
+            name.contains("moon") || name.contains("lunar") || name.contains("space") || name.contains("night")
+        });
+        if is_night_scene {
+            pt_scene = pt_scene.with_night_sky();
+        }
+
         pt_scene
     }
 
@@ -202,6 +221,7 @@ impl PathTracerScene {
     pub fn sky_radiance(&self, ray_dir: Vec3) -> Vec3 {
         let y = ray_dir.y.clamp(-1.0, 1.0);
         let t = 0.5 * (y + 1.0);
+        let is_custom_bg = self.background_zenith.is_some();
         let zenith = self.background_zenith.unwrap_or(Vec3::new(0.35, 0.55, 0.95) * 0.9);
         let horizon = self.background_horizon.unwrap_or(Vec3::new(0.85, 0.88, 0.95));
         let ground = self.background_ground.unwrap_or(Vec3::new(0.18, 0.19, 0.22) * 0.5);
@@ -212,10 +232,25 @@ impl PathTracerScene {
             ground * (-y) + horizon * (1.0 + y)
         };
 
-        if let Some(sun_dir) = self.sun_direction {
+        if is_custom_bg {
+            // In deep celestial space: no atmospheric daylight haze; render pinpoint stars
+            let sp = (ray_dir * 140.0).fract().abs();
+            let sval = ((sp.x * 12.9898 + sp.y * 78.233 + sp.z * 45.164).sin() * 43_758.547).fract().abs();
+            if sval > 0.9982 {
+                let star_glow = ((sval - 0.9982) / 0.0018).powi(2) * 1.5;
+                ambient += Vec3::splat(star_glow);
+            }
+
+            if let Some(sun_dir) = self.sun_direction {
+                let cos_angle = ray_dir.dot(sun_dir);
+                if cos_angle > 0.9995 {
+                    ambient += self.sun_color * (self.sun_intensity * 20.0);
+                }
+            }
+        } else if let Some(sun_dir) = self.sun_direction {
             let cos_angle = ray_dir.dot(sun_dir);
             if cos_angle > 0.0 {
-                // Mie forward scattering haze glow
+                // Atmospheric Mie forward scattering haze glow
                 let glow = (cos_angle.powf(32.0) * 0.4 + cos_angle.powf(128.0) * 1.0) * self.sun_intensity;
                 ambient += self.sun_color * glow;
 

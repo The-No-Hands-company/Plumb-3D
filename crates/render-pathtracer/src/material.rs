@@ -124,10 +124,18 @@ impl TextureSource {
                 *color_a * s + *color_b * (1.0 - s)
             }
             TextureSource::Marble { color_a, color_b, scale } => {
-                let p = uv * *scale;
-                let n = ((p.x * 12.9898 + p.y * 78.233).sin() * 43_758.547).fract().abs();
-                let m = ((p.x + p.y + n * 2.0) * std::f32::consts::PI).sin() * 0.5 + 0.5;
-                *color_a * (1.0 - m * 0.7) + *color_b * (m * 0.7)
+                let coord = if world_pos.length_squared() > 1e-4 {
+                    world_pos * (*scale * 0.45)
+                } else {
+                    core_math::vec3(uv.x * *scale, uv.y * *scale, 0.5)
+                };
+                let n1 = smooth_noise3d(coord);
+                let n2 = smooth_noise3d(coord * 2.08 + core_math::vec3(1.7, 4.3, 2.1));
+                let n3 = smooth_noise3d(coord * 4.15 + core_math::vec3(7.2, 1.1, 5.8));
+                let fbm = n1 * 0.53 + n2 * 0.31 + n3 * 0.16;
+                // Soft turbulent threshold for planetary basalt maria and highland plains
+                let m = (fbm * std::f32::consts::PI * 1.5).sin() * 0.5 + 0.5;
+                *color_a * (0.35 + 0.65 * m) + *color_b * (0.05 * (1.0 - m))
             }
         }
     }
@@ -513,4 +521,44 @@ fn random_in_unit_sphere(rng: &mut impl FnMut() -> f32) -> Vec3 {
             return p / len_sq.sqrt();
         }
     }
+}
+
+fn smooth_noise3d(p: Vec3) -> f32 {
+    let ix = p.x.floor() as i32;
+    let iy = p.y.floor() as i32;
+    let iz = p.z.floor() as i32;
+    let fx = p.x.fract().abs();
+    let fy = p.y.fract().abs();
+    let fz = p.z.fract().abs();
+
+    let ux = fx * fx * (3.0 - 2.0 * fx);
+    let uy = fy * fy * (3.0 - 2.0 * fy);
+    let uz = fz * fz * (3.0 - 2.0 * fz);
+
+    let hash = |x: i32, y: i32, z: i32| -> f32 {
+        let mut n = x.wrapping_mul(374761393)
+            ^ y.wrapping_mul(668265263)
+            ^ z.wrapping_mul(951234191);
+        n = (n ^ (n >> 13)).wrapping_mul(1274126177);
+        ((n as u32 >> 8) as f32) / 16777216.0
+    };
+
+    let c000 = hash(ix, iy, iz);
+    let c100 = hash(ix + 1, iy, iz);
+    let c010 = hash(ix, iy + 1, iz);
+    let c110 = hash(ix + 1, iy + 1, iz);
+    let c001 = hash(ix, iy, iz + 1);
+    let c101 = hash(ix + 1, iy, iz + 1);
+    let c011 = hash(ix, iy + 1, iz + 1);
+    let c111 = hash(ix + 1, iy + 1, iz + 1);
+
+    let x00 = c000 + ux * (c100 - c000);
+    let x10 = c010 + ux * (c110 - c010);
+    let x01 = c001 + ux * (c101 - c001);
+    let x11 = c011 + ux * (c111 - c011);
+
+    let y0 = x00 + uy * (x10 - x00);
+    let y1 = x01 + uy * (x11 - x01);
+
+    y0 + uz * (y1 - y0)
 }

@@ -280,7 +280,7 @@ pub struct AppState {
     pub outliner_filter: String,
     pub inspector_tab: InspectorTab,
 
-    // Offline Production Path Tracer (Cycles / Arnold)
+    // Offline Production Path Tracer
     pub production_render: crate::ui::render_dialog::ProductionRenderState,
 
     // UI, Theming & UX Customization

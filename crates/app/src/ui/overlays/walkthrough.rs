@@ -52,11 +52,11 @@ impl WalkthroughState {
                     tip: Some("Click 'Full Moon' for maximum brilliance, or 'Crescent' for dramatic terminator shadows!".to_string()),
                 },
                 WalkthroughStep {
-                    title: "Step 4: Astrophotography Telephoto Lens".to_string(),
-                    subtitle: "Perspective compression".to_string(),
-                    body: "Wide-angle camera lenses make the moon look tiny like a coin. We have configured a 180mm telephoto lens with a narrow field of view (22°), which compresses perspective and makes the celestial body feel colossal!".to_string(),
-                    hotkey: Some("Camera Tab -> 22° Telephoto FOV".to_string()),
-                    tip: Some("Scroll Mouse Wheel to zoom closer or further while keeping cinematic proportions.".to_string()),
+                    title: "Step 4: Astrophotography Telephoto Framing".to_string(),
+                    subtitle: "Cinematic focal framing".to_string(),
+                    body: "Wide-angle camera lenses make the moon look tiny like a coin. We have configured an astrophotography camera with a 40° field of view at 8.5m distance, perfectly filling the frame while revealing surface features against deep space!".to_string(),
+                    hotkey: Some("Dedicated Astrophotography Camera".to_string()),
+                    tip: Some("Scroll Mouse Wheel to adjust framing or rely on the dedicated Astrophotography Camera during production rendering.".to_string()),
                 },
                 WalkthroughStep {
                     title: "Step 5: The Masterpiece Render".to_string(),
@@ -218,9 +218,10 @@ pub fn render(state: &mut AppState) {
     }
     if focus_camera {
         state.camera.target = vec3(0.0, 0.0, 0.0);
-        state.camera.distance = 16.0;
+        state.camera.distance = 8.5;
         state.camera.pitch = 0.0;
         state.camera.yaw = 0.0;
+        state.camera.fov_y = 40.0_f32.to_radians();
     }
     if set_full_moon {
         for (_id, node) in state.scene.nodes.iter_mut() {

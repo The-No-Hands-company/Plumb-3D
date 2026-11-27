@@ -548,7 +548,7 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Viewport Shading: Live Path Tracer",
         category: "Shading",
         shortcut: "F12",
-        keywords: &["render", "path tracer", "raytracing", "cycles", "global illumination"],
+        keywords: &["render", "path tracer", "raytracing", "production renderer", "global illumination"],
         action: PaletteAction::SetShading(ViewportShadingMode::Rendered),
     },
     // --- Help ---

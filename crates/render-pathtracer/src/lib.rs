@@ -3,7 +3,7 @@
 //! Pure-Rust physically based Monte Carlo production path tracer.
 //!
 //! Provides an offline, multi-threaded CPU render engine for final image
-//! and animation synthesis (analogous to Blender Cycles or Autodesk Arnold).
+//! and cinematic synthesis in Plumb 3D.
 //!
 //! Features:
 //! - Multi-threaded Rayon parallel execution across all CPU cores.

@@ -16,28 +16,44 @@ pub fn draw_render_dialog(state: &mut AppState) {
     let ctx = state.egui_ctx.clone();
     let mut show = state.production_render.show_dialog;
 
-    egui::Window::new("Production Path Tracer (Cycles / Arnold)")
+    egui::Window::new("Plumb 3D Production Renderer")
         .open(&mut show)
-        .default_width(920.0)
-        .default_height(640.0)
-        .min_width(700.0)
-        .min_height(500.0)
+        .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
+        .default_size(egui::vec2(1040.0, 700.0))
+        .min_width(850.0)
+        .min_height(580.0)
         .resizable(true)
         .show(&ctx, |ui| {
             ui.horizontal(|ui| {
-                // Left Column: Render Settings & Controls
-                egui::Frame::none()
-                    .fill(egui::Color32::from_rgb(26, 26, 28))
-                    .inner_margin(egui::Margin::same(10.0))
-                    .show(ui, |ui| {
-                        ui.set_width(280.0);
-                        draw_sidebar_controls(state, ui);
-                    });
+                // Left Column: Dedicated vertical scrollable sidebar for settings
+                ui.allocate_ui_with_layout(
+                    egui::vec2(310.0, ui.available_height()),
+                    egui::Layout::top_down(egui::Align::Min),
+                    |ui| {
+                        egui::Frame::none()
+                            .fill(egui::Color32::from_rgb(22, 25, 32))
+                            .inner_margin(egui::Margin::same(10.0))
+                            .rounding(egui::Rounding::same(6.0))
+                            .show(ui, |ui| {
+                                egui::ScrollArea::vertical()
+                                    .id_salt("render_sidebar_scroll")
+                                    .show(ui, |ui| {
+                                        draw_sidebar_controls(state, ui);
+                                    });
+                            });
+                    },
+                );
 
                 ui.separator();
 
-                // Right Column: Live Accumulating Image Viewport
-                draw_preview_canvas(state, ui);
+                // Right Column: Live Framebuffer & Preview Viewport
+                ui.allocate_ui_with_layout(
+                    egui::vec2(ui.available_width(), ui.available_height()),
+                    egui::Layout::top_down(egui::Align::Min),
+                    |ui| {
+                        draw_preview_canvas(state, ui);
+                    },
+                );
             });
         });
 
@@ -297,33 +313,82 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
 }
 
 fn draw_preview_canvas(state: &mut AppState, ui: &mut egui::Ui) {
-    egui::CentralPanel::default().show_inside(ui, |ui| {
-        let available_size = ui.available_size();
+    let current_samples = state.production_render.buffer.as_ref().map(|b| b.samples_rendered).unwrap_or(0);
+    let target_samples = state.production_render.settings.target_samples.max(1);
+    let is_rendering = state.production_render.is_rendering;
+    let is_paused = state.production_render.is_paused;
 
-        if let Some(tex) = &state.production_render.texture_handle {
-            let img_size = tex.size_vec2();
-            let aspect = img_size.x / img_size.y.max(1.0);
+    // Top Framebuffer Control Toolbar
+    ui.horizontal(|ui| {
+        ui.label(egui::RichText::new("Live Framebuffer").strong().color(egui::Color32::WHITE));
+        ui.label(
+            egui::RichText::new(format!(
+                "{}x{} | {}/{} SPP",
+                state.production_render.settings.width,
+                state.production_render.settings.height,
+                current_samples,
+                target_samples
+            ))
+            .small()
+            .color(egui::Color32::from_rgb(140, 160, 190)),
+        );
 
-            // Fit image proportionally into available preview area
-            let (draw_w, draw_h) = if available_size.x / available_size.y > aspect {
-                (available_size.y * aspect, available_size.y)
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+            if !is_rendering {
+                let btn_text = if current_samples > 0 { "Re-render (F12)" } else { "Start Render (F12)" };
+                if ui.button(egui::RichText::new(btn_text).strong().color(egui::Color32::from_rgb(226, 179, 87))).clicked() {
+                    start_production_render(state);
+                }
             } else {
-                (available_size.x, available_size.x / aspect)
-            };
-
-            ui.centered_and_justified(|ui| {
-                ui.add(egui::Image::new(tex).fit_to_exact_size(egui::vec2(draw_w, draw_h)));
-            });
-        } else {
-            ui.centered_and_justified(|ui| {
-                ui.vertical_centered(|ui| {
-                    ui.add_space(available_size.y * 0.35);
-                    ui.label(egui::RichText::new("Production Ray Tracer").size(20.0).color(egui::Color32::GRAY));
-                    ui.label(egui::RichText::new("Click 'Start Render (F12)' to begin Monte Carlo sample passes").size(13.0).color(egui::Color32::DARK_GRAY));
-                });
-            });
-        }
+                if ui.button("Stop").clicked() {
+                    state.production_render.is_rendering = false;
+                    state.production_render.status_message = "Render stopped by user".to_string();
+                }
+                let pause_text = if is_paused { "Resume" } else { "Pause" };
+                if ui.button(pause_text).clicked() {
+                    state.production_render.is_paused = !is_paused;
+                }
+            }
+        });
     });
+
+    ui.add_space(4.0);
+    ui.separator();
+    ui.add_space(4.0);
+
+    // Framebuffer Display Canvas
+    let available_size = ui.available_size();
+    egui::Frame::none()
+        .fill(egui::Color32::from_rgb(10, 12, 16))
+        .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(35, 42, 54)))
+        .rounding(egui::Rounding::same(6.0))
+        .show(ui, |ui| {
+            if let Some(tex) = &state.production_render.texture_handle {
+                let img_size = tex.size_vec2();
+                let aspect = img_size.x / img_size.y.max(1.0);
+
+                let max_w = (available_size.x - 24.0).max(64.0);
+                let max_h = (available_size.y - 24.0).max(64.0);
+                let (draw_w, draw_h) = if max_w / max_h > aspect {
+                    (max_h * aspect, max_h)
+                } else {
+                    (max_w, max_w / aspect)
+                };
+
+                ui.centered_and_justified(|ui| {
+                    ui.add(egui::Image::new(tex).fit_to_exact_size(egui::vec2(draw_w, draw_h)));
+                });
+            } else {
+                ui.centered_and_justified(|ui| {
+                    ui.vertical_centered(|ui| {
+                        ui.add_space(available_size.y * 0.35);
+                        ui.label(egui::RichText::new("🌕 Plumb 3D Production Renderer").size(18.0).color(egui::Color32::WHITE));
+                        ui.add_space(6.0);
+                        ui.label(egui::RichText::new("Click 'Start Render (F12)' to begin Monte Carlo progressive path tracing").size(12.0).color(egui::Color32::GRAY));
+                    });
+                });
+            }
+        });
 }
 
 pub fn start_production_render(state: &mut AppState) {
