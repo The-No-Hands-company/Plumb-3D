@@ -599,13 +599,15 @@ pub fn draw_window_menu(state: &mut AppState, ui: &mut egui::Ui) {
 
 pub fn draw_help_menu(state: &mut AppState, ui: &mut egui::Ui) {
     ui.menu_button("Help", |ui| {
+        if ui.button("🌕 Lunar Night Sky Walkthrough").clicked() {
+            crate::scenes::build_lunar_night_sky_scene(state);
+            ui.close_menu();
+        }
+        ui.separator();
         for (label, tab) in [
-            ("User Manual & Shortcuts (F1)", 0),
-            ("Beginner Tutorials", 1),
-            ("Modeling & Modals Guide", 2),
-            ("Geometry Nodes Guide", 3),
-            ("Rhai Scripting API", 4),
-            ("Path Tracer Rendering", 5),
+            ("User Manual & Shortcuts (F1)", 0), ("Beginner Tutorials", 1),
+            ("Modeling & Modals Guide", 2), ("Geometry Nodes Guide", 3),
+            ("Rhai Scripting API", 4), ("Path Tracer Rendering", 5),
             ("3D Printing & CAD Interchange", 6),
         ] {
             if ui.button(label).clicked() {

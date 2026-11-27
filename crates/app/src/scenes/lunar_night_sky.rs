@@ -1,0 +1,107 @@
+use core_math::{vec3, EulerRot, Quat, Transform};
+use geo_kernel::Primitives;
+use graph_engine::{Material, NodeData, NodeId, SceneGraph, SceneNode};
+use render_viewport::{CameraProjection, ViewportCamera, ViewportShadingMode};
+
+use crate::state::AppState;
+use crate::types::*;
+use crate::ui::overlays::walkthrough::WalkthroughState;
+
+/// Builds the clean, beginner-friendly Lunar Night Sky scene graph and telephoto camera setup.
+pub fn build_lunar_night_sky_graph() -> (SceneGraph, ViewportCamera, NodeId) {
+    let mut scene = SceneGraph::new();
+
+    // 1. Lunar Regolith PBR Material
+    // Authentic lunar regolith: low albedo, high roughness (0.85), procedural basalt maria & crater pattern
+    let mat_regolith = Material::new(
+        "LunarRegolith",
+        [0.85, 0.86, 0.88, 1.0],
+        0.0,  // Pure dielectric dust
+        0.85, // Matte surface
+        0.0,  // Non-emissive (reflects sunlight)
+        5,    // Marble / turbulent crater noise pattern
+    );
+
+    // 2. The Celestial Body: Clean UV Sphere (No complex sculpting required)
+    let moon_mesh = Primitives::create_uv_sphere(3.0, 36, 36);
+    let mut moon_node = SceneNode::new_mesh(
+        "Moon_Body",
+        Transform::IDENTITY,
+        moon_mesh,
+    );
+    if let NodeData::Mesh { ref mut materials, .. } = moon_node.data {
+        materials[0] = mat_regolith;
+    }
+    let moon_id = scene.add_node(moon_node);
+
+    // 3. Directional Sun Key Light (Casts solar illumination and grazing terminator shadows)
+    let sun_node = SceneNode::new_directional_light(
+        "Sun_KeyLight",
+        Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.2, 0.65, 0.0)),
+        vec3(1.0, 0.98, 0.95),
+        12.0,
+    );
+    scene.add_node(sun_node);
+
+    // 4. Subtle Earthshine Ambient Fill (Soft nocturnal blue reflection from Earth)
+    let earthshine_node = SceneNode::new_directional_light(
+        "Earthshine_Fill",
+        Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, 0.1, -0.8, 0.0)),
+        vec3(0.12, 0.18, 0.32),
+        0.8,
+    );
+    scene.add_node(earthshine_node);
+
+    // 5. Telephoto Astrophotography Camera (Narrow FOV for cinematic lunar compression)
+    let camera = ViewportCamera {
+        target: vec3(0.0, 0.0, 0.0),
+        distance: 16.0,
+        pitch: 0.0,
+        yaw: 0.0,
+        fov_y: 22.0_f32.to_radians(), // Narrow 180mm telephoto lens compression
+        projection: CameraProjection::Perspective,
+        ..Default::default()
+    };
+
+    (scene, camera, moon_id)
+}
+
+/// Populates and activates the complete Lunar Night Sky beginner journey in the app state.
+pub fn build_lunar_night_sky_scene(state: &mut AppState) {
+    let (scene, camera, moon_id) = build_lunar_night_sky_graph();
+    state.scene = scene;
+    state.camera = camera;
+    state.selected_node = Some(moon_id);
+    state.interaction_mode = InteractionMode::Object;
+    state.viewport_shading = ViewportShadingMode::Pbr;
+    state.show_wireframe = false;
+    state.show_outliner = true;
+    state.show_inspector = true;
+    state.inspector_tab = InspectorTab::Materials;
+
+    // Configure Optics & Atmosphere
+    state.dof.enabled = true;
+    state.dof.focus_distance = 16.0;
+    state.dof.f_stop = 4.0;
+    state.ssr.enabled = false;
+
+    // Launch the friendly In-Viewport Guided Walkthrough
+    state.walkthrough = WalkthroughState::lunar_night_sky();
+
+    state.sync_gpu_meshes();
+    state.set_status_message("🌕 Lunar Night Sky Scene initialized. Follow the in-viewport guide!");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lunar_night_sky_graph_initialization() {
+        let (scene, camera, moon_id) = build_lunar_night_sky_graph();
+        assert_eq!(scene.nodes.len(), 3); // Moon + Sun + Earthshine
+        assert!(scene.nodes.get(moon_id).is_some());
+        assert_eq!(camera.target, core_math::Vec3::ZERO);
+        assert!((camera.fov_y.to_degrees() - 22.0).abs() < 1e-3);
+    }
+}

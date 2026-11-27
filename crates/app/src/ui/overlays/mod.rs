@@ -5,6 +5,7 @@ pub mod modals;
 pub mod operator_panel;
 pub mod selection_overlay;
 pub mod tools;
+pub mod walkthrough;
 
 use crate::state::AppState;
 
@@ -18,4 +19,5 @@ pub fn draw_overlays(state: &mut AppState) {
     operator_panel::render(state);
     mesh_features::render(state);
     hud::render(state);
+    walkthrough::render(state);
 }

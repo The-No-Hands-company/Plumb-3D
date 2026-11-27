@@ -46,6 +46,7 @@ pub enum ProjectTemplate {
     CadPrecision,
     Sculpting,
     CastleTower,
+    LunarNightSky,
 }
 
 /// Draws the interactive Welcome & Quick-Start Hub modal window.
@@ -175,6 +176,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                     (ProjectTemplate::CadPrecision, "CAD Precision Drafting", "1mm grid snapping, calipers active, orthogonal camera"),
                     (ProjectTemplate::Sculpting, "Organic Sculpting", "Sculpting sphere, MatCap Clay, brush tools active"),
                     (ProjectTemplate::CastleTower, "Medieval Castle Tower", "Architectural cylinder base with double inset & crenels"),
+                    (ProjectTemplate::LunarNightSky, "🌕 Lunar Night Sky (Beginner)", "UV Sphere, regolith texture, sunlight, telephoto camera & guide"),
                 ];
 
                 for (tmpl, title, desc) in templates {
@@ -344,6 +346,12 @@ pub fn apply_project_template(state: &mut AppState, template: ProjectTemplate) {
             apply_studio_domain(state, StudioDomain::HardSurfaceCad);
             apply_workspace(state, WorkspaceTemplate::HardSurface);
             crate::scenes::build_medieval_citadel_scene(state);
+            return;
+        }
+        ProjectTemplate::LunarNightSky => {
+            apply_studio_domain(state, StudioDomain::CompleteSuite);
+            apply_workspace(state, WorkspaceTemplate::General);
+            crate::scenes::build_lunar_night_sky_scene(state);
             return;
         }
     }

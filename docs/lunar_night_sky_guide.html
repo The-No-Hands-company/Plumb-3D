@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plumb 3D — Lunar Night Sky & Full Moon (Beginner Masterpiece Guide)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --bg: #090b10;
+      --card: #121620;
+      --card-hover: #191f2c;
+      --border: #232c3d;
+      --text-main: #e2e8f0;
+      --text-muted: #8e9bb0;
+      --accent: #f5d77f;
+      --accent-glow: rgba(245, 215, 127, 0.25);
+      --moon-blue: #7eb6ff;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .badge-moon {
+      background: rgba(245, 215, 127, 0.15);
+      color: #f5d77f;
+      border: 1px solid rgba(245, 215, 127, 0.35);
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-step {
+      background: rgba(126, 182, 255, 0.15);
+      color: #93c5fd;
+      border: 1px solid rgba(126, 182, 255, 0.35);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .keycap {
+      background: #1c2230;
+      border: 1px solid #364257;
+      border-bottom: 2px solid #0f141f;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 12px;
+      font-family: monospace;
+      color: #f8fafc;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+    .moon-glow {
+      box-shadow: 0 0 50px rgba(245, 215, 127, 0.15);
+    }
+  </style>
+</head>
+<body class="p-6 max-w-4xl mx-auto antialiased">
+
+  <!-- Header Banner -->
+  <header class="mb-10 text-center border-b border-gray-800 pb-8">
+    <div class="inline-flex items-center gap-2 mb-3">
+      <span class="badge-moon">Beginner Masterpiece Guide</span>
+      <span class="text-xs text-gray-500 font-mono">Plumb 3D v1.0.0</span>
+    </div>
+    <h1 class="text-4xl font-extrabold tracking-tight text-white mb-3">
+      🌕 The Lunar Night Sky & Full Moon
+    </h1>
+    <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+      The intuitive, zero-frustration alternative to the Blender Doughnut. Learn how lighting, materials, and cameras create a breathtaking nocturnal render in 5 simple steps — <strong>with zero manual sculpting required</strong>.
+    </p>
+  </header>
+
+  <!-- Core Philosophy Note -->
+  <div class="bg-indigo-950/40 border border-indigo-800/60 rounded-xl p-5 mb-10 flex gap-4 items-start moon-glow">
+    <div class="text-2xl mt-0.5">✨</div>
+    <div>
+      <h3 class="font-bold text-indigo-200 text-sm mb-1 uppercase tracking-wider">The Secret of Planetary 3D Graphics</h3>
+      <p class="text-sm text-indigo-300/90 leading-relaxed">
+        In real-world visual effects (even in space movies and NASA documentaries), 3D artists <strong>do not sculpt individual craters by hand</strong>. The moon is a clean, mathematically smooth sphere. Its stunning reality comes from <em>surface texturing</em>, <em>grazing sunlight</em>, and <em>telephoto lens compression</em>. By mastering these three elements, you can render almost anything in 3D.
+      </p>
+    </div>
+  </div>
+
+  <!-- Step-by-Step Pipeline -->
+  <section class="space-y-8 mb-12">
+
+    <!-- Step 1 -->
+    <div class="bg-[#121620] border border-[#232c3d] rounded-xl p-6 transition hover:border-[#384660]">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="badge-step">STEP 01</span>
+          <h2 class="text-xl font-bold text-white">The Celestial Sphere</h2>
+        </div>
+        <span class="text-xs text-gray-400 font-mono">Primitives & Navigation</span>
+      </div>
+      <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+        In Plumb 3D, open the Welcome Hub and click <strong class="text-amber-300">🌕 Lunar Night Sky</strong> (or from the top menu, click <code class="text-blue-300">Help &rarr; 🌕 Lunar Night Sky Walkthrough</code>). Plumb 3D places a perfect, smooth UV Sphere in the center of your 3D universe.
+      </p>
+      <div class="bg-[#0b0e14] border border-[#1b2230] rounded-lg p-4 text-xs font-mono space-y-2 text-gray-300">
+        <div><strong class="text-amber-400">Orbit Camera:</strong> Hold <span class="keycap">Middle Mouse Button</span> or <span class="keycap">Alt</span> + <span class="keycap">Left Click</span> and drag.</div>
+        <div><strong class="text-amber-400">Pan Camera:</strong> Hold <span class="keycap">Shift</span> + <span class="keycap">Middle Mouse Button</span>.</div>
+        <div><strong class="text-amber-400">Zoom In/Out:</strong> Scroll the <span class="keycap">Mouse Wheel</span>.</div>
+        <div><strong class="text-amber-400">Center Focus:</strong> Press <span class="keycap">Numpad .</span> to frame the sphere directly in center view.</div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="bg-[#121620] border border-[#232c3d] rounded-xl p-6 transition hover:border-[#384660]">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="badge-step">STEP 02</span>
+          <h2 class="text-xl font-bold text-white">Lunar Regolith Material</h2>
+        </div>
+        <span class="text-xs text-gray-400 font-mono">PBR Shading</span>
+      </div>
+      <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+        The surface detail comes from the <strong>Lunar Regolith Material</strong>. The moon's surface is made of fine pulverized rock and glass beads with no shiny plastic gloss:
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-xs">
+        <div class="bg-[#0b0e14] border border-[#1b2230] p-3 rounded-lg">
+          <div class="font-bold text-gray-200 mb-1">Base Color & Albedo</div>
+          <div class="text-gray-400">Silvery-ash gray. The real moon is actually quite dark, reflecting only ~12% of incident sunlight.</div>
+        </div>
+        <div class="grid-item bg-[#0b0e14] border border-[#1b2230] p-3 rounded-lg">
+          <div class="font-bold text-gray-200 mb-1">Roughness (0.85)</div>
+          <div class="text-gray-400">High roughness eliminates artificial plastic glares and gives the soft matte moon look.</div>
+        </div>
+        <div class="bg-[#0b0e14] border border-[#1b2230] p-3 rounded-lg">
+          <div class="font-bold text-gray-200 mb-1">Pattern 5 (Basalt Maria)</div>
+          <div class="text-gray-400">Procedural turbulent noise automatically creates the dark volcanic seas and bright highlands.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="bg-[#121620] border border-[#232c3d] rounded-xl p-6 transition hover:border-[#384660]">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="badge-step">STEP 03</span>
+          <h2 class="text-xl font-bold text-white">Directing Sunlight & The Terminator Line</h2>
+        </div>
+        <span class="text-xs text-gray-400 font-mono">Lighting & Lunar Phases</span>
+      </div>
+      <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+        The moon does not emit light; it is a mirror reflecting the Sun. The boundary where daylight ends and night begins is called the <strong class="text-blue-300">Terminator Line</strong>:
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="bg-[#0b0e14] border border-amber-900/40 p-4 rounded-lg">
+          <div class="font-bold text-amber-300 text-sm mb-1">🌕 The Glowing Full Moon</div>
+          <p class="text-gray-400 mb-2">The Sun is positioned almost directly in front of the moon (near the camera). The entire visible disk is illuminated with maximum brilliance against the black space background.</p>
+          <div class="text-amber-200 font-mono">Walkthrough HUD &rarr; Click "🌕 Full Moon Sunlight"</div>
+        </div>
+        <div class="bg-[#0b0e14] border border-blue-900/40 p-4 rounded-lg">
+          <div class="font-bold text-blue-300 text-sm mb-1">🌙 The Dramatic Crescent</div>
+          <p class="text-gray-400 mb-2">The Sun is moved to the side at a 90° angle. The grazing light casts long, deep shadows across the surface, giving dramatic depth and showcasing the 3D curvature.</p>
+          <div class="text-blue-200 font-mono">Walkthrough HUD &rarr; Click "🌙 Crescent Moon Sunlight"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="bg-[#121620] border border-[#232c3d] rounded-xl p-6 transition hover:border-[#384660]">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="badge-step">STEP 04</span>
+          <h2 class="text-xl font-bold text-white">Astrophotography Telephoto Framing</h2>
+        </div>
+        <span class="text-xs text-gray-400 font-mono">Camera & Optics</span>
+      </div>
+      <p class="text-sm text-gray-300 mb-3 leading-relaxed">
+        Why does the moon look so tiny when you take a photo with a smartphone? Because smartphones have wide-angle lenses! Professional astrophotographers use <strong>telephoto lenses</strong> (200mm–400mm) that compress perspective:
+      </p>
+      <div class="bg-[#0b0e14] border border-[#1b2230] rounded-lg p-3 text-xs text-gray-300 space-y-1 font-mono">
+        <div>&bull; <strong class="text-blue-300">Field of View (FOV):</strong> 22° (Equivalent to a 180mm telephoto lens)</div>
+        <div>&bull; <strong class="text-blue-300">Depth of Field (DoF):</strong> Focus Distance 16.0m, f/4.0 aperture</div>
+        <div>&bull; <strong class="text-blue-300">Result:</strong> The moon feels monumental and towering in the sky!</div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="bg-[#121620] border border-amber-900/40 rounded-xl p-6 transition hover:border-amber-700/60">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="badge-step bg-amber-950 text-amber-300 border-amber-800">STEP 05</span>
+          <h2 class="text-xl font-bold text-white">Render Your Masterpiece</h2>
+        </div>
+        <span class="text-xs text-amber-400 font-mono">Monte Carlo Path Tracer</span>
+      </div>
+      <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+        Press <span class="keycap">F12</span> or click <strong class="text-amber-300">"Render Lunar Night Sky"</strong> on the walkthrough HUD. The offline production path tracer will immediately compute physical light transport:
+      </p>
+      <div class="space-y-2 text-xs text-gray-300 mb-5">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400">✔</span>
+          <span><strong>Progressive Accumulation:</strong> Watch the image sharpen sample-by-sample in real time.</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400">✔</span>
+          <span><strong>Atmospheric Bloom Halo:</strong> The bright lunar silhouette automatically produces a soft radiant glow against deep space.</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400">✔</span>
+          <span><strong>ACES Filmic Tone Mapping:</strong> Preserves highlights without clipping or burning out the lunar maria.</span>
+        </div>
+      </div>
+      <div class="bg-amber-950/30 border border-amber-800/50 rounded-lg p-3 text-xs text-amber-200">
+        💾 When the render reaches your target samples (e.g. 64 or 128 samples), click <strong>"Save Image as PNG"</strong> in the Render window to save your wallpaper-worthy artwork!
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Summary Footer -->
+  <footer class="text-center border-t border-gray-800 pt-6 text-xs text-gray-500">
+    Plumb 3D Studio &bull; Developed by The No-hands Company &bull; Pure Safe Rust
+  </footer>
+
+</body>
+</html>
