@@ -148,11 +148,20 @@ pub fn draw_materials_panel(
                                         // Image Texture Maps (PBR Diffuse, Normal, Roughness/Metallic)
                                         ui.collapsing("Texture Maps (PBR)", |ui| {
                                             ui.horizontal(|ui| {
-                                                ui.label("Albedo (.png/.jpg):");
+                                                ui.label("Albedo:");
                                                 let mut path_str = active_mat.albedo_texture_path.clone().unwrap_or_default();
                                                 if ui.text_edit_singleline(&mut path_str).changed() {
                                                     active_mat.albedo_texture_path = if path_str.trim().is_empty() { None } else { Some(path_str.trim().to_string()) };
                                                     node.is_dirty = true;
+                                                }
+                                                if ui.button("📁").on_hover_text("Browse for image texture (PNG, JPG, HDR, WebP)").clicked() {
+                                                    if let Some(path) = rfd::FileDialog::new()
+                                                        .add_filter("Image Files", &["png", "jpg", "jpeg", "hdr", "webp", "tga", "bmp"])
+                                                        .pick_file()
+                                                    {
+                                                        active_mat.albedo_texture_path = Some(path.to_string_lossy().to_string());
+                                                        node.is_dirty = true;
+                                                    }
                                                 }
                                             });
                                             ui.horizontal(|ui| {
@@ -162,6 +171,15 @@ pub fn draw_materials_panel(
                                                     active_mat.normal_texture_path = if path_str.trim().is_empty() { None } else { Some(path_str.trim().to_string()) };
                                                     node.is_dirty = true;
                                                 }
+                                                if ui.button("📁").on_hover_text("Browse for tangent normal map (PNG, JPG)").clicked() {
+                                                    if let Some(path) = rfd::FileDialog::new()
+                                                        .add_filter("Image Files", &["png", "jpg", "jpeg", "webp", "tga", "bmp"])
+                                                        .pick_file()
+                                                    {
+                                                        active_mat.normal_texture_path = Some(path.to_string_lossy().to_string());
+                                                        node.is_dirty = true;
+                                                    }
+                                                }
                                             });
                                             ui.horizontal(|ui| {
                                                 ui.label("Rough/Metallic:");
@@ -169,6 +187,15 @@ pub fn draw_materials_panel(
                                                 if ui.text_edit_singleline(&mut path_str).changed() {
                                                     active_mat.roughness_metallic_texture_path = if path_str.trim().is_empty() { None } else { Some(path_str.trim().to_string()) };
                                                     node.is_dirty = true;
+                                                }
+                                                if ui.button("📁").on_hover_text("Browse for roughness/metallic map (PNG, JPG)").clicked() {
+                                                    if let Some(path) = rfd::FileDialog::new()
+                                                        .add_filter("Image Files", &["png", "jpg", "jpeg", "webp", "tga", "bmp"])
+                                                        .pick_file()
+                                                    {
+                                                        active_mat.roughness_metallic_texture_path = Some(path.to_string_lossy().to_string());
+                                                        node.is_dirty = true;
+                                                    }
                                                 }
                                             });
                                         });

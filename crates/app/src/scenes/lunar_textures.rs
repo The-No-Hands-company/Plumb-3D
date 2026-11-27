@@ -15,7 +15,8 @@ pub fn ensure_lunar_textures_exist() -> (String, String) {
     ];
 
     for dir in &candidates {
-        let alb = dir.join("moon_albedo.png");
+        let nasa_photo = dir.join("nasa_moon_photographic.jpg");
+        let alb = if nasa_photo.exists() { nasa_photo } else { dir.join("moon_albedo.png") };
         let nrm = dir.join("moon_normal.png");
         if alb.exists() && nrm.exists() {
             return (
