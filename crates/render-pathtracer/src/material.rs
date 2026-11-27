@@ -510,17 +510,13 @@ fn reflectance(cosine: f32, ref_idx: f32) -> f32 {
 }
 
 fn random_in_unit_sphere(rng: &mut impl FnMut() -> f32) -> Vec3 {
-    loop {
-        let p = Vec3::new(
-            rng() * 2.0 - 1.0,
-            rng() * 2.0 - 1.0,
-            rng() * 2.0 - 1.0,
-        );
-        let len_sq = p.length_squared();
-        if len_sq > 1e-6 && len_sq < 1.0 {
-            return p / len_sq.sqrt();
-        }
-    }
+    let u = rng();
+    let v = rng();
+    let theta = u * std::f32::consts::TAU;
+    let z = (v * 2.0 - 1.0).clamp(-1.0, 1.0);
+    let r = (1.0 - z * z).max(0.0).sqrt();
+    let radius = rng().cbrt().max(0.01);
+    Vec3::new(radius * r * theta.cos(), radius * r * theta.sin(), radius * z)
 }
 
 fn smooth_noise3d(p: Vec3) -> f32 {

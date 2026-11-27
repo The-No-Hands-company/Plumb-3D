@@ -124,5 +124,30 @@ mod tests {
         assert!(scene.nodes.get(cam_id).is_some());
         assert_eq!(camera.target, core_math::Vec3::ZERO);
         assert!((camera.fov_y.to_degrees() - 40.0).abs() < 1e-3);
+
+        let pt_scene = render_pathtracer::PathTracerScene::from_scene_graph(&scene);
+        assert!(!pt_scene.directional_lights.is_empty());
+
+        let pt_cam = render_pathtracer::PathtracerCamera::new(
+            core_math::vec3(0.0, 0.0, 8.5),
+            core_math::Vec3::ZERO,
+            core_math::Vec3::Y,
+            40.0_f32.to_radians(),
+            16.0 / 9.0,
+        );
+        let center_ray = pt_cam.get_ray(0.5, 0.5, || 0.5);
+        let hit = pt_scene.intersect(&center_ray, 1e-4, 1e5);
+        assert!(hit.is_some(), "Center ray must hit the moon");
+
+        let mut rng = || 0.5_f32;
+        let color = render_pathtracer::integrator::trace_path(&pt_scene, &center_ray, 4, &mut rng);
+        assert!(color.length() > 1.0, "Moon surface must be brightly illuminated by sunlight: {:?}", color);
+
+        // Render 160x90 test frame to verify complete render output
+        let mut buffer = render_pathtracer::RenderBuffer::new(160, 90);
+        buffer.render_sample_pass(&pt_scene, &pt_cam, 4, None);
+        assert!(buffer.samples_rendered == 1);
+        let has_lit_pixels = buffer.accumulated_radiance.iter().any(|p| p.length() > 1.0);
+        assert!(has_lit_pixels, "Render buffer must contain illuminated moon pixels");
     }
 }

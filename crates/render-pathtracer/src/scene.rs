@@ -4,11 +4,30 @@ use core_math::{Mat4, Ray, Vec2, Vec3};
 use geo_kernel::{Mesh, RenderMesh};
 use graph_engine::{LightType, NodeData, SceneGraph};
 
+/// Directional light source for physically based solar illumination in the path tracer
+#[derive(Debug, Clone, Copy)]
+pub struct DirectionalLightSource {
+    pub to_light: Vec3,
+    pub color: Vec3,
+    pub intensity: f32,
+}
+
+/// Point light source for local omnidirectional illumination in the path tracer
+#[derive(Debug, Clone, Copy)]
+pub struct PointLightSource {
+    pub position: Vec3,
+    pub color: Vec3,
+    pub intensity: f32,
+    pub range: f32,
+}
+
 /// Production Ray Tracing Scene holding the BVH geometry, materials, and light sources
 pub struct PathTracerScene {
     pub bvh: BvhNode,
     pub materials: Vec<Material>,
     pub emissive_triangles: Vec<Triangle>,
+    pub directional_lights: Vec<DirectionalLightSource>,
+    pub point_lights: Vec<PointLightSource>,
     pub sun_direction: Option<Vec3>,
     pub sun_color: Vec3,
     pub sun_intensity: f32,
@@ -31,6 +50,8 @@ impl PathTracerScene {
             bvh,
             materials,
             emissive_triangles,
+            directional_lights: Vec::new(),
+            point_lights: Vec::new(),
             sun_direction: None,
             sun_color: Vec3::new(1.0, 0.95, 0.8),
             sun_intensity: 1.0,
@@ -73,6 +94,8 @@ impl PathTracerScene {
     pub fn from_scene_graph(scene: &SceneGraph) -> Self {
         let mut triangles = Vec::new();
         let mut materials = Vec::new();
+        let mut directional_lights = Vec::new();
+        let mut point_lights = Vec::new();
         let mut sun_direction = None;
         let mut sun_color = Vec3::new(1.0, 0.95, 0.85);
         let mut sun_intensity = 1.0_f32;
@@ -167,10 +190,26 @@ impl PathTracerScene {
                 NodeData::Light { light_type, color, intensity, .. } => {
                     let light_pos = world_mat.transform_point3(Vec3::ZERO);
                     if *light_type == LightType::Directional {
-                        let dir = world_mat.transform_vector3(-Vec3::Z).normalize_or_zero();
-                        sun_direction = Some(if dir.length_squared() > 1e-4 { dir } else { Vec3::new(0.5, 0.8, 0.3).normalize() });
-                        sun_color = *color;
-                        sun_intensity = *intensity;
+                        // Light shines along local -Z. The vector pointing FROM surface TOWARDS light:
+                        let fwd = -world_mat.transform_vector3(Vec3::Z).normalize_or_zero();
+                        let to_light = if fwd.length_squared() > 1e-4 { -fwd } else { Vec3::new(0.5, 0.8, 0.3).normalize() };
+                        directional_lights.push(DirectionalLightSource {
+                            to_light,
+                            color: *color,
+                            intensity: *intensity,
+                        });
+                        if sun_direction.is_none() {
+                            sun_direction = Some(to_light);
+                            sun_color = *color;
+                            sun_intensity = *intensity;
+                        }
+                    } else if *light_type == LightType::Point {
+                        point_lights.push(PointLightSource {
+                            position: light_pos,
+                            color: *color,
+                            intensity: *intensity,
+                            range: 100.0,
+                        });
                     } else {
                         let light_mat = materials.len();
                         materials.push(Material::Emissive { radiance: *color * (*intensity).max(1.0) });
@@ -183,7 +222,7 @@ impl PathTracerScene {
 
         // Only add soft ceiling area light if NO emissive meshes AND NO directional lights exist
         let has_emissive = triangles.iter().any(|t| materials.get(t.material_id).is_some_and(|m| m.is_emissive()));
-        let has_illumination = has_emissive || sun_direction.is_some();
+        let has_illumination = has_emissive || !directional_lights.is_empty();
         if !has_illumination {
             let light_y = 6.0_f32;
             let light_size = 2.0_f32;
@@ -201,6 +240,8 @@ impl PathTracerScene {
         }
 
         let mut pt_scene = Self::new(triangles, materials);
+        pt_scene.directional_lights = directional_lights;
+        pt_scene.point_lights = point_lights;
         if let Some(sun_dir) = sun_direction {
             pt_scene = pt_scene.with_sun(sun_dir, sun_color, sun_intensity);
         }

@@ -28,7 +28,8 @@ pub fn trace_path(
             break; // Emissive surfaces terminate the path
         }
 
-        // 2. Next Event Estimation (Direct Area Light Sampling)
+        // 2. Next Event Estimation (Direct Area Light, Directional Sunlight & Point Lights)
+        // 2a. Emissive Meshes (Area Lights)
         if !scene.emissive_triangles.is_empty() {
             let light_idx = ((rng() * scene.emissive_triangles.len() as f32) as usize)
                 .min(scene.emissive_triangles.len() - 1);
@@ -69,6 +70,37 @@ pub fn trace_path(
                         let albedo = material.albedo(hit.uv, hit.position, hit.normal);
                         accumulated_radiance += throughput * albedo * light_emission * (g * area) / light_pdf.max(1e-4);
                     }
+                }
+            }
+        }
+
+        // 2b. Directional Lights (Solar / Celestial Illumination)
+        for dir_light in &scene.directional_lights {
+            let cos_theta = hit.normal.dot(dir_light.to_light);
+            if cos_theta > 0.0 {
+                let shadow_ray = Ray::new(hit.position + hit.normal * 1e-4, dir_light.to_light);
+                if scene.intersect(&shadow_ray, 1e-4, 1e5).is_none() {
+                    let albedo = material.albedo(hit.uv, hit.position, hit.normal);
+                    accumulated_radiance += throughput * albedo * dir_light.color * (dir_light.intensity * cos_theta);
+                }
+            }
+        }
+
+        // 2c. Point Lights (Omni Sources)
+        for pt_light in &scene.point_lights {
+            let to_light = pt_light.position - hit.position;
+            let dist_sq = to_light.length_squared();
+            let dist = dist_sq.sqrt();
+            let light_dir = to_light / dist.max(1e-4);
+            let cos_theta = hit.normal.dot(light_dir);
+            if cos_theta > 0.0 {
+                let shadow_ray = Ray::new(hit.position + hit.normal * 1e-4, light_dir);
+                if scene.intersect(&shadow_ray, 1e-4, dist - 1e-3).is_none() {
+                    let d_over_r = (dist / pt_light.range.max(0.1)).clamp(0.0, 1.0);
+                    let win = (1.0 - d_over_r * d_over_r * d_over_r * d_over_r).clamp(0.0, 1.0);
+                    let att = (win * win) / (dist_sq + 1.0);
+                    let albedo = material.albedo(hit.uv, hit.position, hit.normal);
+                    accumulated_radiance += throughput * albedo * pt_light.color * (pt_light.intensity * att * cos_theta);
                 }
             }
         }
