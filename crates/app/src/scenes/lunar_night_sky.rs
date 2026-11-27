@@ -24,8 +24,8 @@ pub fn build_lunar_night_sky_graph() -> (SceneGraph, ViewportCamera, NodeId, Nod
     mat_regolith.albedo_texture_path = Some(albedo_path);
     mat_regolith.normal_texture_path = Some(normal_path);
 
-    // 2. The Celestial Body: Clean UV Sphere (No complex sculpting required)
-    let moon_mesh = Primitives::create_uv_sphere(3.0, 36, 36);
+    // 2. The Celestial Body: High-resolution UV Sphere with Sub-pixel Smooth Silhouette
+    let moon_mesh = Primitives::create_uv_sphere(3.0, 128, 128);
     let mut moon_node = SceneNode::new_mesh(
         "Moon_Body",
         Transform::IDENTITY,

@@ -524,10 +524,13 @@ impl Material {
 }
 
 fn create_tangent_basis(n: Vec3) -> (Vec3, Vec3) {
-    let up = if n.y.abs() < 0.99 { Vec3::Y } else { Vec3::X };
-    let tangent = n.cross(up).normalize();
-    let bitangent = n.cross(tangent).normalize();
-    (tangent, bitangent)
+    let t = if n.y.abs() < 0.999 {
+        Vec3::new(n.z, 0.0, -n.x).normalize()
+    } else {
+        Vec3::X
+    };
+    let b = n.cross(t).normalize();
+    (t, b)
 }
 
 fn reflect(v: Vec3, n: Vec3) -> Vec3 {

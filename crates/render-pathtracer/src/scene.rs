@@ -290,13 +290,44 @@ impl PathTracerScene {
         };
 
         if is_custom_bg {
-            // In deep celestial space: no atmospheric daylight haze; render pinpoint stars
-            let sp = (ray_dir * 140.0).fract().abs();
-            let sval = ((sp.x * 12.9898 + sp.y * 78.233 + sp.z * 45.164).sin() * 43_758.547).fract().abs();
-            if sval > 0.9982 {
-                let star_glow = ((sval - 0.9982) / 0.0018).powi(2) * 1.5;
-                ambient += Vec3::splat(star_glow);
+            // Stable celestial starfield: discretize spherical coordinates to avoid spatial aliasing
+            let theta = ray_dir.z.atan2(ray_dir.x);
+            let phi = ray_dir.y.asin();
+            let u_star = (theta / std::f32::consts::TAU + 0.5) * 360.0;
+            let v_star = (phi / std::f32::consts::PI + 0.5) * 180.0;
+            let cell_x = u_star.floor();
+            let cell_y = v_star.floor();
+            let frac_x = u_star - cell_x - 0.5;
+            let frac_y = v_star - cell_y - 0.5;
+
+            // Stable pseudo-random star position and magnitude per grid cell
+            let h = ((cell_x * 127.1 + cell_y * 311.7).sin() * 43758.545).fract().abs();
+            if h > 0.94 {
+                let offset_x = ((cell_x * 269.5 + cell_y * 183.3).sin() * 43758.545).fract() * 0.35;
+                let offset_y = ((cell_x * 419.2 + cell_y * 371.9).sin() * 43758.545).fract() * 0.35;
+                let dx = frac_x - offset_x;
+                let dy = frac_y - offset_y;
+                let dist_sq = dx * dx + dy * dy;
+                let radius_sq = 0.08;
+                if dist_sq < radius_sq {
+                    let falloff = (1.0 - dist_sq / radius_sq).powi(3);
+                    let mag = ((h - 0.94) / 0.06).powf(1.8) * 2.2;
+                    let star_color = if h > 0.985 {
+                        Vec3::new(0.85, 0.92, 1.25)
+                    } else if h > 0.965 {
+                        Vec3::new(1.15, 1.05, 0.90)
+                    } else {
+                        Vec3::new(1.20, 0.85, 0.70)
+                    };
+                    ambient += star_color * (mag * falloff);
+                }
             }
+
+            // Subtle cosmic nebula dust veil
+            let neb1 = ((ray_dir.x * 2.5 + 1.2).sin() * (ray_dir.y * 2.5 + 0.8).cos() * (ray_dir.z * 2.5).sin()).abs();
+            let neb2 = ((ray_dir.x * 5.0 - 0.4).cos() * (ray_dir.y * 5.0 + 2.1).sin()).abs();
+            let neb_density = (neb1 * 0.6 + neb2 * 0.4).powi(2) * 0.012;
+            ambient += Vec3::new(0.002, 0.004, 0.009) * neb_density;
 
             if let Some(sun_dir) = self.sun_direction {
                 let cos_angle = ray_dir.dot(sun_dir);
@@ -320,6 +351,20 @@ impl PathTracerScene {
 
         ambient
     }
+}
+
+fn fix_uv_seam(uv0: Vec2, uv1: Vec2, uv2: Vec2) -> (Vec2, Vec2, Vec2) {
+    let mut u0 = uv0.x;
+    let mut u1 = uv1.x;
+    let mut u2 = uv2.x;
+    let max_u = u0.max(u1).max(u2);
+    let min_u = u0.min(u1).min(u2);
+    if max_u - min_u > 0.5 {
+        if u0 < 0.5 { u0 += 1.0; }
+        if u1 < 0.5 { u1 += 1.0; }
+        if u2 < 0.5 { u2 += 1.0; }
+    }
+    (Vec2::new(u0, uv0.y), Vec2::new(u1, uv1.y), Vec2::new(u2, uv2.y))
 }
 
 fn append_render_mesh_triangles(
@@ -354,9 +399,10 @@ fn append_render_mesh_triangles(
         let uv0 = Vec2::from_slice(&v0.uv);
         let uv1 = Vec2::from_slice(&v1.uv);
         let uv2 = Vec2::from_slice(&v2.uv);
+        let (fix_uv0, fix_uv1, fix_uv2) = fix_uv_seam(uv0, uv1, uv2);
 
         let mat_id = mat_map.first().copied().unwrap_or(default_mat);
-        triangles.push(Triangle::new(p0, p1, p2, n0, n1, n2, uv0, uv1, uv2, mat_id));
+        triangles.push(Triangle::new(p0, p1, p2, n0, n1, n2, fix_uv0, fix_uv1, fix_uv2, mat_id));
     }
 }
 
@@ -394,7 +440,8 @@ fn append_mesh_triangles(
             let n2 = normal_mat.transform_vector3(mesh.vertices[v2_key].normal).normalize_or_zero();
             let uv2 = mesh.vertices[v2_key].uv;
 
-            triangles.push(Triangle::new(p0, p1, p2, n0, n1, n2, uv0, uv1, uv2, mat_id));
+            let (fix_uv0, fix_uv1, fix_uv2) = fix_uv_seam(uv0, uv1, uv2);
+            triangles.push(Triangle::new(p0, p1, p2, n0, n1, n2, fix_uv0, fix_uv1, fix_uv2, mat_id));
         }
     }
 }

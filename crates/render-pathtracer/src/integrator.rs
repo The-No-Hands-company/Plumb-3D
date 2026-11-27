@@ -1,3 +1,4 @@
+use crate::material::Material;
 use crate::scene::PathTracerScene;
 use core_math::{Ray, Vec3};
 
@@ -81,9 +82,35 @@ pub fn trace_path(
             let cos_theta = eff_normal.dot(dir_light.to_light);
             if cos_theta > 0.0 {
                 let shadow_ray = Ray::new(hit.position + hit.normal * 1e-4, dir_light.to_light);
-                if scene.intersect(&shadow_ray, 1e-4, 1e5).is_none() {
+                // Offset threshold (0.02) eliminates shadow terminator facet self-occlusion
+                if scene.intersect(&shadow_ray, 0.02, 1e5).is_none() {
                     let albedo = material.albedo(hit.uv, hit.position, eff_normal);
-                    accumulated_radiance += throughput * albedo * dir_light.color * (dir_light.intensity * cos_theta);
+
+                    // Micro-facet Oren-Nayar diffuse for rough surfaces (lunar regolith, dust)
+                    let rough = match material {
+                        Material::Principled { roughness, .. } => *roughness,
+                        _ => 0.0,
+                    };
+                    let diffuse_term = if rough > 0.1 {
+                        let sigma2 = rough * rough;
+                        let a = 1.0 - 0.5 * (sigma2 / (sigma2 + 0.33));
+                        let b = 0.45 * (sigma2 / (sigma2 + 0.09));
+                        let view_dir = -ray.direction.normalize();
+                        let v_dot_n = hit.normal.dot(view_dir).max(0.0);
+                        let l_dot_n = cos_theta;
+                        let cos_phi = (view_dir - hit.normal * v_dot_n).normalize_or_zero()
+                            .dot((dir_light.to_light - hit.normal * l_dot_n).normalize_or_zero());
+                        let (sin_alpha, tan_beta) = if l_dot_n < v_dot_n {
+                            ((1.0 - l_dot_n * l_dot_n).max(0.0).sqrt(), (1.0 - v_dot_n * v_dot_n).max(0.0).sqrt() / v_dot_n.max(1e-4))
+                        } else {
+                            ((1.0 - v_dot_n * v_dot_n).max(0.0).sqrt(), (1.0 - l_dot_n * l_dot_n).max(0.0).sqrt() / l_dot_n.max(1e-4))
+                        };
+                        cos_theta * (a + b * cos_phi.max(0.0) * sin_alpha * tan_beta)
+                    } else {
+                        cos_theta
+                    };
+
+                    accumulated_radiance += throughput * albedo * dir_light.color * (dir_light.intensity * diffuse_term);
                 }
             }
         }
