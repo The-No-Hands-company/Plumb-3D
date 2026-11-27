@@ -18,42 +18,30 @@ pub fn draw_render_dialog(state: &mut AppState) {
 
     egui::Window::new("Plumb 3D Production Renderer")
         .open(&mut show)
-        .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
-        .default_size(egui::vec2(1040.0, 700.0))
-        .min_width(850.0)
-        .min_height(580.0)
+        .default_pos(egui::pos2(90.0, 45.0))
+        .default_size(egui::vec2(580.0, 820.0))
+        .min_width(420.0)
+        .min_height(520.0)
         .resizable(true)
         .show(&ctx, |ui| {
-            ui.horizontal(|ui| {
-                // Left Column: Dedicated vertical scrollable sidebar for settings
-                ui.allocate_ui_with_layout(
-                    egui::vec2(310.0, ui.available_height()),
-                    egui::Layout::top_down(egui::Align::Min),
-                    |ui| {
-                        egui::Frame::none()
-                            .fill(egui::Color32::from_rgb(22, 25, 32))
-                            .inner_margin(egui::Margin::same(10.0))
-                            .rounding(egui::Rounding::same(6.0))
-                            .show(ui, |ui| {
-                                egui::ScrollArea::vertical()
-                                    .id_salt("render_sidebar_scroll")
-                                    .show(ui, |ui| {
-                                        draw_sidebar_controls(state, ui);
-                                    });
-                            });
-                    },
-                );
+            ui.set_min_height(500.0);
+            ui.vertical(|ui| {
+                // Top Half: Live Framebuffer Canvas & Viewport Controls
+                let avail_h = ui.available_height();
+                let preview_h = (avail_h * 0.44).clamp(240.0, 520.0);
+                draw_preview_canvas(state, ui, preview_h);
 
+                ui.add_space(4.0);
                 ui.separator();
+                ui.add_space(4.0);
 
-                // Right Column: Live Framebuffer & Preview Viewport
-                ui.allocate_ui_with_layout(
-                    egui::vec2(ui.available_width(), ui.available_height()),
-                    egui::Layout::top_down(egui::Align::Min),
-                    |ui| {
-                        draw_preview_canvas(state, ui);
-                    },
-                );
+                // Bottom Half: Scrollable Settings, Camera, Post-Processing & Export
+                egui::ScrollArea::vertical()
+                    .id_salt("render_dialog_portrait_settings_scroll")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| {
+                        draw_sidebar_controls(state, ui);
+                    });
             });
         });
 
@@ -262,20 +250,6 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
 
     ui.add_space(8.0);
 
-    // Progress Bar & Stats
-    if let Some(buf) = &state.production_render.buffer {
-        let current = buf.samples_rendered;
-        let target = state.production_render.settings.target_samples.max(1);
-        let progress = (current as f32 / target as f32).clamp(0.0, 1.0);
-
-        ui.add(egui::ProgressBar::new(progress).text(format!("Sample {} / {} ({:.0}%)", current, target, progress * 100.0)));
-
-        let elapsed = state.production_render.total_elapsed_secs;
-        let sps = if elapsed > 0.05 { current as f32 / elapsed } else { 0.0 };
-        ui.label(egui::RichText::new(format!("Elapsed: {:.1}s  |  Speed: {:.1} spp/s", elapsed, sps)).size(11.0).color(egui::Color32::LIGHT_GRAY));
-    }
-
-    ui.add_space(8.0);
     ui.separator();
     ui.add_space(4.0);
 
@@ -312,7 +286,7 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
     ui.label(egui::RichText::new(&state.production_render.status_message).size(11.0).color(egui::Color32::GOLD));
 }
 
-fn draw_preview_canvas(state: &mut AppState, ui: &mut egui::Ui) {
+fn draw_preview_canvas(state: &mut AppState, ui: &mut egui::Ui, preview_h: f32) {
     let current_samples = state.production_render.buffer.as_ref().map(|b| b.samples_rendered).unwrap_or(0);
     let target_samples = state.production_render.settings.target_samples.max(1);
     let is_rendering = state.production_render.is_rendering;
@@ -353,22 +327,22 @@ fn draw_preview_canvas(state: &mut AppState, ui: &mut egui::Ui) {
     });
 
     ui.add_space(4.0);
-    ui.separator();
-    ui.add_space(4.0);
 
-    // Framebuffer Display Canvas
-    let available_size = ui.available_size();
+    // Framebuffer Display Canvas with explicit guaranteed height
+    let canvas_h = (preview_h - 40.0).max(180.0);
+    let canvas_size = egui::vec2(ui.available_width(), canvas_h);
     egui::Frame::none()
         .fill(egui::Color32::from_rgb(10, 12, 16))
         .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(35, 42, 54)))
         .rounding(egui::Rounding::same(6.0))
         .show(ui, |ui| {
+            ui.set_min_size(canvas_size);
             if let Some(tex) = &state.production_render.texture_handle {
                 let img_size = tex.size_vec2();
                 let aspect = img_size.x / img_size.y.max(1.0);
 
-                let max_w = (available_size.x - 24.0).max(64.0);
-                let max_h = (available_size.y - 24.0).max(64.0);
+                let max_w = (canvas_size.x - 16.0).max(64.0);
+                let max_h = (canvas_size.y - 16.0).max(64.0);
                 let (draw_w, draw_h) = if max_w / max_h > aspect {
                     (max_h * aspect, max_h)
                 } else {
@@ -381,14 +355,28 @@ fn draw_preview_canvas(state: &mut AppState, ui: &mut egui::Ui) {
             } else {
                 ui.centered_and_justified(|ui| {
                     ui.vertical_centered(|ui| {
-                        ui.add_space(available_size.y * 0.35);
-                        ui.label(egui::RichText::new("🌕 Plumb 3D Production Renderer").size(18.0).color(egui::Color32::WHITE));
+                        ui.add_space(canvas_size.y * 0.28);
+                        ui.label(egui::RichText::new("🌕 Plumb 3D Production Renderer").size(17.0).color(egui::Color32::WHITE));
                         ui.add_space(6.0);
-                        ui.label(egui::RichText::new("Click 'Start Render (F12)' to begin Monte Carlo progressive path tracing").size(12.0).color(egui::Color32::GRAY));
+                        ui.label(egui::RichText::new("Click 'Start Render (F12)' to begin Monte Carlo path tracing").size(12.0).color(egui::Color32::GRAY));
                     });
                 });
             }
         });
+
+    // Progress Bar & Performance Counter directly beneath Live Canvas
+    if let Some(buf) = &state.production_render.buffer {
+        ui.add_space(6.0);
+        let current = buf.samples_rendered;
+        let target = state.production_render.settings.target_samples.max(1);
+        let progress = (current as f32 / target as f32).clamp(0.0, 1.0);
+
+        ui.add(egui::ProgressBar::new(progress).text(format!("Sample {} / {} ({:.0}%)", current, target, progress * 100.0)));
+
+        let elapsed = state.production_render.total_elapsed_secs;
+        let sps = if elapsed > 0.05 { current as f32 / elapsed } else { 0.0 };
+        ui.label(egui::RichText::new(format!("Elapsed: {:.1}s  |  Speed: {:.1} spp/s", elapsed, sps)).size(11.0).color(egui::Color32::LIGHT_GRAY));
+    }
 }
 
 pub fn start_production_render(state: &mut AppState) {
