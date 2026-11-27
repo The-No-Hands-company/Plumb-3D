@@ -500,12 +500,12 @@ pub fn render_frame(state: &mut AppState) {
             .render(&mut pass, &tris, &screen_descriptor);
     }
 
+    state.queue.submit(std::iter::once(encoder.finish()));
+    output.present();
+
     for id in &full_output.textures_delta.free {
         state.egui_renderer.free_texture(id);
     }
-
-    state.queue.submit(std::iter::once(encoder.finish()));
-    output.present();
 
     if state.animation.is_playing {
         state.window.request_redraw();

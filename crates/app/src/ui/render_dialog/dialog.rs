@@ -440,11 +440,15 @@ pub fn start_production_render(state: &mut AppState) {
             [width as usize, height as usize],
             &rgba,
         );
-        state.production_render.texture_handle = Some(state.egui_ctx.load_texture(
-            "render_preview_tex",
-            color_image,
-            egui::TextureOptions::LINEAR,
-        ));
+        if let Some(tex) = &mut state.production_render.texture_handle {
+            tex.set(color_image, egui::TextureOptions::LINEAR);
+        } else {
+            state.production_render.texture_handle = Some(state.egui_ctx.load_texture(
+                "render_preview_tex",
+                color_image,
+                egui::TextureOptions::LINEAR,
+            ));
+        }
         state.production_render.buffer = Some(buffer);
         state.production_render.scene = Some(scene);
         state.production_render.camera = Some(camera);
@@ -460,7 +464,6 @@ pub fn start_production_render(state: &mut AppState) {
     state.production_render.camera = Some(camera);
     state.production_render.is_rendering = true;
     state.production_render.is_paused = false;
-    state.production_render.texture_handle = None;
     state.production_render.render_start_instant = Some(Instant::now());
     state.production_render.total_elapsed_secs = 0.0;
     state.production_render.status_message = format!("Rendering {}x{} at {} target SPP...", width, height, state.production_render.settings.target_samples);
