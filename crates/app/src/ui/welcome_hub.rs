@@ -46,6 +46,7 @@ pub enum ProjectTemplate {
     CadPrecision,
     Sculpting,
     CastleTower,
+    LunarTutorialBlank,
     LunarNightSky,
 }
 
@@ -176,7 +177,8 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                     (ProjectTemplate::CadPrecision, "CAD Precision Drafting", "1mm grid snapping, calipers active, orthogonal camera"),
                     (ProjectTemplate::Sculpting, "Organic Sculpting", "Sculpting sphere, MatCap Clay, brush tools active"),
                     (ProjectTemplate::CastleTower, "Medieval Castle Tower", "Architectural cylinder base with double inset & crenels"),
-                    (ProjectTemplate::LunarNightSky, "🌕 Lunar Night Sky (Beginner)", "UV Sphere, regolith texture, sunlight, telephoto camera & guide"),
+                    (ProjectTemplate::LunarTutorialBlank, "🌕 Lunar Night Sky: Guided Tutorial", "Build from scratch: 128x128 UV Sphere, PBR regolith, sunlight & skybox"),
+                    (ProjectTemplate::LunarNightSky, "🌕 Lunar Night Sky: Ready Showcase", "Finished astrophotography scene with ESO 360 Milky Way & camera setup"),
                 ];
 
                 for (tmpl, title, desc) in templates {
@@ -346,6 +348,12 @@ pub fn apply_project_template(state: &mut AppState, template: ProjectTemplate) {
             apply_studio_domain(state, StudioDomain::HardSurfaceCad);
             apply_workspace(state, WorkspaceTemplate::HardSurface);
             crate::scenes::build_medieval_citadel_scene(state);
+            return;
+        }
+        ProjectTemplate::LunarTutorialBlank => {
+            apply_studio_domain(state, StudioDomain::CompleteSuite);
+            apply_workspace(state, WorkspaceTemplate::General);
+            crate::scenes::build_lunar_night_sky_tutorial_blank(state);
             return;
         }
         ProjectTemplate::LunarNightSky => {

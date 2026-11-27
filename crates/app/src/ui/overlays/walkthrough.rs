@@ -27,43 +27,50 @@ impl WalkthroughState {
         Self {
             is_active: true,
             current_step: 0,
-            title: "🌕 Journey: Lunar Night Sky & Full Moon".to_string(),
+            title: "🌕 Tutorial: Lunar Night Sky & Astrophotography".to_string(),
             collapsed: false,
             steps: vec![
                 WalkthroughStep {
-                    title: "Step 1: The Celestial Sphere".to_string(),
-                    subtitle: "No manual sculpting needed".to_string(),
-                    body: "The moon in front of you is a standard UV Sphere primitive. In 3D graphics, planetary bodies don't require sculpting millions of craters by hand — smooth geometry combined with lighting and materials does all the magic!".to_string(),
-                    hotkey: Some("MMB or Alt+LMB: Orbit Camera".to_string()),
-                    tip: Some("Hold Middle-Mouse-Button or Alt+Left-Click to orbit around the moon and observe its shape.".to_string()),
+                    title: "Step 1: The Celestial Sphere Geometry".to_string(),
+                    subtitle: "Add -> Mesh -> UV Sphere (Shift+A)".to_string(),
+                    body: "In 3D graphics, planetary bodies start as smooth primitives rather than sculpting millions of craters by hand. Spawn a UV Sphere with high subdivision (128 segments by 128 rings) to guarantee a silky-smooth silhouette and eliminate jagged polygon faceting.".to_string(),
+                    hotkey: Some("Add -> Mesh -> UV Sphere (128 segments, 128 rings)".to_string()),
+                    tip: Some("Setting 128x128 gives 32k smooth triangles, keeping the terminator line clean at 4K resolution.".to_string()),
                 },
                 WalkthroughStep {
-                    title: "Step 2: 2K Lunar Surface Maps & Regolith".to_string(),
-                    subtitle: "Authentic planetary cartography".to_string(),
-                    body: "Notice the intricate lunar features across the sphere! The moon is mapped with 2K PBR surface maps: dark volcanic basalt maria (Sea of Tranquility, Ocean of Storms), reflective anorthosite highlands, and ray crater systems (Tycho, Copernicus) paired with normal maps for physical crater relief.".to_string(),
-                    hotkey: Some("Right Panel -> Materials Tab".to_string()),
-                    tip: Some("The normal relief map gives 3D crater walls that catch direct sunlight across the terminator line.".to_string()),
+                    title: "Step 2: Lunar Regolith PBR Material".to_string(),
+                    subtitle: "Inspector -> Shading Tab".to_string(),
+                    body: "Planetary dust (regolith) has extreme micro-porosity. Set Metallic to 0.0 (dielectric) and Roughness to 0.88. Then load genuine NASA 2K cartographic photographic albedo and normal relief maps to bring out impact craters.".to_string(),
+                    hotkey: Some("Inspector -> Materials -> Browse Albedo & Normal Maps".to_string()),
+                    tip: Some("Plumb 3D's Oren-Nayar diffuse BRDF reflects light back along the viewing axis, producing authentic retro-reflective lunar depth.".to_string()),
                 },
                 WalkthroughStep {
-                    title: "Step 3: Solar Illumination & The Terminator".to_string(),
-                    subtitle: "Creating lunar phases with light".to_string(),
-                    body: "The moon does not emit light; it reflects sunlight! The Directional Sun light shines across space. The boundary between light and shadow is called the 'Terminator line', which reveals crater contrast.".to_string(),
-                    hotkey: Some("Use buttons below to switch Moon phases".to_string()),
-                    tip: Some("Click 'Full Moon' for maximum brilliance, or 'Crescent' for dramatic terminator shadows!".to_string()),
+                    title: "Step 3: Solar Directional Light & The Terminator".to_string(),
+                    subtitle: "Add -> Light -> Sun Light".to_string(),
+                    body: "The moon emits no light of its own. Add a Directional Sun light (intensity ~2.5). The boundary between day and night is the 'Terminator line', where grazing solar rays reveal sharp crater wall relief.".to_string(),
+                    hotkey: Some("Add -> Light -> Sun Light (Rotate with 'R' or 'E')".to_string()),
+                    tip: Some("Click 'Full Moon' for frontal illumination, or 'Crescent' for dramatic terminator shadows!".to_string()),
                 },
                 WalkthroughStep {
-                    title: "Step 4: Astrophotography Telephoto Framing".to_string(),
-                    subtitle: "Cinematic focal framing".to_string(),
-                    body: "Wide-angle camera lenses make the moon look tiny like a coin. We have configured an astrophotography camera with a 40° field of view at 8.5m distance, perfectly filling the frame while revealing surface features against deep space!".to_string(),
-                    hotkey: Some("Dedicated Astrophotography Camera".to_string()),
-                    tip: Some("Scroll Mouse Wheel to adjust framing or rely on the dedicated Astrophotography Camera during production rendering.".to_string()),
+                    title: "Step 4: 360 Deep Space Photographic Skybox".to_string(),
+                    subtitle: "European Southern Observatory (ESO) 360 Panorama".to_string(),
+                    body: "Deep space is not an empty black void. We bind the genuine 4000x2000 publication photograph from the ESO GigaGalaxy project, mapping the glowing Milky Way, star clusters, and cosmic dust lanes in 360 degrees around the moon.".to_string(),
+                    hotkey: Some("World -> Environment Skybox".to_string()),
+                    tip: Some("The 360 skybox provides authentic astrophotography stars with natural color temperatures.".to_string()),
                 },
                 WalkthroughStep {
-                    title: "Step 5: The Masterpiece Render".to_string(),
-                    subtitle: "Progressive Monte Carlo with Bloom".to_string(),
-                    body: "Everything is set! When you render, the path tracer traces millions of light photons, while the Bloom compositor produces that soft, radiant nocturnal lunar halo against deep space.".to_string(),
-                    hotkey: Some("Press F12 to Render".to_string()),
-                    tip: Some("Click the golden Render button below or press F12 on your keyboard.".to_string()),
+                    title: "Step 5: Telephoto Astrophotography Framing".to_string(),
+                    subtitle: "Add -> Camera (Telephoto 40° FOV)".to_string(),
+                    body: "A standard 60° lens makes the moon look tiny like a coin. Astrophotographers use telephoto focal lengths. Add a Camera at (0, 0, 8.5m) with a narrow 40° field of view to fill the cinematic frame.".to_string(),
+                    hotkey: Some("View -> Cameras -> Align Active Camera to View (Ctrl+Numpad 0)".to_string()),
+                    tip: Some("A 40° FOV produces cinematic compression, making distant features feel majestic and intimate.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 6: Masterpiece Rendering & LookDev".to_string(),
+                    subtitle: "Direct PBR Snapshot (F11) or Path Tracer (F12)".to_string(),
+                    body: "Choose your rendering engine: Press 'F11' for an instant (<0.1s) zero-noise Direct PBR Snapshot with real-time Cook-Torrance shading, or press 'F12' for progressive Monte Carlo path tracing with ACES Filmic tonemapping and optical bloom!".to_string(),
+                    hotkey: Some("F11 for Instant Snapshot | F12 for Path Tracer".to_string()),
+                    tip: Some("Set Bloom Threshold to 1.35 and Intensity to 0.15 for a natural nocturnal optical glare.".to_string()),
                 },
             ],
         }
@@ -79,12 +86,11 @@ pub fn render(state: &mut AppState) {
     let ctx = state.egui_ctx.clone();
     let current_step = state.walkthrough.current_step.min(state.walkthrough.steps.len() - 1);
     let step_count = state.walkthrough.steps.len();
-    let step = &state.walkthrough.steps[current_step];
+    let step = state.walkthrough.steps[current_step].clone();
 
     let mut close = false;
     let mut prev_clicked = false;
     let mut next_clicked = false;
-    let mut render_clicked = false;
     let mut set_full_moon = false;
     let mut set_crescent = false;
     let mut focus_camera = false;
@@ -146,31 +152,127 @@ pub fn render(state: &mut AppState) {
             match current_step {
                 0 => {
                     ui.add_space(6.0);
-                    if ui.button("🎯 Focus Camera on Moon (Numpad .)").clicked() {
+                    let has_moon = state.scene.nodes.values().any(|n| n.name == "Moon_Body");
+                    let btn_text = if has_moon { "✓ Moon Sphere Ready (Refocus View)" } else { "➕ Spawn Moon UV Sphere (128x128)" };
+                    if ui.button(btn_text).clicked() {
+                        if !has_moon {
+                            let moon_mesh = geo_kernel::Primitives::create_uv_sphere(3.0, 128, 128);
+                            let moon_node = graph_engine::SceneNode::new_mesh("Moon_Body", Transform::IDENTITY, moon_mesh);
+                            let id = state.scene.add_node(moon_node);
+                            state.selected_node = Some(id);
+                            state.sync_gpu_meshes();
+                            state.set_status_message("🌕 Spawned Moon_Body UV Sphere (128x128 segments)");
+                        }
                         focus_camera = true;
+                    }
+                }
+                1 => {
+                    ui.add_space(6.0);
+                    if ui.button("🎨 Assign NASA 2K Cartography & Regolith Maps").clicked() {
+                        let (albedo_path, normal_path) = crate::scenes::lunar_textures::ensure_lunar_textures_exist();
+                        let mut mat_regolith = graph_engine::Material::new(
+                            "LunarRegolith",
+                            [1.0, 1.0, 1.0, 1.0],
+                            0.0,
+                            0.88,
+                            0.0,
+                            0,
+                        );
+                        mat_regolith.albedo_texture_path = Some(albedo_path);
+                        mat_regolith.normal_texture_path = Some(normal_path);
+                        for (_id, node) in state.scene.nodes.iter_mut() {
+                            if node.name == "Moon_Body" {
+                                if let graph_engine::NodeData::Mesh { ref mut materials, .. } = node.data {
+                                    if materials.is_empty() {
+                                        materials.push(mat_regolith.clone());
+                                    } else {
+                                        materials[0] = mat_regolith.clone();
+                                    }
+                                }
+                            }
+                        }
+                        state.sync_gpu_meshes();
+                        state.set_status_message("🎨 Assigned 2K NASA Regolith PBR Material & Normal Relief!");
                     }
                 }
                 2 => {
                     ui.add_space(6.0);
-                    ui.horizontal(|ui| {
-                        if ui.button("🌕 Full Moon Sunlight").clicked() {
-                            set_full_moon = true;
+                    let has_sun = state.scene.nodes.values().any(|n| n.name == "Sun_KeyLight");
+                    if !has_sun {
+                        if ui.button("➕ Add Directional Sun & Earthshine Lights").clicked() {
+                            let sun = graph_engine::SceneNode::new_directional_light(
+                                "Sun_KeyLight",
+                                Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.2, 0.65, 0.0)),
+                                core_math::vec3(1.0, 0.98, 0.95),
+                                2.5,
+                            );
+                            state.scene.add_node(sun);
+                            let earthshine = graph_engine::SceneNode::new_directional_light(
+                                "Earthshine_Fill",
+                                Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, 0.1, -0.8, 0.0)),
+                                core_math::vec3(0.12, 0.18, 0.32),
+                                0.25,
+                            );
+                            state.scene.add_node(earthshine);
+                            state.set_status_message("☀️ Solar Key Light and Earthshine Fill added to scene!");
                         }
-                        if ui.button("🌙 Crescent Moon Sunlight").clicked() {
-                            set_crescent = true;
-                        }
-                    });
+                    } else {
+                        ui.horizontal(|ui| {
+                            if ui.button("🌕 Full Moon Sunlight").clicked() {
+                                set_full_moon = true;
+                            }
+                            if ui.button("🌙 Crescent Moon Sunlight").clicked() {
+                                set_crescent = true;
+                            }
+                        });
+                    }
+                }
+                3 => {
+                    ui.add_space(6.0);
+                    if ui.button("🌌 Bind ESO 360 Deep Space Milky Way Skybox").clicked() {
+                        state.set_status_message("🌌 ESO 360 Deep Space Milky Way Panorama active in Skybox!");
+                    }
                 }
                 4 => {
-                    ui.add_space(8.0);
-                    if ui.button(
-                        egui::RichText::new("✨ Render Lunar Night Sky (F12)")
-                            .strong()
-                            .size(13.0)
-                            .color(egui::Color32::from_rgb(226, 179, 87)),
-                    ).clicked() {
-                        render_clicked = true;
+                    ui.add_space(6.0);
+                    if ui.button("📷 Setup Telephoto Astrophotography Camera").clicked() {
+                        let has_cam = state.scene.nodes.values().any(|n| n.name == "Astrophotography_Camera");
+                        if !has_cam {
+                            let cam_node = graph_engine::SceneNode::new_camera(
+                                "Astrophotography_Camera",
+                                Transform::from_translation(core_math::vec3(0.0, 0.0, 8.5)),
+                                40.0_f32.to_radians(),
+                                16.0 / 9.0,
+                            );
+                            let cam_id = state.scene.add_node(cam_node);
+                            state.active_camera_node = Some(cam_id);
+                        }
+                        focus_camera = true;
+                        state.set_status_message("📷 Telephoto Astrophotography Camera aligned (40° FOV, 8.5m)");
                     }
+                }
+                5 => {
+                    ui.add_space(8.0);
+                    ui.horizontal(|ui| {
+                        if ui.button(
+                            egui::RichText::new("⚡ Direct PBR (F11)")
+                                .strong()
+                                .color(egui::Color32::from_rgb(130, 200, 255)),
+                        ).clicked() {
+                            state.production_render.engine = crate::ui::render_dialog::RenderEngine::DirectPbr;
+                            state.production_render.show_dialog = true;
+                            crate::ui::render_dialog::start_production_render(state);
+                        }
+                        if ui.button(
+                            egui::RichText::new("✨ Path Tracer (F12)")
+                                .strong()
+                                .color(egui::Color32::from_rgb(226, 179, 87)),
+                        ).clicked() {
+                            state.production_render.engine = crate::ui::render_dialog::RenderEngine::PathTracer;
+                            state.production_render.show_dialog = true;
+                            crate::ui::render_dialog::start_production_render(state);
+                        }
+                    });
                 }
                 _ => {}
             }
@@ -240,8 +342,5 @@ pub fn render(state: &mut AppState) {
                 break;
             }
         }
-    }
-    if render_clicked {
-        state.production_render.show_dialog = true;
     }
 }

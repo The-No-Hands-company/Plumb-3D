@@ -116,6 +116,39 @@ pub fn build_lunar_night_sky_scene(state: &mut AppState) {
     state.set_status_message("🌕 Lunar Night Sky Scene initialized. Follow the in-viewport guide!");
 }
 
+/// Initializes an empty scene canvas for the hands-on "Lunar Night Sky" tutorial from scratch.
+pub fn build_lunar_night_sky_tutorial_blank(state: &mut AppState) {
+    state.scene = graph_engine::SceneGraph::new();
+    state.camera.target = core_math::Vec3::ZERO;
+    state.camera.distance = 8.5;
+    state.camera.pitch = 0.0;
+    state.camera.yaw = 0.0;
+    state.camera.fov_y = 40.0_f32.to_radians();
+    state.selected_node = None;
+    state.active_camera_node = None;
+    state.interaction_mode = InteractionMode::Object;
+    state.viewport_shading = ViewportShadingMode::Pbr;
+    state.show_wireframe = false;
+    state.show_outliner = true;
+    state.show_inspector = true;
+    state.inspector_tab = InspectorTab::Materials;
+
+    state.production_render.settings.width = 960;
+    state.production_render.settings.height = 540;
+    state.production_render.settings.target_samples = 64;
+    state.production_render.focus_distance = 8.5;
+    state.production_render.post_process.bloom_enabled = true;
+    state.production_render.post_process.bloom_threshold = 1.35;
+    state.production_render.post_process.bloom_intensity = 0.15;
+    state.production_render.post_process.exposure = 0.85;
+    state.production_render.post_process.contrast = 1.15;
+
+    state.walkthrough = WalkthroughState::lunar_night_sky();
+    state.walkthrough.current_step = 0;
+    state.sync_gpu_meshes();
+    state.set_status_message("🌕 Lunar Tutorial started: Follow Step 1 to spawn your sphere!");
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

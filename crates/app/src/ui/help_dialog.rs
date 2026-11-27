@@ -158,6 +158,19 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
                 ("5. Export for Slicing", "Click 'File -> Export Active Mesh as STL for 3D Printing (.stl)'. The exported binary STL file is ready to drop directly into Cura, PrusaSlicer, or Bambu Studio!"),
             ],
         ),
+        (
+            "8. Lunar Astrophotography & Night Sky",
+            "Celestial & Astrophotography",
+            "Recreate a photorealistic lunar night sky from scratch: 128x128 UV Sphere, NASA 2K cartography maps, Oren-Nayar regolith BRDF, directional sunlight & terminator contrast, 360 ESO photographic Milky Way skybox, and telephoto framing.",
+            &[
+                ("1. Spawn UV Sphere", "Press 'Shift+A' (or Add -> Mesh -> UV Sphere). In the operator panel or Inspector, set Radius to 3.0m, Segments to 128, and Rings to 128 for a sub-pixel smooth silhouette."),
+                ("2. Lunar Regolith PBR Material", "Select the sphere and switch to Inspector 'Shading' tab. Create a material with Metallic 0.0 (dielectric silicate) and Roughness 0.88 (micro-facet Oren-Nayar retro-reflective regolith). Load NASA 2K Albedo and Normal relief maps."),
+                ("3. Solar Light & The Terminator", "Add a Directional Sun light (Add -> Light -> Sun Light). Rotate it (-0.2 rad X, 0.65 rad Y) to cast solar illumination across the moon's limb, creating the dramatic lunar terminator where crater shadows emerge."),
+                ("4. Authentic 360 Photographic Skybox", "Bind the genuine European Southern Observatory (ESO) 4000x2000 Milky Way 360 equirectangular skybox (eso_milky_way_360.jpg) to surround deep space with real photographic star clusters."),
+                ("5. Telephoto Astrophotography Camera", "Add a Camera at (0, 0, 8.5m) with a narrow 40° FOV (telephoto compression). This frames the lunar disc majestically centered against the galactic starfield."),
+                ("6. Production Render (F11 / F12)", "Press 'F11' for an instant Direct PBR Snapshot, or 'F12' for progressive Monte Carlo path tracing with ACES Filmic tonemapping, physical regolith retro-reflection, and optical bloom."),
+            ],
+        ),
     ];
 
     ui.horizontal_wrapped(|ui| {
@@ -195,6 +208,27 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
             ui.label(*step_desc);
         });
         ui.add_space(4.0);
+    }
+
+    if state.selected_tutorial == 7 {
+        ui.add_space(8.0);
+        ui.horizontal(|ui| {
+            if ui.button(
+                egui::RichText::new("🚀 Start Guided Tutorial (From Scratch)")
+                    .strong()
+                    .color(egui::Color32::from_rgb(226, 179, 87)),
+            ).clicked() {
+                crate::scenes::build_lunar_night_sky_tutorial_blank(state);
+                state.show_help_dialog = false;
+            }
+            if ui.button(
+                egui::RichText::new("🌕 Load Completed Showcase Scene")
+                    .color(egui::Color32::from_rgb(130, 200, 255)),
+            ).clicked() {
+                crate::scenes::build_lunar_night_sky_scene(state);
+                state.show_help_dialog = false;
+            }
+        });
     }
 }
 

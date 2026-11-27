@@ -34,6 +34,8 @@ pub struct PathTracerScene {
     pub background_zenith: Option<Vec3>,
     pub background_horizon: Option<Vec3>,
     pub background_ground: Option<Vec3>,
+    pub environment_map: Option<TextureSource>,
+    pub environment_intensity: f32,
 }
 
 impl PathTracerScene {
@@ -58,7 +60,28 @@ impl PathTracerScene {
             background_zenith: None,
             background_horizon: None,
             background_ground: None,
+            environment_map: None,
+            environment_intensity: 1.0,
         }
+    }
+
+    /// Sets an equirectangular environment texture map (e.g. 360 photographic Milky Way panorama)
+    pub fn with_environment_map(mut self, tex: TextureSource) -> Self {
+        self.environment_map = Some(tex);
+        self
+    }
+
+    /// Loads an equirectangular photographic skybox file from disk
+    pub fn with_environment_map_path(mut self, path: &str) -> Self {
+        if let Ok(img) = image::open(path) {
+            let rgba = img.to_rgba8();
+            self.environment_map = Some(TextureSource::Image {
+                width: rgba.width(),
+                height: rgba.height(),
+                data: std::sync::Arc::new(rgba.into_raw()),
+            });
+        }
+        self
     }
 
     /// Sets custom background environment gradient (zenith, horizon, ground)
@@ -271,11 +294,31 @@ impl PathTracerScene {
             pt_scene = pt_scene.with_night_sky();
         }
 
+        let env_candidates = [
+            "assets/textures/skydome/eso_milky_way_360.jpg",
+            "crates/app/assets/textures/skydome/eso_milky_way_360.jpg",
+        ];
+        for path in env_candidates {
+            if std::path::Path::new(path).exists() {
+                pt_scene = pt_scene.with_environment_map_path(path);
+                break;
+            }
+        }
+
         pt_scene
     }
 
     /// Computes atmospheric studio sky radiance with physical sun disk & Mie forward scattering
     pub fn sky_radiance(&self, ray_dir: Vec3) -> Vec3 {
+        if let Some(env_map) = &self.environment_map {
+            let theta = ray_dir.z.atan2(ray_dir.x);
+            let phi = ray_dir.y.asin();
+            let u = (theta / std::f32::consts::TAU + 0.5).rem_euclid(1.0);
+            let v = (0.5 - phi / std::f32::consts::PI).clamp(0.0, 1.0);
+            let sample = env_map.evaluate(core_math::Vec2::new(u, v), Vec3::ZERO, Vec3::Y);
+            return sample * self.environment_intensity;
+        }
+
         let y = ray_dir.y.clamp(-1.0, 1.0);
         let t = 0.5 * (y + 1.0);
         let is_custom_bg = self.background_zenith.is_some();
