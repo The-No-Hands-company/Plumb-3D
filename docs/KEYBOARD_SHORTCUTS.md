@@ -94,3 +94,23 @@ This document provides a comprehensive index of all default keyboard shortcuts, 
 | `Ctrl + Y` | **Redo** | Redo the previously undone operation. |
 | `Ctrl + S` | **Save Project** | Save scene to native `.plmb` binary container format. |
 | `Ctrl + O` | **Open Project** | Open an existing `.plmb` project archive. |
+
+---
+
+## 6. CAD Precision, 2D Sketcher & Engineering
+
+| Shortcut | Action | Description |
+| :--- | :--- | :--- |
+| `Space` / `Tab (Hold)` | **8-Directional Radial Pie Menu** | Instant gestural radial pie menu: East (Extrude), West (Inset), North (Bevel), South (Knife), NE (Push-Pull), NW (Loop Cut), SE (Sub-elements), SW (Workplane). |
+| `Shift + Space` | **2D CAD Sketcher Mode** | Toggle 2D parametric constraint sketcher on the active 3D construction workplane. |
+| `L` *(Sketcher)* | **Draft Line** | Place parametric 2D line segments with endpoint snapping. |
+| `R` *(Sketcher)* | **Draft Rectangle** | Place 2D parametric rectangle from corner to corner. |
+| `C` *(Sketcher)* | **Draft Circle** | Place 2D parametric circle with radius constraint. |
+| `A` *(Sketcher)* | **Draft Arc** | Place 3-point tangent constraint arc. |
+| `D` *(Sketcher)* | **Dimension Callout** | Add horizontal, vertical, or aligned linear dimension constraint. |
+| `Alt + W` | **Align Workplane** | Align 3D construction workplane to active face or selection normal. |
+| `Alt + X` | **Symmetrize Workplane**| Symmetrize active geometry across the CAD workplane. |
+| `Inspector > Assembly` | **CAD Assemblies** | Multi-body kinematic mates (Revolute, Prismatic, Concentric), SAT 3D clash detection, exploded views. |
+| `Inspector > Drafting` | **Technical 2D Drawings** | ANSI/ISO 2D multi-view drawing sheets, vector Hidden Line Removal (HLR), ASME Y14.5 GD&T, DXF & SVG export. |
+| `Inspector > Sheet Metal` | **Sheet Metal & CNC** | DIN 6935 K-factor bend physics, parametric flanges, 1-click CNC flat pattern unfolding (`OUTER_CUT`, `BEND_UP`, `BEND_DOWN`). |
+| `Inspector > Diagnostics` | **Class-A Diagnostics** | Dynamic Zebra reflection striping, Gaussian & Mean curvature heatmaps, porcupine curvature combs. |

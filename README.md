@@ -9,7 +9,7 @@
 [![CI/CD Build & Test](https://github.com/The-No-Hands-company/Plumb-3D/actions/workflows/ci.yml/badge.svg)](https://github.com/The-No-Hands-company/Plumb-3D/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Pure Safe Rust](https://img.shields.io/badge/Rust-100%25%20Safe-brightgreen.svg)](#architectural-compliance--quality-standards)
-[![Tests Passing](https://img.shields.io/badge/Tests-330%20Passed-success.svg)](#architectural-compliance--quality-standards)
+[![Tests Passing](https://img.shields.io/badge/Tests-428%20Passed-success.svg)](#architectural-compliance--quality-standards)
 [![Zero Clippy Warnings](https://img.shields.io/badge/Clippy-0%20Warnings-success.svg)](#architectural-compliance--quality-standards)
 
 </div>
@@ -37,9 +37,9 @@ Inspired by the precision modeling workflows of **Plasticity**, the topological 
 
 ---
 
-## Key Highlights & Subsystem Architecture (18 Hardened Domains)
+## Key Highlights & Subsystem Architecture (23 Hardened Domains)
 
-Plumb 3D is hardened across **18 systematic subsystems** with full unit test coverage and production UI integration:
+Plumb 3D is hardened across **23 systematic subsystems** with full unit test coverage and production UI integration:
 
 ### 1. Mesh Primitives & Parametric Generators
 - 10 Parametric Primitives: Cube, Cylinder, Cone, UV Sphere, IcoSphere, Torus, Planar Grid, Pyramid, Capsule, and the mascot Plumb Bob.
@@ -149,6 +149,37 @@ Plumb 3D is hardened across **18 systematic subsystems** with full unit test cov
 - **CAM 3D Print Quality Inspector**: Watertightness validation, overhang angle detection, layer slicing preview, and G-code export.
 - **Live Collaboration Session**: Multi-client scene node synchronization (Figma for 3D).
 
+### 19. Precision B-Rep, Trimmed NURBS & SSI
+- **Analytic Trimmed NURBS Surface Patches**: Parametric surfaces bounded by 2D trimming curves in UV space ($[0,1] \times [0,1]$).
+- **Surface-Surface Intersection (SSI)**: Robust marching solver calculating transverse intersection curves between intersecting NURBS sheets.
+- **STEP (ISO 10303-21) Solid B-Rep Importer**: Full parsing and boundary representation reconstruction from industry-standard STEP AP203/AP214 files.
+- **8-Directional Radial Pie Menu (`Space` / `Tab`)**: Ultra-fast gestural modeling shortcuts for extrude, inset, bevel, knife, and loop cut.
+
+### 20. Class-A Surface Diagnostics & Universal CAD Interop
+- **Dynamic Zebra Reflection Striping**: Screen-space normal reflection striping with adjustable stripe frequency and rotation angle for $G^1$ tangency and $G^2$ curvature inspection.
+- **Screen-Space Curvature Heatmaps**: Real-time Gaussian curvature ($K = \kappa_1 \kappa_2$) and Mean curvature ($H = \frac{\kappa_1 + \kappa_2}{2}$) colormaps (Turbo, Cool-to-Warm, Jet).
+- **$G^0 / G^1 / G^2$ Seam Continuity Diagnostics**: Automated boundary inspection detecting positional gaps, angular tangency kinks, and curvature radius jumps.
+- **Porcupine Curvature Combs**: Needle vectors along 3D curves indicating curvature radius and inflection points.
+- **ANSI/USAF IGES 5.3 Solid Interop**: Native import and export for Entity 128 (B-Spline Surface), Entity 126 (B-Spline Curve), and Entity 110 (Line).
+
+### 21. Advanced B-Rep Solids & Boundary Patch Filling
+- **Variable-Radius Rolling-Ball & Chordal Fillet Engine**: True rolling-ball fillet blending along 3D edge rails smoothly tapering from radius $r_1 \to r_2$ with circular $G^1$ and curvature-continuous $G^2$ transitions.
+- **$N$-Sided Trim Patch Filler (Coons & Gordon Networks)**: Fills arbitrary 3-sided, 5-sided, or $N$-sided holes with watertight patches maintaining tangent matching with adjacent surfaces.
+- **CAD Solid Shell & Uniform Thicken Operator**: Hollows solid bodies leaving uniform wall thickness, thickens open surface sheets, and miters sharp corners.
+
+### 22. Multi-Body CAD Assemblies & Kinematics
+- **Kinematic Mate Connectors**: Precise local coordinate frames with Origin, Up, and Normal alignment.
+- **7 Kinematic Joint Types**: Coincident, Concentric, Revolute (hinge), Prismatic (slider), Cylindrical, Gear, and Fixed with `Aligned` vs `AntiAligned` flips.
+- **Separating Axis Theorem (SAT) 3D Clash Detection**: Fast AABB broadphase + exact triangle-triangle SAT narrowphase computing intersection volumes and penetration depth.
+- **Exploded View Sequencer**: Interactive progress scrubber ($t \in [0.0, 1.0]$) and procedural 3D dashed trail lines.
+
+### 23. Technical 2D Engineering Drawings & Sheet Metal Flat-Pattern
+- **First & Third Angle Orthographic Projection**: Front, Top, Right, Left, Bottom, Rear, and Isometric ($30^\circ/30^\circ$) projections.
+- **Analytical Vector Hidden Line Removal (HLR)**: Rigorous edge-surface occlusion solver classifying solid visible lines, dashed hidden lines, and silhouette outlines.
+- **ASME Y14.5 GD&T Callouts**: Feature Control Frames (Position, Flatness, Perpendicularity, Runout) with MMC/LMC modifiers, linear witness dimensions, and center marks.
+- **Standard Drawing Sheet Exporters**: ISO A4–A0 and ANSI A–E sheets with formal title blocks, exporting to AutoCAD DXF and styled vector SVG.
+- **Sheet Metal & CNC Flat Pattern Unfolder**: DIN 6935 K-factor bend deduction engine, parametric base & edge flanges, and 1-click flat pattern unfolding exporting to multi-layer DXF (`OUTER_CUT`, `BEND_UP`, `BEND_DOWN`) and SVG.
+
 ---
 
 ## Workspace Architecture
@@ -172,7 +203,7 @@ The codebase is organized into 7 decoupled, pure-Rust crates under `crates/`:
 - **100% Pure Safe Rust**: Zero `unsafe` code blocks across the entire codebase (`zero unsafe` policy).
 - **Zajfan Engineering Standard**: Every single `.rs` file strictly adheres to the $\le 630$ line ceiling. Monolithic files are broken into clean, cohesive submodules.
 - **Zero Warnings**: Compiles completely clean under `cargo clippy --workspace -- -D warnings`.
-- **Comprehensive Verification**: **281 passing unit and integration tests** verifying geometry invariants, CAD precision, path tracing, and scene graph evaluation.
+- **Comprehensive Verification**: **428+ passing unit and integration tests** verifying geometry invariants, CAD precision, path tracing, and scene graph evaluation.
 - **Clean Typography**: 100% 7-bit ASCII typography throughout the entire UI subsystem, preventing font fallback tofu glyphs.
 
 ---
@@ -213,6 +244,7 @@ cargo run -p app --release
 | | `Numpad 5` | Toggle Perspective / Orthographic |
 | | `Numpad 0` | Toggle Active Camera View / Free Orbit |
 | **Selection & Mode** | `Tab` | Toggle Object Mode / Edit Mode |
+| | `Space` / `Tab (Hold)` | 8-Directional Gestural Radial Pie Menu |
 | | `1 / 2 / 3` | Vertex / Edge / Face selection levels |
 | | `Shift + LMB` | Multi-select toggle |
 | | `B` | Marquee box select |
@@ -237,6 +269,10 @@ cargo run -p app --release
 | | `J` / `V` | Connect vertices across face / Rip vertex |
 | | `Alt + M` | Merge vertices at center |
 | | `Delete` / `X` | Delete selected elements |
+| **CAD & Engineering** | `Shift + Space` | 2D CAD Constraint Sketcher mode |
+| | `Inspector > Assembly` | Multi-Body Mates, SAT Clash Check & Exploded View |
+| | `Inspector > Drafting` | ANSI/ISO 2D Drawing Sheets, Vector HLR & GD&T |
+| | `Inspector > Sheet Metal` | DIN 6935 K-Factor Flanges & 1-Click Flat-Pattern Unfolding |
 | **Windows & Studio** | `F1` | In-Software User Manual & Tutorials Hub |
 | | `F2` | Welcome & Quick-Start Project Hub |
 | | `F3` / `Ctrl + K` | Omnipresent Command Palette search |
@@ -250,17 +286,29 @@ cargo run -p app --release
 
 Plumb 3D enforces a strict separation of concerns across major product generations. **Version 1.x is strictly The Modeler**, maintaining laser focus on pure modeling speed, CAD precision, and rock-solid geometry:
 
-- **v1.0.0 (Frozen Commercial Release)**: Pure safe-Rust Polygonal & CAD Modeler foundation. 2-manifold BMesh kernel, non-destructive 16-modifier stack, G2 CAD splines with STEP export, UV unwrapping, native `.plmb` container, 5 semantic design-token themes, arbitrary docking (`egui_dock`), and 3 in-viewport interactive walkthroughs.
-- **v1.1.0 (Upcoming)**: *Precision CAD & Curve Drafting* — 2D constraint sketcher on workplanes, live parametric dimension callouts, and multi-rail curve lofts.
-- **v1.2.0**: *Universal Interop & Production Shading* — Native glTF 2.0 / GLB container export & import with PBR materials, and micro-chamfer normal perturbation shader.
-- **v1.3.0**: *High-Speed Direct Modeling UX* — Coplanar face-split polygon inscription and modal bi-directional push-pull carving (boss/cavity).
-- **v1.4.0**: *Field-Aligned Quad Retopology & Pixar SubD Limit Math* — Curvature field tensor alignment, OpenSubdiv fractional semi-sharp creases ($w \in [0.0, 10.0]$), and closed-form Catmull-Clark limit surface stencils.
-- **v1.7.0**: *Advanced B-Rep Operations & Class-A Surface Solids* — Variable-radius rolling-ball & chordal fillet engine, N-sided Coons boundary patch filler with G1 Hermite boundary matching, and CAD solid shell hollowing and uniform thicken operator with corner mitering.
-- **v1.6.0**: *Class-A Surface Diagnostics & Universal CAD Interop* — Dynamic Zebra reflection striping, real-time screen-space Gaussian & Mean curvature heatmaps, G0/G1/G2 surface continuity seam analysis, porcupine curvature combs, and ANSI/USAF IGES 5.3 CAD solid B-Rep importer and exporter.
-- **v1.5.0**: *Precision B-Rep & Cognitive Velocity* — Analytic Trimmed NURBS surface patches, Surface-Surface Intersection (SSI) engine, STEP CAD solid importer, and 8-direction modal gesture Radial Pie Menu.
+### Completed Releases (v1.0.0 – v1.10.0)
+- **v1.0.0 (Commercial Hardened Foundation)**: 2-manifold BMesh Half-Edge kernel, 16-modifier stack, G2 CAD splines, STEP export, UV unwrapping, native `.plmb` container, 5 semantic design-token themes, arbitrary docking (`egui_dock`), and 3 interactive walkthroughs.
+- **v1.1.0 (Precision CAD & Curve Drafting)**: 2D constraint sketcher on workplanes, live dimension callouts, and multi-rail curve lofts.
+- **v1.2.0 (Universal Interop & Production Shading)**: Native glTF 2.0 / GLB container export & import with PBR materials, and micro-chamfer normal perturbation shader.
+- **v1.3.0 (High-Speed Direct Modeling UX)**: Coplanar face-split polygon inscription and modal bi-directional push-pull carving (boss/cavity).
+- **v1.4.0 (Field-Aligned Quad Retopology & Pixar SubD Limit Math)**: 4-RoSy cross-field curvature tensor alignment, OpenSubdiv fractional semi-sharp creases ($w \in [0.0, 10.0]$), and closed-form Catmull-Clark limit surface stencils.
+- **v1.5.0 (Precision B-Rep & Cognitive Velocity)**: Analytic Trimmed NURBS surface patches, Surface-Surface Intersection (SSI) engine, STEP CAD solid importer, and 8-direction modal gesture Radial Pie Menu.
+- **v1.6.0 (Class-A Surface Diagnostics & Universal CAD Interop)**: Dynamic Zebra reflection striping, real-time screen-space Gaussian & Mean curvature heatmaps, G0/G1/G2 surface continuity seam analysis, porcupine curvature combs, and ANSI/USAF IGES 5.3 CAD solid B-Rep importer and exporter.
+- **v1.7.0 (Advanced B-Rep Operations & Class-A Surface Solids)**: Variable-radius rolling-ball & chordal fillet engine, N-sided Coons boundary patch filler with G1 Hermite boundary matching, and CAD solid shell hollowing and uniform thicken operator with corner mitering.
+- **v1.8.0 (Multi-Body CAD Assemblies & Kinematics)**: MateConnector coordinate frames, 7 kinematic joint types (Revolute, Prismatic, Concentric, etc.), SAT 3D interference clash detection with penetration depth, and exploded view sequencer with 3D dashed trail lines.
+- **v1.9.0 (Technical 2D Engineering Drawings, Vector HLR & GD&T)**: First & Third Angle orthographic projections, analytical vector Hidden Line Removal (HLR), ASME Y14.5 GD&T feature control frames, ISO A4–A0 & ANSI A–E sheets, and vector SVG & AutoCAD DXF exporters.
+- **v1.10.0 (Sheet Metal Engine & Flat-Pattern Unfolding)**: DIN 6935 K-factor bend physics, parametric base & edge flanges, 1-click flat pattern unfolding, and multi-layer CNC DXF (`OUTER_CUT`, `BEND_UP`, `BEND_DOWN`) + SVG exports.
 
-### Long-Term Generational Roadmap
-- **Plumb 3D v2.0: The Animator** — Armature skeletal hierarchies, 2-Bone/CCD IK solvers, weight painting, NLA clip mixing, dope sheet, and direct MP4/H.264 video container export.
+### Target Releases to 100% CAD Modeler Completeness (v1.11.0 – v1.16.0)
+- **v1.11.0**: *Mechanical Part Generators & Fastener Library* — ANSI/ISO Bolts, Screws, Nuts, Washers, Metric Threads, Involute Gears (Spur/Bevel/Helical), Spline Shafts, and Roller Chain Sprockets.
+- **v1.12.0**: *Finite Element Analysis (FEA) Structural Simulation* — Linear elasticity solver, Von Mises stress tensor heatmaps, displacement vector deformation overlays, and Factor of Safety (FoS) analysis.
+- **v1.13.0**: *CAM & CNC G-Code Toolpath Generator* — Facing, 2.5D adaptive clearing roughing, ball-end surfacing, lead-in/lead-out arcs, and RS-274 standard G-Code export.
+- **v1.14.0**: *Parametric Design Tables & Global Expression Variables* — Mathematical expression parser for dimensions (`Width * 0.5 + 2.0`) and CSV/TSV configuration tables for part families.
+- **v1.15.0**: *Generative Design & Topology Optimization* — SIMP material penalization method, compliance minimization under volume constraints, and organic load-path lattice generation.
+- **v1.16.0**: *100% CAD Modeler Feature Completeness & Final Polish* — Comprehensive CAD interop certification, multi-body kinematics verification, and performance benchmarks.
+
+### Long-Term Generational Roadmap (v2.0+)
+- **Plumb 3D v2.0: The Animator & DCC Suite** — Digital Clay Sculpting Engine, Armature skeletal hierarchies, 2-Bone/CCD IK solvers, weight painting, NLA clip mixing, dope sheet, and direct MP4/H.264 video container export.
 - **Plumb 3D v3.0: The Renderer** — Full procedural material shading DAG node network (OpenPBR standard) and hardware GPU ray tracing pipeline (Vulkan RT / DXR).
 - **Plumb 3D v4.0: The Simulator** — XPBD cloth & soft-body tearing, rigid-body fracturing, and FLIP liquid solvers.
 - **Plumb 3D v5.0: The Studio Suite** — Pixar OpenUSD Stage referencing, Alembic point cache streaming, and multi-user collaborative networking.

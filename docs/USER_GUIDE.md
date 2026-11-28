@@ -22,6 +22,11 @@ Welcome to the **Plumb 3D User Guide**! This comprehensive manual walks you thro
 15. [Multi-Engine Scripting (Rhai, Python, Lua)](#15-multi-engine-scripting-rhai-python-lua)
 16. [Production Path Tracer & Hardware RT](#16-production-path-tracer--hardware-rt)
 17. [CAM 3D Print Quality Inspector & Slicing](#17-cam-3d-print-quality-inspector--slicing)
+18. [Class-A Surface Diagnostics & Curvature Analysis](#18-class-a-surface-diagnostics--curvature-analysis)
+19. [Multi-Body CAD Assemblies & Kinematics](#19-multi-body-cad-assemblies--kinematics)
+20. [Technical 2D Engineering Drawings & GD&T](#20-technical-2d-engineering-drawings--gdt)
+21. [Sheet Metal Design & CNC Flat-Pattern Unfolding](#21-sheet-metal-design--cnc-flat-pattern-unfolding)
+22. [Gestural Modeling & 8-Directional Radial Pie Menu](#22-gestural-modeling--8-directional-radial-pie-menu)
 
 ---
 
@@ -253,3 +258,109 @@ Open via **Render -> 3D Print Quality Inspector**:
 - **Overhang Angle Heatmap**: Highlights faces exceeding support thresholds ($>45^\circ$).
 - **Volume & Weight Estimation**: Real-time calculations of enclosed volume ($\text{cm}^3$) and PLA filament weight.
 - **CAM Layer Slicing & G-code Export**: Computes horizontal layer contours, infill paths, and exports standard G-code for 3D printers.
+
+---
+
+## 18. Class-A Surface Diagnostics & Curvature Analysis
+
+Accessed via the **CAD Precision & Diagnostics** inspector or Shading menu:
+
+- **Dynamic Zebra Reflection Striping**: Simulates parallel fluorescent lighting tubes reflected across surfaces.
+  - Aligned, unbroken stripes indicate **$G^1$ Tangency**.
+  - Smoothly curving, non-kinked stripes verify **$G^2$ Curvature Continuity**.
+  - Adjustable stripe frequency, angle, and high-contrast black/white or chrome palettes.
+- **Screen-Space Curvature Heatmaps**:
+  - **Gaussian Curvature ($K = \kappa_1 \kappa_2$)**: Distinguishes synclastic dome regions ($K > 0$), anticlastic saddle/hyperbolic regions ($K < 0$), and developable flat/cylindrical surfaces ($K = 0$).
+  - **Mean Curvature ($H = \frac{\kappa_1 + \kappa_2}{2}$)**: Visualizes overall surface tension and minimal surface properties.
+  - Colormaps: Turbo, Cool-to-Warm, Jet, and Grayscale with numeric min/max bounds.
+- **$G^0 / G^1 / G^2$ Seam Continuity Diagnostics**:
+  - Automatically iterates boundary edges between adjacent surface sheets to detect positional gaps ($G^0$), dihedral angle kinks ($G^1$), and radius discontinuities ($G^2$).
+- **Porcupine Curvature Combs**:
+  - Renders 3D needle vectors along curve rails showing local curvature magnitude and inflection points where curvature crosses zero.
+
+---
+
+## 19. Multi-Body CAD Assemblies & Kinematics
+
+Accessed via the **Assembly** tab in the Inspector:
+
+- **MateConnectors**:
+  - Local coordinate reference frames placed on vertices, edges, face centers, or cylinder axes with explicit Origin, Up, and Normal vectors.
+- **7 Kinematic Joint Types**:
+  - **Coincident**: Locks translational separation between planar faces.
+  - **Concentric**: Aligns central cylindrical axes (pins, shafts, bushings).
+  - **Revolute**: Single rotational degree of freedom (hinge, pivot).
+  - **Prismatic**: Single linear sliding degree of freedom along an axis.
+  - **Cylindrical**: Combined rotation and sliding along a shared cylinder axis.
+  - **Gear**: Coupled rotational ratio ($N_1 : N_2$) between gear bodies.
+  - **Fixed**: Rigidly locks all 6 degrees of freedom.
+  - **Alignment Flips**: Toggle between `Aligned` and `AntiAligned` orientations.
+- **Separating Axis Theorem (SAT) 3D Clash Detection**:
+  - AABB broadphase bounding volume filtering for instant rejection of non-overlapping bodies.
+  - Narrowphase exact triangle-triangle SAT intersection detecting spatial interferences.
+  - Computes penetration depth and categorizes contacts into hard **Interference** clashes vs safe **Clearance** margins.
+- **Exploded View Sequencer**:
+  - Multi-step assembly explosion sequencing with interactive scrub slider ($0.0 \to 1.0$).
+  - Procedural 3D dashed trail lines linking exploded components back to their assembled positions.
+
+---
+
+## 20. Technical 2D Engineering Drawings & GD&T
+
+Accessed via the **Drafting** tab in the Inspector:
+
+- **Orthographic Multi-View Projection Engine**:
+  - Supports **First-Angle (ISO)** and **Third-Angle (ANSI)** projection standards.
+  - Automatically generates 4 standard orthographic views: Front, Top, Right, and Isometric ($30^\circ/30^\circ$).
+- **Analytical Vector Hidden Line Removal (HLR)**:
+  - Raycasts and surface occlusion tests classify every model edge:
+    - `VisibleSolid`: Unobstructed foreground edges (rendered in solid black).
+    - `HiddenDashed`: Occluded internal edges (rendered in dashed lines).
+    - `SilhouetteOutline`: Exterior boundary profile silhouettes.
+- **ASME Y14.5 Geometric Dimensioning & Tolerancing (GD&T)**:
+  - Feature Control Frames: Position, Flatness, Perpendicularity, Concentricity, and Runout.
+  - Material condition symbols: Maximum Material Condition (MMC - $\textcircled{\text{M}}$), Least Material Condition (LMC - $\textcircled{\text{L}}$), and Regardless of Feature Size (RFS).
+  - Parametric witness dimension lines, diametral callouts ($\varnothing$), and center marks.
+- **Standard Drawing Sheet Templates & Vector Export**:
+  - ISO standards: A4, A3, A2, A1, A0.
+  - ANSI standards: A (Letter), B (Tabloid), C, D, E.
+  - Formal title blocks with Part Name, Material, Scale, Date, and Engineering approval.
+  - 1-click export to **AutoCAD DXF** and high-resolution **Vector SVG**.
+
+---
+
+## 21. Sheet Metal Design & CNC Flat-Pattern Unfolding
+
+Accessed via the **Sheet Metal** tab in the Inspector:
+
+- **DIN 6935 K-Factor Bend Physics**:
+  - Accurate neutral axis mechanics accounting for sheet metal stretching and compression during press-brake air bending.
+  - Calculates Bend Allowance ($\text{BA}$), Outside Setback ($\text{OSSB}$), and Bend Deduction ($\text{BD}$).
+  - Standard material presets: Mild Steel ($K=0.44$), Aluminum ($K=0.40$), and Stainless Steel ($K=0.50$).
+  - Built-in corner relief notches: Rectangular, Tear (slit), and Round.
+- **Base Flange & Edge Flange Builders**:
+  - **Base Flange**: Creates planar solid sheet metal blanks with uniform thickness.
+  - **Edge Flange**: Bends selected boundary edges upward or downward at specified angles (e.g. $90^\circ$, $45^\circ$) with true concentric cylindrical bend transitions and straight flange extensions.
+- **1-Click CNC Flat-Pattern Unfolding**:
+  - Flattens 3D folded brackets into 2D cut patterns using neutral axis compensation.
+  - Extracts outer cutting perimeter and press-brake bend centerlines with angle, direction (`BEND UP` / `BEND DOWN`), and allowance callouts.
+  - **Multi-Layer AutoCAD DXF Exporter**: Generates industry-standard CAD layers (`OUTER_CUT` for laser/waterjet, `BEND_UP` and `BEND_DOWN` for press brake CNC).
+  - **SVG Exporter**: Vector drawing with color-coded bend dashed lines.
+
+---
+
+## 22. Gestural Modeling & 8-Directional Radial Pie Menu
+
+- **Radial Pie Menu (`Space` or Hold `Tab`)**:
+  - Instant circular menu centered at the mouse cursor. Flicking the mouse in one of the 8 cardinal directions triggers modeling operators with muscle memory speed:
+    - **East ($0^\circ$)**: Extrude Region (`E`)
+    - **North-East ($45^\circ$)**: Direct Push-Pull (`Shift+E`)
+    - **North ($90^\circ$)**: Bevel Edge / Chamfer (`Ctrl+B`)
+    - **North-West ($135^\circ$)**: Loop Cut and Slide (`Ctrl+R`)
+    - **West ($180^\circ$)**: Inset Face (`I`)
+    - **South-West ($225^\circ$)**: Align CAD Workplane (`Alt+W`)
+    - **South ($270^\circ$)**: Interactive Knife Bisect (`K`)
+    - **South-East ($315^\circ$)**: Cycle Sub-element level (Vertex $\to$ Edge $\to$ Face)
+- **CAD Workplane Snapping (`Alt+W`)**:
+  - Instantly aligns an infinite planar construction grid to any selected face or normal vector.
+  - Symmetrize geometry across the active workplane using `Alt+X`.

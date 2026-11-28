@@ -4,6 +4,116 @@ All notable changes to the Plumb 3D DCC Suite are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-11-28 - Sheet Metal Engine & Flat-Pattern Unfolding (K-Factor CNC Manufacturing)
+
+### Added
+- **DIN 6935 K-Factor & Neutral Axis Analytical Mechanics**:
+  - Exact neutral axis shift $y = K \cdot T$, Bend Allowance ($\text{BA} = \theta \cdot \frac{\pi}{180}(R + KT)$), Outside Setback ($\text{OSSB} = (R+T)\tan(\frac{\theta}{2})$), and Bend Deduction ($\text{BD} = 2 \cdot \text{OSSB} - \text{BA}$).
+  - Built-in material presets for Mild Steel ($K=0.44$), Aluminum ($K=0.40$), and Stainless/High-Strength Steel ($K=0.50$).
+  - Corner relief notch configurations: Rectangular, Tear (slit), and Round.
+- **Parametric Sheet Metal Builder**:
+  - `SheetMetalBuilder::create_base_flange`: constructs uniform thickness solid plates with topological quads.
+  - `SheetMetalBuilder::add_edge_flange`: generates smooth cylindrical arc bends with inner and outer concentric radius tessellation, followed by angled planar flange extensions.
+- **1-Click Flat-Pattern Unfolding Engine**:
+  - Unfolds 3D sheet metal brackets into 2D cut blanks compensated by neutral-axis elongation.
+  - Extracts outer cutting boundary polygon + bend centerlines with angle, direction (`Up` vs `Down`), radius, and allowance metadata.
+  - **AutoCAD DXF Exporter**: multi-layer DXF with `OUTER_CUT`, `BEND_UP`, and `BEND_DOWN`.
+  - **SVG Exporter**: styled vector graphic with color-coded dashed bend lines and callout badges.
+- **Interactive UI & Commands**:
+  - Dedicated `SheetMetal` Inspector tab and Command Palette shortcuts.
+  - `CreateBaseFlangeCommand`, `AddEdgeFlangeCommand`, and `UnfoldSheetMetalCommand` with full undo/redo.
+
+## [1.9.0] - 2026-11-28 - Technical 2D Engineering Drawings, Hidden Line Removal (HLR) & GD&T
+
+### Added
+- **First-Angle (ISO) & Third-Angle (ANSI) Orthographic Projections**:
+  - Analytical camera view projections for Front, Top, Right, Left, Bottom, Rear, and Isometric ($30^\circ / 30^\circ$) views.
+- **Analytical Hidden Line Removal (HLR) Vector Engine**:
+  - Rigorous face-edge occlusion classification separating visible solid lines (`HlrLineStyle::VisibleSolid`) from hidden dashed lines (`HlrLineStyle::HiddenDashed`) and silhouette outlines (`HlrLineStyle::SilhouetteOutline`).
+- **ASME Y14.5 Geometric Dimensioning & Tolerancing (GD&T)**:
+  - Feature Control Frames supporting Position, Flatness, Perpendicularity, Concentricity, and Runout with Maximum/Least Material Condition callouts.
+  - Linear witness dimensions with arrowheads, diametral callouts, and center marks.
+- **Standard Drawing Sheet Exporter**:
+  - ISO A4–A0 and ANSI A–E standard sheets with formal ASME title blocks and automated 4-view generation.
+  - Production-ready vector SVG and AutoCAD DXF multi-view drawing sheet exporters.
+
+## [1.8.0] - 2026-11-28 - Multi-Body CAD Assemblies, Kinematic Mates & Interference Clash Detection
+
+### Added
+- **Multi-Body CAD Assembly Kinematics**:
+  - `MateConnector` coordinate frame attachments (Origin, Up, Normal).
+  - Kinematic mate types: Coincident, Concentric, Revolute, Prismatic, Cylindrical, Gear, and Fixed with alignment options (`Aligned` vs `AntiAligned`).
+  - Degree-of-Freedom (DOF) solver with interactive joint actuation.
+- **Separating Axis Theorem (SAT) 3D Interference Clash Detection**:
+  - AABB broadphase bounding volume acceleration + narrowphase 3D triangle-triangle SAT intersection.
+  - Penetration depth computation and clash categorization (`Interference` collision vs `Clearance` hazard).
+- **Interactive Exploded View Sequencer**:
+  - Exploded view sequencing with interactive progress scrubber ($t \in [0.0, 1.0]$) and 3D dashed trail line generation.
+
+## [1.7.0] - 2026-11-28 - Advanced B-Rep Operations & Class-A Surface Solids
+
+### Added
+- **Variable-Radius Rolling-Ball & Chordal Fillet Engine**:
+  - Edge rail filleting smoothly tapering from radius $r_1 \to r_2$ with $G^1$ circular rolling-ball and $G^2$ curvature-continuous blend surface transitions.
+- **N-Sided Trim Patch Filler (Coons & Gordon Surface Networks)**:
+  - Creates watertight patches over 3-sided, 5-sided, or $N$-sided curve boundaries with tangent matching.
+- **CAD Solid Shell Hollowing & Uniform Thicken Operator**:
+  - Shell hollowing with interior cavity offsetting, open surface sheet thickening, and mitered corner stitching.
+
+## [1.6.0] - 2026-11-28 - Class-A Surface Diagnostics & Universal CAD Interop
+
+### Added
+- **ANSI/USAF IGES 5.3 Solid B-Rep Interop**:
+  - Native IGES 5.3 importer and exporter supporting Entity 128 (Rational B-Spline Surfaces), Entity 126 (B-Spline Curves), and Entity 110 (Lines).
+- **Class-A Surface Diagnostics Suite**:
+  - Real-time dynamic Zebra reflection striping for surface tangency ($G^1$) and curvature ($G^2$) inspection.
+  - Real-time screen-space Gaussian & Mean curvature heatmaps.
+  - $G^0 / G^1 / G^2$ surface continuity seam analysis.
+  - Curvature needle combs (porcupine plots) displaying surface normal inflection and curvature spikes.
+
+## [1.5.0] - 2026-11-28 - Precision B-Rep & Cognitive Velocity
+
+### Added
+- **Analytic Trimmed NURBS Surface Engine**:
+  - Trimmed NURBS surface patches with 2D trimming curve boundary loops in UV parametric space ($[0,1] \times [0,1]$).
+  - Surface-Surface Intersection (SSI) engine computing transverse intersection curves between adjacent NURBS patches.
+- **STEP (ISO 10303-21) Solid B-Rep Importer**:
+  - Parses and reconstructs STEP manifold solid B-Rep face networks into native geometry.
+- **8-Directional Modal Gesture Radial Pie Menu**:
+  - Instant circular pie menu triggered via `Space` / `Tab` with directional flick gestures for Extrude, Inset, Bevel, Knife, Push-Pull, Loop Cut, and Sub-element selection.
+
+## [1.4.0] - 2026-11-28 - Field-Aligned Quad Retopology & Pixar OpenSubdiv Limit Math
+
+### Added
+- **4-RoSy Cross-Field Curvature Tensor Alignment**:
+  - Principal curvature estimation and field-guided quad remeshing aligning quad edges with underlying principal stress lines.
+- **Pixar OpenSubdiv Limit Math & Fractional Creasing**:
+  - Fractional semi-sharp creasing ($w \in [0.0, 10.0]$) with closed-form Catmull-Clark limit surface stencils.
+
+## [1.3.0] - 2026-11-28 - High-Speed Direct Modeling UX
+
+### Added
+- **Coplanar Face-Split Polygon Inscriber**:
+  - Inscribes quads, circles, and regular $N$-gons on planar faces with automatic edge splitting.
+- **Modal Bi-Directional Push-Pull Carving**:
+  - Dynamic boss extrusion and cavity subtraction with automatic boundary boolean stitching.
+
+## [1.2.0] - 2026-11-28 - Universal Interop & Production Shading
+
+### Added
+- **Native glTF 2.0 / GLB Container Import & Export**:
+  - Full binary glTF roundtrip with embedded PBR metallic-roughness materials and texture maps.
+- **Micro-Chamfer Normal Perturbation Shader**:
+  - Real-time procedural edge rounding shader providing synthetic fillets on hard edges without polygon count increases.
+
+## [1.1.0] - 2026-11-28 - Precision CAD & Curve Drafting
+
+### Added
+- **2D Parametric Constraint Sketcher**:
+  - Workplane drafting engine supporting Points, Lines, Circles, Arcs, and geometric constraints.
+  - Multi-rail curve lofting and skinning.
+  - Live dimension callouts and distance inspection overlays.
+
 ## [1.0.0] - 2026-11-28 - Plumb 3D Modeler v1.0.0: The Hardened Commercial Release
 
 ### Core Architecture & Release Scope
