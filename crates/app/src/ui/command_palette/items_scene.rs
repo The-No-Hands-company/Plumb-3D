@@ -270,6 +270,57 @@ pub const SCENE_COMMANDS: &[PaletteItem] = &[
         keywords: &["mean", "curvature", "heatmap", "diagnostics", "laplacian", "class-a"],
         action: PaletteAction::SetShading(ViewportShadingMode::MeanCurvature),
     },
+    // --- Advanced Retopology & Pixar SubD Limit ---
+    PaletteItem {
+        name: "Mesh: Field-Aligned Quad Remesh",
+        category: "Modeling",
+        shortcut: "Mesh > Remesh",
+        keywords: &[
+            "quad",
+            "remesh",
+            "retopology",
+            "field",
+            "curvature",
+            "zremesher",
+            "instant meshes",
+            "flow",
+        ],
+        action: PaletteAction::TriggerAction(|state, _| {
+            if let Some(sel_id) = state.selected_node {
+                let settings = geo_kernel::FieldRemeshSettings {
+                    target_edge_length: state.field_remesh_edge_len,
+                    curvature_influence: state.field_remesh_curvature_influence,
+                    smooth_passes: 4,
+                };
+                let cmd = Box::new(crate::commands::FieldRemeshCommand::new(sel_id, settings));
+                let _ = state.history.execute(cmd, &mut state.scene);
+                state.sync_gpu_meshes();
+                state.set_status_message("Mesh remeshed to field-aligned quads.");
+            }
+        }),
+    },
+    PaletteItem {
+        name: "Mesh: Evaluate SubD Limit Surface",
+        category: "Modeling",
+        shortcut: "Mesh > SubD",
+        keywords: &[
+            "subd",
+            "subdivision",
+            "limit",
+            "surface",
+            "pixar",
+            "opensubdiv",
+            "stencil",
+        ],
+        action: PaletteAction::TriggerAction(|state, _| {
+            if let Some(sel_id) = state.selected_node {
+                let cmd = Box::new(crate::commands::SubdLimitCommand::new(sel_id));
+                let _ = state.history.execute(cmd, &mut state.scene);
+                state.sync_gpu_meshes();
+                state.set_status_message("Mesh projected to exact Pixar SubD limit surface.");
+            }
+        }),
+    },
     PaletteItem {
         name: "Viewport Shading: Live Path Tracer",
         category: "Shading",

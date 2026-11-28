@@ -366,6 +366,72 @@ pub const MODELING_COMMANDS: &[PaletteItem] = &[
         }),
     },
     PaletteItem {
+        name: "B-Rep Rolling-Ball Fillet (G1/G2 Blend)",
+        category: "CAD",
+        shortcut: "Ctrl+Shift+B",
+        keywords: &["fillet", "rolling ball", "chordal", "brep", "blend", "bevel", "cad"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            if let Some(id) = state.selected_node {
+                let edges: Vec<_> = state.selected_edges.iter().copied().collect();
+                if !edges.is_empty() {
+                    let cmd = Box::new(crate::commands::RollingBallFilletCommand::new(
+                        id,
+                        edges,
+                        geo_kernel::RollingBallFilletSettings::default(),
+                    ));
+                    let _ = state.history.execute(cmd, &mut state.scene);
+                    state.sync_gpu_meshes();
+                    state.set_status_message("Applied Rolling-Ball B-Rep Fillet to edges");
+                }
+            }
+        }),
+    },
+    PaletteItem {
+        name: "N-Sided Coons Patch Surface Fill",
+        category: "CAD",
+        shortcut: "Shift+F",
+        keywords: &["coons", "patch", "n-sided", "fill", "surface", "gordon", "cad"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            if let Some(id) = state.selected_node {
+                let verts: Vec<_> = state.selected_vertices.iter().copied().collect();
+                if verts.len() >= 3 {
+                    let cmd = Box::new(crate::commands::PatchFillCoonsCommand::new(
+                        id,
+                        verts,
+                        2,
+                        geo_kernel::CoonsPatchType::BicubicHermite,
+                    ));
+                    let _ = state.history.execute(cmd, &mut state.scene);
+                    state.sync_gpu_meshes();
+                    state.set_status_message("Filled N-sided hole with Coons surface network");
+                }
+            }
+        }),
+    },
+    PaletteItem {
+        name: "Shell / Hollow Solid with Wall Thickness",
+        category: "CAD",
+        shortcut: "Alt+S",
+        keywords: &["shell", "hollow", "thicken", "wall thickness", "solid", "cad", "miter"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            if let Some(id) = state.selected_node {
+                let faces: Vec<_> = state.selected_faces.iter().copied().collect();
+                let cmd = Box::new(crate::commands::ShellSolidCommand::new(
+                    id,
+                    geo_kernel::ShellSettings {
+                        thickness: 0.1,
+                        direction: geo_kernel::ShellDirection::Inward,
+                        open_faces: faces,
+                        miter_corners: true,
+                    },
+                ));
+                let _ = state.history.execute(cmd, &mut state.scene);
+                state.sync_gpu_meshes();
+                state.set_status_message("Shelled solid body with uniform wall thickness");
+            }
+        }),
+    },
+    PaletteItem {
         name: "Spawn CAD 3-Point Circular Arc",
         category: "Add",
         shortcut: "Add > Curve",
@@ -492,57 +558,6 @@ pub const MODELING_COMMANDS: &[PaletteItem] = &[
         ],
         action: PaletteAction::TriggerAction(|_, a| {
             a.export_gcode = true;
-        }),
-    },
-    // --- Advanced Retopology & Pixar SubD Limit ---
-    PaletteItem {
-        name: "Mesh: Field-Aligned Quad Remesh",
-        category: "Modeling",
-        shortcut: "Mesh > Remesh",
-        keywords: &[
-            "quad",
-            "remesh",
-            "retopology",
-            "field",
-            "curvature",
-            "zremesher",
-            "instant meshes",
-            "flow",
-        ],
-        action: PaletteAction::TriggerAction(|state, _| {
-            if let Some(sel_id) = state.selected_node {
-                let settings = geo_kernel::FieldRemeshSettings {
-                    target_edge_length: state.field_remesh_edge_len,
-                    curvature_influence: state.field_remesh_curvature_influence,
-                    smooth_passes: 4,
-                };
-                let cmd = Box::new(crate::commands::FieldRemeshCommand::new(sel_id, settings));
-                let _ = state.history.execute(cmd, &mut state.scene);
-                state.sync_gpu_meshes();
-                state.set_status_message("Mesh remeshed to field-aligned quads.");
-            }
-        }),
-    },
-    PaletteItem {
-        name: "Mesh: Evaluate SubD Limit Surface",
-        category: "Modeling",
-        shortcut: "Mesh > SubD",
-        keywords: &[
-            "subd",
-            "subdivision",
-            "limit",
-            "surface",
-            "pixar",
-            "opensubdiv",
-            "stencil",
-        ],
-        action: PaletteAction::TriggerAction(|state, _| {
-            if let Some(sel_id) = state.selected_node {
-                let cmd = Box::new(crate::commands::SubdLimitCommand::new(sel_id));
-                let _ = state.history.execute(cmd, &mut state.scene);
-                state.sync_gpu_meshes();
-                state.set_status_message("Mesh projected to exact Pixar SubD limit surface.");
-            }
         }),
     },
 ];

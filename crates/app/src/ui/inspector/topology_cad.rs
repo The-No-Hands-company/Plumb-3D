@@ -2,7 +2,10 @@
 //! Provides QuadriFlow 4-RoSy field-aligned auto-retopology,
 //! continuous bicubic SubD-to-NURBS STEP solid conversion, and manifold voxel remeshing.
 
-use crate::commands::{FieldRemeshCommand, SubdLimitCommand};
+use crate::commands::{
+    FieldRemeshCommand, PatchFillCoonsCommand, RollingBallFilletCommand, ShellSolidCommand,
+    SubdLimitCommand,
+};
 use crate::state::AppState;
 use crate::ui::actions::UiActions;
 use geo_kernel::{
@@ -266,7 +269,78 @@ pub fn draw_topology_cad_panel(
 
     ui.separator();
 
-    // 3. Voxel Remeshing & Decimation
+    // 3. Advanced B-Rep Operations: Rolling-Ball Fillet, Coons Patch & Solid Shell
+    ui.group(|ui| {
+        ui.horizontal(|ui| {
+            ui.label(egui::RichText::new("Advanced B-Rep & Surface Solids").strong());
+        });
+        ui.label(
+            egui::RichText::new(
+                "Rolling-ball / chordal fillets, N-sided Coons patches, and uniform shell hollowing.",
+            )
+            .small()
+            .weak(),
+        );
+
+        ui.horizontal(|ui| {
+            if ui.button("Rolling-Ball Fillet")
+                .on_hover_text("Applies G1/G2 rolling-ball blend along selected edges")
+                .clicked()
+            {
+                let sel_edges: Vec<_> = state.selected_edges.iter().copied().collect();
+                if !sel_edges.is_empty() {
+                    let settings = geo_kernel::RollingBallFilletSettings::default();
+                    let cmd = Box::new(RollingBallFilletCommand::new(sel_id, sel_edges, settings));
+                    let _ = state.history.execute(cmd, &mut state.scene);
+                    state.sync_gpu_meshes();
+                    state.set_status_message("Applied Rolling-Ball B-Rep Fillet to selected edges.");
+                } else {
+                    state.set_status_message("Select at least 1 edge to apply rolling-ball fillet.");
+                }
+            }
+
+            if ui.button("Coons Patch Fill")
+                .on_hover_text("Fills selected N-sided boundary loop with smooth bicubic Coons patch")
+                .clicked()
+            {
+                let sel_verts: Vec<_> = state.selected_vertices.iter().copied().collect();
+                if sel_verts.len() >= 3 {
+                    let cmd = Box::new(PatchFillCoonsCommand::new(
+                        sel_id,
+                        sel_verts,
+                        2,
+                        geo_kernel::CoonsPatchType::BicubicHermite,
+                    ));
+                    let _ = state.history.execute(cmd, &mut state.scene);
+                    state.sync_gpu_meshes();
+                    state.set_status_message("Filled N-sided hole with bicubic Coons surface network.");
+                } else {
+                    state.set_status_message("Select at least 3 boundary vertices to fill Coons patch.");
+                }
+            }
+
+            if ui.button("Shell Solid (0.1m)")
+                .on_hover_text("Hollows solid body or thickens surface with uniform mitered wall thickness")
+                .clicked()
+            {
+                let sel_faces: Vec<_> = state.selected_faces.iter().copied().collect();
+                let settings = geo_kernel::ShellSettings {
+                    thickness: 0.1,
+                    direction: geo_kernel::ShellDirection::Inward,
+                    open_faces: sel_faces,
+                    miter_corners: true,
+                };
+                let cmd = Box::new(ShellSolidCommand::new(sel_id, settings));
+                let _ = state.history.execute(cmd, &mut state.scene);
+                state.sync_gpu_meshes();
+                state.set_status_message("Shelled solid body with uniform wall thickness.");
+            }
+        });
+    });
+
+    ui.separator();
+
+    // 4. Voxel Remeshing & Decimation
     ui.group(|ui| {
         ui.horizontal(|ui| {
             ui.label(egui::RichText::new("Voxel Remesh & QEM Decimate").strong());

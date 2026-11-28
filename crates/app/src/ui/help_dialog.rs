@@ -423,7 +423,7 @@ fn draw_tab_about(ui: &mut egui::Ui) {
 
     ui.add_space(8.0);
     ui.label(egui::RichText::new("Engine Status:").strong());
-    ui.label("Plumb 3D Suite Version: 1.6.0 Class-A Surface Diagnostics & Universal CAD Interop");
+    ui.label("Plumb 3D Suite Version: 1.7.0 Advanced B-Rep Operations & Class-A Surface Solids");
     ui.label(
         "All 7 workspace crates verified with 354 passing unit tests and 0 compiler warnings.",
     );
