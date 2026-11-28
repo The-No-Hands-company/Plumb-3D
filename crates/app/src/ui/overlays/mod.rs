@@ -1,4 +1,5 @@
 pub mod camera_gate;
+pub mod cutter_overlay;
 pub mod hud;
 pub mod mesh_features;
 pub mod modals;
@@ -16,6 +17,7 @@ pub fn draw_overlays(state: &mut AppState) {
     crate::live_pathtracer::step_live_viewport_pathtracer(state);
     crate::live_pathtracer::render_live_pathtracer_overlay(state);
     camera_gate::render(state);
+    cutter_overlay::render(state);
     selection_overlay::render_selection_overlay(state);
     tools::render(state);
     modals::render(state);
