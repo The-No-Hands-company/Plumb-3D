@@ -35,6 +35,7 @@ pub mod quadriflow;
 pub mod raycast;
 pub mod sculpt;
 pub mod sculpt_dyntopo;
+pub mod sheet_metal;
 pub mod sketch;
 pub mod slicer;
 pub mod spline;
@@ -100,6 +101,10 @@ pub use quadriflow::{CrossField4RoSy, QuadriflowSettings};
 pub use raycast::RaycastHit;
 pub use sculpt::{BrushAlphaTexture, BrushFalloff, SculptBrush, SculptSettings};
 pub use sculpt_dyntopo::{DyntopoDetailMode, DyntopoMode, DyntopoSettings, DyntopoStats};
+pub use sheet_metal::{
+    BaseFlangeSettings, BendDirection, BendReliefType, EdgeFlangeSettings, FlatBendLine,
+    FlatPattern, SheetBend, SheetMetalBuilder, SheetMetalParams,
+};
 pub use sketch::{
     extract_dimension_callouts, extrude_sketch, revolve_sketch, sketch_to_splines, solve_sketch,
     ConstraintId, ConstraintType, DimensionCallout, DimensionType, Sketch, SketchArc, SketchCircle,

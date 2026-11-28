@@ -362,4 +362,25 @@ pub const SCENE_COMMANDS: &[PaletteItem] = &[
         keywords: &["beginner", "tutorial", "first time", "learning", "start"],
         action: PaletteAction::OpenHelp(1),
     },
+    // --- Sheet Metal & CNC Manufacturing ---
+    PaletteItem {
+        name: "Sheet Metal: DIN 6935 K-Factor Flanges",
+        category: "CAD",
+        shortcut: "Inspector > Sheet Metal",
+        keywords: &["sheet metal", "flange", "k-factor", "bend", "din 6935", "cad"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::SheetMetal;
+            state.set_status_message("Switched to Sheet Metal & CNC Manufacturing Inspector");
+        }),
+    },
+    PaletteItem {
+        name: "Sheet Metal: 1-Click Flat-Pattern Unfolding (DXF/SVG)",
+        category: "CAD",
+        shortcut: "Inspector > Sheet Metal",
+        keywords: &["unfold", "flat pattern", "cnc", "sheet metal", "dxf", "svg", "laser cut"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::SheetMetal;
+            state.set_status_message("Unfold Sheet Metal Flat Pattern for CNC fabrication");
+        }),
+    },
 ];

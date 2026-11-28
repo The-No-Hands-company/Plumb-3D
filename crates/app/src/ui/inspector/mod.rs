@@ -11,6 +11,7 @@ pub mod paint;
 mod physics;
 mod scene_nodes;
 pub mod sculpt;
+mod sheet_metal;
 mod topology_cad;
 mod transform;
 mod vertex_groups;
@@ -29,6 +30,7 @@ pub use paint::{draw_texture_paint_tools, draw_vertex_paint_tools};
 pub use physics::{draw_physics_panel, PhysicsSubTab};
 pub use scene_nodes::draw_scene_nodes_panel;
 pub use sculpt::draw_sculpt_tools;
+pub use sheet_metal::draw_sheet_metal_panel;
 pub use topology_cad::draw_topology_cad_panel;
 pub use transform::draw_transform_panel;
 pub use vertex_groups::draw_vertex_groups_panel;
@@ -168,6 +170,16 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                 state.inspector_tab = crate::types::InspectorTab::Drafting;
             }
 
+            if ui
+                .selectable_label(
+                    state.inspector_tab == crate::types::InspectorTab::SheetMetal,
+                    "Sheet Metal",
+                )
+                .clicked()
+            {
+                state.inspector_tab = crate::types::InspectorTab::SheetMetal;
+            }
+
             if state.current_workspace != WorkspaceTemplate::Animation {
                 let tool_label = match state.current_workspace {
                     WorkspaceTemplate::Sculpting => "Brushes",
@@ -290,6 +302,9 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                 crate::types::InspectorTab::Drafting => {
                     draw_drafting_panel(ui, state, actions, Some(sel_id));
                 }
+                crate::types::InspectorTab::SheetMetal => {
+                    draw_sheet_metal_panel(ui, state, actions, Some(sel_id));
+                }
             });
     } else if state.inspector_tab == crate::types::InspectorTab::Assembly {
         egui::ScrollArea::vertical()
@@ -302,6 +317,12 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
             .auto_shrink([false, false])
             .show(ui, |ui| {
                 draw_drafting_panel(ui, state, actions, None);
+            });
+    } else if state.inspector_tab == crate::types::InspectorTab::SheetMetal {
+        egui::ScrollArea::vertical()
+            .auto_shrink([false, false])
+            .show(ui, |ui| {
+                draw_sheet_metal_panel(ui, state, actions, None);
             });
     } else {
         ui.vertical_centered(|ui| {
