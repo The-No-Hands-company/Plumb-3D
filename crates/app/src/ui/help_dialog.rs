@@ -210,6 +210,27 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
         ui.add_space(4.0);
     }
 
+    if state.selected_tutorial == 1 {
+        ui.add_space(8.0);
+        ui.horizontal(|ui| {
+            if ui.button(
+                egui::RichText::new("🚀 Start Guided Tutorial (From Scratch)")
+                    .strong()
+                    .color(egui::Color32::from_rgb(226, 179, 87)),
+            ).clicked() {
+                crate::scenes::build_castle_tower_tutorial_blank(state);
+                state.show_help_dialog = false;
+            }
+            if ui.button(
+                egui::RichText::new("🏰 Load Completed Citadel Scene")
+                    .color(egui::Color32::from_rgb(130, 200, 255)),
+            ).clicked() {
+                crate::scenes::build_medieval_citadel_scene(state);
+                state.show_help_dialog = false;
+            }
+        });
+    }
+
     if state.selected_tutorial == 7 {
         ui.add_space(8.0);
         ui.horizontal(|ui| {

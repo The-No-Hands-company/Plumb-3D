@@ -45,6 +45,7 @@ pub enum ProjectTemplate {
     HardSurface,
     CadPrecision,
     Sculpting,
+    CastleTowerTutorial,
     CastleTower,
     LunarTutorialBlank,
     LunarNightSky,
@@ -176,7 +177,8 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                     (ProjectTemplate::HardSurface, "Hard-Surface Modeling", "Sub-d quad mesh, face mode, wireframe active"),
                     (ProjectTemplate::CadPrecision, "CAD Precision Drafting", "1mm grid snapping, calipers active, orthogonal camera"),
                     (ProjectTemplate::Sculpting, "Organic Sculpting", "Sculpting sphere, MatCap Clay, brush tools active"),
-                    (ProjectTemplate::CastleTower, "Medieval Castle Tower", "Architectural cylinder base with double inset & crenels"),
+                    (ProjectTemplate::CastleTowerTutorial, "🏰 Castle Tower: Guided Tutorial", "Build from scratch: Cylinder, Inset parapet, Extrude sunken walkway & crenels"),
+                    (ProjectTemplate::CastleTower, "🏰 Medieval Citadel: Finished Scene", "Multi-mesh fortress with keep, ramparts, watchtower & torchlights"),
                     (ProjectTemplate::LunarTutorialBlank, "🌕 Lunar Night Sky: Guided Tutorial", "Build from scratch: 128x128 UV Sphere, PBR regolith, sunlight & skybox"),
                     (ProjectTemplate::LunarNightSky, "🌕 Lunar Night Sky: Ready Showcase", "Finished astrophotography scene with ESO 360 Milky Way & camera setup"),
                 ];
@@ -343,6 +345,12 @@ pub fn apply_project_template(state: &mut AppState, template: ProjectTemplate) {
             state.show_wireframe = false;
             state.show_outliner = false;
             state.inspector_tab = InspectorTab::Tools;
+        }
+        ProjectTemplate::CastleTowerTutorial => {
+            apply_studio_domain(state, StudioDomain::HardSurfaceCad);
+            apply_workspace(state, WorkspaceTemplate::HardSurface);
+            crate::scenes::build_castle_tower_tutorial_blank(state);
+            return;
         }
         ProjectTemplate::CastleTower => {
             apply_studio_domain(state, StudioDomain::HardSurfaceCad);

@@ -5,6 +5,7 @@ use render_viewport::{CameraProjection, ViewportCamera, ViewportShadingMode};
 
 use crate::state::AppState;
 use crate::types::*;
+use crate::ui::overlays::walkthrough::WalkthroughState;
 
 /// Builds a fully realized Medieval Citadel & Fortress architectural scene graph and camera setup.
 pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
@@ -302,4 +303,36 @@ pub fn build_medieval_citadel_scene(state: &mut AppState) {
     state.production_render.post_process.filmic_tonemap = true;
 
     state.sync_gpu_meshes();
+}
+
+/// Initializes an empty scene canvas for the hands-on "Medieval Castle Tower" modeling tutorial from scratch.
+pub fn build_castle_tower_tutorial_blank(state: &mut AppState) {
+    state.scene = SceneGraph::new();
+    state.gpu_mesh_cache.clear();
+    state.object_colors.clear();
+    state.object_materials.clear();
+    state.selected_vertices.clear();
+    state.selected_edges.clear();
+    state.selected_faces.clear();
+    state.selected_node = None;
+    state.active_camera_node = None;
+
+    state.camera.target = vec3(0.0, 3.0, 0.0);
+    state.camera.distance = 11.0;
+    state.camera.pitch = 0.35;
+    state.camera.yaw = 0.45;
+    state.camera.fov_y = 45.0_f32.to_radians();
+
+    state.interaction_mode = InteractionMode::Object;
+    state.viewport_shading = ViewportShadingMode::Studio;
+    state.show_wireframe = true;
+    state.show_grid = true;
+    state.show_outliner = true;
+    state.show_inspector = true;
+    state.inspector_tab = InspectorTab::Modifiers;
+
+    state.walkthrough = WalkthroughState::castle_tower();
+    state.walkthrough.current_step = 0;
+    state.sync_gpu_meshes();
+    state.set_status_message("🏰 Castle Tower Tutorial started: Click Step 1 to spawn your cylinder base!");
 }

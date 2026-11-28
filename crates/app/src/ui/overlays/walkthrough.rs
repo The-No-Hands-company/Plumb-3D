@@ -1,6 +1,17 @@
 use crate::state::AppState;
 use core_math::{vec3, EulerRot, Quat, Transform};
 
+use super::walkthrough_actions::{render_castle_tower_step_buttons, render_lunar_step_buttons};
+
+/// Identifies which tutorial journey is currently loaded in the walkthrough overlay.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum WalkthroughId {
+    #[default]
+    None,
+    LunarNightSky,
+    CastleTower,
+}
+
 /// Single step definition in an interactive in-viewport walkthrough tutorial.
 #[derive(Debug, Clone)]
 pub struct WalkthroughStep {
@@ -14,6 +25,7 @@ pub struct WalkthroughStep {
 /// Runtime state managing the in-viewport interactive step-by-step tutorial overlay.
 #[derive(Debug, Clone, Default)]
 pub struct WalkthroughState {
+    pub id: WalkthroughId,
     pub is_active: bool,
     pub current_step: usize,
     pub title: String,
@@ -25,6 +37,7 @@ impl WalkthroughState {
     /// Factory constructor for the beginner "Lunar Night Sky & Full Moon" walkthrough.
     pub fn lunar_night_sky() -> Self {
         Self {
+            id: WalkthroughId::LunarNightSky,
             is_active: true,
             current_step: 0,
             title: "🌕 Tutorial: Lunar Night Sky & Astrophotography".to_string(),
@@ -71,6 +84,68 @@ impl WalkthroughState {
                     body: "Choose your rendering engine: Press 'F11' for an instant (<0.1s) zero-noise Direct PBR Snapshot with real-time Cook-Torrance shading, or press 'F12' for progressive Monte Carlo path tracing with ACES Filmic tonemapping and optical bloom!".to_string(),
                     hotkey: Some("F11 for Instant Snapshot | F12 for Path Tracer".to_string()),
                     tip: Some("Set Bloom Threshold to 1.35 and Intensity to 0.15 for a natural nocturnal optical glare.".to_string()),
+                },
+            ],
+        }
+    }
+
+    /// Factory constructor for the hands-on "Medieval Castle Tower" modeling walkthrough.
+    pub fn castle_tower() -> Self {
+        Self {
+            id: WalkthroughId::CastleTower,
+            is_active: true,
+            current_step: 0,
+            title: "🏰 Tutorial: Medieval Castle Tower".to_string(),
+            collapsed: false,
+            steps: vec![
+                WalkthroughStep {
+                    title: "Step 1: Cylinder Primitive Base".to_string(),
+                    subtitle: "Add -> Primitive -> Cylinder (Shift+A)".to_string(),
+                    body: "Architectural towers start from a clean cylindrical base. Spawn a Cylinder with Radius 2.0m, Height 6.0m, and 16 segments. 16 perimeter facets divide evenly into 8 defensive battlements and 8 crenel gaps.".to_string(),
+                    hotkey: Some("Add -> Primitive -> Cylinder (Radius 2m, Height 6m, 16 Segs)".to_string()),
+                    tip: Some("16 segments give clean quad topologies when insetting concentric roof walkways.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 2: Enter Edit Mode & Select Top Cap".to_string(),
+                    subtitle: "Press Tab -> Press '3' (Face Mode)".to_string(),
+                    body: "Switch from Object Mode to Edit Mode (Tab). Press '3' to activate Face selection level. Select the top circular cap of the cylinder to begin sculpting the tower summit.".to_string(),
+                    hotkey: Some("Tab (Edit Mode) | 3 (Face Selection) | LMB Select".to_string()),
+                    tip: Some("Notice the selected face highlights with a bright cyan outline in the viewport.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 3: Outer Parapet Wall Inset".to_string(),
+                    subtitle: "Press 'I' -> Inset 0.3m (Thickness)".to_string(),
+                    body: "Press 'I' to activate Inset. Move inward 0.3m to define the outer defensive stone parapet wall thickness. This leaves a 0.3m protective barrier around the perimeter while isolating the inner floor.".to_string(),
+                    hotkey: Some("I (Inset) -> Drag or Enter 0.3m".to_string()),
+                    tip: Some("Inset creates a concentric loop of 16 quads without distorting the outer wall silhouette.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 4: Sentry Walkway Boundary Inset".to_string(),
+                    subtitle: "Press 'I' -> Inset 0.8m (Walkway Width)".to_string(),
+                    body: "With the newly inset circular face still selected, press 'I' again and move inward 0.8m. This defines the wide sentry walkway loop and isolates the central elevated roof core.".to_string(),
+                    hotkey: Some("I (Inset) -> Drag or Enter 0.8m".to_string()),
+                    tip: Some("You now have two concentric rings: the outer parapet wall and the sentry walkway ring.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 5: Extrude Sunken Walkway Trench".to_string(),
+                    subtitle: "Select Walkway Loop -> Press 'E' -> -0.8m".to_string(),
+                    body: "Select the 16 walkway ring quads. Press 'E' to Extrude and move down -0.8m. This sinks the walkway trench down, shielding castle guards behind the solid stone parapet.".to_string(),
+                    hotkey: Some("E (Extrude) -> Move Down (-0.8m)".to_string()),
+                    tip: Some("Sunken walkways are historical Norman fortress architecture for archer protection.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 6: Defensive Crenellations (Merlons)".to_string(),
+                    subtitle: "Select Alternating Rim Faces -> Press 'E' -> +0.5m".to_string(),
+                    body: "Select alternating faces around the top outer rim wall (8 merlons). Press 'E' to extrude them upward by 0.5m. The gaps between allow archers to shoot while retaining stone cover!".to_string(),
+                    hotkey: Some("Shift+LMB Alternating Faces -> E (Extrude +0.5m)".to_string()),
+                    tip: Some("Plumb 3D maintains 2-manifold BMesh connectivity across all extruded perimeter blocks.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 7: Stone Material & Bevel Chamfers".to_string(),
+                    subtitle: "Modifiers -> + Bevel | Shading -> Granite PBR".to_string(),
+                    body: "Real stone masonry has beveled, weathered edges. In the Inspector Modifier Stack, click '+ Bevel' (0.05m). Assign Weathered Granite material and enable Viewport Cavity Shading!".to_string(),
+                    hotkey: Some("Inspector -> Modifiers -> + Bevel (0.05m)".to_string()),
+                    tip: Some("The non-destructive Bevel modifier automatically calculates corner miters across all crenels.".to_string()),
                 },
             ],
         }
@@ -148,133 +223,14 @@ pub fn render(state: &mut AppState) {
                     });
             }
 
-            // Interactive Action Buttons for specific steps
-            match current_step {
-                0 => {
-                    ui.add_space(6.0);
-                    let has_moon = state.scene.nodes.values().any(|n| n.name == "Moon_Body");
-                    let btn_text = if has_moon { "✓ Moon Sphere Ready (Refocus View)" } else { "➕ Spawn Moon UV Sphere (128x128)" };
-                    if ui.button(btn_text).clicked() {
-                        if !has_moon {
-                            let moon_mesh = geo_kernel::Primitives::create_uv_sphere(3.0, 128, 128);
-                            let moon_node = graph_engine::SceneNode::new_mesh("Moon_Body", Transform::IDENTITY, moon_mesh);
-                            let id = state.scene.add_node(moon_node);
-                            state.selected_node = Some(id);
-                            state.sync_gpu_meshes();
-                            state.set_status_message("🌕 Spawned Moon_Body UV Sphere (128x128 segments)");
-                        }
-                        focus_camera = true;
-                    }
+            // Interactive Action Buttons
+            match state.walkthrough.id {
+                WalkthroughId::CastleTower => {
+                    render_castle_tower_step_buttons(ui, state, current_step, &mut focus_camera);
                 }
-                1 => {
-                    ui.add_space(6.0);
-                    if ui.button("🎨 Assign NASA 2K Cartography & Regolith Maps").clicked() {
-                        let (albedo_path, normal_path) = crate::scenes::lunar_textures::ensure_lunar_textures_exist();
-                        let mut mat_regolith = graph_engine::Material::new(
-                            "LunarRegolith",
-                            [1.0, 1.0, 1.0, 1.0],
-                            0.0,
-                            0.88,
-                            0.0,
-                            0,
-                        );
-                        mat_regolith.albedo_texture_path = Some(albedo_path);
-                        mat_regolith.normal_texture_path = Some(normal_path);
-                        for (_id, node) in state.scene.nodes.iter_mut() {
-                            if node.name == "Moon_Body" {
-                                if let graph_engine::NodeData::Mesh { ref mut materials, .. } = node.data {
-                                    if materials.is_empty() {
-                                        materials.push(mat_regolith.clone());
-                                    } else {
-                                        materials[0] = mat_regolith.clone();
-                                    }
-                                }
-                            }
-                        }
-                        state.sync_gpu_meshes();
-                        state.set_status_message("🎨 Assigned 2K NASA Regolith PBR Material & Normal Relief!");
-                    }
+                _ => {
+                    render_lunar_step_buttons(ui, state, current_step, &mut set_full_moon, &mut set_crescent, &mut focus_camera);
                 }
-                2 => {
-                    ui.add_space(6.0);
-                    let has_sun = state.scene.nodes.values().any(|n| n.name == "Sun_KeyLight");
-                    if !has_sun {
-                        if ui.button("➕ Add Directional Sun & Earthshine Lights").clicked() {
-                            let sun = graph_engine::SceneNode::new_directional_light(
-                                "Sun_KeyLight",
-                                Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.2, 0.65, 0.0)),
-                                core_math::vec3(1.0, 0.98, 0.95),
-                                2.5,
-                            );
-                            state.scene.add_node(sun);
-                            let earthshine = graph_engine::SceneNode::new_directional_light(
-                                "Earthshine_Fill",
-                                Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, 0.1, -0.8, 0.0)),
-                                core_math::vec3(0.12, 0.18, 0.32),
-                                0.25,
-                            );
-                            state.scene.add_node(earthshine);
-                            state.set_status_message("☀️ Solar Key Light and Earthshine Fill added to scene!");
-                        }
-                    } else {
-                        ui.horizontal(|ui| {
-                            if ui.button("🌕 Full Moon Sunlight").clicked() {
-                                set_full_moon = true;
-                            }
-                            if ui.button("🌙 Crescent Moon Sunlight").clicked() {
-                                set_crescent = true;
-                            }
-                        });
-                    }
-                }
-                3 => {
-                    ui.add_space(6.0);
-                    if ui.button("🌌 Bind ESO 360 Deep Space Milky Way Skybox").clicked() {
-                        state.set_status_message("🌌 ESO 360 Deep Space Milky Way Panorama active in Skybox!");
-                    }
-                }
-                4 => {
-                    ui.add_space(6.0);
-                    if ui.button("📷 Setup Telephoto Astrophotography Camera").clicked() {
-                        let has_cam = state.scene.nodes.values().any(|n| n.name == "Astrophotography_Camera");
-                        if !has_cam {
-                            let cam_node = graph_engine::SceneNode::new_camera(
-                                "Astrophotography_Camera",
-                                Transform::from_translation(core_math::vec3(0.0, 0.0, 8.5)),
-                                40.0_f32.to_radians(),
-                                16.0 / 9.0,
-                            );
-                            let cam_id = state.scene.add_node(cam_node);
-                            state.active_camera_node = Some(cam_id);
-                        }
-                        focus_camera = true;
-                        state.set_status_message("📷 Telephoto Astrophotography Camera aligned (40° FOV, 8.5m)");
-                    }
-                }
-                5 => {
-                    ui.add_space(8.0);
-                    ui.horizontal(|ui| {
-                        if ui.button(
-                            egui::RichText::new("⚡ Direct PBR (F11)")
-                                .strong()
-                                .color(egui::Color32::from_rgb(130, 200, 255)),
-                        ).clicked() {
-                            state.production_render.engine = crate::ui::render_dialog::RenderEngine::DirectPbr;
-                            state.production_render.show_dialog = true;
-                            crate::ui::render_dialog::start_production_render(state);
-                        }
-                        if ui.button(
-                            egui::RichText::new("✨ Path Tracer (F12)")
-                                .strong()
-                                .color(egui::Color32::from_rgb(226, 179, 87)),
-                        ).clicked() {
-                            state.production_render.engine = crate::ui::render_dialog::RenderEngine::PathTracer;
-                            state.production_render.show_dialog = true;
-                            crate::ui::render_dialog::start_production_render(state);
-                        }
-                    });
-                }
-                _ => {}
             }
 
             // Tip
@@ -319,11 +275,22 @@ pub fn render(state: &mut AppState) {
         state.walkthrough.current_step += 1;
     }
     if focus_camera {
-        state.camera.target = vec3(0.0, 0.0, 0.0);
-        state.camera.distance = 8.5;
-        state.camera.pitch = 0.0;
-        state.camera.yaw = 0.0;
-        state.camera.fov_y = 40.0_f32.to_radians();
+        match state.walkthrough.id {
+            WalkthroughId::CastleTower => {
+                state.camera.target = vec3(0.0, 3.0, 0.0);
+                state.camera.distance = 11.0;
+                state.camera.pitch = 0.35;
+                state.camera.yaw = 0.45;
+                state.camera.fov_y = 45.0_f32.to_radians();
+            }
+            _ => {
+                state.camera.target = vec3(0.0, 0.0, 0.0);
+                state.camera.distance = 8.5;
+                state.camera.pitch = 0.0;
+                state.camera.yaw = 0.0;
+                state.camera.fov_y = 40.0_f32.to_radians();
+            }
+        }
     }
     if set_full_moon {
         for (_id, node) in state.scene.nodes.iter_mut() {
