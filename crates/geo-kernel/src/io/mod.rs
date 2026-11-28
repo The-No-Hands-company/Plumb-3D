@@ -1,5 +1,6 @@
 pub mod alembic;
 pub mod fbx;
+pub mod glb;
 pub mod gltf;
 pub mod obj;
 pub mod plmb;

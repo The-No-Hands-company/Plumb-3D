@@ -15,6 +15,7 @@
 //! - Direct export to PNG images.
 
 pub mod baker;
+pub mod bevel_normal;
 pub mod bvh;
 pub mod camera;
 pub mod denoiser;
@@ -30,6 +31,7 @@ pub mod scene;
 mod tests;
 
 pub use baker::{bake_texture, BakeMapType, BakeSettings};
+pub use bevel_normal::compute_beveled_normal;
 pub use bvh::{BvhNode, RayHit, Triangle};
 pub use camera::PathtracerCamera;
 pub use denoiser::{denoise_radiance, DenoiseSettings};

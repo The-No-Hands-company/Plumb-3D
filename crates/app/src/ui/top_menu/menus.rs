@@ -65,6 +65,13 @@ pub fn draw_file_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
             actions.export_gltf = true;
             ui.close_menu();
         }
+        if ui
+            .button("Export Active Mesh as Binary glTF (.glb)")
+            .clicked()
+        {
+            actions.export_glb = true;
+            ui.close_menu();
+        }
         if ui.button("Export Active Mesh as PLY (.ply)").clicked() {
             actions.export_ply = true;
             ui.close_menu();

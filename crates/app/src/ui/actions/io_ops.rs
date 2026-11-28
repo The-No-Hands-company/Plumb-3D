@@ -94,6 +94,42 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         }
     }
 
+    // 5b. Handle glTF 2.0 Binary (GLB) Export with native file dialog
+    if actions.export_glb {
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("glTF 2.0 Binary (*.glb)", &["glb"])
+                .set_file_name(format!("{}.glb", name))
+                .save_file()
+            {
+                let (base_color, metallic, roughness) = if let Some(node_id) = state.selected_node {
+                    if let Some(node) = state.scene.nodes.get(node_id) {
+                        if let graph_engine::NodeData::Mesh { materials, .. } = &node.data {
+                            if let Some(mat) = materials.first() {
+                                (mat.base_color, mat.metallic, mat.roughness)
+                            } else {
+                                ([0.8, 0.8, 0.8, 1.0], 0.0, 0.5)
+                            }
+                        } else {
+                            ([0.8, 0.8, 0.8, 1.0], 0.0, 0.5)
+                        }
+                    } else {
+                        ([0.8, 0.8, 0.8, 1.0], 0.0, 0.5)
+                    }
+                } else {
+                    ([0.8, 0.8, 0.8, 1.0], 0.0, 0.5)
+                };
+
+                let content = mesh.to_glb_with_material(&name, base_color, metallic, roughness);
+                let _ = std::fs::write(&path, content);
+                state.set_status_message(format!(
+                    "Exported glTF 2.0 Binary (GLB) to: {}",
+                    path.display()
+                ));
+            }
+        }
+    }
+
     // 6. Handle OBJ Export with native file dialog
     if actions.export_obj {
         if let Some((name, mesh)) = get_active_mesh(state) {

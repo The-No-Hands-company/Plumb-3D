@@ -257,6 +257,22 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
 
     ui.add_space(4.0);
 
+    // Micro-Chamfer Bevel Normal Shader
+    egui::CollapsingHeader::new("Edge Shading & Bevel Chamfer")
+        .default_open(true)
+        .show(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.label("Bevel Radius:");
+                ui.add(
+                    egui::Slider::new(&mut state.production_render.bevel_radius, 0.0..=0.08)
+                        .suffix(" m")
+                        .text("Micro-Chamfer"),
+                );
+            });
+        });
+
+    ui.add_space(4.0);
+
     // Post-Production & LookDev (VFB Compositor)
     egui::CollapsingHeader::new("Post-Production & LookDev")
         .default_open(true)
@@ -583,7 +599,8 @@ pub fn start_production_render(state: &mut AppState) {
     let aspect_ratio = width as f32 / height as f32;
 
     // 2. Build BVH Ray Tracing Scene from SceneGraph
-    let scene = PathTracerScene::from_scene_graph(&state.scene);
+    let mut scene = PathTracerScene::from_scene_graph(&state.scene);
+    scene.bevel_radius = state.production_render.bevel_radius;
 
     // 3. Resolve Camera
     let aperture = if state.production_render.dof_enabled {

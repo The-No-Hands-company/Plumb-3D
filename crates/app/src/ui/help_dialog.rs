@@ -423,9 +423,9 @@ fn draw_tab_about(ui: &mut egui::Ui) {
 
     ui.add_space(8.0);
     ui.label(egui::RichText::new("Engine Status:").strong());
-    ui.label("Plumb 3D Suite Version: 1.1.0 Precision CAD & Curve Drafting Release");
+    ui.label("Plumb 3D Suite Version: 1.2.0 Universal Interop & Production Shading");
     ui.label(
-        "All 7 workspace crates verified with 346 passing unit tests and 0 compiler warnings.",
+        "All 7 workspace crates verified with 348 passing unit tests and 0 compiler warnings.",
     );
 }
 

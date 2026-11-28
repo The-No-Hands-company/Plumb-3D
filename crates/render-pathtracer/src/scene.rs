@@ -36,6 +36,7 @@ pub struct PathTracerScene {
     pub background_ground: Option<Vec3>,
     pub environment_map: Option<TextureSource>,
     pub environment_intensity: f32,
+    pub bevel_radius: f32,
 }
 
 impl PathTracerScene {
@@ -66,7 +67,14 @@ impl PathTracerScene {
             background_ground: None,
             environment_map: None,
             environment_intensity: 1.0,
+            bevel_radius: 0.0,
         }
+    }
+
+    /// Sets the micro-chamfer bevel radius for rounded edge normal perturbation.
+    pub fn with_bevel_radius(mut self, radius: f32) -> Self {
+        self.bevel_radius = radius.max(0.0);
+        self
     }
 
     /// Sets an equirectangular environment texture map (e.g. 360 photographic Milky Way panorama)

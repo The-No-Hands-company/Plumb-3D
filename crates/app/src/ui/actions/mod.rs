@@ -148,6 +148,7 @@ pub struct UiActions {
     pub trigger_import_dialog: bool,
     pub export_obj: bool,
     pub export_gltf: bool,
+    pub export_glb: bool,
     pub export_stl: bool,
     pub export_ply: bool,
     pub export_step: bool,

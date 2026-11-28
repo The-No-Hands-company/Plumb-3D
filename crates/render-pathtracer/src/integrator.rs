@@ -14,11 +14,20 @@ pub fn trace_path(
     let mut accumulated_radiance = Vec3::ZERO;
 
     for bounce in 0..max_bounces {
-        let Some(hit) = scene.intersect(&ray, 1e-4, 1e5) else {
+        let Some(mut hit) = scene.intersect(&ray, 1e-4, 1e5) else {
             // Missed geometry -> add ambient sky radiance
             accumulated_radiance += throughput * scene.sky_radiance(ray.direction);
             break;
         };
+
+        if scene.bevel_radius > 0.0 {
+            hit.normal = crate::bevel_normal::compute_beveled_normal(
+                scene,
+                hit.position,
+                hit.normal,
+                scene.bevel_radius,
+            );
+        }
 
         let material = &scene.materials[hit.material_id % scene.materials.len()];
 

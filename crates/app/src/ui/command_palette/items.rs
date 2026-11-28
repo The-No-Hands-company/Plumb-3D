@@ -359,9 +359,18 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Export Active Mesh as glTF 2.0 (.gltf)",
         category: "File",
         shortcut: "Ctrl+E",
-        keywords: &["export", "gltf", "glb", "web 3d", "game engine"],
+        keywords: &["export", "gltf", "web 3d", "game engine"],
         action: PaletteAction::TriggerAction(|_, a| {
             a.export_gltf = true;
+        }),
+    },
+    PaletteItem {
+        name: "Export Active Mesh as Binary glTF (.glb)",
+        category: "File",
+        shortcut: "Ctrl+Shift+G",
+        keywords: &["export", "glb", "binary gltf", "unreal", "unity", "godot"],
+        action: PaletteAction::TriggerAction(|_, a| {
+            a.export_glb = true;
         }),
     },
     PaletteItem {

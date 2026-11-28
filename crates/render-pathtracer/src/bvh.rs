@@ -226,4 +226,29 @@ impl BvhNode {
             }
         }
     }
+
+    /// Collects all triangles whose bounding box intersects a sphere centered at `center` with radius `radius`.
+    pub fn query_sphere(&self, center: Vec3, radius: f32, result: &mut Vec<Triangle>) {
+        let aabb = self.aabb();
+        let closest = center.clamp(aabb.min, aabb.max);
+        if (center - closest).length_squared() > radius * radius {
+            return;
+        }
+
+        match self {
+            BvhNode::Leaf { triangles, .. } => {
+                for tri in triangles {
+                    let tri_aabb = tri.aabb();
+                    let tri_closest = center.clamp(tri_aabb.min, tri_aabb.max);
+                    if (center - tri_closest).length_squared() <= radius * radius {
+                        result.push(*tri);
+                    }
+                }
+            }
+            BvhNode::Inner { left, right, .. } => {
+                left.query_sphere(center, radius, result);
+                right.query_sphere(center, radius, result);
+            }
+        }
+    }
 }
