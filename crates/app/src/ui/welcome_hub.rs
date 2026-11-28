@@ -14,6 +14,7 @@ pub struct WelcomeHubState {
     pub show_dialog: bool,
     pub dont_show_on_startup: bool,
     pub splash_texture: Option<egui::TextureHandle>,
+    pub selected_template: ProjectTemplate,
 }
 
 impl std::fmt::Debug for WelcomeHubState {
@@ -22,6 +23,7 @@ impl std::fmt::Debug for WelcomeHubState {
             .field("show_dialog", &self.show_dialog)
             .field("dont_show_on_startup", &self.dont_show_on_startup)
             .field("has_splash_texture", &self.splash_texture.is_some())
+            .field("selected_template", &self.selected_template)
             .finish()
     }
 }
@@ -32,6 +34,7 @@ impl Default for WelcomeHubState {
             show_dialog: true,
             dont_show_on_startup: false,
             splash_texture: None,
+            selected_template: ProjectTemplate::General,
         }
     }
 }
@@ -39,8 +42,9 @@ impl Default for WelcomeHubState {
 static SPLASH_BYTES: &[u8] = include_bytes!("../../../../docs/images/castle_citadel_hero.png");
 
 /// Project starter template identifier.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ProjectTemplate {
+    #[default]
     General,
     HardSurface,
     CadPrecision,
@@ -81,7 +85,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
 
     egui::Window::new("Plumb 3D -- Welcome & Quick-Start Hub")
         .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
-        .fixed_size(egui::vec2(660.0, 680.0))
+        .fixed_size(egui::vec2(640.0, 500.0))
         .collapsible(false)
         .resizable(false)
         .frame(
@@ -94,7 +98,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
         .show(&ctx, |ui| {
             // Hero Splash Artwork Banner (Rendered with Plumb 3D Monte Carlo Path Tracer)
             if let Some(ref splash_tex) = state.welcome_hub.splash_texture {
-                let banner_size = egui::vec2(628.0, 190.0);
+                let banner_size = egui::vec2(608.0, 150.0);
                 let tex_size = splash_tex.size_vec2();
                 let img_aspect = (tex_size.x / tex_size.y.max(1.0)).max(0.01);
                 let target_aspect = banner_size.x / banner_size.y;
@@ -170,8 +174,9 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
             ui.add_space(8.0);
 
             ui.columns(2, |columns| {
-                // Left Column: New Project Starter Templates
-                columns[0].label(egui::RichText::new("New Project Templates").strong().size(14.0).color(egui::Color32::WHITE));
+                // Left Column: New Project Starter Templates (Compact Dropdown)
+                columns[0].label(egui::RichText::new("New Project").strong().size(14.0).color(egui::Color32::WHITE));
+                columns[0].label(egui::RichText::new("Select a template or guided walkthrough:").size(11.0).color(egui::Color32::from_rgb(150, 165, 185)));
                 columns[0].add_space(4.0);
 
                 let templates = [
@@ -186,23 +191,54 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                     (ProjectTemplate::LunarNightSky, "🌕 Lunar Night Sky: Ready Showcase", "Finished astrophotography scene with ESO 360 Milky Way & camera setup"),
                 ];
 
-                for (tmpl, title, desc) in templates {
-                    let frame = egui::Frame::none()
-                        .fill(egui::Color32::from_rgb(26, 30, 38))
-                        .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(45, 52, 66)))
-                        .rounding(egui::Rounding::same(6.0))
-                        .inner_margin(egui::Margin::same(8.0));
+                let selected_title = templates
+                    .iter()
+                    .find(|(t, _, _)| *t == state.welcome_hub.selected_template)
+                    .map(|(_, title, _)| *title)
+                    .unwrap_or("General 3D");
 
-                    let resp = frame.show(&mut columns[0], |ui| {
-                        ui.label(egui::RichText::new(title).strong().color(egui::Color32::from_rgb(235, 240, 250)));
-                        ui.label(egui::RichText::new(desc).size(10.5).color(egui::Color32::from_rgb(140, 150, 170)));
-                    }).response;
+                egui::ComboBox::from_id_salt("welcome_template_dropdown")
+                    .width(columns[0].available_width() - 8.0)
+                    .selected_text(egui::RichText::new(selected_title).strong().color(egui::Color32::from_rgb(226, 179, 87)))
+                    .show_ui(&mut columns[0], |ui| {
+                        for &(tmpl, title, _) in &templates {
+                            ui.selectable_value(&mut state.welcome_hub.selected_template, tmpl, title);
+                        }
+                    });
 
-                    if resp.interact(egui::Sense::click()).clicked() {
-                        selected_template = Some(tmpl);
+                columns[0].add_space(8.0);
+
+                let (_, current_title, current_desc) = templates
+                    .iter()
+                    .find(|(t, _, _)| *t == state.welcome_hub.selected_template)
+                    .copied()
+                    .unwrap_or(templates[0]);
+
+                let preview_frame = egui::Frame::none()
+                    .fill(egui::Color32::from_rgb(26, 30, 38))
+                    .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(50, 60, 75)))
+                    .rounding(egui::Rounding::same(6.0))
+                    .inner_margin(egui::Margin::same(10.0));
+
+                preview_frame.show(&mut columns[0], |ui| {
+                    ui.label(egui::RichText::new(current_title).strong().size(13.0).color(egui::Color32::from_rgb(235, 240, 250)));
+                    ui.add_space(2.0);
+                    ui.label(egui::RichText::new(current_desc).size(11.0).color(egui::Color32::from_rgb(150, 165, 185)));
+                    ui.add_space(8.0);
+                    if ui.button(
+                        egui::RichText::new("🚀 Start Project")
+                            .strong()
+                            .color(egui::Color32::from_rgb(226, 179, 87)),
+                    ).clicked() {
+                        selected_template = Some(state.welcome_hub.selected_template);
                         close = true;
                     }
-                    columns[0].add_space(4.0);
+                });
+
+                columns[0].add_space(6.0);
+                if columns[0].button("📄 Quick Blank Scene (Cube)").clicked() {
+                    selected_template = Some(ProjectTemplate::General);
+                    close = true;
                 }
 
                 // Right Column: Getting Started & Settings
@@ -407,5 +443,6 @@ mod tests {
         let state = WelcomeHubState::default();
         assert!(state.show_dialog);
         assert!(!state.dont_show_on_startup);
+        assert_eq!(state.selected_template, ProjectTemplate::General);
     }
 }
