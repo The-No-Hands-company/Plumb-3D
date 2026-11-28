@@ -6,6 +6,7 @@ pub mod inset;
 pub mod kitbash;
 pub mod knife;
 pub mod loop_cut;
+pub mod push_pull;
 pub mod vertex_crease;
 
 use winit::dpi::PhysicalPosition;
@@ -16,6 +17,7 @@ use crate::state::AppState;
 
 pub fn is_any_modal_active(state: &AppState) -> bool {
     state.extrude_modal_active
+        || state.push_pull_modal_active
         || state.bevel_modal_active
         || state.inset_modal_active
         || state.edge_crease_modal_active
@@ -35,6 +37,9 @@ pub fn handle_mouse_input(state: &mut AppState, button: MouseButton, is_pressed:
     }
     if state.extrude_modal_active {
         return extrude::handle_mouse_input(state, button, is_pressed);
+    }
+    if state.push_pull_modal_active {
+        return push_pull::handle_mouse_input(state, button, is_pressed);
     }
     if state.bevel_modal_active {
         return bevel::handle_mouse_input(state, button, is_pressed);
@@ -66,6 +71,9 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
     }
     if state.extrude_modal_active {
         return extrude::handle_cursor_moved(state, position);
+    }
+    if state.push_pull_modal_active {
+        return push_pull::handle_cursor_moved(state, position);
     }
     if state.bevel_modal_active {
         return bevel::handle_cursor_moved(state, position);
@@ -119,6 +127,9 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
     }
     if state.extrude_modal_active {
         return extrude::handle_keyboard_input(state, key_code);
+    }
+    if state.push_pull_modal_active {
+        return push_pull::handle_keyboard_input(state, key_code, true);
     }
     if state.bevel_modal_active {
         return bevel::handle_keyboard_input(state, key_code);

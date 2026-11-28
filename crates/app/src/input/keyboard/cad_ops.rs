@@ -137,6 +137,21 @@ pub fn handle_mesh_key(state: &mut AppState, key_code: KeyCode) -> bool {
             crate::modals::cutter::start(state);
             true
         }
+        KeyCode::KeyP
+            if state.interaction_mode == InteractionMode::Edit
+                && !state.selected_faces.is_empty() =>
+        {
+            let mouse_pos = (
+                state.surface_config.width as f64 * 0.5,
+                state.surface_config.height as f64 * 0.5,
+            );
+            crate::modals::push_pull::start(state, mouse_pos);
+            state.set_status_message(
+                "Modal Push-Pull: Drag mouse along normal (Up=Boss Union, Down=Cavity Cut)",
+            );
+            state.window.request_redraw();
+            true
+        }
         KeyCode::F9 => {
             state.show_last_operator_panel = !state.show_last_operator_panel;
             state.window.request_redraw();

@@ -5,6 +5,7 @@ pub mod hud;
 pub mod mesh_features;
 pub mod modals;
 pub mod operator_panel;
+pub mod push_pull_overlay;
 pub mod selection_overlay;
 pub mod sketch_overlay;
 pub mod tools;
@@ -22,6 +23,7 @@ pub fn draw_overlays(state: &mut AppState) {
     selection_overlay::render_selection_overlay(state);
     tools::render(state);
     modals::render(state);
+    push_pull_overlay::render(state);
     operator_panel::render(state);
     sketch_overlay::render(state);
     curvature_comb_overlay::render(state);

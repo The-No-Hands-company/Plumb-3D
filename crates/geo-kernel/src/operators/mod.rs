@@ -8,6 +8,8 @@ pub mod extrude;
 pub mod field_remesh;
 pub mod flow_guide;
 pub mod generation;
+pub mod inscribe;
+pub mod push_pull;
 pub mod remesh;
 pub mod remesh_tables;
 pub mod selection;
@@ -23,6 +25,7 @@ pub mod weld_bead;
 pub mod weld_clean;
 
 pub use cable::CableGenerator;
+pub use push_pull::PushPullResult;
 pub use types::*;
 pub use variable_bevel::FilletContinuity;
 pub use weld_bead::WeldStyle;

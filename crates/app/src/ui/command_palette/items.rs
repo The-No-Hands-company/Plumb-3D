@@ -42,6 +42,30 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         }),
     },
     PaletteItem {
+        name: "Push-Pull: Modal Carve (Boss/Cavity)",
+        category: "Modeling",
+        shortcut: "P",
+        keywords: &[
+            "push",
+            "pull",
+            "carve",
+            "boss",
+            "cavity",
+            "pocket",
+            "plasticity",
+        ],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.interaction_mode = InteractionMode::Edit;
+            if !state.selected_faces.is_empty() {
+                let mouse_pos = (
+                    state.surface_config.width as f64 * 0.5,
+                    state.surface_config.height as f64 * 0.5,
+                );
+                crate::modals::push_pull::start(state, mouse_pos);
+            }
+        }),
+    },
+    PaletteItem {
         name: "Bevel Edges / Vertices",
         category: "Modeling",
         shortcut: "Ctrl+B",
