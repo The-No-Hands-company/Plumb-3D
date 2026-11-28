@@ -591,6 +591,27 @@ pub const MODELING_COMMANDS: &[PaletteItem] = &[
             state.set_status_message("Exploded View Disassembly Active");
         }),
     },
+    // --- Technical Drafting & GD&T ---
+    PaletteItem {
+        name: "Drafting: 2D Multi-View Sheet & GD&T",
+        category: "Drafting",
+        shortcut: "Alt+D S",
+        keywords: &["drafting", "drawing", "sheet", "multi-view", "orthographic", "hlr", "gdt"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::Drafting;
+            state.set_status_message("Switched to 2D Technical Drafting Inspector");
+        }),
+    },
+    PaletteItem {
+        name: "Drafting: Export Drawing as Vector SVG / DXF",
+        category: "Drafting",
+        shortcut: "Alt+D E",
+        keywords: &["drafting", "export", "svg", "dxf", "vector", "autocad", "drawing"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::Drafting;
+            state.set_status_message("Export Technical Drawing Sheet from Drafting Panel");
+        }),
+    },
 ];
 
 pub static COMMAND_LIST: std::sync::LazyLock<Vec<PaletteItem>> = std::sync::LazyLock::new(|| {

@@ -1,5 +1,6 @@
 mod assembly;
 mod constraints;
+mod drafting;
 mod groom_panel;
 mod materials;
 mod mesh_info;
@@ -17,6 +18,7 @@ mod volumetrics;
 
 pub use assembly::draw_assembly_panel;
 pub use constraints::draw_constraints_panel;
+pub use drafting::draw_drafting_panel;
 pub use groom_panel::draw_groom_panel;
 pub use materials::draw_materials_panel;
 pub use mesh_info::draw_mesh_info;
@@ -156,6 +158,16 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                 state.inspector_tab = crate::types::InspectorTab::Assembly;
             }
 
+            if ui
+                .selectable_label(
+                    state.inspector_tab == crate::types::InspectorTab::Drafting,
+                    "Drafting",
+                )
+                .clicked()
+            {
+                state.inspector_tab = crate::types::InspectorTab::Drafting;
+            }
+
             if state.current_workspace != WorkspaceTemplate::Animation {
                 let tool_label = match state.current_workspace {
                     WorkspaceTemplate::Sculpting => "Brushes",
@@ -275,12 +287,21 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                 crate::types::InspectorTab::Assembly => {
                     draw_assembly_panel(ui, state, actions, Some(sel_id));
                 }
+                crate::types::InspectorTab::Drafting => {
+                    draw_drafting_panel(ui, state, actions, Some(sel_id));
+                }
             });
     } else if state.inspector_tab == crate::types::InspectorTab::Assembly {
         egui::ScrollArea::vertical()
             .auto_shrink([false, false])
             .show(ui, |ui| {
                 draw_assembly_panel(ui, state, actions, None);
+            });
+    } else if state.inspector_tab == crate::types::InspectorTab::Drafting {
+        egui::ScrollArea::vertical()
+            .auto_shrink([false, false])
+            .show(ui, |ui| {
+                draw_drafting_panel(ui, state, actions, None);
             });
     } else {
         ui.vertical_centered(|ui| {

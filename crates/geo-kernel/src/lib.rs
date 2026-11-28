@@ -17,6 +17,7 @@ pub mod assembly;
 pub mod boolean;
 pub mod decimate;
 pub mod diagnostics;
+pub mod drafting;
 pub mod fluid_sph;
 pub mod gaussian_splat;
 pub mod groom;
@@ -57,6 +58,11 @@ pub use decimate::{decimate_mesh, DecimateModifier, SymmQuadric};
 pub use diagnostics::{
     ContinuityClass, CurvatureColorMap, CurvatureNeedle, SeamContinuityReport,
     SurfaceCurvatureSample,
+};
+pub use drafting::{
+    CenterMark, DiameterDimension, DrawingSheet, DrawingView, FeatureControlFrame,
+    GdtCharacteristic, HlrEdgeSegment, HlrEngine, HlrLineStyle, LinearDimension,
+    MaterialCondition, ProjectionStandard, SheetFormat, TitleBlock, ViewCamera, ViewType,
 };
 pub use fluid_sph::{FluidParticle, SphFluidSimulator, SphSettings};
 pub use gaussian_splat::{GaussianCloud, GaussianSplat};
