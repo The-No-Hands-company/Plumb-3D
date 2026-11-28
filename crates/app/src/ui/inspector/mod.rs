@@ -98,6 +98,7 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                 NodeData::Camera { .. } => "Camera",
                 NodeData::Joint { .. } => "Bone",
                 NodeData::Curve { .. } => "Spline",
+                NodeData::Sketch { .. } => "CAD Sketch",
                 NodeData::Transform => "Group",
             };
             ui.horizontal(|ui| {

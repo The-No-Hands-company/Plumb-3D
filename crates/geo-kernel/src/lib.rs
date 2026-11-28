@@ -32,6 +32,7 @@ pub mod quadriflow;
 pub mod raycast;
 pub mod sculpt;
 pub mod sculpt_dyntopo;
+pub mod sketch;
 pub mod slicer;
 pub mod spline;
 pub mod subd_nurbs;
@@ -80,6 +81,12 @@ pub use quadriflow::{CrossField4RoSy, QuadriflowSettings};
 pub use raycast::RaycastHit;
 pub use sculpt::{BrushAlphaTexture, BrushFalloff, SculptBrush, SculptSettings};
 pub use sculpt_dyntopo::{DyntopoDetailMode, DyntopoMode, DyntopoSettings, DyntopoStats};
+pub use sketch::{
+    extract_dimension_callouts, extrude_sketch, revolve_sketch, sketch_to_splines, solve_sketch,
+    ConstraintId, ConstraintType, DimensionCallout, DimensionType, Sketch, SketchArc, SketchCircle,
+    SketchConstraint, SketchEntity, SketchEntityId, SketchLine, SketchPoint, SketchPointId,
+    SolverConfig, SolverStatus, Workplane,
+};
 pub use slicer::{InfillPattern, SlicedLayer, SlicerSettings, ToolpathSegment};
 pub use spline::{BezierPoint, HandleType, ProfileShape, Spline};
 pub use subd_nurbs::{convert_mesh_to_nurbs_patches, export_subd_nurbs_step, BicubicNurbsPatch};

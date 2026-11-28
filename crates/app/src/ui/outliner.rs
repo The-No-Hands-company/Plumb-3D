@@ -214,6 +214,7 @@ fn draw_outliner_tree_node(
             NodeData::Camera { .. } => "[Cam]",
             NodeData::Joint { .. } => "[Bone]",
             NodeData::Curve { .. } => "[Crv]",
+            NodeData::Sketch { .. } => "[Skt]",
             NodeData::Transform => "[Grp]",
         };
 

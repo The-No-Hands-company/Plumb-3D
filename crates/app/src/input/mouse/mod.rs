@@ -3,6 +3,7 @@ pub mod curve_pen;
 pub mod gizmo_drag;
 pub mod navigation;
 pub mod painting_drag;
+pub mod sketch_input;
 
 pub use buttons::*;
 pub use gizmo_drag::*;

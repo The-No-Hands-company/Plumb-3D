@@ -40,6 +40,13 @@ pub fn handle_mouse_left_down(state: &mut AppState) {
             return;
         }
     }
+    if state.sketch_active {
+        if let Some((mx, my)) = state.last_mouse_pos {
+            if state.handle_sketch_click(mx, my) {
+                return;
+            }
+        }
+    }
     if state.measure_mode {
         if let Some((mx, my)) = state.last_mouse_pos {
             let ray = state.get_screen_ray(mx, my);

@@ -31,6 +31,18 @@ pub enum SnapTarget {
     FaceCenter,
 }
 
+/// Active drafting tool in 2D CAD Constraint Sketcher mode.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SketchTool {
+    #[default]
+    Select,
+    Line,
+    Rectangle,
+    Circle,
+    Arc,
+    Dimension,
+}
+
 /// Spline knot and tangent handle selection component.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CurveHandleSelection {

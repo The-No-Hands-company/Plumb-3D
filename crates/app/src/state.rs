@@ -333,6 +333,13 @@ pub struct AppState {
     pub curve_pen_is_closed: bool,
     pub curve_pen_drag_origin: Option<Vec3>,
 
+    // 2D Parametric CAD Constraint Sketcher
+    pub sketch_active: bool,
+    pub sketch_tool: SketchTool,
+    pub sketch_in_progress_point: Option<core_math::Vec2>,
+    pub sketch_extrude_depth: f32,
+    pub editing_dimension: Option<(geo_kernel::ConstraintId, String)>,
+
     // Direct Edit Mode Operators
     pub shrink_fatten_offset: f32,
     pub relax_iterations: usize,
@@ -736,6 +743,11 @@ impl AppState {
             curve_pen_points: Vec::new(),
             curve_pen_is_closed: false,
             curve_pen_drag_origin: None,
+            sketch_active: false,
+            sketch_tool: SketchTool::Select,
+            sketch_in_progress_point: None,
+            sketch_extrude_depth: 25.0,
+            editing_dimension: None,
             shrink_fatten_offset: 0.1,
             relax_iterations: 3,
             relax_factor: 0.3,

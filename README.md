@@ -250,7 +250,7 @@ cargo run -p app --release
 
 Plumb 3D enforces a strict separation of concerns across major product generations. **Version 1.x is strictly The Modeler**, maintaining laser focus on pure modeling speed, CAD precision, and rock-solid geometry:
 
-- **v1.0.0 (Frozen Commercial Release)**: Best-in-class Polygonal & CAD Modeler. 2-manifold BMesh kernel, 16 live modifiers, CAD splines, UV unwrapping, native `.plmb` container, 5 semantic design-token themes, arbitrary docking (`egui_dock`), and 3 in-viewport interactive walkthroughs.
+- **v1.0.0 (Frozen Commercial Release)**: Pure safe-Rust Polygonal & CAD Modeler foundation. 2-manifold BMesh kernel, non-destructive 16-modifier stack, G2 CAD splines with STEP export, UV unwrapping, native `.plmb` container, 5 semantic design-token themes, arbitrary docking (`egui_dock`), and 3 in-viewport interactive walkthroughs.
 - **v1.1.0 (Upcoming)**: *Precision CAD & Curve Drafting* — 2D constraint sketcher on workplanes, live parametric dimension callouts, and multi-rail curve lofts.
 - **v1.2.0**: *Modifier Mastery* — Lattice FFD deform, simple deform suite (bend, twist, taper, stretch), and weighted normals.
 - **v1.3.0**: *Hard-Surface Booleans 2.0* — Live interactive cutter gizmo, ghost cutters, and QuadriFlow guide curves.

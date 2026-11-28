@@ -4,6 +4,7 @@ pub mod mesh_features;
 pub mod modals;
 pub mod operator_panel;
 pub mod selection_overlay;
+pub mod sketch_overlay;
 pub mod tools;
 pub mod walkthrough;
 pub mod walkthrough_actions;
@@ -19,6 +20,7 @@ pub fn draw_overlays(state: &mut AppState) {
     tools::render(state);
     modals::render(state);
     operator_panel::render(state);
+    sketch_overlay::render(state);
     mesh_features::render(state);
     hud::render(state);
     walkthrough::render(state);

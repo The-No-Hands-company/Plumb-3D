@@ -1,5 +1,5 @@
 use core_math::{Mat4, Transform, Vec3};
-use geo_kernel::{Mesh, ModifierStack, ProfileShape, RenderMesh, ShadingMode, Spline};
+use geo_kernel::{Mesh, ModifierStack, ProfileShape, RenderMesh, ShadingMode, Sketch, Spline};
 use slotmap::new_key_type;
 
 use crate::material::{LightType, Material};
@@ -45,6 +45,10 @@ pub enum NodeData {
         bevel_resolution: usize,
         cached_render_mesh: Option<RenderMesh>,
         profile_shape: ProfileShape,
+    },
+    Sketch {
+        sketch: Sketch,
+        cached_render_mesh: Option<RenderMesh>,
     },
 }
 
@@ -239,6 +243,22 @@ impl SceneNode {
         }
     }
 
+    pub fn new_sketch(name: impl Into<String>, transform: Transform, sketch: Sketch) -> Self {
+        Self {
+            name: name.into(),
+            local_transform: transform,
+            world_matrix: transform.to_matrix(),
+            parent: None,
+            children: Vec::new(),
+            data: NodeData::Sketch {
+                sketch,
+                cached_render_mesh: None,
+            },
+            is_dirty: true,
+            visible: true,
+        }
+    }
+
     /// Duplicate this node with a new name and a translational offset.
     pub fn duplicate(&self, name: impl Into<String>, offset: Vec3) -> Self {
         let mut new_transform = self.local_transform;
@@ -303,6 +323,10 @@ impl SceneNode {
                 bevel_resolution: *bevel_resolution,
                 cached_render_mesh: None,
                 profile_shape: *profile_shape,
+            },
+            NodeData::Sketch { sketch, .. } => NodeData::Sketch {
+                sketch: sketch.clone(),
+                cached_render_mesh: None,
             },
         };
 

@@ -291,8 +291,8 @@ impl Workplane {
     pub fn from_point_and_normal(origin: Vec3, normal: Vec3) -> Self {
         let n = normal.normalize_or_zero();
         let up = if n.y.abs() < 0.99 { Vec3::Y } else { Vec3::Z };
-        let u = n.cross(up).normalize();
-        let v = n.cross(u).normalize();
+        let u = n.cross(up).normalize_or_zero();
+        let v = n.cross(u).normalize_or_zero();
         Self {
             origin,
             normal: n,
@@ -300,6 +300,77 @@ impl Workplane {
             tangent_v: v,
             is_active: true,
         }
+    }
+
+    /// Front View Workplane (XY plane, normal pointing along +Z).
+    pub fn xy() -> Self {
+        Self {
+            origin: Vec3::ZERO,
+            normal: Vec3::Z,
+            tangent_u: Vec3::X,
+            tangent_v: Vec3::Y,
+            is_active: true,
+        }
+    }
+
+    /// Top View Workplane (XZ plane, normal pointing along +Y).
+    pub fn xz() -> Self {
+        Self {
+            origin: Vec3::ZERO,
+            normal: Vec3::Y,
+            tangent_u: Vec3::X,
+            tangent_v: Vec3::Z,
+            is_active: true,
+        }
+    }
+
+    /// Right View Workplane (YZ plane, normal pointing along +X).
+    pub fn yz() -> Self {
+        Self {
+            origin: Vec3::ZERO,
+            normal: Vec3::X,
+            tangent_u: Vec3::Y,
+            tangent_v: Vec3::Z,
+            is_active: true,
+        }
+    }
+
+    /// Creates an offset workplane parallel to this one by `offset_distance` along its normal.
+    pub fn offset(&self, offset_distance: f32) -> Self {
+        Self {
+            origin: self.origin + self.normal * offset_distance,
+            normal: self.normal,
+            tangent_u: self.tangent_u,
+            tangent_v: self.tangent_v,
+            is_active: self.is_active,
+        }
+    }
+
+    /// Maps a 2D sketch coordinate $(u, v)$ to 3D world space.
+    #[inline]
+    pub fn to_3d(&self, uv: Vec2) -> Vec3 {
+        self.origin + self.tangent_u * uv.x + self.tangent_v * uv.y
+    }
+
+    /// Projects a 3D world coordinate onto the 2D sketch plane $(u, v)$.
+    #[inline]
+    pub fn to_2d(&self, world_p: Vec3) -> Vec2 {
+        let rel = world_p - self.origin;
+        Vec2::new(rel.dot(self.tangent_u), rel.dot(self.tangent_v))
+    }
+
+    /// Projects a 3D world point onto the 3D surface of this workplane.
+    #[inline]
+    pub fn project_point(&self, world_p: Vec3) -> Vec3 {
+        let rel = world_p - self.origin;
+        let dist = rel.dot(self.normal);
+        world_p - self.normal * dist
+    }
+
+    /// Signed perpendicular distance of a 3D point from this workplane.
+    #[inline]
+    pub fn signed_distance(&self, world_p: Vec3) -> f32 {
+        (world_p - self.origin).dot(self.normal)
     }
 
     /// Project a 3D ray onto the workplane, returning 2D (u, v) coordinates relative to origin.
