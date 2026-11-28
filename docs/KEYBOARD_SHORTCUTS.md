@@ -114,4 +114,5 @@ This document provides a comprehensive index of all default keyboard shortcuts, 
 | `Inspector > Drafting` | **Technical 2D Drawings** | ANSI/ISO 2D multi-view drawing sheets, vector Hidden Line Removal (HLR), ASME Y14.5 GD&T, DXF & SVG export. |
 | `Inspector > Sheet Metal` | **Sheet Metal & CNC** | DIN 6935 K-factor bend physics, parametric flanges, 1-click CNC flat pattern unfolding (`OUTER_CUT`, `BEND_UP`, `BEND_DOWN`). |
 | `Inspector > Mechanical` | **Mechanical Library** | Parametric ISO/ANSI Fasteners (M2-M30), Involute Gears (Spur/Helical/Bevel), and Roller Chain Sprockets. |
+| `Inspector > FEA` | **FEA Simulation** | Linear elasticity, Von Mises stress recovery, Factor of Safety (FoS), and displacement overlay. |
 | `Inspector > Diagnostics` | **Class-A Diagnostics** | Dynamic Zebra reflection striping, Gaussian & Mean curvature heatmaps, porcupine curvature combs. |

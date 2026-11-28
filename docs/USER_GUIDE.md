@@ -28,6 +28,7 @@ Welcome to the **Plumb 3D User Guide**! This comprehensive manual walks you thro
 21. [Sheet Metal Design & CNC Flat-Pattern Unfolding](#21-sheet-metal-design--cnc-flat-pattern-unfolding)
 22. [Gestural Modeling & 8-Directional Radial Pie Menu](#22-gestural-modeling--8-directional-radial-pie-menu)
 23. [Mechanical Part Generators, Fasteners & Involute Gears](#23-mechanical-part-generators-fasteners--involute-gears)
+24. [Finite Element Analysis (FEA) Structural Simulation](#24-finite-element-analysis-fea-structural-simulation)
 
 ---
 
@@ -401,3 +402,40 @@ Accessed via the **Mechanical** tab in the Inspector or the Command Palette (`F3
   - Bottom Root Diameter $BD = PCD - d_r$ with cylindrical roller seating pockets.
   - Outside Tip Diameter $OD = p \cdot (0.6 + \cot(180^\circ / N))$.
   - Optional mounting hub collar with parametric hub diameter and extension length.
+
+---
+
+## 24. Finite Element Analysis (FEA) Structural Simulation
+
+Accessed via the **FEA** tab in the Inspector or the Command Palette (`F3`):
+
+### 1. Mathematical Formulation & Tet4 Meshing
+- **Linear Elasticity**: Solves the continuum equilibrium equation $\nabla \cdot \boldsymbol{\sigma} + \mathbf{b} = 0$ using linear 4-node tetrahedral elements (Tet4).
+- **Element Stiffness Matrix**:
+  - Analytical element volume evaluation $V_e = \frac{1}{6} \det(\mathbf{J})$.
+  - Strain-displacement matrix $[B]$ relating nodal displacements $\{u_e\}$ to small strain tensor $\boldsymbol{\varepsilon}$.
+  - Element stiffness $[k_e] = [B]^T [D] [B] \cdot V_e$, where $[D]$ is the 3D isotropic constitutive Hooke's tensor.
+- **Global Solver**:
+  - Assembles global stiffness $[K] \{U\} = \{F\}$.
+  - Solves for nodal displacements using a Preconditioned Conjugate Gradient (PCG) iterative solver with diagonal preconditioning.
+
+### 2. Engineering Materials & Boundary Conditions
+- **Isotropic Material Models**:
+  - Young's Modulus ($E$), Poisson's Ratio ($\nu$), Yield Strength ($\sigma_y$), and Density ($\rho$).
+  - Standard presets: ASTM A36 Structural Steel, Aluminum 6061-T6, Titanium Ti-6Al-4V, PLA Plastic (3D print), and ABS Plastic.
+- **Support Constraints**:
+  - Fixed Support: Constrains all 3 translational degrees of freedom ($u_x = 0, u_y = 0, u_z = 0$).
+  - Surface normal constraints (roller constraints).
+- **Applied Mechanical Loads**:
+  - Directional force vectors in Newtons ($\vec{F} = [F_x, F_y, F_z]$) distributed across selected surface nodes.
+  - Gravitational body forces ($\vec{g} = [0, 0, -9.81]\,\text{m/s}^2 \cdot \rho V_e$).
+
+### 3. Stress Recovery & Failure Criteria
+- **Cauchy Stress Tensor**: Recovers $\boldsymbol{\sigma} = [\sigma_{xx}, \sigma_{yy}, \sigma_{zz}, \tau_{xy}, \tau_{yz}, \tau_{zx}]$ across all mesh elements.
+- **Von Mises Equivalent Stress**:
+  $$\sigma_v = \sqrt{\frac{1}{2}\left[(\sigma_{xx}-\sigma_{yy})^2 + (\sigma_{yy}-\sigma_{zz})^2 + (\sigma_{zz}-\sigma_{xx})^2 + 6(\tau_{xy}^2 + \tau_{yz}^2 + \tau_{zx}^2)\right]}$$
+- **Factor of Safety (FoS)**:
+  - Evaluates structural integrity against material yield: $\text{FoS} = \frac{\sigma_y}{\max(\sigma_v, 10^{-6})}$.
+  - Color-coded safety status: **SAFE** ($\text{FoS} \ge 2.0$), **MARGINAL YIELD** ($1.0 \le \text{FoS} < 2.0$), or **YIELD EXCEEDED / PLASTIC FAILURE** ($\text{FoS} < 1.0$).
+- **Deformation Displacement Overlay**:
+  - Magnifies infinitesimal physical deflections by a parametric scale factor ($1\times - 1000\times$) to visualize structural flexure, bending modes, and compliance.

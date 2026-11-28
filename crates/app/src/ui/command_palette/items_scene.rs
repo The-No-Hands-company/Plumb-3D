@@ -414,4 +414,15 @@ pub const SCENE_COMMANDS: &[PaletteItem] = &[
             state.set_status_message("Switched to Roller Chain Sprocket Generator Inspector");
         }),
     },
+    // --- FEA Structural Analysis ---
+    PaletteItem {
+        name: "FEA: Linear Elasticity & Von Mises Stress Simulation",
+        category: "Simulation",
+        shortcut: "Inspector > FEA",
+        keywords: &["fea", "stress", "von mises", "finite element", "elasticity", "deflection", "safety"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::Fea;
+            state.set_status_message("Switched to FEA Structural Simulation Inspector");
+        }),
+    },
 ];

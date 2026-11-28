@@ -18,6 +18,7 @@ pub mod boolean;
 pub mod decimate;
 pub mod diagnostics;
 pub mod drafting;
+pub mod fea;
 pub mod fluid_sph;
 pub mod gaussian_splat;
 pub mod groom;
@@ -65,6 +66,10 @@ pub use drafting::{
     CenterMark, DiameterDimension, DrawingSheet, DrawingView, FeatureControlFrame,
     GdtCharacteristic, HlrEdgeSegment, HlrEngine, HlrLineStyle, LinearDimension,
     MaterialCondition, ProjectionStandard, SheetFormat, TitleBlock, ViewCamera, ViewType,
+};
+pub use fea::{
+    AppliedLoad, FeaConfig, FeaMaterial, FeaReport, FeaSolver, MaterialPreset, SupportConstraint,
+    SupportType, Tet4Element, TetMesh,
 };
 pub use fluid_sph::{FluidParticle, SphFluidSimulator, SphSettings};
 pub use gaussian_splat::{GaussianCloud, GaussianSplat};

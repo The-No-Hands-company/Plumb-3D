@@ -9,7 +9,7 @@
 [![CI/CD Build & Test](https://github.com/The-No-Hands-company/Plumb-3D/actions/workflows/ci.yml/badge.svg)](https://github.com/The-No-Hands-company/Plumb-3D/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Pure Safe Rust](https://img.shields.io/badge/Rust-100%25%20Safe-brightgreen.svg)](#architectural-compliance--quality-standards)
-[![Tests Passing](https://img.shields.io/badge/Tests-434%20Passed-success.svg)](#architectural-compliance--quality-standards)
+[![Tests Passing](https://img.shields.io/badge/Tests-438%20Passed-success.svg)](#architectural-compliance--quality-standards)
 [![Zero Clippy Warnings](https://img.shields.io/badge/Clippy-0%20Warnings-success.svg)](#architectural-compliance--quality-standards)
 
 </div>
@@ -37,9 +37,9 @@ Inspired by the precision modeling workflows of **Plasticity**, the topological 
 
 ---
 
-## Key Highlights & Subsystem Architecture (24 Hardened Domains)
+## Key Highlights & Subsystem Architecture (25 Hardened Domains)
 
-Plumb 3D is hardened across **24 systematic subsystems** with full unit test coverage and production UI integration:
+Plumb 3D is hardened across **25 systematic subsystems** with full unit test coverage and production UI integration:
 
 ### 1. Mesh Primitives & Parametric Generators
 - 10 Parametric Primitives: Cube, Cylinder, Cone, UV Sphere, IcoSphere, Torus, Planar Grid, Pyramid, Capsule, and the mascot Plumb Bob.
@@ -185,6 +185,12 @@ Plumb 3D is hardened across **24 systematic subsystems** with full unit test cov
 - **Involute Gear Transmission Engine**: True involute tooth flank curve generator ($x(\phi), y(\phi)$) for Spur Gears, Helical Gears (axial helix angle $\beta$ with continuous tooth twist), and Bevel Gears (pitch cone angle taper).
 - **Roller Chain Sprockets**: ANSI B29.1 standard roller chain sprockets (ANSI #25, #35, #40, #50, #60) with exact roller seating pockets, tooth crests, and mounting hub collars.
 
+### 25. Finite Element Analysis (FEA) Structural Simulation & Stress Tensor Heatmaps
+- **Linear Elasticity Solver & Tet4 Meshing**: Direct linear elasticity solver using linear 4-node tetrahedral elements (Tet4) with analytical volume evaluation, strain-displacement matrix $[B]$, and element stiffness $[k_e] = [B]^T [D] [B] V_e$.
+- **Preconditioned Conjugate Gradient (PCG)**: Solves large sparse $[K] \{U\} = \{F\}$ systems for nodal displacement vectors.
+- **Cauchy Stress Recovery & Von Mises Yield Criteria**: Recovers full 3D stress tensors across nodes, calculates Von Mises equivalent stress, and evaluates structural Factor of Safety ($\text{FoS} = \sigma_y / \sigma_v$).
+- **Boundary Anchors & Body Loads**: Fixed/pinned support constraints, mechanical load vectors (N), gravitational body loads, and exaggerated deformation displacement overlays ($1\times - 1000\times$).
+
 ---
 
 ## Workspace Architecture
@@ -208,7 +214,7 @@ The codebase is organized into 7 decoupled, pure-Rust crates under `crates/`:
 - **100% Pure Safe Rust**: Zero `unsafe` code blocks across the entire codebase (`zero unsafe` policy).
 - **Zajfan Engineering Standard**: Every single `.rs` file strictly adheres to the $\le 630$ line ceiling. Monolithic files are broken into clean, cohesive submodules.
 - **Zero Warnings**: Compiles completely clean under `cargo clippy --workspace -- -D warnings`.
-- **Comprehensive Verification**: **434+ passing unit and integration tests** verifying geometry invariants, CAD precision, path tracing, and scene graph evaluation.
+- **Comprehensive Verification**: **438+ passing unit and integration tests** verifying geometry invariants, CAD precision, path tracing, and scene graph evaluation.
 - **Clean Typography**: 100% 7-bit ASCII typography throughout the entire UI subsystem, preventing font fallback tofu glyphs.
 
 ---
@@ -279,6 +285,7 @@ cargo run -p app --release
 | | `Inspector > Drafting` | ANSI/ISO 2D Drawing Sheets, Vector HLR & GD&T |
 | | `Inspector > Sheet Metal` | DIN 6935 K-Factor Flanges & 1-Click Flat-Pattern Unfolding |
 | | `Inspector > Mechanical` | ISO Fasteners, Involute Gears & Roller Sprockets |
+| | `Inspector > FEA` | Linear Elasticity, Von Mises Stress & Factor of Safety |
 | **Windows & Studio** | `F1` | In-Software User Manual & Tutorials Hub |
 | | `F2` | Welcome & Quick-Start Project Hub |
 | | `F3` / `Ctrl + K` | Omnipresent Command Palette search |
@@ -292,7 +299,7 @@ cargo run -p app --release
 
 Plumb 3D enforces a strict separation of concerns across major product generations. **Version 1.x is strictly The Modeler**, maintaining laser focus on pure modeling speed, CAD precision, and rock-solid geometry:
 
-### Completed Releases (v1.0.0 – v1.11.0)
+### Completed Releases (v1.0.0 – v1.12.0)
 - **v1.0.0 (Commercial Hardened Foundation)**: 2-manifold BMesh Half-Edge kernel, 16-modifier stack, G2 CAD splines, STEP export, UV unwrapping, native `.plmb` container, 5 semantic design-token themes, arbitrary docking (`egui_dock`), and 3 interactive walkthroughs.
 - **v1.1.0 (Precision CAD & Curve Drafting)**: 2D constraint sketcher on workplanes, live dimension callouts, and multi-rail curve lofts.
 - **v1.2.0 (Universal Interop & Production Shading)**: Native glTF 2.0 / GLB container export & import with PBR materials, and micro-chamfer normal perturbation shader.
@@ -305,9 +312,9 @@ Plumb 3D enforces a strict separation of concerns across major product generatio
 - **v1.9.0 (Technical 2D Engineering Drawings, Vector HLR & GD&T)**: First & Third Angle orthographic projections, analytical vector Hidden Line Removal (HLR), ASME Y14.5 GD&T feature control frames, ISO A4–A0 & ANSI A–E sheets, and vector SVG & AutoCAD DXF exporters.
 - **v1.10.0 (Sheet Metal Engine & Flat-Pattern Unfolding)**: DIN 6935 K-factor bend physics, parametric base & edge flanges, 1-click flat pattern unfolding, and multi-layer CNC DXF (`OUTER_CUT`, `BEND_UP`, `BEND_DOWN`) + SVG exports.
 - **v1.11.0 (Mechanical Part Generators & Fastener Library)**: Parametric ISO/ANSI metric fasteners (M2–M30 bolts, screws, nuts, washers), analytical Involute Gears (Spur, Helical, Bevel), and ANSI roller chain sprockets (#25–#60).
+- **v1.12.0 (Finite Element Analysis & Stress Tensor Heatmaps)**: Linear elasticity solver using Tet4 elements, Cauchy stress tensor recovery, Von Mises equivalent stress, and structural Factor of Safety (FoS) failure analysis.
 
-### Target Releases to 100% CAD Modeler Completeness (v1.12.0 – v1.16.0)
-- **v1.12.0**: *Finite Element Analysis (FEA) Structural Simulation* — Linear elasticity solver, Von Mises stress tensor heatmaps, displacement vector deformation overlays, and Factor of Safety (FoS) analysis.
+### Target Releases to 100% CAD Modeler Completeness (v1.13.0 – v1.16.0)
 - **v1.13.0**: *CAM & CNC G-Code Toolpath Generator* — Facing, 2.5D adaptive clearing roughing, ball-end surfacing, lead-in/lead-out arcs, and RS-274 standard G-Code export.
 - **v1.14.0**: *Parametric Design Tables & Global Expression Variables* — Mathematical expression parser for dimensions (`Width * 0.5 + 2.0`) and CSV/TSV configuration tables for part families.
 - **v1.15.0**: *Generative Design & Topology Optimization* — SIMP material penalization method, compliance minimization under volume constraints, and organic load-path lattice generation.

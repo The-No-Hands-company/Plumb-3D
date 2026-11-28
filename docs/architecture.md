@@ -56,5 +56,6 @@ The geometric kernel is organized into modular mathematical engines:
 | `drafting/` | Technical 2D drafting: First & Third angle orthographic camera projections, analytical vector Hidden Line Removal (HLR), ASME Y14.5 GD&T feature control frames, and DXF / SVG sheet exporters. |
 | `sheet_metal/` | DIN 6935 K-factor bend deduction engine, parametric base & edge flanges, 1-click flat pattern unfolding, and multi-layer CNC DXF (`OUTER_CUT`, `BEND_UP`, `BEND_DOWN`) + SVG export. |
 | `mechanical/` | Parametric ANSI/ISO Fasteners (M2-M30 bolts, SHCS, nuts, washers), Involute Gears (Spur, Helical with twist, Bevel with taper), and ANSI roller chain sprockets (#25-#60). |
+| `fea/` | Finite element linear elasticity solver, 4-node tetrahedral (Tet4) formulation, material models, Cauchy stress recovery, Von Mises yield criteria, and Factor of Safety (FoS). |
 | `io/` | Universal CAD and DCC interop: ISO 10303-21 STEP, ANSI/USAF IGES 5.3, native glTF 2.0 / GLB, USDA, native binary `.plmb` container, OBJ, STL, and PLY. |
 | `modifiers/` | Non-destructive 16-modifier stack: Bevel, Solidify, Mirror, Array, Boolean (BSP), Subdivide, Displace, Shrinkwrap, Curve, Lattice, Remesh, and Weighted Normals. |

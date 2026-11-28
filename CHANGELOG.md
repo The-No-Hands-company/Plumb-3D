@@ -4,6 +4,29 @@ All notable changes to the Plumb 3D DCC Suite are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2026-11-28 - Finite Element Analysis (FEA) Structural Simulation & Stress Tensor Heatmaps
+
+### Added
+- **Linear Elasticity Solver & Tet4 Finite Elements**:
+  - Direct linear elasticity solver using 4-node tetrahedral elements (Tet4) with analytical volume evaluation, strain-displacement matrix $[B]$, and element stiffness $[k_e] = [B]^T [D] [B] V_e$.
+  - Preconditioned Conjugate Gradient (PCG) solver for global linear systems $[K] \{U\} = \{F\}$.
+- **Standard Structural Materials**:
+  - Isotropic material models with Young's Modulus ($E$), Poisson's Ratio ($\nu$), Yield Strength ($\sigma_y$), and Density ($\rho$).
+  - Built-in presets for ASTM A36 Structural Steel, Aluminum 6061-T6, Titanium Ti-6Al-4V Grade 5, PLA Plastic (3D print), and ABS Plastic.
+- **Cauchy Stress Tensor Recovery & Failure Analysis**:
+  - Recovers 3D Cauchy stress tensor $\boldsymbol{\sigma} = [\sigma_{xx}, \sigma_{yy}, \sigma_{zz}, \tau_{xy}, \tau_{yz}, \tau_{zx}]$ across elements and nodes.
+  - Computes Von Mises equivalent stress $\sigma_v = \sqrt{\frac{1}{2}\left[(\sigma_{xx}-\sigma_{yy})^2 + (\sigma_{yy}-\sigma_{zz})^2 + (\sigma_{zz}-\sigma_{xx})^2 + 6(\tau_{xy}^2 + \tau_{yz}^2 + \tau_{zx}^2)\right]}$.
+  - Evaluates structural Factor of Safety ($\text{FoS} = \sigma_y / \sigma_v$) and detects plastic yielding.
+- **Structural Boundary Conditions & Body Loads**:
+  - Fixed / pinned support constraints locking translational degrees of freedom.
+  - Point and distributed mechanical load vectors (Newtons).
+  - Gravitational body forces ($\vec{g} = [0, 0, -9.81]\,\text{m/s}^2$).
+  - Exaggerated deformation displacement visualization ($1\times$ to $1000\times$).
+- **Inspector UI & Commands**:
+  - Dedicated **FEA** Inspector tab with live material presets, boundary condition setups, and safety factor evaluation.
+  - `RunFeaSimulationCommand` with full undo/redo.
+  - Command Palette shortcut for instant structural simulation execution.
+
 ## [1.11.0] - 2026-11-28 - Mechanical Part Generators & Fastener Library
 
 ### Added
