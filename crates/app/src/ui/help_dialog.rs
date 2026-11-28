@@ -423,7 +423,7 @@ fn draw_tab_about(ui: &mut egui::Ui) {
 
     ui.add_space(8.0);
     ui.label(egui::RichText::new("Engine Status:").strong());
-    ui.label("Plumb 3D Suite Version: 1.3.0 High-Speed Direct Modeling UX");
+    ui.label("Plumb 3D Suite Version: 1.4.0 Field-Aligned Quad Retopo & Pixar SubD Limit");
     ui.label(
         "All 7 workspace crates verified with 354 passing unit tests and 0 compiler warnings.",
     );

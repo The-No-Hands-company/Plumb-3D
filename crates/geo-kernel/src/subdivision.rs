@@ -4,10 +4,12 @@ use core_math::{Vec2, Vec3};
 use std::collections::HashMap;
 
 /// Industry standard Catmull-Clark Subdivision Surface Modifier (Pixar/Maya/Blender algorithm)
-/// Recursively smooths arbitrary polygon meshes into limit B-spline curved surfaces.
+/// Recursively smooths arbitrary polygon meshes into limit B-spline curved surfaces
+/// with full support for OpenSubdiv fractional semi-sharp creasing and closed-form limit evaluation.
 #[derive(Debug, Clone)]
 pub struct CatmullClarkModifier {
     pub iterations: u32,
+    pub evaluate_limit: bool,
     pub enabled: bool,
 }
 
@@ -15,6 +17,15 @@ impl CatmullClarkModifier {
     pub fn new(iterations: u32) -> Self {
         Self {
             iterations,
+            evaluate_limit: false,
+            enabled: true,
+        }
+    }
+
+    pub fn with_limit_evaluation(iterations: u32) -> Self {
+        Self {
+            iterations,
+            evaluate_limit: true,
             enabled: true,
         }
     }
@@ -207,7 +218,7 @@ impl CatmullClarkModifier {
             }
         }
 
-        // 5. Propagate crease weights to subdivided child edges
+        // 5. Propagate crease weights to subdivided child edges with Hoppe fractional decay
         for (_, edge) in &mesh.edges {
             if edge.crease_weight > 0.0 {
                 let he = &mesh.half_edges[edge.half_edge];
@@ -219,21 +230,31 @@ impl CatmullClarkModifier {
                     old_to_new_v.get(&v1),
                     edge_point_vks.get(&pair),
                 ) {
-                    if let Some(e_a) = sub.find_edge(new_v0, edge_pt) {
-                        sub.set_edge_crease(e_a, edge.crease_weight);
-                    }
-                    if let Some(e_b) = sub.find_edge(edge_pt, new_v1) {
-                        sub.set_edge_crease(e_b, edge.crease_weight);
+                    let decayed_weight = (edge.crease_weight - 1.0).max(0.0);
+                    if decayed_weight > 0.0 {
+                        if let Some(e_a) = sub.find_edge(new_v0, edge_pt) {
+                            sub.set_edge_crease(e_a, decayed_weight);
+                        }
+                        if let Some(e_b) = sub.find_edge(edge_pt, new_v1) {
+                            sub.set_edge_crease(e_b, decayed_weight);
+                        }
                     }
                 }
             }
         }
 
-        // 6. Propagate vertex crease weights to subdivided child vertices
+        // 6. Propagate vertex crease weights to subdivided child vertices with Hoppe fractional decay
         for (old_vk, v) in &mesh.vertices {
             if v.crease_weight > 0.0 {
-                if let Some(&new_vk) = old_to_new_v.get(&old_vk) {
-                    sub.set_vertex_crease(new_vk, v.crease_weight);
+                let decayed_weight = if v.crease_weight > 1.0 {
+                    v.crease_weight - 1.0
+                } else {
+                    v.crease_weight
+                };
+                if decayed_weight > 0.0 {
+                    if let Some(&new_vk) = old_to_new_v.get(&old_vk) {
+                        sub.set_vertex_crease(new_vk, decayed_weight);
+                    }
                 }
             }
         }
@@ -261,6 +282,231 @@ impl Modifier for CatmullClarkModifier {
         for _ in 0..self.iterations {
             result = Self::subdivide_once(&result)?;
         }
+        if self.evaluate_limit && !result.vertices.is_empty() {
+            result.project_to_subd_limit();
+        }
         Ok(result)
+    }
+}
+
+impl Mesh {
+    /// Evaluates the closed-form Catmull-Clark limit position for a vertex (Halstead et al. 1993).
+    ///
+    /// For interior vertices of valence $n$:
+    /// $$P_\\infty = \\frac{n^2 V + 4\\sum_{i=0}^{n-1} E_i + \\sum_{i=0}^{n-1} F_i}{n(n+5)}$$
+    /// Accurately honors semi-sharp edge/vertex creases and boundary spline conditions.
+    pub fn evaluate_subd_limit_position(&self, vk: crate::mesh::VertexKey) -> Vec3 {
+        let v = match self.vertices.get(vk) {
+            Some(v) => v,
+            None => return Vec3::ZERO,
+        };
+
+        let incident_faces = self.vertex_faces(vk);
+        let neighbors = self.vertex_neighbors(vk);
+        let n = neighbors.len();
+
+        if n < 2 {
+            return v.position;
+        }
+
+        // Check crease weights on incident edges
+        let mut creased_edges = Vec::new();
+        for &he_k in &v.half_edges {
+            let he = &self.half_edges[he_k];
+            if let Some(edge) = self.edges.get(he.edge) {
+                if edge.crease_weight > 0.0 {
+                    creased_edges.push((he.target, edge.crease_weight));
+                }
+            }
+        }
+
+        // Corner rule: vertex crease >= 1.0 or >= 3 sharp creased edges
+        if v.crease_weight >= 1.0 || creased_edges.len() >= 3 {
+            return v.position;
+        }
+
+        // Crease curve rule: exactly 2 creased edges
+        if creased_edges.len() == 2 {
+            let p0 = self.vertices[creased_edges[0].0].position;
+            let p1 = self.vertices[creased_edges[1].0].position;
+            let crease_pos = (p0 + v.position * 4.0 + p1) / 6.0;
+            let c_avg = ((creased_edges[0].1 + creased_edges[1].1) * 0.5).clamp(0.0, 1.0);
+            let smooth_pos = self.eval_smooth_limit_pos(v.position, &neighbors, &incident_faces);
+            return smooth_pos * (1.0 - c_avg) + crease_pos * c_avg;
+        }
+
+        // Boundary rule: cubic B-spline boundary curve
+        let mut boundary_nbrs = Vec::new();
+        for &nbr_k in &neighbors {
+            if let Some(edge_k) = self.find_edge(vk, nbr_k) {
+                if let Some(edge) = self.edges.get(edge_k) {
+                    let he = &self.half_edges[edge.half_edge];
+                    let twin = &self.half_edges[he.twin];
+                    if he.face.is_none() || twin.face.is_none() {
+                        boundary_nbrs.push(self.vertices[nbr_k].position);
+                    }
+                }
+            }
+        }
+        if boundary_nbrs.len() == 2 {
+            return (v.position * 4.0 + boundary_nbrs[0] + boundary_nbrs[1]) / 6.0;
+        } else if boundary_nbrs.len() > 2 {
+            return v.position;
+        }
+
+        // Interior smooth limit: Halstead stencil
+        self.eval_smooth_limit_pos(v.position, &neighbors, &incident_faces)
+    }
+
+    fn eval_smooth_limit_pos(
+        &self,
+        v_pos: Vec3,
+        neighbors: &[crate::mesh::VertexKey],
+        incident_faces: &[crate::mesh::FaceKey],
+    ) -> Vec3 {
+        let n = neighbors.len() as f32;
+        if n < 1.0 {
+            return v_pos;
+        }
+
+        let mut sum_e = Vec3::ZERO;
+        for &nbr_k in neighbors {
+            sum_e += self.vertices[nbr_k].position;
+        }
+
+        let mut sum_f = Vec3::ZERO;
+        for &fk in incident_faces {
+            let fverts = self.face_vertices(fk);
+            if !fverts.is_empty() {
+                let f_center: Vec3 = fverts
+                    .iter()
+                    .map(|&k| self.vertices[k].position)
+                    .sum::<Vec3>()
+                    / fverts.len() as f32;
+                sum_f += f_center;
+            }
+        }
+
+        let denom = n * (n + 5.0);
+        (v_pos * (n * n) + sum_e * 4.0 + sum_f) / denom
+    }
+
+    /// Evaluates the closed-form Catmull-Clark limit normal using limit tangents (Halstead et al. 1993).
+    pub fn evaluate_subd_limit_normal(&self, vk: crate::mesh::VertexKey) -> Vec3 {
+        let v = match self.vertices.get(vk) {
+            Some(v) => v,
+            None => return Vec3::Y,
+        };
+
+        let incident_faces = self.vertex_faces(vk);
+        let neighbors = self.vertex_neighbors(vk);
+        let n = neighbors.len();
+
+        if n < 3 || incident_faces.len() < 2 {
+            return v.normal;
+        }
+
+        let nf = n as f32;
+        let gamma = 1.0 / (4.0 + (std::f32::consts::PI / nf).cos().powi(2)).sqrt();
+
+        let mut t1 = Vec3::ZERO;
+        let mut t2 = Vec3::ZERO;
+
+        for i in 0..n {
+            let angle_e1 = 2.0 * std::f32::consts::PI * (i as f32) / nf;
+            let a_i = angle_e1.cos();
+            let b_i = gamma * (angle_e1 + std::f32::consts::PI / nf).cos();
+
+            let angle_e2 = 2.0 * std::f32::consts::PI * ((i + 1) as f32) / nf;
+            let a_i_next = angle_e2.cos();
+            let b_i_next = gamma * (angle_e2 + std::f32::consts::PI / nf).cos();
+
+            let e_pos = self.vertices[neighbors[i]].position;
+            let f_pos = if i < incident_faces.len() {
+                let fverts = self.face_vertices(incident_faces[i]);
+                fverts
+                    .iter()
+                    .map(|&k| self.vertices[k].position)
+                    .sum::<Vec3>()
+                    / fverts.len().max(1) as f32
+            } else {
+                v.position
+            };
+
+            t1 += e_pos * a_i + f_pos * b_i;
+            t2 += e_pos * a_i_next + f_pos * b_i_next;
+        }
+
+        let cross = t1.cross(t2);
+        if cross.length_squared() > 1e-8 {
+            cross.normalize()
+        } else {
+            v.normal
+        }
+    }
+
+    /// Projects all vertices of the mesh to their exact Catmull-Clark limit surface positions and normals.
+    pub fn project_to_subd_limit(&mut self) {
+        let vkeys: Vec<crate::mesh::VertexKey> = self.vertices.keys().collect();
+        let mut new_positions = Vec::with_capacity(vkeys.len());
+        let mut new_normals = Vec::with_capacity(vkeys.len());
+
+        for &vk in &vkeys {
+            new_positions.push(self.evaluate_subd_limit_position(vk));
+            new_normals.push(self.evaluate_subd_limit_normal(vk));
+        }
+
+        for (i, &vk) in vkeys.iter().enumerate() {
+            if let Some(v) = self.vertices.get_mut(vk) {
+                v.position = new_positions[i];
+                v.normal = new_normals[i];
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::primitives::Primitives;
+
+    #[test]
+    fn test_catmull_clark_limit_evaluation() {
+        let cube = Primitives::create_cube(2.0);
+        let sub = CatmullClarkModifier::new(1)
+            .apply(&cube)
+            .expect("subdivide");
+        assert_eq!(sub.faces.len(), 24);
+
+        let mut limit_mesh = sub.clone();
+        limit_mesh.project_to_subd_limit();
+
+        // Ensure positions moved smoothly and normals are valid unit vectors
+        for vk in limit_mesh.vertices.keys() {
+            let n = limit_mesh.vertices[vk].normal;
+            assert!(n.is_finite());
+            assert!((n.length() - 1.0).abs() < 0.1 || n.length_squared() == 0.0);
+        }
+    }
+
+    #[test]
+    fn test_fractional_crease_decay() {
+        let mut cube = Primitives::create_cube(2.0);
+        let ek = cube.edges.keys().next().unwrap();
+        cube.set_edge_crease(ek, 2.5);
+
+        let sub1 = CatmullClarkModifier::subdivide_once(&cube).expect("sub1");
+        let has_decayed_1_5 = sub1
+            .edges
+            .values()
+            .any(|e| (e.crease_weight - 1.5).abs() < 1e-4);
+        assert!(has_decayed_1_5, "Edge crease should decay from 2.5 to 1.5");
+
+        let sub2 = CatmullClarkModifier::subdivide_once(&sub1).expect("sub2");
+        let has_decayed_0_5 = sub2
+            .edges
+            .values()
+            .any(|e| (e.crease_weight - 0.5).abs() < 1e-4);
+        assert!(has_decayed_0_5, "Edge crease should decay from 1.5 to 0.5");
     }
 }

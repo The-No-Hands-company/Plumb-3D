@@ -474,10 +474,10 @@ impl Mesh {
         faces
     }
 
-    /// Sets the crease weight on an edge in [0.0, 1.0].
+    /// Sets the semi-sharp crease weight on an edge in [0.0, 10.0] (Pixar OpenSubdiv standard).
     pub fn set_edge_crease(&mut self, edge_key: EdgeKey, weight: f32) {
         if let Some(edge) = self.edges.get_mut(edge_key) {
-            edge.crease_weight = weight.clamp(0.0, 1.0);
+            edge.crease_weight = weight.clamp(0.0, 10.0);
             edge.is_sharp = edge.crease_weight > 0.0;
         }
     }
@@ -490,10 +490,10 @@ impl Mesh {
             .unwrap_or(0.0)
     }
 
-    /// Sets the crease weight on a vertex in [0.0, 1.0].
+    /// Sets the semi-sharp crease weight on a vertex in [0.0, 10.0] (Pixar OpenSubdiv standard).
     pub fn set_vertex_crease(&mut self, vertex_key: VertexKey, weight: f32) {
         if let Some(vertex) = self.vertices.get_mut(vertex_key) {
-            vertex.crease_weight = weight.clamp(0.0, 1.0);
+            vertex.crease_weight = weight.clamp(0.0, 10.0);
         }
     }
 

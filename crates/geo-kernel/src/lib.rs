@@ -69,8 +69,8 @@ pub use modifiers::{
 pub use multires::{MultiresLevel, MultiresMesh};
 pub use openvdb::{VdbGrid, VdbLeafBrick, VolumeGenerators, VolumetricSample};
 pub use operators::{
-    bevel::BevelProfile, CableGenerator, CutPoint, FilletContinuity, NgonMethod, QuadMethod,
-    SymmetrizeDirection, WeldStyle,
+    bevel::BevelProfile, CableGenerator, CurvatureTensor, CutPoint, FieldRemeshSettings,
+    FilletContinuity, NgonMethod, QuadMethod, SymmetrizeDirection, WeldStyle,
 };
 pub use plugin::{
     PluginError, PluginRegistry, PlumbMeshBuffer, PlumbPlugin, PlumbPluginDescriptor,

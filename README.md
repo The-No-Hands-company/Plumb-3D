@@ -252,9 +252,9 @@ Plumb 3D enforces a strict separation of concerns across major product generatio
 
 - **v1.0.0 (Frozen Commercial Release)**: Pure safe-Rust Polygonal & CAD Modeler foundation. 2-manifold BMesh kernel, non-destructive 16-modifier stack, G2 CAD splines with STEP export, UV unwrapping, native `.plmb` container, 5 semantic design-token themes, arbitrary docking (`egui_dock`), and 3 in-viewport interactive walkthroughs.
 - **v1.1.0 (Upcoming)**: *Precision CAD & Curve Drafting* — 2D constraint sketcher on workplanes, live parametric dimension callouts, and multi-rail curve lofts.
-- **v1.2.0**: *Modifier Mastery* — Lattice FFD deform, simple deform suite (bend, twist, taper, stretch), and weighted normals.
-- **v1.3.0**: *Hard-Surface Booleans 2.0* — Live interactive cutter gizmo, ghost cutters, and QuadriFlow guide curves.
-- **v1.4.0**: *UV Unwrapping & Print Prep* — LSCM conformal unwrapping, automatic island packing, and 3D print overhang heatmaps.
+- **v1.2.0**: *Universal Interop & Production Shading* — Native glTF 2.0 / GLB container export & import with PBR materials, and micro-chamfer normal perturbation shader.
+- **v1.3.0**: *High-Speed Direct Modeling UX* — Coplanar face-split polygon inscription and modal bi-directional push-pull carving (boss/cavity).
+- **v1.4.0**: *Field-Aligned Quad Retopology & Pixar SubD Limit Math* — Curvature field tensor alignment, OpenSubdiv fractional semi-sharp creases ($w \in [0.0, 10.0]$), and closed-form Catmull-Clark limit surface stencils.
 - **v1.5.0**: *Plugin SDK & Ecosystem* — C-ABI and WebAssembly (WASM) dynamic plugin loaders and customizable radial pie menus.
 
 ### Long-Term Generational Roadmap

@@ -2,9 +2,12 @@
 //! Provides QuadriFlow 4-RoSy field-aligned auto-retopology,
 //! continuous bicubic SubD-to-NURBS STEP solid conversion, and manifold voxel remeshing.
 
+use crate::commands::{FieldRemeshCommand, SubdLimitCommand};
 use crate::state::AppState;
 use crate::ui::actions::UiActions;
-use geo_kernel::{convert_mesh_to_nurbs_patches, export_subd_nurbs_step, QuadriflowSettings};
+use geo_kernel::{
+    convert_mesh_to_nurbs_patches, export_subd_nurbs_step, FieldRemeshSettings, QuadriflowSettings,
+};
 use graph_engine::{NodeData, NodeId};
 
 pub fn draw_topology_cad_panel(
@@ -108,6 +111,48 @@ pub fn draw_topology_cad_panel(
                 }
             }
         }
+
+        ui.add_space(6.0);
+        ui.separator();
+        ui.horizontal(|ui| {
+            ui.label(egui::RichText::new("Curvature Field-Aligned Quad Remesh").strong());
+        });
+        ui.horizontal(|ui| {
+            ui.label("Edge Length:");
+            ui.add(
+                egui::Slider::new(&mut state.field_remesh_edge_len, 0.05..=2.0)
+                    .step_by(0.05)
+                    .suffix("m"),
+            );
+        });
+        ui.horizontal(|ui| {
+            ui.label("Curvature Weight:");
+            ui.add(egui::Slider::new(
+                &mut state.field_remesh_curvature_influence,
+                0.0..=1.0,
+            ));
+        });
+
+        if ui
+            .button("Run Curvature Quad Remesh")
+            .on_hover_text(
+                "Extracts all-quad topology aligned with principal surface curvature tensors",
+            )
+            .clicked()
+        {
+            let settings = FieldRemeshSettings {
+                target_edge_length: state.field_remesh_edge_len,
+                curvature_influence: state.field_remesh_curvature_influence,
+                smooth_passes: 4,
+            };
+            let cmd = Box::new(FieldRemeshCommand::new(sel_id, settings));
+            if let Err(e) = state.history.execute(cmd, &mut state.scene) {
+                state.set_status_message(format!("Quad remesh failed: {}", e));
+            } else {
+                state.sync_gpu_meshes();
+                state.set_status_message("Mesh remeshed to field-aligned quads.");
+            }
+        }
     });
 
     ui.separator();
@@ -115,10 +160,10 @@ pub fn draw_topology_cad_panel(
     // 2. SubD-to-NURBS Limit Surface CAD Solid
     ui.group(|ui| {
         ui.horizontal(|ui| {
-            ui.label(egui::RichText::new("SubD-to-NURBS Limit Surface CAD").strong());
+            ui.label(egui::RichText::new("Pixar OpenSubdiv Limit Surface & CAD").strong());
         });
         ui.label(
-            egui::RichText::new("Evaluates Catmull-Clark limit surface into exact bicubic Bezier NURBS patches.")
+            egui::RichText::new("Evaluates closed-form Catmull-Clark limit surface and bicubic Bezier NURBS patches.")
                 .small()
                 .weak(),
         );
@@ -126,27 +171,43 @@ pub fn draw_topology_cad_panel(
         let patch_count = base_mesh.faces.len();
         ui.label(format!("Estimated NURBS Patches: {}", patch_count));
 
-        if ui.button("Export Continuous NURBS STEP Solid (.step)")
-            .on_hover_text("Exports mathematical bicubic G1 continuous limit surface to standard ISO 10303-21 STEP CAD solid")
-            .clicked()
-        {
-            let node_name = state.scene.nodes.get(sel_id).map(|n| n.name.clone()).unwrap_or_else(|| "SubDModel".into());
-            if let Some(path) = rfd::FileDialog::new()
-                .add_filter("STEP CAD Solid (*.step, *.stp)", &["step", "stp"])
-                .set_file_name(format!("{}.step", node_name))
-                .save_file()
+        ui.horizontal(|ui| {
+            if ui
+                .button("Evaluate Pixar Limit Surface")
+                .on_hover_text("Projects mesh vertices directly onto exact Catmull-Clark limit surface using Halstead stencils")
+                .clicked()
             {
-                let step_content = export_subd_nurbs_step(&base_mesh, &node_name);
-                if std::fs::write(&path, step_content).is_ok() {
-                    let patches = convert_mesh_to_nurbs_patches(&base_mesh);
-                    state.set_status_message(format!(
-                        "Exported {} bicubic NURBS patches to: {}",
-                        patches.len(),
-                        path.display()
-                    ));
+                let cmd = Box::new(SubdLimitCommand::new(sel_id));
+                if let Err(e) = state.history.execute(cmd, &mut state.scene) {
+                    state.set_status_message(format!("Limit evaluation failed: {}", e));
+                } else {
+                    state.sync_gpu_meshes();
+                    state.set_status_message("Mesh projected to exact Pixar SubD limit surface.");
                 }
             }
-        }
+
+            if ui.button("Export NURBS STEP Solid (.step)")
+                .on_hover_text("Exports mathematical bicubic G1 continuous limit surface to standard ISO 10303-21 STEP CAD solid")
+                .clicked()
+            {
+                let node_name = state.scene.nodes.get(sel_id).map(|n| n.name.clone()).unwrap_or_else(|| "SubDModel".into());
+                if let Some(path) = rfd::FileDialog::new()
+                    .add_filter("STEP CAD Solid (*.step, *.stp)", &["step", "stp"])
+                    .set_file_name(format!("{}.step", node_name))
+                    .save_file()
+                {
+                    let step_content = export_subd_nurbs_step(&base_mesh, &node_name);
+                    if std::fs::write(&path, step_content).is_ok() {
+                        let patches = convert_mesh_to_nurbs_patches(&base_mesh);
+                        state.set_status_message(format!(
+                            "Exported {} bicubic NURBS patches to: {}",
+                            patches.len(),
+                            path.display()
+                        ));
+                    }
+                }
+            }
+        });
     });
 
     ui.separator();

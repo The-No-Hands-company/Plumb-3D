@@ -1,4 +1,5 @@
 pub mod items;
+pub mod items_scene;
 
 use crate::state::AppState;
 use crate::ui::actions::UiActions;
@@ -296,7 +297,7 @@ mod tests {
     #[test]
     fn test_command_list_completeness() {
         assert!(COMMAND_LIST.len() >= 30);
-        for cmd in COMMAND_LIST {
+        for cmd in COMMAND_LIST.iter() {
             assert!(!cmd.name.is_empty());
             assert!(!cmd.category.is_empty());
             assert!(!cmd.keywords.is_empty());

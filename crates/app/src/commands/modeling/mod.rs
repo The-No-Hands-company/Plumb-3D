@@ -1,17 +1,21 @@
 pub mod advanced_fillet;
 pub mod curves;
 pub mod deform;
+pub mod field_remesh;
 pub mod mesh_ops;
 pub mod push_pull;
 pub mod remesh;
 pub mod sketch;
+pub mod subd_limit;
 pub mod topology;
 
 pub use advanced_fillet::*;
 pub use curves::*;
 pub use deform::*;
+pub use field_remesh::*;
 pub use mesh_ops::*;
 pub use push_pull::*;
 pub use remesh::*;
 pub use sketch::*;
+pub use subd_limit::*;
 pub use topology::*;

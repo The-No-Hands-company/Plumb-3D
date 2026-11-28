@@ -25,6 +25,7 @@ pub mod weld_bead;
 pub mod weld_clean;
 
 pub use cable::CableGenerator;
+pub use field_remesh::{CurvatureTensor, FieldRemeshSettings};
 pub use push_pull::PushPullResult;
 pub use types::*;
 pub use variable_bevel::FilletContinuity;
