@@ -45,6 +45,8 @@ pub enum ProjectTemplate {
     HardSurface,
     CadPrecision,
     Sculpting,
+    SciFiCrateTutorial,
+    SciFiCrate,
     CastleTowerTutorial,
     CastleTower,
     LunarTutorialBlank,
@@ -177,6 +179,7 @@ pub fn draw_welcome_hub(state: &mut AppState, _actions: &mut UiActions) {
                     (ProjectTemplate::HardSurface, "Hard-Surface Modeling", "Sub-d quad mesh, face mode, wireframe active"),
                     (ProjectTemplate::CadPrecision, "CAD Precision Drafting", "1mm grid snapping, calipers active, orthogonal camera"),
                     (ProjectTemplate::Sculpting, "Organic Sculpting", "Sculpting sphere, MatCap Clay, brush tools active"),
+                    (ProjectTemplate::SciFiCrateTutorial, "📦 Sci-Fi Crate: Guided Tutorial", "Box modeling masterclass: Cube, Inset, Recessed Extrude & Bevel chamfers"),
                     (ProjectTemplate::CastleTowerTutorial, "🏰 Castle Tower: Guided Tutorial", "Build from scratch: Cylinder, Inset parapet, Extrude sunken walkway & crenels"),
                     (ProjectTemplate::CastleTower, "🏰 Medieval Citadel: Finished Scene", "Multi-mesh fortress with keep, ramparts, watchtower & torchlights"),
                     (ProjectTemplate::LunarTutorialBlank, "🌕 Lunar Night Sky: Guided Tutorial", "Build from scratch: 128x128 UV Sphere, PBR regolith, sunlight & skybox"),
@@ -345,6 +348,26 @@ pub fn apply_project_template(state: &mut AppState, template: ProjectTemplate) {
             state.show_wireframe = false;
             state.show_outliner = false;
             state.inspector_tab = InspectorTab::Tools;
+        }
+        ProjectTemplate::SciFiCrateTutorial => {
+            apply_studio_domain(state, StudioDomain::HardSurfaceCad);
+            apply_workspace(state, WorkspaceTemplate::HardSurface);
+            crate::scenes::build_scifi_crate_tutorial_blank(state);
+            return;
+        }
+        ProjectTemplate::SciFiCrate => {
+            apply_studio_domain(state, StudioDomain::HardSurfaceCad);
+            apply_workspace(state, WorkspaceTemplate::HardSurface);
+            let (scene, camera, id) = crate::scenes::build_scifi_crate_finished_graph();
+            state.scene = scene;
+            state.camera = camera;
+            state.selected_node = Some(id);
+            state.interaction_mode = InteractionMode::Object;
+            state.viewport_shading = ViewportShadingMode::Studio;
+            state.show_wireframe = true;
+            state.sync_gpu_meshes();
+            state.set_status_message("📦 Loaded Finished Sci-Fi Storage Crate showcase scene!");
+            return;
         }
         ProjectTemplate::CastleTowerTutorial => {
             apply_studio_domain(state, StudioDomain::HardSurfaceCad);

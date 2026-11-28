@@ -2,6 +2,7 @@ use crate::state::AppState;
 use core_math::{vec3, EulerRot, Quat, Transform};
 
 use super::walkthrough_actions::{render_castle_tower_step_buttons, render_lunar_step_buttons};
+use super::walkthrough_crate::render_scifi_crate_step_buttons;
 
 /// Identifies which tutorial journey is currently loaded in the walkthrough overlay.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -10,6 +11,7 @@ pub enum WalkthroughId {
     None,
     LunarNightSky,
     CastleTower,
+    SciFiCrate,
 }
 
 /// Single step definition in an interactive in-viewport walkthrough tutorial.
@@ -150,6 +152,68 @@ impl WalkthroughState {
             ],
         }
     }
+
+    /// Factory constructor for the hands-on "Sci-Fi Storage Crate" box modeling walkthrough.
+    pub fn scifi_crate() -> Self {
+        Self {
+            id: WalkthroughId::SciFiCrate,
+            is_active: true,
+            current_step: 0,
+            title: "📦 Tutorial: Sci-Fi Storage Crate".to_string(),
+            collapsed: false,
+            steps: vec![
+                WalkthroughStep {
+                    title: "Step 1: The Default Cargo Cube".to_string(),
+                    subtitle: "Add -> Mesh -> Cube (Shift+A)".to_string(),
+                    body: "Box modeling is the foundational technique of 3D hard-surface art. Every mechanical asset starts from a simple six-sided cube, carved into complex machinery using Inset, Extrude, and Bevel.".to_string(),
+                    hotkey: Some("Add -> Mesh -> Cube (2m x 2m x 2m)".to_string()),
+                    tip: Some("A 2.0m cube aligns perfectly with standard game engine and architectural scale grids.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 2: Enter Edit Mode & Select Side Faces".to_string(),
+                    subtitle: "Press Tab -> Press '3' (Face Mode)".to_string(),
+                    body: "Press 'Tab' to enter Edit Mode. Press '3' for Face selection level. Select the 4 perimeter side panels of the cube to prepare them for recessed mechanical plating.".to_string(),
+                    hotkey: Some("Tab (Edit Mode) | 3 (Face Selection) | Shift+LMB Sides".to_string()),
+                    tip: Some("All 4 selected faces highlight in bright cyan in the 3D viewport.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 3: Individual Inset (Panel Framing)".to_string(),
+                    subtitle: "Press 'I' -> 'I' again for Individual Inset".to_string(),
+                    body: "Press 'I' to activate Inset. Press 'I' a second time to toggle 'Individual Inset' mode. Inset by 0.18m to create heavy structural frame borders around each face.".to_string(),
+                    hotkey: Some("I -> I (Toggle Individual Inset) -> 0.18m".to_string()),
+                    tip: Some("Individual Inset scales each face toward its own center instead of the collective group median.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 4: Recessed Extrusion (Negative Extrude)".to_string(),
+                    subtitle: "Press 'E' -> Move Inward -0.12m".to_string(),
+                    body: "With the 4 inset panels selected, press 'E' to Extrude and push them inward (-0.12m) along their normals. This sinks the panels into protected structural bays.".to_string(),
+                    hotkey: Some("E (Extrude) -> Move Inward (-0.12m)".to_string()),
+                    tip: Some("Negative extrusions create natural shadow catchers that pop under studio lighting.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 5: Non-Destructive Bevel Chamfers".to_string(),
+                    subtitle: "Inspector -> Modifiers -> + Bevel (3 Segments)".to_string(),
+                    body: "Real-world metal never has infinitely sharp 0-width edges. In the Inspector Modifier Stack, click '+ Bevel'. Set Width to 0.035m and Segments to 3 for silky specular edge gleams!".to_string(),
+                    hotkey: Some("Inspector -> Modifiers -> + Bevel (Width 0.035m, 3 Segs)".to_string()),
+                    tip: Some("Bevel modifiers in Plumb 3D run live on the GPU mesh, keeping the base topology non-destructively clean.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 6: Gunmetal Alloy PBR LookDev".to_string(),
+                    subtitle: "Inspector -> Materials | Studio Viewport Cavity".to_string(),
+                    body: "Assign Industrial Gunmetal PBR (Metallic 0.88, Roughness 0.32). Turn on Viewport Cavity Shading in Studio mode to accentuate the recessed seams.".to_string(),
+                    hotkey: Some("Inspector -> Materials -> Gunmetal PBR".to_string()),
+                    tip: Some("Metallic reflections catch the 3-point studio lights, while cavity shading deepens the recessed pockets.".to_string()),
+                },
+                WalkthroughStep {
+                    title: "Step 7: Production Render Beauty Shot".to_string(),
+                    subtitle: "Direct PBR Snapshot (F11) or Path Tracer (F12)".to_string(),
+                    body: "Press 'F11' for an instant (<0.15s) multi-pass stratified Direct PBR snapshot with ground shadow catching, or press 'F12' for progressive Monte Carlo path tracing with filmic tone mapping!".to_string(),
+                    hotkey: Some("F11 for Instant Snapshot | F12 for Path Tracer".to_string()),
+                    tip: Some("Notice the ground shadow plane automatically catches contact shadows beneath the crate!".to_string()),
+                },
+            ],
+        }
+    }
 }
 
 /// Renders the floating interactive walkthrough card inside the 3D viewport.
@@ -228,6 +292,9 @@ pub fn render(state: &mut AppState) {
                 WalkthroughId::CastleTower => {
                     render_castle_tower_step_buttons(ui, state, current_step, &mut focus_camera);
                 }
+                WalkthroughId::SciFiCrate => {
+                    render_scifi_crate_step_buttons(ui, state, current_step, &mut focus_camera);
+                }
                 _ => {
                     render_lunar_step_buttons(ui, state, current_step, &mut set_full_moon, &mut set_crescent, &mut focus_camera);
                 }
@@ -281,6 +348,13 @@ pub fn render(state: &mut AppState) {
                 state.camera.distance = 11.0;
                 state.camera.pitch = 0.35;
                 state.camera.yaw = 0.45;
+                state.camera.fov_y = 45.0_f32.to_radians();
+            }
+            WalkthroughId::SciFiCrate => {
+                state.camera.target = vec3(0.0, 1.0, 0.0);
+                state.camera.distance = 5.2;
+                state.camera.pitch = 0.32;
+                state.camera.yaw = 0.65;
                 state.camera.fov_y = 45.0_f32.to_radians();
             }
             _ => {

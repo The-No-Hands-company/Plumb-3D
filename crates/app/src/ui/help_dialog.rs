@@ -210,6 +210,34 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
         ui.add_space(4.0);
     }
 
+    if state.selected_tutorial == 0 {
+        ui.add_space(8.0);
+        ui.horizontal(|ui| {
+            if ui.button(
+                egui::RichText::new("🚀 Start Guided Tutorial (From Scratch)")
+                    .strong()
+                    .color(egui::Color32::from_rgb(226, 179, 87)),
+            ).clicked() {
+                crate::scenes::build_scifi_crate_tutorial_blank(state);
+                state.show_help_dialog = false;
+            }
+            if ui.button(
+                egui::RichText::new("📦 Load Completed Crate Scene")
+                    .color(egui::Color32::from_rgb(130, 200, 255)),
+            ).clicked() {
+                let (scene, camera, id) = crate::scenes::build_scifi_crate_finished_graph();
+                state.scene = scene;
+                state.camera = camera;
+                state.selected_node = Some(id);
+                state.interaction_mode = crate::types::InteractionMode::Object;
+                state.viewport_shading = render_viewport::ViewportShadingMode::Studio;
+                state.show_wireframe = true;
+                state.sync_gpu_meshes();
+                state.show_help_dialog = false;
+            }
+        });
+    }
+
     if state.selected_tutorial == 1 {
         ui.add_space(8.0);
         ui.horizontal(|ui| {

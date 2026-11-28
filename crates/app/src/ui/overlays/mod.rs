@@ -7,6 +7,7 @@ pub mod selection_overlay;
 pub mod tools;
 pub mod walkthrough;
 pub mod walkthrough_actions;
+pub mod walkthrough_crate;
 
 use crate::state::AppState;
 
