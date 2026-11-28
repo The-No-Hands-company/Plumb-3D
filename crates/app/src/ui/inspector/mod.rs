@@ -3,6 +3,7 @@ mod constraints;
 mod drafting;
 mod groom_panel;
 mod materials;
+mod mechanical;
 mod mesh_info;
 mod mesh_tools;
 mod modifiers;
@@ -22,6 +23,7 @@ pub use constraints::draw_constraints_panel;
 pub use drafting::draw_drafting_panel;
 pub use groom_panel::draw_groom_panel;
 pub use materials::draw_materials_panel;
+pub use mechanical::draw_mechanical_panel;
 pub use mesh_info::draw_mesh_info;
 pub use mesh_tools::draw_mesh_tools_panel;
 pub use modifiers::draw_modifiers_panel;
@@ -180,6 +182,16 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                 state.inspector_tab = crate::types::InspectorTab::SheetMetal;
             }
 
+            if ui
+                .selectable_label(
+                    state.inspector_tab == crate::types::InspectorTab::Mechanical,
+                    "Mechanical",
+                )
+                .clicked()
+            {
+                state.inspector_tab = crate::types::InspectorTab::Mechanical;
+            }
+
             if state.current_workspace != WorkspaceTemplate::Animation {
                 let tool_label = match state.current_workspace {
                     WorkspaceTemplate::Sculpting => "Brushes",
@@ -305,6 +317,9 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                 crate::types::InspectorTab::SheetMetal => {
                     draw_sheet_metal_panel(ui, state, actions, Some(sel_id));
                 }
+                crate::types::InspectorTab::Mechanical => {
+                    draw_mechanical_panel(ui, state, actions);
+                }
             });
     } else if state.inspector_tab == crate::types::InspectorTab::Assembly {
         egui::ScrollArea::vertical()
@@ -323,6 +338,12 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
             .auto_shrink([false, false])
             .show(ui, |ui| {
                 draw_sheet_metal_panel(ui, state, actions, None);
+            });
+    } else if state.inspector_tab == crate::types::InspectorTab::Mechanical {
+        egui::ScrollArea::vertical()
+            .auto_shrink([false, false])
+            .show(ui, |ui| {
+                draw_mechanical_panel(ui, state, actions);
             });
     } else {
         ui.vertical_centered(|ui| {

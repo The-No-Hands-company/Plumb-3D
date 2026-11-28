@@ -4,6 +4,27 @@ All notable changes to the Plumb 3D DCC Suite are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2026-11-28 - Mechanical Part Generators & Fastener Library
+
+### Added
+- **ISO / ANSI Standard Fastener Library**:
+  - Full parametric dimensional generator covering standard metric thread sizes from M2 through M30.
+  - Supports ISO 4014 / DIN 931 Hex Head Bolts, ISO 4762 / DIN 912 Hexagon Socket Head Cap Screws (SHCS), ISO 4032 / DIN 934 Hex Nuts, ISO 7089 / DIN 125 Flat Washers, and DIN 127 Helical Spring Lock Washers.
+  - Standard head width across flats ($s$), head heights ($k$), nominal diameters, and metric coarse pitches.
+  - Cosmetic and physical thread rendering modes.
+- **Involute Gear & Power Transmission Engine**:
+  - Analytical involute tooth flank curve generator ($x(\phi), y(\phi)$) ensuring true meshing contact without undercut.
+  - Supports Spur Gears (straight teeth), Helical Gears (axial helix angle $\beta$ with continuous tooth twist), and Bevel Gears (pitch cone angle taper for $90^\circ$ shaft drives).
+  - Parametric Module $m$, teeth $Z$, pressure angle $\alpha$ ($20^\circ / 14.5^\circ$), face width $b$, and shaft bore diameter.
+  - Automatic calculation of pitch diameter, base diameter, addendum, dedendum, and root fillet curves.
+- **ANSI Roller Chain Sprockets**:
+  - Conforms to ANSI B29.1 standard roller chain pitches: ANSI #25 ($1/4"$), ANSI #35 ($3/8"$), ANSI #40 ($1/2"$), ANSI #50 ($5/8"$), and ANSI #60 ($3/4"$).
+  - Exact roller seat seating radius, tooth flank curve, outside diameter, and optional mounting hub boss collar.
+- **Inspector UI & Commands**:
+  - Dedicated **Mechanical** Inspector tab with 3 sub-categories (Fasteners, Involute Gears, Sprockets), live kinematic readouts, and 1-click scene spawners.
+  - Undoable commands: `SpawnFastenerCommand`, `SpawnGearCommand`, and `SpawnSprocketCommand`.
+  - Command Palette shortcuts for instant mechanical component creation.
+
 ## [1.10.0] - 2026-11-28 - Sheet Metal Engine & Flat-Pattern Unfolding (K-Factor CNC Manufacturing)
 
 ### Added

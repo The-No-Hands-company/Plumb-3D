@@ -55,5 +55,6 @@ The geometric kernel is organized into modular mathematical engines:
 | `assembly/` | Multi-body CAD kinematics: `MateConnector` coordinate frames, 7 kinematic joint types (Revolute, Prismatic, Concentric, Cylindrical, Gear, Fixed), Separating Axis Theorem (SAT) 3D interference clash detection, and exploded view sequencer. |
 | `drafting/` | Technical 2D drafting: First & Third angle orthographic camera projections, analytical vector Hidden Line Removal (HLR), ASME Y14.5 GD&T feature control frames, and DXF / SVG sheet exporters. |
 | `sheet_metal/` | DIN 6935 K-factor bend deduction engine, parametric base & edge flanges, 1-click flat pattern unfolding, and multi-layer CNC DXF (`OUTER_CUT`, `BEND_UP`, `BEND_DOWN`) + SVG export. |
+| `mechanical/` | Parametric ANSI/ISO Fasteners (M2-M30 bolts, SHCS, nuts, washers), Involute Gears (Spur, Helical with twist, Bevel with taper), and ANSI roller chain sprockets (#25-#60). |
 | `io/` | Universal CAD and DCC interop: ISO 10303-21 STEP, ANSI/USAF IGES 5.3, native glTF 2.0 / GLB, USDA, native binary `.plmb` container, OBJ, STL, and PLY. |
 | `modifiers/` | Non-destructive 16-modifier stack: Bevel, Solidify, Mirror, Array, Boolean (BSP), Subdivide, Displace, Shrinkwrap, Curve, Lattice, Remesh, and Weighted Normals. |

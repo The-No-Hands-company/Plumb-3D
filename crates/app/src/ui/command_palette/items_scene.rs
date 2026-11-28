@@ -383,4 +383,35 @@ pub const SCENE_COMMANDS: &[PaletteItem] = &[
             state.set_status_message("Unfold Sheet Metal Flat Pattern for CNC fabrication");
         }),
     },
+    // --- Mechanical Parts & Fasteners ---
+    PaletteItem {
+        name: "Mechanical: Parametric Fasteners (Bolts, Nuts, Washers)",
+        category: "CAD",
+        shortcut: "Inspector > Mechanical",
+        keywords: &["bolt", "screw", "nut", "washer", "fastener", "metric", "iso", "shcs"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::Mechanical;
+            state.set_status_message("Switched to Mechanical Fasteners Inspector");
+        }),
+    },
+    PaletteItem {
+        name: "Mechanical: Involute Gears (Spur, Helical, Bevel)",
+        category: "CAD",
+        shortcut: "Inspector > Mechanical",
+        keywords: &["gear", "involute", "spur", "helical", "bevel", "transmission", "teeth"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::Mechanical;
+            state.set_status_message("Switched to Involute Gear Generator Inspector");
+        }),
+    },
+    PaletteItem {
+        name: "Mechanical: Roller Chain Sprockets (ANSI #25-#60)",
+        category: "CAD",
+        shortcut: "Inspector > Mechanical",
+        keywords: &["sprocket", "roller chain", "ansi", "chain drive", "transmission"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::Mechanical;
+            state.set_status_message("Switched to Roller Chain Sprocket Generator Inspector");
+        }),
+    },
 ];

@@ -27,6 +27,7 @@ Welcome to the **Plumb 3D User Guide**! This comprehensive manual walks you thro
 20. [Technical 2D Engineering Drawings & GD&T](#20-technical-2d-engineering-drawings--gdt)
 21. [Sheet Metal Design & CNC Flat-Pattern Unfolding](#21-sheet-metal-design--cnc-flat-pattern-unfolding)
 22. [Gestural Modeling & 8-Directional Radial Pie Menu](#22-gestural-modeling--8-directional-radial-pie-menu)
+23. [Mechanical Part Generators, Fasteners & Involute Gears](#23-mechanical-part-generators-fasteners--involute-gears)
 
 ---
 
@@ -364,3 +365,39 @@ Accessed via the **Sheet Metal** tab in the Inspector:
 - **CAD Workplane Snapping (`Alt+W`)**:
   - Instantly aligns an infinite planar construction grid to any selected face or normal vector.
   - Symmetrize geometry across the active workplane using `Alt+X`.
+
+---
+
+## 23. Mechanical Part Generators, Fasteners & Involute Gears
+
+Accessed via the **Mechanical** tab in the Inspector or the Command Palette (`F3`):
+
+### 1. ISO / ANSI Standard Fasteners
+- **Standard Thread Sizes**: Covers M2, M2.5, M3, M4, M5, M6, M8, M10, M12, M16, M20, M24, and M30.
+- **Fastener Styles**:
+  - **ISO 4014 / DIN 931 Hex Head Bolt**: Hexagonal head with standardized width across flats ($s$), head height ($k$), and cylindrical shank of custom length ($L$).
+  - **ISO 4762 / DIN 912 Socket Head Cap Screw (SHCS)**: Cylindrical head with internal hex drive socket.
+  - **ISO 4032 / DIN 934 Hex Nut**: Hexagonal nut body with internal clearance bore.
+  - **ISO 7089 / DIN 125 Flat Washer**: Standard plain flat washer disc ($d_1$ inner, $d_2$ outer, $s$ thickness).
+  - **DIN 127 Lock Washer**: Helical split spring lock washer with continuous elevation ramp and split gap.
+- **1-Click Placement**: Spawns watertight 2-manifold BMesh geometry directly into the active scene.
+
+### 2. Involute Gear Transmission Engine
+- **Kinematic Transmission Styles**:
+  - **Spur Gear**: Straight teeth extruded axially along face width $b$.
+  - **Helical Gear**: Continuous cylindrical tooth twist determined by the helix angle $\beta$ ($\Delta\theta = \frac{b \tan\beta}{r}$).
+  - **Bevel Gear**: Conical gear teeth tapering towards a pitch cone apex for intersecting $90^\circ$ shaft drives.
+- **AGMA / ISO Tooth Profile Calculations**:
+  - Standard Module $m$ (mm), tooth count $Z$, and pressure angle $\alpha$ ($20.0^\circ$ standard, $14.5^\circ$).
+  - Pitch diameter $d = m \cdot Z$, base radius $r_b = r \cdot \cos\alpha$.
+  - Addendum $h_a = 1.0 \cdot m$, dedendum $h_f = 1.25 \cdot m$.
+  - True analytical involute curve generation ($x = r(\phi)\cos\theta, y = r(\phi)\sin\theta$) preventing undercut.
+  - Center shaft mounting bore with parametric diameter.
+
+### 3. Roller Chain Sprockets (ANSI B29.1)
+- **Chain Pitch Classes**: ANSI #25 ($1/4"$), ANSI #35 ($3/8"$), ANSI #40 ($1/2"$), ANSI #50 ($5/8"$), ANSI #60 ($3/4"$).
+- **Parametric Tooth Geometry**:
+  - Pitch Circle Diameter $PCD = \frac{p}{\sin(180^\circ / N)}$.
+  - Bottom Root Diameter $BD = PCD - d_r$ with cylindrical roller seating pockets.
+  - Outside Tip Diameter $OD = p \cdot (0.6 + \cot(180^\circ / N))$.
+  - Optional mounting hub collar with parametric hub diameter and extension length.

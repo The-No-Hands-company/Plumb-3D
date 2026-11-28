@@ -9,7 +9,7 @@
 [![CI/CD Build & Test](https://github.com/The-No-Hands-company/Plumb-3D/actions/workflows/ci.yml/badge.svg)](https://github.com/The-No-Hands-company/Plumb-3D/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Pure Safe Rust](https://img.shields.io/badge/Rust-100%25%20Safe-brightgreen.svg)](#architectural-compliance--quality-standards)
-[![Tests Passing](https://img.shields.io/badge/Tests-428%20Passed-success.svg)](#architectural-compliance--quality-standards)
+[![Tests Passing](https://img.shields.io/badge/Tests-434%20Passed-success.svg)](#architectural-compliance--quality-standards)
 [![Zero Clippy Warnings](https://img.shields.io/badge/Clippy-0%20Warnings-success.svg)](#architectural-compliance--quality-standards)
 
 </div>
@@ -37,9 +37,9 @@ Inspired by the precision modeling workflows of **Plasticity**, the topological 
 
 ---
 
-## Key Highlights & Subsystem Architecture (23 Hardened Domains)
+## Key Highlights & Subsystem Architecture (24 Hardened Domains)
 
-Plumb 3D is hardened across **23 systematic subsystems** with full unit test coverage and production UI integration:
+Plumb 3D is hardened across **24 systematic subsystems** with full unit test coverage and production UI integration:
 
 ### 1. Mesh Primitives & Parametric Generators
 - 10 Parametric Primitives: Cube, Cylinder, Cone, UV Sphere, IcoSphere, Torus, Planar Grid, Pyramid, Capsule, and the mascot Plumb Bob.
@@ -180,6 +180,11 @@ Plumb 3D is hardened across **23 systematic subsystems** with full unit test cov
 - **Standard Drawing Sheet Exporters**: ISO A4–A0 and ANSI A–E sheets with formal title blocks, exporting to AutoCAD DXF and styled vector SVG.
 - **Sheet Metal & CNC Flat Pattern Unfolder**: DIN 6935 K-factor bend deduction engine, parametric base & edge flanges, and 1-click flat pattern unfolding exporting to multi-layer DXF (`OUTER_CUT`, `BEND_UP`, `BEND_DOWN`) and SVG.
 
+### 24. Mechanical Part Generators, Fastener Library & Involute Gears
+- **Parametric ANSI/ISO Fasteners**: Full metric range from M2 through M30 with ISO 4014 Hex Bolts, ISO 4762 Socket Head Cap Screws (SHCS), ISO 4032 Hex Nuts, ISO 7089 Flat Washers, and DIN 127 Spring Lock Washers.
+- **Involute Gear Transmission Engine**: True involute tooth flank curve generator ($x(\phi), y(\phi)$) for Spur Gears, Helical Gears (axial helix angle $\beta$ with continuous tooth twist), and Bevel Gears (pitch cone angle taper).
+- **Roller Chain Sprockets**: ANSI B29.1 standard roller chain sprockets (ANSI #25, #35, #40, #50, #60) with exact roller seating pockets, tooth crests, and mounting hub collars.
+
 ---
 
 ## Workspace Architecture
@@ -203,7 +208,7 @@ The codebase is organized into 7 decoupled, pure-Rust crates under `crates/`:
 - **100% Pure Safe Rust**: Zero `unsafe` code blocks across the entire codebase (`zero unsafe` policy).
 - **Zajfan Engineering Standard**: Every single `.rs` file strictly adheres to the $\le 630$ line ceiling. Monolithic files are broken into clean, cohesive submodules.
 - **Zero Warnings**: Compiles completely clean under `cargo clippy --workspace -- -D warnings`.
-- **Comprehensive Verification**: **428+ passing unit and integration tests** verifying geometry invariants, CAD precision, path tracing, and scene graph evaluation.
+- **Comprehensive Verification**: **434+ passing unit and integration tests** verifying geometry invariants, CAD precision, path tracing, and scene graph evaluation.
 - **Clean Typography**: 100% 7-bit ASCII typography throughout the entire UI subsystem, preventing font fallback tofu glyphs.
 
 ---
@@ -273,6 +278,7 @@ cargo run -p app --release
 | | `Inspector > Assembly` | Multi-Body Mates, SAT Clash Check & Exploded View |
 | | `Inspector > Drafting` | ANSI/ISO 2D Drawing Sheets, Vector HLR & GD&T |
 | | `Inspector > Sheet Metal` | DIN 6935 K-Factor Flanges & 1-Click Flat-Pattern Unfolding |
+| | `Inspector > Mechanical` | ISO Fasteners, Involute Gears & Roller Sprockets |
 | **Windows & Studio** | `F1` | In-Software User Manual & Tutorials Hub |
 | | `F2` | Welcome & Quick-Start Project Hub |
 | | `F3` / `Ctrl + K` | Omnipresent Command Palette search |
@@ -286,7 +292,7 @@ cargo run -p app --release
 
 Plumb 3D enforces a strict separation of concerns across major product generations. **Version 1.x is strictly The Modeler**, maintaining laser focus on pure modeling speed, CAD precision, and rock-solid geometry:
 
-### Completed Releases (v1.0.0 – v1.10.0)
+### Completed Releases (v1.0.0 – v1.11.0)
 - **v1.0.0 (Commercial Hardened Foundation)**: 2-manifold BMesh Half-Edge kernel, 16-modifier stack, G2 CAD splines, STEP export, UV unwrapping, native `.plmb` container, 5 semantic design-token themes, arbitrary docking (`egui_dock`), and 3 interactive walkthroughs.
 - **v1.1.0 (Precision CAD & Curve Drafting)**: 2D constraint sketcher on workplanes, live dimension callouts, and multi-rail curve lofts.
 - **v1.2.0 (Universal Interop & Production Shading)**: Native glTF 2.0 / GLB container export & import with PBR materials, and micro-chamfer normal perturbation shader.
@@ -298,9 +304,9 @@ Plumb 3D enforces a strict separation of concerns across major product generatio
 - **v1.8.0 (Multi-Body CAD Assemblies & Kinematics)**: MateConnector coordinate frames, 7 kinematic joint types (Revolute, Prismatic, Concentric, etc.), SAT 3D interference clash detection with penetration depth, and exploded view sequencer with 3D dashed trail lines.
 - **v1.9.0 (Technical 2D Engineering Drawings, Vector HLR & GD&T)**: First & Third Angle orthographic projections, analytical vector Hidden Line Removal (HLR), ASME Y14.5 GD&T feature control frames, ISO A4–A0 & ANSI A–E sheets, and vector SVG & AutoCAD DXF exporters.
 - **v1.10.0 (Sheet Metal Engine & Flat-Pattern Unfolding)**: DIN 6935 K-factor bend physics, parametric base & edge flanges, 1-click flat pattern unfolding, and multi-layer CNC DXF (`OUTER_CUT`, `BEND_UP`, `BEND_DOWN`) + SVG exports.
+- **v1.11.0 (Mechanical Part Generators & Fastener Library)**: Parametric ISO/ANSI metric fasteners (M2–M30 bolts, screws, nuts, washers), analytical Involute Gears (Spur, Helical, Bevel), and ANSI roller chain sprockets (#25–#60).
 
-### Target Releases to 100% CAD Modeler Completeness (v1.11.0 – v1.16.0)
-- **v1.11.0**: *Mechanical Part Generators & Fastener Library* — ANSI/ISO Bolts, Screws, Nuts, Washers, Metric Threads, Involute Gears (Spur/Bevel/Helical), Spline Shafts, and Roller Chain Sprockets.
+### Target Releases to 100% CAD Modeler Completeness (v1.12.0 – v1.16.0)
 - **v1.12.0**: *Finite Element Analysis (FEA) Structural Simulation* — Linear elasticity solver, Von Mises stress tensor heatmaps, displacement vector deformation overlays, and Factor of Safety (FoS) analysis.
 - **v1.13.0**: *CAM & CNC G-Code Toolpath Generator* — Facing, 2.5D adaptive clearing roughing, ball-end surfacing, lead-in/lead-out arcs, and RS-274 standard G-Code export.
 - **v1.14.0**: *Parametric Design Tables & Global Expression Variables* — Mathematical expression parser for dimensions (`Width * 0.5 + 2.0`) and CSV/TSV configuration tables for part families.

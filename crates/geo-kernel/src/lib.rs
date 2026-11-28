@@ -24,6 +24,7 @@ pub mod groom;
 pub mod io;
 pub mod kitbash;
 pub mod lsystem;
+pub mod mechanical;
 pub mod mesh;
 pub mod modifiers;
 pub mod multires;
@@ -71,6 +72,10 @@ pub use groom::{GroomBrush, GroomSettings, GroomSystem, HairGuide, HairStrand};
 pub use io::{PlmbMetadata, PlmbVersion, PLMB_MAGIC};
 pub use kitbash::{Kitbash, KitbashHardwareType};
 pub use lsystem::{LSystem, LSystemPreset};
+pub use mechanical::{
+    AnsiChainSize, FastenerBuilder, FastenerParams, FastenerType, GearParams, GearType,
+    InvoluteGearBuilder, MetricThreadSize, SprocketBuilder, SprocketParams, ThreadMode,
+};
 pub use mesh::{
     Edge, EdgeKey, Face, FaceKey, HalfEdge, HalfEdgeKey, Mesh, MeshError, MeshManifoldReport,
     Vertex, VertexGroup, VertexKey,
