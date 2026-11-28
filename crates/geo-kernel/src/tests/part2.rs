@@ -257,7 +257,7 @@ fn test_auto_smooth_normals_and_split_corners() {
     let sharp_count = cylinder.edges.values().filter(|e| e.is_sharp).count();
     assert!(sharp_count > 0);
     let smooth_render = cylinder.to_render_mesh(ShadingMode::Smooth);
-    assert!(smooth_render.vertices.len() > 0);
+    assert!(!smooth_render.vertices.is_empty());
 }
 
 #[test]

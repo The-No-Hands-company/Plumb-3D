@@ -380,7 +380,7 @@ mod tests {
     fn test_curvature_comb_circular_arc() {
         // Build a 90-degree circular arc approximation
         let mut s = Spline::new();
-        let k = 0.55228475; // standard cubic bezier circle approximation
+        let k = 0.552_284_8; // standard cubic bezier circle approximation
         let mut p0 = BezierPoint::sharp(vec3(1.0, 0.0, 0.0));
         p0.handle_out = vec3(0.0, k, 0.0);
         let mut p1 = BezierPoint::sharp(vec3(0.0, 1.0, 0.0));

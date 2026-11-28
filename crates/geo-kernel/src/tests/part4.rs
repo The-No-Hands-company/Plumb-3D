@@ -17,7 +17,7 @@ fn test_uv_seams_and_smart_unwrap() {
 
     // Smart UV Project on Cube (threshold 66 deg will split 90 deg cube faces into 6 charts)
     cube.smart_uv_project(66.0, 0.02);
-    assert!(cube.get_seams().len() > 0);
+    assert!(!cube.get_seams().is_empty());
 
     // Verify all vertices have valid UV coordinates within [0, 1]
     for v in cube.vertices.values() {

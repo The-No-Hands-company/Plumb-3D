@@ -1,6 +1,9 @@
 pub mod advanced_fillet;
+pub mod assembly_mate;
+pub mod clash_detect;
 pub mod curves;
 pub mod deform;
+pub mod exploded_view;
 pub mod field_remesh;
 pub mod fillet_brep;
 pub mod mesh_ops;
@@ -13,8 +16,11 @@ pub mod subd_limit;
 pub mod topology;
 
 pub use advanced_fillet::*;
+pub use assembly_mate::*;
+pub use clash_detect::*;
 pub use curves::*;
 pub use deform::*;
+pub use exploded_view::*;
 pub use field_remesh::*;
 pub use fillet_brep::*;
 pub use mesh_ops::*;

@@ -298,7 +298,7 @@ fn test_curve_bevel_evaluation() {
 
     let render_mesh = scene.evaluate_mesh(curve_id);
     assert!(render_mesh.is_some());
-    assert!(render_mesh.unwrap().vertices.len() > 0);
+    assert!(!render_mesh.unwrap().vertices.is_empty());
 }
 
 #[test]

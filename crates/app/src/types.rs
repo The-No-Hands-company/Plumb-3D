@@ -101,6 +101,7 @@ pub enum InspectorTab {
     Tools,
     Constraints,
     Physics,
+    Assembly,
 }
 
 /// Recorded parameters of the most recent modeling operation for the interactive "Adjust Last Operation" panel (Blender F9).

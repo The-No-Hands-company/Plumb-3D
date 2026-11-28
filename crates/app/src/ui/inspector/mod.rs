@@ -1,3 +1,4 @@
+mod assembly;
 mod constraints;
 mod groom_panel;
 mod materials;
@@ -14,6 +15,7 @@ mod transform;
 mod vertex_groups;
 mod volumetrics;
 
+pub use assembly::draw_assembly_panel;
 pub use constraints::draw_constraints_panel;
 pub use groom_panel::draw_groom_panel;
 pub use materials::draw_materials_panel;
@@ -144,6 +146,16 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                 state.inspector_tab = crate::types::InspectorTab::Materials;
             }
 
+            if ui
+                .selectable_label(
+                    state.inspector_tab == crate::types::InspectorTab::Assembly,
+                    "Assembly",
+                )
+                .clicked()
+            {
+                state.inspector_tab = crate::types::InspectorTab::Assembly;
+            }
+
             if state.current_workspace != WorkspaceTemplate::Animation {
                 let tool_label = match state.current_workspace {
                     WorkspaceTemplate::Sculpting => "Brushes",
@@ -260,6 +272,15 @@ pub fn draw_inspector_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                     ui.separator();
                     draw_motion_panel(ui, state);
                 }
+                crate::types::InspectorTab::Assembly => {
+                    draw_assembly_panel(ui, state, actions, Some(sel_id));
+                }
+            });
+    } else if state.inspector_tab == crate::types::InspectorTab::Assembly {
+        egui::ScrollArea::vertical()
+            .auto_shrink([false, false])
+            .show(ui, |ui| {
+                draw_assembly_panel(ui, state, actions, None);
             });
     } else {
         ui.vertical_centered(|ui| {

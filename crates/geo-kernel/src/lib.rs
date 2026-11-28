@@ -13,6 +13,7 @@
 //! - [`io`]: CAD, 3D printing, and interchange exporters (STL ASCII/Binary, PLY ASCII/Binary, glTF 2.0, OBJ).
 
 pub mod analysis;
+pub mod assembly;
 pub mod boolean;
 pub mod decimate;
 pub mod diagnostics;
@@ -46,6 +47,11 @@ pub mod validation;
 pub mod xpbd_cloth;
 
 pub use analysis::MeshAnalysisReport;
+pub use assembly::{
+    check_mesh_clash, triangle_triangle_intersection, AssemblyBody, AssemblySolver, ClashResult,
+    ClashType, CollisionMesh, ExplodedStep, ExplodedTrailLine, ExplodedView, KinematicMate,
+    MateAlignment, MateConnector, MateType,
+};
 pub use boolean::BooleanOp;
 pub use decimate::{decimate_mesh, DecimateModifier, SymmQuadric};
 pub use diagnostics::{

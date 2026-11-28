@@ -352,14 +352,14 @@ mod tests {
 
         let tile = BrushAlphaTexture::Tile;
         let v_tile = tile.evaluate(0.2, 0.3);
-        assert!(v_tile >= 0.1 && v_tile <= 1.0);
+        assert!((0.1..=1.0).contains(&v_tile));
 
         let scales = BrushAlphaTexture::Scales;
         let v_scales = scales.evaluate(0.1, 0.2);
-        assert!(v_scales >= 0.05 && v_scales <= 1.0);
+        assert!((0.05..=1.0).contains(&v_scales));
 
         let noise = BrushAlphaTexture::Noise;
         let v_noise = noise.evaluate(0.4, 0.7);
-        assert!(v_noise >= 0.25 && v_noise <= 1.0);
+        assert!((0.25..=1.0).contains(&v_noise));
     }
 }

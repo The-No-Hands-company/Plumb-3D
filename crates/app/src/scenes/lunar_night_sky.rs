@@ -203,7 +203,7 @@ mod tests {
             ..Default::default()
         };
         let rgba = buffer.to_rgba8_post_processed(&post_process);
-        let lit_pixels: Vec<_> = rgba.chunks_exact(4).filter(|p| p[0] > 10).collect();
+        let lit_pixels: Vec<_> = rgba.as_chunks::<4>().0.iter().filter(|p| p[0] > 10).collect();
         assert!(!lit_pixels.is_empty(), "Must have illuminated moon pixels");
         let blown_out = lit_pixels
             .iter()

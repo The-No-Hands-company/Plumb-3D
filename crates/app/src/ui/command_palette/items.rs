@@ -560,6 +560,37 @@ pub const MODELING_COMMANDS: &[PaletteItem] = &[
             a.export_gcode = true;
         }),
     },
+    // --- Assembly & Kinematics ---
+    PaletteItem {
+        name: "Assembly: Check 3D Interference & Clash",
+        category: "Assembly",
+        shortcut: "Alt+A C",
+        keywords: &["assembly", "clash", "interference", "collision", "clearance", "overlap"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::Assembly;
+            state.set_status_message("Switched to Assembly & Clash Detection Inspector");
+        }),
+    },
+    PaletteItem {
+        name: "Assembly: Add Kinematic Mate Joint",
+        category: "Assembly",
+        shortcut: "Alt+A M",
+        keywords: &["assembly", "mate", "joint", "revolute", "prismatic", "hinge", "slider"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::Assembly;
+            state.set_status_message("Configure Kinematic Mate in Assembly Panel");
+        }),
+    },
+    PaletteItem {
+        name: "Assembly: Exploded View Disassembly",
+        category: "Assembly",
+        shortcut: "Alt+A E",
+        keywords: &["assembly", "exploded", "disassembly", "animation", "trail lines"],
+        action: PaletteAction::TriggerAction(|state, _| {
+            state.inspector_tab = crate::types::InspectorTab::Assembly;
+            state.set_status_message("Exploded View Disassembly Active");
+        }),
+    },
 ];
 
 pub static COMMAND_LIST: std::sync::LazyLock<Vec<PaletteItem>> = std::sync::LazyLock::new(|| {
