@@ -20,3 +20,5 @@ mod tests;
 mod precision_tests;
 #[cfg(test)]
 mod mutation_tests;
+#[cfg(test)]
+mod stress_tests;

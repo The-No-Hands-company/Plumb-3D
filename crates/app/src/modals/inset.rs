@@ -98,6 +98,11 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
         let dx = (state.inset_modal_start_mouse.0 - position.x) as f32;
         state.inset_modal_factor = (0.8 + dx * 0.003).clamp(0.01, 0.99);
         state.inset_modal_thickness = (1.0 - state.inset_modal_factor) * state.inset_modal_initial_radius;
+        state.set_status_message(format!(
+            "📐 Insetting: Thickness {:.3}m (Factor: {:.2}) | 'I' toggle Individual | Type numbers + Enter",
+            state.inset_modal_thickness,
+            state.inset_modal_factor
+        ));
     }
     state.modal_numeric_buffer.clear();
     state.last_mouse_pos = Some((position.x, position.y));
@@ -134,6 +139,10 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
             state.inset_modal_thickness = val.max(0.0);
             state.inset_modal_factor = (1.0 - state.inset_modal_thickness / r).clamp(0.01, 0.99);
         }
+        state.set_status_message(format!(
+            "📐 Inset Thickness: {} m (Press Enter to confirm)",
+            state.modal_numeric_buffer
+        ));
         state.window.request_redraw();
         return true;
     }
@@ -145,6 +154,10 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
             state.inset_modal_thickness = val.max(0.0);
             state.inset_modal_factor = (1.0 - state.inset_modal_thickness / r).clamp(0.01, 0.99);
         }
+        state.set_status_message(format!(
+            "📐 Inset Thickness: {} m (Press Enter to confirm)",
+            state.modal_numeric_buffer
+        ));
         state.window.request_redraw();
         return true;
     }

@@ -79,6 +79,10 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
     let dy = (state.extrude_modal_start_mouse.1 - position.y) as f32;
     state.extrude_modal_distance = dy * 0.01;
     state.modal_numeric_buffer.clear();
+    state.set_status_message(format!(
+        "⚒ Extruding: {:+.3}m (Type numeric digits + Enter to set exact distance)",
+        state.extrude_modal_distance
+    ));
     state.last_mouse_pos = Some((position.x, position.y));
     state.window.request_redraw();
     true
@@ -111,6 +115,10 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
         if let Ok(val) = state.modal_numeric_buffer.parse::<f32>() {
             state.extrude_modal_distance = val;
         }
+        state.set_status_message(format!(
+            "⚒ Extrude Distance: {} m (Press Enter to confirm)",
+            state.modal_numeric_buffer
+        ));
         state.window.request_redraw();
         return true;
     }
@@ -120,6 +128,10 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
         if let Ok(val) = state.modal_numeric_buffer.parse::<f32>() {
             state.extrude_modal_distance = val;
         }
+        state.set_status_message(format!(
+            "⚒ Extrude Distance: {} m (Press Enter to confirm)",
+            state.modal_numeric_buffer
+        ));
         state.window.request_redraw();
         return true;
     }

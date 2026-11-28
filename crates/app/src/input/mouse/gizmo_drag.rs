@@ -87,6 +87,11 @@ pub fn handle_gizmo_drag(
                 delta.z = (delta.z / s).round() * s;
             }
 
+            state.set_status_message(format!(
+                "⬌ Move: X: {:+.3}m, Y: {:+.3}m, Z: {:+.3}m (Dist: {:.3}m)",
+                delta.x, delta.y, delta.z, delta.length()
+            ));
+
             if state.interaction_mode == InteractionMode::Object || state.interaction_mode == InteractionMode::Pose {
                 if state.selected_nodes.len() > 1 {
                     for &nid in &state.selected_nodes {
@@ -258,6 +263,13 @@ pub fn handle_gizmo_drag(
             } else {
                 state.last_snap_hit = None;
             }
+
+            let (_, rot_angle) = delta_rot.to_axis_angle();
+            state.set_status_message(format!(
+                "↻ Rotate: {:+.1}° ({:?})",
+                rot_angle.to_degrees(),
+                axis
+            ));
             if state.interaction_mode == InteractionMode::Object || state.interaction_mode == InteractionMode::Pose {
                 if state.selected_nodes.len() > 1 {
                     let pivot = state.get_gizmo_world_position().unwrap_or(Vec3::ZERO);
@@ -342,6 +354,11 @@ pub fn handle_gizmo_drag(
         }
         GizmoMode::Scale => {
             let delta_scale = TransformGizmo::calculate_scale_delta(axis, dx, dy);
+            let total_scale = Vec3::ONE + delta_scale;
+            state.set_status_message(format!(
+                "⤢ Scale: [{:.3}, {:.3}, {:.3}] ({:?})",
+                total_scale.x, total_scale.y, total_scale.z, axis
+            ));
             if state.interaction_mode == InteractionMode::Object || state.interaction_mode == InteractionMode::Pose {
                 if state.selected_nodes.len() > 1 {
                     let pivot = state.get_gizmo_world_position().unwrap_or(Vec3::ZERO);
