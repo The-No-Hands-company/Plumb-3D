@@ -6,6 +6,7 @@ pub mod command_palette;
 pub mod context_menu;
 pub mod docking;
 pub mod help_dialog;
+pub mod help_tutorials;
 pub mod history_panel;
 pub mod inspector;
 pub mod node_editor;
