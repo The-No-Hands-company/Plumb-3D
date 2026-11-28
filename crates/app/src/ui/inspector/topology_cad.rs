@@ -219,6 +219,48 @@ pub fn draw_topology_cad_panel(
                     crate::ui::actions::import_model_from_file(state, &path);
                 }
             }
+
+            if ui.button("Export IGES Solid (.igs)")
+                .on_hover_text("Exports 80-column ANSI/USAF IGES 5.3 CAD file")
+                .clicked()
+            {
+                let node_name = state.scene.nodes.get(sel_id).map(|n| n.name.clone()).unwrap_or_else(|| "Model".into());
+                if let Some(path) = rfd::FileDialog::new()
+                    .add_filter("IGES CAD Solid (*.igs, *.iges)", &["igs", "iges"])
+                    .set_file_name(format!("{}.igs", node_name))
+                    .save_file()
+                {
+                    if base_mesh.export_iges_file(&path).is_ok() {
+                        state.set_status_message(format!("Exported IGES CAD Solid to: {}", path.display()));
+                    }
+                }
+            }
+
+            if ui.button("Import IGES Solid (.igs)")
+                .on_hover_text("Parses ANSI/USAF IGES 5.3 CAD file into watertight 2-manifold BMesh")
+                .clicked()
+            {
+                if let Some(path) = rfd::FileDialog::new()
+                    .add_filter("IGES CAD Solid (*.igs, *.iges)", &["igs", "iges"])
+                    .pick_file()
+                {
+                    crate::ui::actions::import_model_from_file(state, &path);
+                }
+            }
+
+            if ui.button("Class-A Surface Diagnostic (G0/G1/G2)")
+                .on_hover_text("Evaluates positional G0, tangent G1, and curvature G2 continuity across all edge seams")
+                .clicked()
+            {
+                let reports = base_mesh.evaluate_surface_continuity();
+                let g2_count = reports.iter().filter(|r| r.continuity == geo_kernel::ContinuityClass::G2).count();
+                let g1_count = reports.iter().filter(|r| r.continuity == geo_kernel::ContinuityClass::G1).count();
+                let g0_count = reports.iter().filter(|r| r.continuity == geo_kernel::ContinuityClass::G0).count();
+                state.set_status_message(format!(
+                    "Class-A Surface Analysis: {} G2 Curvature Seams, {} G1 Tangent Seams, {} G0 Seams across {} edges.",
+                    g2_count, g1_count, g0_count, reports.len()
+                ));
+            }
         });
     });
 

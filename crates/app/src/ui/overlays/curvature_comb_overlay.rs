@@ -106,6 +106,24 @@ pub fn render(state: &mut AppState) {
                     egui::Color32::from_rgb(0, 240, 255),
                 );
             }
+        } else if let NodeData::Mesh { base_mesh, .. } = &node.data {
+            let needles = base_mesh.evaluate_boundary_curvature_combs(scale);
+            let wmat = node.world_matrix;
+
+            for sample in &needles {
+                let w_origin = wmat.transform_point3(sample.root);
+                let w_tip = wmat.transform_point3(sample.tip);
+
+                let s_orig_opt = state.camera.world_to_screen(w_origin, width, height);
+                let s_tip_opt = state.camera.world_to_screen(w_tip, width, height);
+
+                if let (Some(s_orig), Some(s_tip)) = (s_orig_opt, s_tip_opt) {
+                    let p0 = egui::pos2(s_orig.x, s_orig.y);
+                    let p1 = egui::pos2(s_tip.x, s_tip.y);
+                    let color = egui::Color32::from_rgb(0, 230, 255);
+                    painter.line_segment([p0, p1], egui::Stroke::new(1.0_f32, color));
+                }
+            }
         }
     }
 }

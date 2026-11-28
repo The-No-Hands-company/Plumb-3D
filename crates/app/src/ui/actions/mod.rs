@@ -154,6 +154,7 @@ pub struct UiActions {
     pub export_stl: bool,
     pub export_ply: bool,
     pub export_step: bool,
+    pub export_iges: bool,
     pub export_subd_nurbs_step: bool,
     pub export_usd: bool,
     pub export_fbx: bool,

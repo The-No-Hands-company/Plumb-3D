@@ -11,6 +11,8 @@ pub enum ViewportShadingMode {
     MatCapChrome,
     NormalInspection,
     Zebra,
+    GaussianCurvature,
+    MeanCurvature,
     Pbr,
     Rendered,
 }
@@ -24,6 +26,8 @@ impl ViewportShadingMode {
             Self::MatCapChrome => 3.0,
             Self::NormalInspection => 4.0,
             Self::Zebra => 6.0,
+            Self::GaussianCurvature => 7.0,
+            Self::MeanCurvature => 8.0,
             Self::Pbr | Self::Rendered => 5.0,
         }
     }

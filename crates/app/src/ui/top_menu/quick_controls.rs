@@ -112,6 +112,8 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
                                     ViewportShadingMode::MatCapChrome => "Chrome",
                                     ViewportShadingMode::NormalInspection => "Normals",
                                     ViewportShadingMode::Zebra => "Zebra",
+                                    ViewportShadingMode::GaussianCurvature => "Gaussian Curv",
+                                    ViewportShadingMode::MeanCurvature => "Mean Curv",
                                     ViewportShadingMode::Rendered => "Rendered",
                                 })
                                 .width(70.0)
@@ -123,6 +125,8 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
                                     ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MatCapChrome, "MatCap Chrome");
                                     ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::NormalInspection, "Normals Inspection");
                                     ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Zebra, "Zebra Surfacing");
+                                    ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::GaussianCurvature, "Gaussian Curvature Heatmap");
+                                    ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MeanCurvature, "Mean Curvature Heatmap");
                                     ui.separator();
                                     ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Rendered, "Rendered (Live RT)");
                                 });

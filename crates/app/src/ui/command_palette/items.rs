@@ -440,6 +440,24 @@ pub const MODELING_COMMANDS: &[PaletteItem] = &[
         }),
     },
     PaletteItem {
+        name: "Export Active Mesh as CAD IGES Solid (.igs)",
+        category: "File",
+        shortcut: "File > Export",
+        keywords: &[
+            "iges",
+            "igs",
+            "cad solid",
+            "brep",
+            "surface",
+            "cnc",
+            "cam",
+            "aerospace",
+        ],
+        action: PaletteAction::TriggerAction(|_, a| {
+            a.export_iges = true;
+        }),
+    },
+    PaletteItem {
         name: "Export Full Scene as Pixar OpenUSD (.usda)",
         category: "File",
         shortcut: "File > Export",

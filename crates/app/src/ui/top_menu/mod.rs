@@ -1,8 +1,10 @@
-pub mod menus;
+pub mod menus_file_edit;
+pub mod menus_view;
 pub mod quick_controls;
 pub mod render_menu;
 
-pub use menus::*;
+pub use menus_file_edit::*;
+pub use menus_view::*;
 pub use quick_controls::*;
 pub use render_menu::*;
 

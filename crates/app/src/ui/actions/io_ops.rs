@@ -70,8 +70,8 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
     if actions.trigger_import_dialog {
         if let Some(path) = rfd::FileDialog::new()
             .add_filter(
-                "Supported 3D Models (*.plmb, *.obj, *.stl, *.ply, *.gltf, *.glb, *.step, *.stp)",
-                &["plmb", "obj", "stl", "ply", "gltf", "glb", "step", "stp"],
+                "Supported 3D Models (*.plmb, *.obj, *.stl, *.ply, *.gltf, *.glb, *.step, *.stp, *.igs, *.iges)",
+                &["plmb", "obj", "stl", "ply", "gltf", "glb", "step", "stp", "igs", "iges"],
             )
             .pick_file()
         {
@@ -186,6 +186,24 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
                 if mesh.export_step_file(&path).is_ok() {
                     state.set_status_message(format!(
                         "Exported CAD Solid STEP to: {}",
+                        path.display()
+                    ));
+                }
+            }
+        }
+    }
+
+    // 10. Handle CAD IGES Solid Export with native file dialog
+    if actions.export_iges {
+        if let Some((name, mesh)) = get_active_mesh(state) {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("CAD IGES Solid (*.igs, *.iges)", &["igs", "iges"])
+                .set_file_name(format!("{}.igs", name))
+                .save_file()
+            {
+                if mesh.export_iges_file(&path).is_ok() {
+                    state.set_status_message(format!(
+                        "Exported CAD Solid IGES to: {}",
                         path.display()
                     ));
                 }
@@ -440,6 +458,15 @@ pub fn import_model_from_file(state: &mut AppState, path: &Path) {
                     insert_mesh_into_scene(state, file_stem, mesh);
                     state
                         .set_status_message(format!("Imported STEP CAD Solid: {}", path.display()));
+                }
+            }
+        }
+        "igs" | "iges" => {
+            if let Ok(src) = std::fs::read_to_string(path) {
+                if let Ok(mesh) = Mesh::from_iges_str(&src) {
+                    insert_mesh_into_scene(state, file_stem, mesh);
+                    state
+                        .set_status_message(format!("Imported IGES CAD Solid: {}", path.display()));
                 }
             }
         }

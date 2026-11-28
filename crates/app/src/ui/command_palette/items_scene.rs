@@ -250,6 +250,27 @@ pub const SCENE_COMMANDS: &[PaletteItem] = &[
         action: PaletteAction::SetShading(ViewportShadingMode::Studio),
     },
     PaletteItem {
+        name: "Viewport Shading: Zebra Surfacing",
+        category: "Shading",
+        shortcut: "",
+        keywords: &["zebra", "reflection lines", "class-a", "surfacing", "continuity"],
+        action: PaletteAction::SetShading(ViewportShadingMode::Zebra),
+    },
+    PaletteItem {
+        name: "Viewport Shading: Gaussian Curvature Heatmap",
+        category: "Shading",
+        shortcut: "",
+        keywords: &["gaussian", "curvature", "heatmap", "diagnostics", "inflection", "class-a"],
+        action: PaletteAction::SetShading(ViewportShadingMode::GaussianCurvature),
+    },
+    PaletteItem {
+        name: "Viewport Shading: Mean Curvature Heatmap",
+        category: "Shading",
+        shortcut: "",
+        keywords: &["mean", "curvature", "heatmap", "diagnostics", "laplacian", "class-a"],
+        action: PaletteAction::SetShading(ViewportShadingMode::MeanCurvature),
+    },
+    PaletteItem {
         name: "Viewport Shading: Live Path Tracer",
         category: "Shading",
         shortcut: "F12",

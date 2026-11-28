@@ -255,6 +255,7 @@ Plumb 3D enforces a strict separation of concerns across major product generatio
 - **v1.2.0**: *Universal Interop & Production Shading* — Native glTF 2.0 / GLB container export & import with PBR materials, and micro-chamfer normal perturbation shader.
 - **v1.3.0**: *High-Speed Direct Modeling UX* — Coplanar face-split polygon inscription and modal bi-directional push-pull carving (boss/cavity).
 - **v1.4.0**: *Field-Aligned Quad Retopology & Pixar SubD Limit Math* — Curvature field tensor alignment, OpenSubdiv fractional semi-sharp creases ($w \in [0.0, 10.0]$), and closed-form Catmull-Clark limit surface stencils.
+- **v1.6.0**: *Class-A Surface Diagnostics & Universal CAD Interop* — Dynamic Zebra reflection striping, real-time screen-space Gaussian & Mean curvature heatmaps, G0/G1/G2 surface continuity seam analysis, porcupine curvature combs, and ANSI/USAF IGES 5.3 CAD solid B-Rep importer and exporter.
 - **v1.5.0**: *Precision B-Rep & Cognitive Velocity* — Analytic Trimmed NURBS surface patches, Surface-Surface Intersection (SSI) engine, STEP CAD solid importer, and 8-direction modal gesture Radial Pie Menu.
 
 ### Long-Term Generational Roadmap

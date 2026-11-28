@@ -388,6 +388,53 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         return vec4<f32>(apply_tonemapping(zebra_col + vec3<f32>(fresnel), normal, exposure, tonemap_mode, cavity), in.color.a);
     }
 
+    // Shading Mode 7: Realtime Screen-Space Gaussian Curvature Heatmap (Class-A Surfacing)
+    if (mode == 7u) {
+        let dNdx = dpdx(normal);
+        let dNdy = dpdy(normal);
+        let dPdx = dpdx(in.world_pos);
+        let dPdy = dpdy(in.world_pos);
+        let E = dot(dPdx, dPdx);
+        let F = dot(dPdx, dPdy);
+        let G = dot(dPdy, dPdy);
+        let detI = max(E * G - F * F, 1e-8);
+        let e = -dot(dPdx, dNdx);
+        let f = -0.5 * (dot(dPdx, dNdy) + dot(dPdy, dNdx));
+        let g = -dot(dPdy, dNdy);
+        let detII = e * g - f * f;
+        let K = clamp(detII / detI * 0.1, -1.0, 1.0);
+        let t = K * 0.5 + 0.5;
+        let r_c = clamp(2.0 * t - 0.5, 0.0, 1.0);
+        let g_c = select(clamp(2.0 * (1.0 - t), 0.0, 1.0), clamp(2.0 * t, 0.0, 1.0), t < 0.5);
+        let b_c = clamp(1.5 - 2.0 * t, 0.0, 1.0);
+        let curv_col = vec3<f32>(r_c, g_c, b_c);
+        let diff = max(dot(normal, normalize(vec3<f32>(0.5, 0.8, 0.3))), 0.2);
+        return vec4<f32>(curv_col * diff, in.color.a);
+    }
+
+    // Shading Mode 8: Realtime Screen-Space Mean Curvature Heatmap (Class-A Surfacing)
+    if (mode == 8u) {
+        let dNdx = dpdx(normal);
+        let dNdy = dpdy(normal);
+        let dPdx = dpdx(in.world_pos);
+        let dPdy = dpdy(in.world_pos);
+        let E = dot(dPdx, dPdx);
+        let F = dot(dPdx, dPdy);
+        let G = dot(dPdy, dPdy);
+        let detI = max(E * G - F * F, 1e-8);
+        let e = -dot(dPdx, dNdx);
+        let f = -0.5 * (dot(dPdx, dNdy) + dot(dPdy, dNdx));
+        let g = -dot(dPdy, dNdy);
+        let H = clamp((e * G - 2.0 * f * F + g * E) / (2.0 * detI) * 0.2, -1.0, 1.0);
+        let t = H * 0.5 + 0.5;
+        let r_c = clamp(2.0 * t - 0.5, 0.0, 1.0);
+        let g_c = select(clamp(2.0 * (1.0 - t), 0.0, 1.0), clamp(2.0 * t, 0.0, 1.0), t < 0.5);
+        let b_c = clamp(1.5 - 2.0 * t, 0.0, 1.0);
+        let curv_col = vec3<f32>(r_c, g_c, b_c);
+        let diff = max(dot(normal, normalize(vec3<f32>(0.5, 0.8, 0.3))), 0.2);
+        return vec4<f32>(curv_col * diff, in.color.a);
+    }
+
     // Default Shading Mode 0: Three-point Studio Lighting (or active dynamic scene lights)
     if (scene_lights.light_count.x > 0u) {
         var accum_diffuse = vec3<f32>(0.0);

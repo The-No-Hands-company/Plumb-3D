@@ -15,6 +15,7 @@
 pub mod analysis;
 pub mod boolean;
 pub mod decimate;
+pub mod diagnostics;
 pub mod fluid_sph;
 pub mod gaussian_splat;
 pub mod groom;
@@ -47,6 +48,10 @@ pub mod xpbd_cloth;
 pub use analysis::MeshAnalysisReport;
 pub use boolean::BooleanOp;
 pub use decimate::{decimate_mesh, DecimateModifier, SymmQuadric};
+pub use diagnostics::{
+    ContinuityClass, CurvatureColorMap, CurvatureNeedle, SeamContinuityReport,
+    SurfaceCurvatureSample,
+};
 pub use fluid_sph::{FluidParticle, SphFluidSimulator, SphSettings};
 pub use gaussian_splat::{GaussianCloud, GaussianSplat};
 pub use groom::{GroomBrush, GroomSettings, GroomSystem, HairGuide, HairStrand};
