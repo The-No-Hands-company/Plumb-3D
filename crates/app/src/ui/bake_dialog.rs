@@ -228,11 +228,14 @@ pub fn draw_bake_dialog(state: &mut AppState) {
         let w = baked_img.width() as usize;
         let h = baked_img.height() as usize;
         let color_img = egui::ColorImage::from_rgba_unmultiplied([w, h], baked_img.as_raw());
-        let tex = state.egui_ctx.load_texture("baked_preview_tex", color_img, Default::default());
+        let tex = state
+            .egui_ctx
+            .load_texture("baked_preview_tex", color_img, Default::default());
 
         state.bake_state.preview_tex = Some(tex);
         state.bake_state.last_baked_image = Some(baked_img);
-        state.bake_state.status_message = format!("Bake completed in {} ms ({}x{}).", elapsed, w, h);
+        state.bake_state.status_message =
+            format!("Bake completed in {} ms ({}x{}).", elapsed, w, h);
     }
 
     if trigger_export {
@@ -245,7 +248,8 @@ pub fn draw_bake_dialog(state: &mut AppState) {
             };
             match img.save(filename) {
                 Ok(_) => {
-                    state.bake_state.status_message = format!("Exported successfully to '{}'.", filename);
+                    state.bake_state.status_message =
+                        format!("Exported successfully to '{}'.", filename);
                 }
                 Err(e) => {
                     state.bake_state.status_message = format!("Export failed: {}", e);

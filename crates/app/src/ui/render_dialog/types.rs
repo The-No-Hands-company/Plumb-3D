@@ -1,4 +1,4 @@
-use render_pathtracer::{PathtracerCamera, PathTracerScene, RenderBuffer, RenderSettings};
+use render_pathtracer::{PathTracerScene, PathtracerCamera, RenderBuffer, RenderSettings};
 use std::time::Instant;
 
 /// Preset output resolutions for production rendering

@@ -83,18 +83,31 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
 
                 ui.separator();
 
-                let (response, painter) = ui.allocate_painter(egui::vec2(ui.available_width(), 380.0), egui::Sense::click_and_drag());
+                let (response, painter) = ui.allocate_painter(
+                    egui::vec2(ui.available_width(), 380.0),
+                    egui::Sense::click_and_drag(),
+                );
                 let rect = response.rect;
 
                 painter.rect_filled(rect, 4.0, egui::Color32::from_rgb(20, 22, 26));
-                painter.rect_stroke(rect, 4.0, egui::Stroke::new(1.0_f32, egui::Color32::from_white_alpha(30)));
+                painter.rect_stroke(
+                    rect,
+                    4.0,
+                    egui::Stroke::new(1.0_f32, egui::Color32::from_white_alpha(30)),
+                );
 
                 let grid_lines = 8;
                 for i in 1..grid_lines {
                     let gx = rect.left() + (i as f32 / grid_lines as f32) * rect.width();
                     let gy = rect.top() + (i as f32 / grid_lines as f32) * rect.height();
-                    painter.line_segment([egui::pos2(gx, rect.top()), egui::pos2(gx, rect.bottom())], egui::Stroke::new(0.5_f32, egui::Color32::from_white_alpha(15)));
-                    painter.line_segment([egui::pos2(rect.left(), gy), egui::pos2(rect.right(), gy)], egui::Stroke::new(0.5_f32, egui::Color32::from_white_alpha(15)));
+                    painter.line_segment(
+                        [egui::pos2(gx, rect.top()), egui::pos2(gx, rect.bottom())],
+                        egui::Stroke::new(0.5_f32, egui::Color32::from_white_alpha(15)),
+                    );
+                    painter.line_segment(
+                        [egui::pos2(rect.left(), gy), egui::pos2(rect.right(), gy)],
+                        egui::Stroke::new(0.5_f32, egui::Color32::from_white_alpha(15)),
+                    );
                 }
 
                 // Render ABF++ angle and area distortion heatmap overlay
@@ -105,11 +118,20 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                         let mut poly_pts = Vec::with_capacity(verts.len());
                         for vk in verts {
                             let uv = base_mesh.vertices[vk].uv;
-                            poly_pts.push(egui::pos2(rect.left() + uv.x * rect.width(), rect.top() + (1.0 - uv.y) * rect.height()));
+                            poly_pts.push(egui::pos2(
+                                rect.left() + uv.x * rect.width(),
+                                rect.top() + (1.0 - uv.y) * rect.height(),
+                            ));
                         }
                         if poly_pts.len() >= 3 {
-                            let fill_c = egui::Color32::from_rgba_unmultiplied(rgba[0], rgba[1], rgba[2], rgba[3]);
-                            painter.add(egui::Shape::convex_polygon(poly_pts, fill_c, egui::Stroke::NONE));
+                            let fill_c = egui::Color32::from_rgba_unmultiplied(
+                                rgba[0], rgba[1], rgba[2], rgba[3],
+                            );
+                            painter.add(egui::Shape::convex_polygon(
+                                poly_pts,
+                                fill_c,
+                                egui::Stroke::NONE,
+                            ));
                         }
                     }
                 }
@@ -128,7 +150,10 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                     if pts.len() >= 3 {
                         for i in 0..pts.len() {
                             let next_i = (i + 1) % pts.len();
-                            painter.line_segment([pts[i], pts[next_i]], egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(70, 160, 255)));
+                            painter.line_segment(
+                                [pts[i], pts[next_i]],
+                                egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(70, 160, 255)),
+                            );
                         }
                     }
                 }
@@ -142,8 +167,14 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                     let he = &base_mesh.half_edges[edge.half_edge];
                     let uv0 = base_mesh.vertices[he.origin].uv;
                     let uv1 = base_mesh.vertices[he.target].uv;
-                    let p0 = egui::pos2(rect.left() + uv0.x * rect.width(), rect.top() + (1.0 - uv0.y) * rect.height());
-                    let p1 = egui::pos2(rect.left() + uv1.x * rect.width(), rect.top() + (1.0 - uv1.y) * rect.height());
+                    let p0 = egui::pos2(
+                        rect.left() + uv0.x * rect.width(),
+                        rect.top() + (1.0 - uv0.y) * rect.height(),
+                    );
+                    let p1 = egui::pos2(
+                        rect.left() + uv1.x * rect.width(),
+                        rect.top() + (1.0 - uv1.y) * rect.height(),
+                    );
 
                     if state.uv_seam_cut_mode {
                         if let Some(m) = mouse_pos {
@@ -156,13 +187,19 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                     }
 
                     if edge.is_seam {
-                        painter.line_segment([p0, p1], egui::Stroke::new(2.5_f32, egui::Color32::from_rgb(255, 50, 50)));
+                        painter.line_segment(
+                            [p0, p1],
+                            egui::Stroke::new(2.5_f32, egui::Color32::from_rgb(255, 50, 50)),
+                        );
                     }
                 }
 
                 if state.uv_seam_cut_mode {
                     if let Some((ek, p0, p1)) = closest_edge {
-                        painter.line_segment([p0, p1], egui::Stroke::new(3.0_f32, egui::Color32::YELLOW));
+                        painter.line_segment(
+                            [p0, p1],
+                            egui::Stroke::new(3.0_f32, egui::Color32::YELLOW),
+                        );
                         if response.clicked() {
                             base_mesh.edges[ek].is_seam = !base_mesh.edges[ek].is_seam;
                         }
@@ -174,7 +211,10 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                 let mut min_vert_dist = 12.0_f32;
 
                 for (vk, v) in &base_mesh.vertices {
-                    let vp = egui::pos2(rect.left() + v.uv.x * rect.width(), rect.top() + (1.0 - v.uv.y) * rect.height());
+                    let vp = egui::pos2(
+                        rect.left() + v.uv.x * rect.width(),
+                        rect.top() + (1.0 - v.uv.y) * rect.height(),
+                    );
                     if let Some(m) = mouse_pos {
                         let d = (m - vp).length();
                         if d < min_vert_dist {
@@ -186,14 +226,22 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                     if v.uv_pinned {
                         // Draw red pushpin marker for pinned UV vertices
                         painter.circle_filled(vp, 4.5_f32, egui::Color32::from_rgb(255, 45, 45));
-                        painter.circle_stroke(vp, 4.5_f32, egui::Stroke::new(1.5_f32, egui::Color32::WHITE));
+                        painter.circle_stroke(
+                            vp,
+                            4.5_f32,
+                            egui::Stroke::new(1.5_f32, egui::Color32::WHITE),
+                        );
                         painter.circle_filled(vp, 1.5_f32, egui::Color32::WHITE);
                     }
                 }
 
                 let p_pressed = ui.input(|i| i.key_pressed(egui::Key::P));
                 if let Some((cvk, cvp)) = closest_vert {
-                    painter.circle_stroke(cvp, 6.5_f32, egui::Stroke::new(1.5_f32, egui::Color32::YELLOW));
+                    painter.circle_stroke(
+                        cvp,
+                        6.5_f32,
+                        egui::Stroke::new(1.5_f32, egui::Color32::YELLOW),
+                    );
                     if p_pressed || (state.uv_pin_mode && response.clicked()) {
                         base_mesh.vertices[cvk].uv_pinned = !base_mesh.vertices[cvk].uv_pinned;
                     }
@@ -216,9 +264,21 @@ pub fn draw_uv_editor_inner(state: &mut AppState, actions: &mut UiActions, ui: &
                 ui.separator();
                 let summary = base_mesh.summarize_uv_distortion();
                 ui.horizontal(|ui| {
-                    ui.label(format!("Mesh: {} | V: {} | F: {}", node.name, base_mesh.vertices.len(), base_mesh.faces.len()));
+                    ui.label(format!(
+                        "Mesh: {} | V: {} | F: {}",
+                        node.name,
+                        base_mesh.vertices.len(),
+                        base_mesh.faces.len()
+                    ));
                     ui.separator();
-                    ui.label(egui::RichText::new(format!("Angle Err: {:.1} deg | Area Stretch: {:.2}x", summary.mean_angle_error_deg, summary.mean_area_stretch)).small().color(egui::Color32::from_rgb(180, 200, 230)));
+                    ui.label(
+                        egui::RichText::new(format!(
+                            "Angle Err: {:.1} deg | Area Stretch: {:.2}x",
+                            summary.mean_angle_error_deg, summary.mean_area_stretch
+                        ))
+                        .small()
+                        .color(egui::Color32::from_rgb(180, 200, 230)),
+                    );
                 });
             }
         }

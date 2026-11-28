@@ -86,7 +86,9 @@ impl Mesh {
             let mut edges_to_split = Vec::new();
             for (ek, edge) in &self.edges {
                 if let Some(he) = self.half_edges.get(edge.half_edge) {
-                    if let (Some(v0), Some(v1)) = (self.vertices.get(he.origin), self.vertices.get(he.target)) {
+                    if let (Some(v0), Some(v1)) =
+                        (self.vertices.get(he.origin), self.vertices.get(he.target))
+                    {
                         let mid = (v0.position + v1.position) * 0.5;
                         if (mid - center).length_squared() <= r_sq {
                             let len_sq = (v0.position - v1.position).length_squared();
@@ -113,7 +115,10 @@ impl Mesh {
                 .filter_map(|(fk, _)| {
                     let verts = self.face_vertices(fk);
                     if verts.len() > 3 {
-                        let centroid: Vec3 = verts.iter().map(|&vk| self.vertices[vk].position).sum::<Vec3>()
+                        let centroid: Vec3 = verts
+                            .iter()
+                            .map(|&vk| self.vertices[vk].position)
+                            .sum::<Vec3>()
                             / verts.len() as f32;
                         if (centroid - center).length_squared() <= r_sq {
                             Some(fk)
@@ -126,7 +131,12 @@ impl Mesh {
                 })
                 .collect();
 
-            let _ = self.triangulate_faces(&faces_to_triangulate, QuadMethod::Beauty, NgonMethod::Beauty, 4);
+            let _ = self.triangulate_faces(
+                &faces_to_triangulate,
+                QuadMethod::Beauty,
+                NgonMethod::Beauty,
+                4,
+            );
         }
 
         // 2. Edge Collapse Phase
@@ -134,7 +144,9 @@ impl Mesh {
             let mut edges_to_collapse = Vec::new();
             for (_ek, edge) in &self.edges {
                 if let Some(he) = self.half_edges.get(edge.half_edge) {
-                    if let (Some(v0), Some(v1)) = (self.vertices.get(he.origin), self.vertices.get(he.target)) {
+                    if let (Some(v0), Some(v1)) =
+                        (self.vertices.get(he.origin), self.vertices.get(he.target))
+                    {
                         let mid = (v0.position + v1.position) * 0.5;
                         if (mid - center).length_squared() <= r_sq {
                             let len_sq = (v0.position - v1.position).length_squared();
@@ -152,7 +164,8 @@ impl Mesh {
                     let root_a = *remapped.get(&va).unwrap_or(&va);
                     let root_b = *remapped.get(&vb).unwrap_or(&vb);
                     if root_a != root_b {
-                        let mid = (self.vertices[root_a].position + self.vertices[root_b].position) * 0.5;
+                        let mid =
+                            (self.vertices[root_a].position + self.vertices[root_b].position) * 0.5;
                         self.vertices[root_a].position = mid;
                         remapped.insert(root_b, root_a);
                         stats.edges_collapsed += 1;
@@ -202,12 +215,8 @@ impl Mesh {
         motion_delta: Option<Vec3>,
     ) -> Result<DyntopoStats, MeshError> {
         let mut stats = self.apply_dyntopo(hit_point, sculpt_settings.radius, dyntopo)?;
-        stats.vertices_sculpted = self.apply_sculpt_brush(
-            hit_point,
-            hit_normal,
-            sculpt_settings,
-            motion_delta,
-        );
+        stats.vertices_sculpted =
+            self.apply_sculpt_brush(hit_point, hit_normal, sculpt_settings, motion_delta);
         Ok(stats)
     }
 }

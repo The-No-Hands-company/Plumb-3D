@@ -8,7 +8,9 @@ use crate::ui::actions::UiActions;
 pub fn handle_separate_join_actions(state: &mut AppState, actions: &mut UiActions) {
     // Handle Join Meshes (Blender Ctrl+J / Maya Combine)
     if actions.trigger_join_meshes {
-        if let (Some(target_id), Some(source_id)) = (state.selected_node, state.previous_selected_node) {
+        if let (Some(target_id), Some(source_id)) =
+            (state.selected_node, state.previous_selected_node)
+        {
             if target_id != source_id {
                 let cmd = Box::new(JoinMeshesCommand {
                     target_id,

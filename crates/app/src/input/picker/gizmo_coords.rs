@@ -30,7 +30,9 @@ impl AppState {
                                 }
                             }
                             if count > 0 {
-                                return Some(node.world_matrix.transform_point3(sum / count as f32));
+                                return Some(
+                                    node.world_matrix.transform_point3(sum / count as f32),
+                                );
                             }
                         }
                     }
@@ -51,7 +53,9 @@ impl AppState {
                                 }
                             }
                             if count > 0 {
-                                return Some(node.world_matrix.transform_point3(sum / count as f32));
+                                return Some(
+                                    node.world_matrix.transform_point3(sum / count as f32),
+                                );
                             }
                         }
                     }
@@ -73,7 +77,9 @@ impl AppState {
                                 }
                             }
                             if count > 0 {
-                                return Some(node.world_matrix.transform_point3(sum / count as f32));
+                                return Some(
+                                    node.world_matrix.transform_point3(sum / count as f32),
+                                );
                             }
                         }
                     }
@@ -96,20 +102,22 @@ impl AppState {
             }
         }
 
-        if (self.interaction_mode == InteractionMode::Object || self.interaction_mode == InteractionMode::Pose)
-            && self.selected_nodes.len() > 1 {
-                let mut sum = Vec3::ZERO;
-                let mut count = 0;
-                for &nid in &self.selected_nodes {
-                    if let Some(n) = self.scene.nodes.get(nid) {
-                        sum += n.world_matrix.transform_point3(Vec3::ZERO);
-                        count += 1;
-                    }
-                }
-                if count > 0 {
-                    return Some(sum / count as f32);
+        if (self.interaction_mode == InteractionMode::Object
+            || self.interaction_mode == InteractionMode::Pose)
+            && self.selected_nodes.len() > 1
+        {
+            let mut sum = Vec3::ZERO;
+            let mut count = 0;
+            for &nid in &self.selected_nodes {
+                if let Some(n) = self.scene.nodes.get(nid) {
+                    sum += n.world_matrix.transform_point3(Vec3::ZERO);
+                    count += 1;
                 }
             }
+            if count > 0 {
+                return Some(sum / count as f32);
+            }
+        }
 
         Some(node.world_matrix.transform_point3(Vec3::ZERO))
     }
@@ -174,7 +182,8 @@ impl AppState {
 
                                 if count > 0.0 && normal_sum.length_squared() > 1e-5 {
                                     let local_norm = normal_sum.normalize();
-                                    let world_norm = (node.local_transform.rotation * local_norm).normalize();
+                                    let world_norm =
+                                        (node.local_transform.rotation * local_norm).normalize();
                                     let dot = Vec3::Z.dot(world_norm);
                                     let rot = if dot < -0.9999 {
                                         Quat::from_axis_angle(Vec3::Y, std::f32::consts::PI)

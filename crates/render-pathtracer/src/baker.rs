@@ -72,7 +72,16 @@ pub fn bake_texture(low_poly: &Mesh, high_poly: &Mesh, settings: &BakeSettings) 
             let n1 = high_poly.vertices[verts[i]].normal;
             let n2 = high_poly.vertices[verts[i + 1]].normal;
             high_tris.push(Triangle::new(
-                v0, v1, v2, n0, n1, n2, Vec2::ZERO, Vec2::ZERO, Vec2::ZERO, 0,
+                v0,
+                v1,
+                v2,
+                n0,
+                n1,
+                n2,
+                Vec2::ZERO,
+                Vec2::ZERO,
+                Vec2::ZERO,
+                0,
             ));
         }
     }
@@ -125,7 +134,17 @@ pub fn bake_texture(low_poly: &Mesh, high_poly: &Mesh, settings: &BakeSettings) 
             let bitangent = avg_normal.cross(tangent).normalize_or_zero();
 
             low_tris.push(LowPolyTri {
-                p0, p1, p2, n0, n1, n2, uv0, uv1, uv2, tangent, bitangent,
+                p0,
+                p1,
+                p2,
+                n0,
+                n1,
+                n2,
+                uv0,
+                uv1,
+                uv2,
+                tangent,
+                bitangent,
             });
         }
     }
@@ -237,7 +256,10 @@ pub fn bake_texture(low_poly: &Mesh, high_poly: &Mesh, settings: &BakeSettings) 
                                         u * local_dir.x + hit.normal * local_dir.y + v * local_dir.z
                                     };
 
-                                    let ao_ray = Ray::new(hit.position + hit.normal * 0.005, ao_dir.normalize());
+                                    let ao_ray = Ray::new(
+                                        hit.position + hit.normal * 0.005,
+                                        ao_dir.normalize(),
+                                    );
                                     if bvh_tree.intersect(&ao_ray, 0.001, cage * 1.5).is_none() {
                                         unoccluded += 1;
                                     }
@@ -248,12 +270,14 @@ pub fn bake_texture(low_poly: &Mesh, high_poly: &Mesh, settings: &BakeSettings) 
                             }
                             BakeMapType::Curvature => {
                                 let diff = (hit.normal - norm_low).length();
-                                let curv = (128.0_f32 + diff * 64.0_f32).clamp(0.0_f32, 255.0_f32) as u8;
+                                let curv =
+                                    (128.0_f32 + diff * 64.0_f32).clamp(0.0_f32, 255.0_f32) as u8;
                                 Rgba([curv, curv, curv, 255])
                             }
                             BakeMapType::Height => {
                                 let signed_dist = (hit.position - pos_low).dot(norm_low);
-                                let norm_dist = (signed_dist / cage * 127.0 + 128.0).clamp(0.0, 255.0) as u8;
+                                let norm_dist =
+                                    (signed_dist / cage * 127.0 + 128.0).clamp(0.0, 255.0) as u8;
                                 Rgba([norm_dist, norm_dist, norm_dist, 255])
                             }
                         }

@@ -30,35 +30,97 @@ pub fn default_keybindings() -> Vec<KeybindingEntry> {
         // Modeling
         KeybindingEntry::new("model.extrude", "Modeling", "Extrude Region / Faces", "E"),
         KeybindingEntry::new("model.inset", "Modeling", "Inset Polygons", "I"),
-        KeybindingEntry::new("model.bevel", "Modeling", "Bevel Edges / Vertices", "Ctrl+B"),
+        KeybindingEntry::new(
+            "model.bevel",
+            "Modeling",
+            "Bevel Edges / Vertices",
+            "Ctrl+B",
+        ),
         KeybindingEntry::new("model.loop_cut", "Modeling", "Loop Cut and Slide", "Ctrl+R"),
-        KeybindingEntry::new("model.knife", "Modeling", "Interactive Knife Topology Cut", "K"),
-        KeybindingEntry::new("model.delete", "Modeling", "Delete / Dissolve Sub-Elements", "X"),
+        KeybindingEntry::new(
+            "model.knife",
+            "Modeling",
+            "Interactive Knife Topology Cut",
+            "K",
+        ),
+        KeybindingEntry::new(
+            "model.delete",
+            "Modeling",
+            "Delete / Dissolve Sub-Elements",
+            "X",
+        ),
         KeybindingEntry::new("model.bridge", "Modeling", "Bridge Edge Loops", "Alt+B"),
         KeybindingEntry::new("model.subdivide", "Modeling", "Subdivide Selected", "W"),
-
         // Navigation & Gizmo
-        KeybindingEntry::new("nav.translate", "Navigation", "Translate Manipulator Gizmo", "G"),
+        KeybindingEntry::new(
+            "nav.translate",
+            "Navigation",
+            "Translate Manipulator Gizmo",
+            "G",
+        ),
         KeybindingEntry::new("nav.rotate", "Navigation", "Rotate Manipulator Gizmo", "R"),
         KeybindingEntry::new("nav.scale", "Navigation", "Scale Manipulator Gizmo", "S"),
-        KeybindingEntry::new("nav.frame_selected", "Navigation", "Frame / Focus Selected Object", "Numpad ."),
-
+        KeybindingEntry::new(
+            "nav.frame_selected",
+            "Navigation",
+            "Frame / Focus Selected Object",
+            "Numpad .",
+        ),
         // Selection
         KeybindingEntry::new("select.box", "Selection", "Box Selection Mode", "B"),
-        KeybindingEntry::new("select.circle", "Selection", "Circle / Paint Selection Brush", "C"),
-        KeybindingEntry::new("select.lasso", "Selection", "Lasso Selection Mode", "Shift+Space"),
-        KeybindingEntry::new("select.invert", "Selection", "Invert Current Selection", "Ctrl+I"),
+        KeybindingEntry::new(
+            "select.circle",
+            "Selection",
+            "Circle / Paint Selection Brush",
+            "C",
+        ),
+        KeybindingEntry::new(
+            "select.lasso",
+            "Selection",
+            "Lasso Selection Mode",
+            "Shift+Space",
+        ),
+        KeybindingEntry::new(
+            "select.invert",
+            "Selection",
+            "Invert Current Selection",
+            "Ctrl+I",
+        ),
         KeybindingEntry::new("select.all", "Selection", "Select / Deselect All", "A"),
-
         // General & Interface
-        KeybindingEntry::new("general.mode_toggle", "General", "Toggle Object / Edit Mode", "Tab"),
-        KeybindingEntry::new("general.palette", "General", "Omnipresent Command Palette", "F3"),
-        KeybindingEntry::new("general.help", "General", "In-Software Help Reference Manual", "F1"),
-        KeybindingEntry::new("general.snap", "General", "Toggle Snapping to Grid/Vertices", "Shift+Tab"),
+        KeybindingEntry::new(
+            "general.mode_toggle",
+            "General",
+            "Toggle Object / Edit Mode",
+            "Tab",
+        ),
+        KeybindingEntry::new(
+            "general.palette",
+            "General",
+            "Omnipresent Command Palette",
+            "F3",
+        ),
+        KeybindingEntry::new(
+            "general.help",
+            "General",
+            "In-Software Help Reference Manual",
+            "F1",
+        ),
+        KeybindingEntry::new(
+            "general.snap",
+            "General",
+            "Toggle Snapping to Grid/Vertices",
+            "Shift+Tab",
+        ),
         KeybindingEntry::new("general.undo", "General", "Undo Last Action", "Ctrl+Z"),
         KeybindingEntry::new("general.redo", "General", "Redo Action", "Ctrl+Y"),
         KeybindingEntry::new("general.save", "General", "Save Project File", "Ctrl+S"),
-        KeybindingEntry::new("general.render", "General", "Render Production Viewport", "F12"),
+        KeybindingEntry::new(
+            "general.render",
+            "General",
+            "Render Production Viewport",
+            "F12",
+        ),
     ]
 }
 

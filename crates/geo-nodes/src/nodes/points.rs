@@ -71,7 +71,9 @@ impl GeoNodeOp for DistributePointsOnFacesNode {
                 };
                 let bitangent = normal.cross(tangent).normalize();
 
-                let pos = centroid + tangent * (jitter_x * face_area.sqrt()) + bitangent * (jitter_z * face_area.sqrt());
+                let pos = centroid
+                    + tangent * (jitter_x * face_area.sqrt())
+                    + bitangent * (jitter_z * face_area.sqrt());
                 points.push(PointInstance::new(pos, normal));
             }
         }
@@ -123,7 +125,8 @@ impl GeoNodeOp for InstanceOnPointsNode {
             let scale = pt.scale * user_scale;
             // Compute rotation aligning +Y to point normal
             let rot = Quat::from_rotation_arc(Vec3::Y, pt.normal);
-            let transform = core_math::Mat4::from_scale_rotation_translation(scale, rot, pt.position);
+            let transform =
+                core_math::Mat4::from_scale_rotation_translation(scale, rot, pt.position);
 
             let _ = combined_mesh.join(instance_mesh, transform);
         }
@@ -144,13 +147,14 @@ struct SimpleLcgRng {
 
 impl SimpleLcgRng {
     fn new(seed: u64) -> Self {
-        Self {
-            state: seed.max(1),
-        }
+        Self { state: seed.max(1) }
     }
 
     fn next_u32(&mut self) -> u32 {
-        self.state = self.state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        self.state = self
+            .state
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         (self.state >> 32) as u32
     }
 

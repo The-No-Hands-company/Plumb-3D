@@ -12,8 +12,22 @@ pub fn build_scifi_crate_finished_graph() -> (SceneGraph, ViewportCamera, NodeId
     let mut scene = SceneGraph::new();
 
     // 1. Materials Palette
-    let mat_gunmetal = Material::new("IndustrialGunmetal", [0.18, 0.20, 0.24, 1.0], 0.88, 0.32, 0.0, 0);
-    let mat_floor = Material::new("HangarDeckPlate", [0.12, 0.14, 0.16, 1.0], 0.30, 0.65, 0.0, 2);
+    let mat_gunmetal = Material::new(
+        "IndustrialGunmetal",
+        [0.18, 0.20, 0.24, 1.0],
+        0.88,
+        0.32,
+        0.0,
+        0,
+    );
+    let mat_floor = Material::new(
+        "HangarDeckPlate",
+        [0.12, 0.14, 0.16, 1.0],
+        0.30,
+        0.65,
+        0.0,
+        2,
+    );
 
     // 2. Base Crate Mesh (Box modeled with insets, extrusions, and live bevel modifier)
     let cube_mesh = Primitives::create_cube(2.0);
@@ -22,7 +36,12 @@ pub fn build_scifi_crate_finished_graph() -> (SceneGraph, ViewportCamera, NodeId
         Transform::from_translation(vec3(0.0, 1.0, 0.0)),
         cube_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, ref mut modifier_stack, .. } = crate_node.data {
+    if let NodeData::Mesh {
+        ref mut materials,
+        ref mut modifier_stack,
+        ..
+    } = crate_node.data
+    {
         materials[0] = mat_gunmetal;
         let bevel = geo_kernel::BevelModifier::new(0.04);
         modifier_stack.add_modifier(Box::new(bevel));
@@ -36,7 +55,10 @@ pub fn build_scifi_crate_finished_graph() -> (SceneGraph, ViewportCamera, NodeId
         Transform::from_translation(vec3(0.0, 0.0, 0.0)),
         floor_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = floor_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = floor_node.data
+    {
         materials[0] = mat_floor;
     }
     scene.add_node(floor_node);
@@ -108,7 +130,9 @@ pub fn build_scifi_crate_tutorial_blank(state: &mut AppState) {
     state.walkthrough = WalkthroughState::scifi_crate();
     state.walkthrough.current_step = 0;
     state.sync_gpu_meshes();
-    state.set_status_message("📦 Sci-Fi Storage Crate Tutorial started: Click Step 1 to spawn your default cube!");
+    state.set_status_message(
+        "📦 Sci-Fi Storage Crate Tutorial started: Click Step 1 to spawn your default cube!",
+    );
 }
 
 #[cfg(test)]
@@ -123,7 +147,10 @@ mod tests {
 
         let hero = scene.nodes.get(hero_id).expect("hero node exists");
         assert_eq!(hero.name, "SciFi_Cargo_Crate");
-        if let NodeData::Mesh { ref modifier_stack, .. } = hero.data {
+        if let NodeData::Mesh {
+            ref modifier_stack, ..
+        } = hero.data
+        {
             assert_eq!(modifier_stack.modifiers().len(), 1);
             assert_eq!(modifier_stack.modifiers()[0].name(), "Bevel");
         } else {
@@ -142,7 +169,12 @@ mod tests {
         let side_faces: Vec<_> = {
             let node = scene.nodes.get(id).unwrap();
             if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                base_mesh.faces.iter().filter(|(_, f)| f.normal.y.abs() < 0.2).map(|(k, _)| k).collect()
+                base_mesh
+                    .faces
+                    .iter()
+                    .filter(|(_, f)| f.normal.y.abs() < 0.2)
+                    .map(|(k, _)| k)
+                    .collect()
             } else {
                 Vec::new()
             }

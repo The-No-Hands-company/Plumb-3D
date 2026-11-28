@@ -134,7 +134,9 @@ impl Mesh {
     /// Parse a Binary STL byte buffer into a 2-manifold Half-Edge Mesh
     pub fn from_stl_binary(bytes: &[u8]) -> Result<Self, MeshError> {
         if bytes.len() < 84 {
-            return Err(MeshError::InvariantFailed("Binary STL buffer too short (< 84 bytes)".into()));
+            return Err(MeshError::InvariantFailed(
+                "Binary STL buffer too short (< 84 bytes)".into(),
+            ));
         }
 
         let num_triangles = u32::from_le_bytes(bytes[80..84].try_into().unwrap()) as usize;

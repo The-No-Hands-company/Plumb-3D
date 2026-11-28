@@ -39,24 +39,90 @@ pub fn draw_file_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
             actions.trigger_open_plmb = true;
             ui.close_menu();
         }
-        if ui.button("Import 3D Model... (plmb, obj, stl, ply, gltf)").clicked() {
+        if ui
+            .button("Import 3D Model... (plmb, obj, stl, ply, gltf)")
+            .clicked()
+        {
             actions.trigger_import_dialog = true;
             ui.close_menu();
         }
         ui.separator();
-        if ui.button("Export Active Mesh as STL for 3D Printing (.stl)").clicked() { actions.export_stl = true; ui.close_menu(); }
-        if ui.button("Export Active Mesh as OBJ (.obj)").clicked() { actions.export_obj = true; ui.close_menu(); }
-        if ui.button("Export Active Mesh as glTF 2.0 (.gltf)").clicked() { actions.export_gltf = true; ui.close_menu(); }
-        if ui.button("Export Active Mesh as PLY (.ply)").clicked() { actions.export_ply = true; ui.close_menu(); }
-        if ui.button("Export Active Mesh as CAD STEP Solid (.step)").clicked() { actions.export_step = true; ui.close_menu(); }
-        if ui.button("Export SubD Limit Surface as Continuous NURBS CAD STEP (.step)").clicked() { actions.export_subd_nurbs_step = true; ui.close_menu(); }
-        if ui.button("Export Full Scene as Pixar OpenUSD (.usda)").clicked() { actions.export_usd = true; ui.close_menu(); }
-        if ui.button("Import Pixar OpenUSD Scene (.usda)...").clicked() { actions.import_usd = true; ui.close_menu(); }
-        if ui.button("Export Active Mesh as Autodesk FBX (.fbx)").clicked() { actions.export_fbx = true; ui.close_menu(); }
-        if ui.button("Import Autodesk FBX (.fbx)...").clicked() { actions.import_fbx = true; ui.close_menu(); }
-        if ui.button("Export Active Mesh as Alembic Cache (.abc)").clicked() { actions.export_alembic = true; ui.close_menu(); }
-        if ui.button("Export Sliced G-Code for 3D Printing (.gcode)").clicked() { actions.export_gcode = true; ui.close_menu(); }
-        if ui.button("3D Print & CAD Quality Inspector...").clicked() { state.print_inspector.show_dialog = true; ui.close_menu(); }
+        if ui
+            .button("Export Active Mesh as STL for 3D Printing (.stl)")
+            .clicked()
+        {
+            actions.export_stl = true;
+            ui.close_menu();
+        }
+        if ui.button("Export Active Mesh as OBJ (.obj)").clicked() {
+            actions.export_obj = true;
+            ui.close_menu();
+        }
+        if ui
+            .button("Export Active Mesh as glTF 2.0 (.gltf)")
+            .clicked()
+        {
+            actions.export_gltf = true;
+            ui.close_menu();
+        }
+        if ui.button("Export Active Mesh as PLY (.ply)").clicked() {
+            actions.export_ply = true;
+            ui.close_menu();
+        }
+        if ui
+            .button("Export Active Mesh as CAD STEP Solid (.step)")
+            .clicked()
+        {
+            actions.export_step = true;
+            ui.close_menu();
+        }
+        if ui
+            .button("Export SubD Limit Surface as Continuous NURBS CAD STEP (.step)")
+            .clicked()
+        {
+            actions.export_subd_nurbs_step = true;
+            ui.close_menu();
+        }
+        if ui
+            .button("Export Full Scene as Pixar OpenUSD (.usda)")
+            .clicked()
+        {
+            actions.export_usd = true;
+            ui.close_menu();
+        }
+        if ui.button("Import Pixar OpenUSD Scene (.usda)...").clicked() {
+            actions.import_usd = true;
+            ui.close_menu();
+        }
+        if ui
+            .button("Export Active Mesh as Autodesk FBX (.fbx)")
+            .clicked()
+        {
+            actions.export_fbx = true;
+            ui.close_menu();
+        }
+        if ui.button("Import Autodesk FBX (.fbx)...").clicked() {
+            actions.import_fbx = true;
+            ui.close_menu();
+        }
+        if ui
+            .button("Export Active Mesh as Alembic Cache (.abc)")
+            .clicked()
+        {
+            actions.export_alembic = true;
+            ui.close_menu();
+        }
+        if ui
+            .button("Export Sliced G-Code for 3D Printing (.gcode)")
+            .clicked()
+        {
+            actions.export_gcode = true;
+            ui.close_menu();
+        }
+        if ui.button("3D Print & CAD Quality Inspector...").clicked() {
+            state.print_inspector.show_dialog = true;
+            ui.close_menu();
+        }
         ui.separator();
         if ui.button("Import Sample glTF Cube").clicked() {
             let sample_gltf = Primitives::create_cube(2.0).to_gltf("ImportedCube");
@@ -88,7 +154,10 @@ pub fn draw_edit_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
         } else {
             "Undo (Ctrl+Z)".into()
         };
-        if ui.add_enabled(state.history.can_undo(), egui::Button::new(undo_text)).clicked() {
+        if ui
+            .add_enabled(state.history.can_undo(), egui::Button::new(undo_text))
+            .clicked()
+        {
             actions.trigger_undo = true;
             ui.close_menu();
         }
@@ -98,7 +167,10 @@ pub fn draw_edit_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
         } else {
             "Redo (Ctrl+Y)".into()
         };
-        if ui.add_enabled(state.history.can_redo(), egui::Button::new(redo_text)).clicked() {
+        if ui
+            .add_enabled(state.history.can_redo(), egui::Button::new(redo_text))
+            .clicked()
+        {
             actions.trigger_redo = true;
             ui.close_menu();
         }
@@ -106,7 +178,13 @@ pub fn draw_edit_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
             state.show_history_window = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Duplicate Object (Shift+D)")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Duplicate Object (Shift+D)"),
+            )
+            .clicked()
+        {
             actions.trigger_duplicate_node = true;
             ui.close_menu();
         }
@@ -114,76 +192,183 @@ pub fn draw_edit_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
         let can_join = state.selected_node.is_some()
             && state.previous_selected_node.is_some()
             && state.selected_node != state.previous_selected_node;
-        if ui.add_enabled(can_join, egui::Button::new("Join Meshes (Ctrl+J)")).clicked() {
+        if ui
+            .add_enabled(can_join, egui::Button::new("Join Meshes (Ctrl+J)"))
+            .clicked()
+        {
             actions.trigger_join_meshes = true;
             ui.close_menu();
         }
-        let can_separate = state.interaction_mode == InteractionMode::Edit && !state.selected_faces.is_empty();
-        if ui.add_enabled(can_separate, egui::Button::new("Separate Faces (P)")).clicked() {
+        let can_separate =
+            state.interaction_mode == InteractionMode::Edit && !state.selected_faces.is_empty();
+        if ui
+            .add_enabled(can_separate, egui::Button::new("Separate Faces (P)"))
+            .clicked()
+        {
             actions.trigger_separate_faces = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Separate by Material")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Separate by Material"),
+            )
+            .clicked()
+        {
             actions.trigger_separate_by_material = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit, egui::Button::new("Inset Faces (I)")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit,
+                egui::Button::new("Inset Faces (I)"),
+            )
+            .clicked()
+        {
             actions.trigger_inset = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit, egui::Button::new("Flip Normals (Alt+N)")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit,
+                egui::Button::new("Flip Normals (Alt+N)"),
+            )
+            .clicked()
+        {
             actions.trigger_flip_normals = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Bisect / Slice Plane")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Bisect / Slice Plane"),
+            )
+            .clicked()
+        {
             actions.trigger_bisect = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit, egui::Button::new("Triangulate Faces (Ctrl+T)")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit,
+                egui::Button::new("Triangulate Faces (Ctrl+T)"),
+            )
+            .clicked()
+        {
             actions.trigger_triangulate = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit, egui::Button::new("Symmetrize Mesh")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit,
+                egui::Button::new("Symmetrize Mesh"),
+            )
+            .clicked()
+        {
             actions.trigger_symmetrize = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit, egui::Button::new("Spin Revolve")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit,
+                egui::Button::new("Spin Revolve"),
+            )
+            .clicked()
+        {
             actions.trigger_spin = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Clean Degenerate Geometry")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Clean Degenerate Geometry"),
+            )
+            .clicked()
+        {
             actions.trigger_clean_degenerate = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit, egui::Button::new("Cap Holes / Fill Boundaries")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit,
+                egui::Button::new("Cap Holes / Fill Boundaries"),
+            )
+            .clicked()
+        {
             actions.trigger_cap_holes = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit, egui::Button::new("Grid Fill")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit,
+                egui::Button::new("Grid Fill"),
+            )
+            .clicked()
+        {
             actions.trigger_grid_fill = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit && state.selected_vertices.len() >= 2, egui::Button::new("Pick Shortest Path")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit
+                    && state.selected_vertices.len() >= 2,
+                egui::Button::new("Pick Shortest Path"),
+            )
+            .clicked()
+        {
             actions.trigger_shortest_path = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit && !state.selected_edges.is_empty(), egui::Button::new("Extract Curve from Edges")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit && !state.selected_edges.is_empty(),
+                egui::Button::new("Extract Curve from Edges"),
+            )
+            .clicked()
+        {
             actions.trigger_extract_curve = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit && !state.selected_vertices.is_empty(), egui::Button::new("Shrink / Fatten (Alt+S)")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit
+                    && !state.selected_vertices.is_empty(),
+                egui::Button::new("Shrink / Fatten (Alt+S)"),
+            )
+            .clicked()
+        {
             actions.trigger_shrink_fatten = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit && !state.selected_vertices.is_empty(), egui::Button::new("Relax / Smooth Vertices")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit
+                    && !state.selected_vertices.is_empty(),
+                egui::Button::new("Relax / Smooth Vertices"),
+            )
+            .clicked()
+        {
             actions.trigger_relax_vertices = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit && !state.selected_vertices.is_empty(), egui::Button::new("Rip Vertices (V)")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit
+                    && !state.selected_vertices.is_empty(),
+                egui::Button::new("Rip Vertices (V)"),
+            )
+            .clicked()
+        {
             actions.trigger_rip_vertices = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.interaction_mode == InteractionMode::Edit, egui::Button::new("Knife Multi-Cut (K)")).clicked() {
+        if ui
+            .add_enabled(
+                state.interaction_mode == InteractionMode::Edit,
+                egui::Button::new("Knife Multi-Cut (K)"),
+            )
+            .clicked()
+        {
             state.knife_active = !state.knife_active;
             if !state.knife_active {
                 state.knife_points.clear();
@@ -199,18 +384,58 @@ pub fn draw_edit_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
 pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
     ui.menu_button("Add", |ui| {
         ui.menu_button("Mesh Primitives", |ui| {
-            if ui.button("Box / Cube").clicked() { actions.spawn_mesh = Some(("Cube", Primitives::create_cube(2.0))); ui.close_menu(); }
-            if ui.button("Plane Grid").clicked() { actions.spawn_mesh = Some(("Plane", Primitives::create_plane(4.0, 4.0, 4, 4))); ui.close_menu(); }
-            if ui.button("UV Sphere").clicked() { actions.spawn_mesh = Some(("Sphere", Primitives::create_uv_sphere(1.2, 16, 16))); ui.close_menu(); }
-            if ui.button("Cylinder").clicked() { actions.spawn_mesh = Some(("Cylinder", Primitives::create_cylinder(1.0, 2.5, 16))); ui.close_menu(); }
-            if ui.button("Torus / Donut").clicked() { actions.spawn_mesh = Some(("Torus", Primitives::create_torus(1.5, 0.4, 24, 16))); ui.close_menu(); }
-            if ui.button("Cone").clicked() { actions.spawn_mesh = Some(("Cone", Primitives::create_cone(1.2, 2.5, 16))); ui.close_menu(); }
-            if ui.button("Pyramid").clicked() { actions.spawn_mesh = Some(("Pyramid", Primitives::create_pyramid(2.0, 2.5))); ui.close_menu(); }
-            if ui.button("Capsule / Pill").clicked() { actions.spawn_mesh = Some(("Capsule", Primitives::create_capsule(0.8, 1.8, 16, 6))); ui.close_menu(); }
-            if ui.button("IcoSphere (Geodesic)").clicked() { actions.spawn_mesh = Some(("IcoSphere", Primitives::create_icosphere(1.2, 2))); ui.close_menu(); }
-            if ui.button("Geodesic Dome").clicked() { actions.spawn_mesh = Some(("GeodesicDome", Primitives::create_geodesic_dome(2.0, 2))); ui.close_menu(); }
-            if ui.button("Pipe / Screw Thread").clicked() { actions.spawn_mesh = Some(("PipeThread", Primitives::create_pipe_thread(1.2, 0.3, 2.0, 16))); ui.close_menu(); }
-            if ui.button("Plumb Bob (Mascot)").clicked() { actions.spawn_mesh = Some(("PlumbBob", Primitives::create_plumb_bob())); ui.close_menu(); }
+            if ui.button("Box / Cube").clicked() {
+                actions.spawn_mesh = Some(("Cube", Primitives::create_cube(2.0)));
+                ui.close_menu();
+            }
+            if ui.button("Plane Grid").clicked() {
+                actions.spawn_mesh = Some(("Plane", Primitives::create_plane(4.0, 4.0, 4, 4)));
+                ui.close_menu();
+            }
+            if ui.button("UV Sphere").clicked() {
+                actions.spawn_mesh = Some(("Sphere", Primitives::create_uv_sphere(1.2, 16, 16)));
+                ui.close_menu();
+            }
+            if ui.button("Cylinder").clicked() {
+                actions.spawn_mesh = Some(("Cylinder", Primitives::create_cylinder(1.0, 2.5, 16)));
+                ui.close_menu();
+            }
+            if ui.button("Torus / Donut").clicked() {
+                actions.spawn_mesh = Some(("Torus", Primitives::create_torus(1.5, 0.4, 24, 16)));
+                ui.close_menu();
+            }
+            if ui.button("Cone").clicked() {
+                actions.spawn_mesh = Some(("Cone", Primitives::create_cone(1.2, 2.5, 16)));
+                ui.close_menu();
+            }
+            if ui.button("Pyramid").clicked() {
+                actions.spawn_mesh = Some(("Pyramid", Primitives::create_pyramid(2.0, 2.5)));
+                ui.close_menu();
+            }
+            if ui.button("Capsule / Pill").clicked() {
+                actions.spawn_mesh = Some(("Capsule", Primitives::create_capsule(0.8, 1.8, 16, 6)));
+                ui.close_menu();
+            }
+            if ui.button("IcoSphere (Geodesic)").clicked() {
+                actions.spawn_mesh = Some(("IcoSphere", Primitives::create_icosphere(1.2, 2)));
+                ui.close_menu();
+            }
+            if ui.button("Geodesic Dome").clicked() {
+                actions.spawn_mesh =
+                    Some(("GeodesicDome", Primitives::create_geodesic_dome(2.0, 2)));
+                ui.close_menu();
+            }
+            if ui.button("Pipe / Screw Thread").clicked() {
+                actions.spawn_mesh = Some((
+                    "PipeThread",
+                    Primitives::create_pipe_thread(1.2, 0.3, 2.0, 16),
+                ));
+                ui.close_menu();
+            }
+            if ui.button("Plumb Bob (Mascot)").clicked() {
+                actions.spawn_mesh = Some(("PlumbBob", Primitives::create_plumb_bob()));
+                ui.close_menu();
+            }
         });
         ui.menu_button("Bio-Vegetation (L-System)", |ui| {
             if ui.button("Oak Tree").clicked() {
@@ -232,45 +457,93 @@ pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
                 ui.close_menu();
             }
             if ui.button("Biomechanical Conduit").clicked() {
-                if let Ok(m) = LSystem::from_preset(LSystemPreset::SciFiBiomechanicalConduit).generate_mesh() {
+                if let Ok(m) =
+                    LSystem::from_preset(LSystemPreset::SciFiBiomechanicalConduit).generate_mesh()
+                {
                     actions.spawn_mesh = Some(("BioConduit", m));
                 }
                 ui.close_menu();
             }
         });
         ui.menu_button("Curves & Splines", |ui| {
-            if ui.button("Bezier Path").clicked() { actions.spawn_curve = Some(0); ui.close_menu(); }
-            if ui.button("Bezier Circle").clicked() { actions.spawn_curve = Some(1); ui.close_menu(); }
-            if ui.button("Helical Spiral").clicked() { actions.spawn_curve = Some(2); ui.close_menu(); }
+            if ui.button("Bezier Path").clicked() {
+                actions.spawn_curve = Some(0);
+                ui.close_menu();
+            }
+            if ui.button("Bezier Circle").clicked() {
+                actions.spawn_curve = Some(1);
+                ui.close_menu();
+            }
+            if ui.button("Helical Spiral").clicked() {
+                actions.spawn_curve = Some(2);
+                ui.close_menu();
+            }
             ui.separator();
             if ui.button("Lathe Vase (Spline)").clicked() {
-                let profile = vec![(0.0, -1.2), (0.7, -1.2), (0.15, -0.3), (0.2, 0.6), (0.8, 1.3), (0.0, 1.3)];
-                if let Ok(m) = Spline::lathe(&profile, 24, 2.0 * std::f32::consts::PI) { actions.spawn_mesh = Some(("LatheVase", m)); }
+                let profile = vec![
+                    (0.0, -1.2),
+                    (0.7, -1.2),
+                    (0.15, -0.3),
+                    (0.2, 0.6),
+                    (0.8, 1.3),
+                    (0.0, 1.3),
+                ];
+                if let Ok(m) = Spline::lathe(&profile, 24, 2.0 * std::f32::consts::PI) {
+                    actions.spawn_mesh = Some(("LatheVase", m));
+                }
                 ui.close_menu();
             }
             if ui.button("Curved Pipe (Spline)").clicked() {
                 let circle = Spline::circle_cross_section(0.25, 12);
                 let mut spline = Spline::new();
-                spline.add_point(BezierPoint::smooth(vec3(-2.0, 0.0, -1.0), vec3(0.0, 1.5, 0.0)));
-                spline.add_point(BezierPoint::smooth(vec3(0.0, 2.0, 0.0), vec3(1.5, 0.0, 0.0)));
-                spline.add_point(BezierPoint::smooth(vec3(2.0, 0.5, 1.0), vec3(0.0, -1.0, 0.0)));
+                spline.add_point(BezierPoint::smooth(
+                    vec3(-2.0, 0.0, -1.0),
+                    vec3(0.0, 1.5, 0.0),
+                ));
+                spline.add_point(BezierPoint::smooth(
+                    vec3(0.0, 2.0, 0.0),
+                    vec3(1.5, 0.0, 0.0),
+                ));
+                spline.add_point(BezierPoint::smooth(
+                    vec3(2.0, 0.5, 1.0),
+                    vec3(0.0, -1.0, 0.0),
+                ));
                 let path = spline.sample(12);
-                if let Ok(m) = Spline::sweep(&circle, &path, false) { actions.spawn_mesh = Some(("CurvedPipe", m)); }
+                if let Ok(m) = Spline::sweep(&circle, &path, false) {
+                    actions.spawn_mesh = Some(("CurvedPipe", m));
+                }
                 ui.close_menu();
             }
             ui.separator();
-            if ui.button("Loft Selected Curves (Ctrl+L)").clicked() { actions.trigger_loft_curves = true; ui.close_menu(); }
-            if ui.button("Fillet Curve Corners (0.2m)").clicked() { actions.trigger_fillet_curve = Some(0.2); ui.close_menu(); }
-            if ui.button("Revolve / Lathe Curve (360 deg)").clicked() { actions.trigger_lathe_curve = Some((16, 360.0)); ui.close_menu(); }
+            if ui.button("Loft Selected Curves (Ctrl+L)").clicked() {
+                actions.trigger_loft_curves = true;
+                ui.close_menu();
+            }
+            if ui.button("Fillet Curve Corners (0.2m)").clicked() {
+                actions.trigger_fillet_curve = Some(0.2);
+                ui.close_menu();
+            }
+            if ui.button("Revolve / Lathe Curve (360 deg)").clicked() {
+                actions.trigger_lathe_curve = Some((16, 360.0));
+                ui.close_menu();
+            }
         });
         ui.menu_button("OpenVDB Volumetrics", |ui| {
             if ui.button("Cumulus Cloud (Level-Set Mesh)").clicked() {
-                let cloud = geo_kernel::VolumeGenerators::create_cumulus_cloud(core_math::Vec3::ZERO, 2.0, 1.0, 0.4);
+                let cloud = geo_kernel::VolumeGenerators::create_cumulus_cloud(
+                    core_math::Vec3::ZERO,
+                    2.0,
+                    1.0,
+                    0.4,
+                );
                 let mesh = cloud.extract_isosurface(0.35);
                 actions.spawn_mesh = Some(("VdbCumulusCloud", mesh));
                 ui.close_menu();
             }
-            if ui.button("Atmospheric Ground Fog (Level-Set Mesh)").clicked() {
+            if ui
+                .button("Atmospheric Ground Fog (Level-Set Mesh)")
+                .clicked()
+            {
                 let fog = geo_kernel::VolumeGenerators::create_ground_fog(4.0, 1.5, 0.8, 0.4);
                 let mesh = fog.extract_isosurface(0.2);
                 actions.spawn_mesh = Some(("VdbGroundFog", mesh));
@@ -278,55 +551,134 @@ pub fn draw_add_menu(actions: &mut UiActions, ui: &mut egui::Ui) {
             }
         });
         ui.menu_button("Lights", |ui| {
-            if ui.button("Directional Light (Sun)").clicked() { actions.spawn_light = Some(("SunLight", LightType::Directional)); ui.close_menu(); }
-            if ui.button("Point Light (Omni)").clicked() { actions.spawn_light = Some(("PointLight", LightType::Point)); ui.close_menu(); }
-            if ui.button("Spot Light (Cone)").clicked() { actions.spawn_light = Some(("SpotLight", LightType::Spot)); ui.close_menu(); }
+            if ui.button("Directional Light (Sun)").clicked() {
+                actions.spawn_light = Some(("SunLight", LightType::Directional));
+                ui.close_menu();
+            }
+            if ui.button("Point Light (Omni)").clicked() {
+                actions.spawn_light = Some(("PointLight", LightType::Point));
+                ui.close_menu();
+            }
+            if ui.button("Spot Light (Cone)").clicked() {
+                actions.spawn_light = Some(("SpotLight", LightType::Spot));
+                ui.close_menu();
+            }
         });
-        if ui.button("Camera").clicked() { actions.spawn_camera = true; ui.close_menu(); }
-        if ui.button("Joint / Bone Armature").clicked() { actions.spawn_joint = true; ui.close_menu(); }
+        if ui.button("Camera").clicked() {
+            actions.spawn_camera = true;
+            ui.close_menu();
+        }
+        if ui.button("Joint / Bone Armature").clicked() {
+            actions.spawn_joint = true;
+            ui.close_menu();
+        }
     });
 }
 
 pub fn draw_mode_menu(state: &mut AppState, ui: &mut egui::Ui) {
     ui.menu_button("Mode", |ui| {
-        if ui.selectable_label(state.interaction_mode == InteractionMode::Object, "Object Mode (Tab)").clicked() {
+        if ui
+            .selectable_label(
+                state.interaction_mode == InteractionMode::Object,
+                "Object Mode (Tab)",
+            )
+            .clicked()
+        {
             state.interaction_mode = InteractionMode::Object;
-            if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
+            if let Some(sel_id) = state.selected_node {
+                state.scene.mark_dirty(sel_id);
+            }
             ui.close_menu();
         }
-        if ui.selectable_label(state.interaction_mode == InteractionMode::Edit, "Edit Mode (Tab)").clicked() {
+        if ui
+            .selectable_label(
+                state.interaction_mode == InteractionMode::Edit,
+                "Edit Mode (Tab)",
+            )
+            .clicked()
+        {
             state.interaction_mode = InteractionMode::Edit;
-            if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
+            if let Some(sel_id) = state.selected_node {
+                state.scene.mark_dirty(sel_id);
+            }
             ui.close_menu();
         }
-        if ui.selectable_label(state.interaction_mode == InteractionMode::Sculpt, "Sculpt Mode").clicked() {
+        if ui
+            .selectable_label(
+                state.interaction_mode == InteractionMode::Sculpt,
+                "Sculpt Mode",
+            )
+            .clicked()
+        {
             state.interaction_mode = InteractionMode::Sculpt;
-            if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
+            if let Some(sel_id) = state.selected_node {
+                state.scene.mark_dirty(sel_id);
+            }
             ui.close_menu();
         }
-        if ui.selectable_label(state.interaction_mode == InteractionMode::WeightPaint, "Weight Paint Mode").clicked() {
+        if ui
+            .selectable_label(
+                state.interaction_mode == InteractionMode::WeightPaint,
+                "Weight Paint Mode",
+            )
+            .clicked()
+        {
             state.interaction_mode = InteractionMode::WeightPaint;
-            if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
+            if let Some(sel_id) = state.selected_node {
+                state.scene.mark_dirty(sel_id);
+            }
             ui.close_menu();
         }
-        if ui.selectable_label(state.interaction_mode == InteractionMode::VertexPaint, "Vertex Paint Mode").clicked() {
+        if ui
+            .selectable_label(
+                state.interaction_mode == InteractionMode::VertexPaint,
+                "Vertex Paint Mode",
+            )
+            .clicked()
+        {
             state.interaction_mode = InteractionMode::VertexPaint;
-            if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
+            if let Some(sel_id) = state.selected_node {
+                state.scene.mark_dirty(sel_id);
+            }
             ui.close_menu();
         }
-        if ui.selectable_label(state.interaction_mode == InteractionMode::TexturePaint, "Texture Paint Mode").clicked() {
+        if ui
+            .selectable_label(
+                state.interaction_mode == InteractionMode::TexturePaint,
+                "Texture Paint Mode",
+            )
+            .clicked()
+        {
             state.interaction_mode = InteractionMode::TexturePaint;
-            if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
+            if let Some(sel_id) = state.selected_node {
+                state.scene.mark_dirty(sel_id);
+            }
             ui.close_menu();
         }
-        if ui.selectable_label(state.interaction_mode == InteractionMode::Pose, "Pose Mode (Rigging)").clicked() {
+        if ui
+            .selectable_label(
+                state.interaction_mode == InteractionMode::Pose,
+                "Pose Mode (Rigging)",
+            )
+            .clicked()
+        {
             state.interaction_mode = InteractionMode::Pose;
-            if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
+            if let Some(sel_id) = state.selected_node {
+                state.scene.mark_dirty(sel_id);
+            }
             ui.close_menu();
         }
-        if ui.selectable_label(state.interaction_mode == InteractionMode::CurveEdit, "Curve Edit Mode").clicked() {
+        if ui
+            .selectable_label(
+                state.interaction_mode == InteractionMode::CurveEdit,
+                "Curve Edit Mode",
+            )
+            .clicked()
+        {
             state.interaction_mode = InteractionMode::CurveEdit;
-            if let Some(sel_id) = state.selected_node { state.scene.mark_dirty(sel_id); }
+            if let Some(sel_id) = state.selected_node {
+                state.scene.mark_dirty(sel_id);
+            }
             ui.close_menu();
         }
     });
@@ -341,16 +693,27 @@ pub fn draw_viewport_menu(state: &mut AppState, actions: &mut UiActions, ui: &mu
         ui.checkbox(&mut state.show_face_normals, "Show Face Normals");
         ui.checkbox(&mut state.show_vertex_normals, "Show Vertex Normals");
         if state.show_face_normals || state.show_vertex_normals {
-            ui.add(egui::Slider::new(&mut state.normal_display_length, 0.05..=1.0).text("Normal Length"));
+            ui.add(
+                egui::Slider::new(&mut state.normal_display_length, 0.05..=1.0)
+                    .text("Normal Length"),
+            );
         }
         ui.checkbox(&mut state.show_viewport_hud, "Heads-Up Statistics HUD");
         ui.separator();
-        ui.label(egui::RichText::new("COLOR & TONEMAPPING").small().color(egui::Color32::GRAY));
+        ui.label(
+            egui::RichText::new("COLOR & TONEMAPPING")
+                .small()
+                .color(egui::Color32::GRAY),
+        );
         ui.add(egui::Slider::new(&mut state.exposure, 0.1..=4.0).text("Exposure"));
         ui.horizontal(|ui| {
             ui.label("Tonemap:");
             ui.selectable_value(&mut state.tonemapping, TonemappingMode::Aces, "ACES");
-            ui.selectable_value(&mut state.tonemapping, TonemappingMode::Reinhard, "Reinhard");
+            ui.selectable_value(
+                &mut state.tonemapping,
+                TonemappingMode::Reinhard,
+                "Reinhard",
+            );
             ui.selectable_value(&mut state.tonemapping, TonemappingMode::None, "Raw");
         });
         ui.horizontal(|ui| {
@@ -360,7 +723,10 @@ pub fn draw_viewport_menu(state: &mut AppState, actions: &mut UiActions, ui: &mu
             }
         });
         ui.separator();
-        if ui.checkbox(&mut state.flat_shading, "Flat Shading").changed() {
+        if ui
+            .checkbox(&mut state.flat_shading, "Flat Shading")
+            .changed()
+        {
             if let Some(node_id) = state.selected_node {
                 if let Some(node) = state.scene.nodes.get_mut(node_id) {
                     if let NodeData::Mesh { shading_mode, .. } = &mut node.data {
@@ -381,22 +747,37 @@ pub fn draw_viewport_menu(state: &mut AppState, actions: &mut UiActions, ui: &mu
         ui.checkbox(&mut state.show_script_console, "Scripting Console (Rhai)");
         ui.separator();
         let is_persp = state.camera.projection == CameraProjection::Perspective;
-        if ui.selectable_label(is_persp, "Perspective Camera").clicked() {
+        if ui
+            .selectable_label(is_persp, "Perspective Camera")
+            .clicked()
+        {
             state.camera.projection = CameraProjection::Perspective;
             ui.close_menu();
         }
-        if ui.selectable_label(!is_persp, "Orthographic Camera").clicked() {
+        if ui
+            .selectable_label(!is_persp, "Orthographic Camera")
+            .clicked()
+        {
             state.camera.projection = CameraProjection::Orthographic;
             ui.close_menu();
         }
         ui.separator();
         let in_cam_view = state.active_camera_node.is_some();
-        if ui.selectable_label(in_cam_view, "Active Camera View (Numpad 0)").clicked() {
+        if ui
+            .selectable_label(in_cam_view, "Active Camera View (Numpad 0)")
+            .clicked()
+        {
             if in_cam_view {
                 state.active_camera_node = None;
             } else {
-                let cam = state.selected_node
-                    .filter(|&id| matches!(state.scene.nodes.get(id).map(|n| &n.data), Some(NodeData::Camera { .. })))
+                let cam = state
+                    .selected_node
+                    .filter(|&id| {
+                        matches!(
+                            state.scene.nodes.get(id).map(|n| &n.data),
+                            Some(NodeData::Camera { .. })
+                        )
+                    })
                     .or_else(|| {
                         state.scene.nodes.iter().find_map(|(id, node)| {
                             if matches!(node.data, NodeData::Camera { .. }) {
@@ -413,9 +794,15 @@ pub fn draw_viewport_menu(state: &mut AppState, actions: &mut UiActions, ui: &mu
             ui.close_menu();
         }
         if ui.button("Align Camera to View (Ctrl+Numpad 0)").clicked() {
-            let cam = state.active_camera_node
+            let cam = state
+                .active_camera_node
                 .or_else(|| {
-                    state.selected_node.filter(|&id| matches!(state.scene.nodes.get(id).map(|n| &n.data), Some(NodeData::Camera { .. })))
+                    state.selected_node.filter(|&id| {
+                        matches!(
+                            state.scene.nodes.get(id).map(|n| &n.data),
+                            Some(NodeData::Camera { .. })
+                        )
+                    })
                 })
                 .or_else(|| {
                     state.scene.nodes.iter().find_map(|(id, node)| {
@@ -453,7 +840,8 @@ pub fn draw_viewport_menu(state: &mut AppState, actions: &mut UiActions, ui: &mu
         }
         if ui.button("Reset Camera").clicked() {
             state.camera = ViewportCamera::new();
-            state.camera.aspect = state.surface_config.width as f32 / state.surface_config.height as f32;
+            state.camera.aspect =
+                state.surface_config.width as f32 / state.surface_config.height as f32;
             ui.close_menu();
         }
     });
@@ -461,20 +849,54 @@ pub fn draw_viewport_menu(state: &mut AppState, actions: &mut UiActions, ui: &mu
 
 pub fn draw_shading_menu(state: &mut AppState, ui: &mut egui::Ui) {
     ui.menu_button("Shading", |ui| {
-        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Studio, "Studio (Three-Point Lighting)");
-        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Pbr, "PBR (Physically Based Cook-Torrance)");
-        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MatCapRedWax, "MatCap Red Wax (Sculpt)");
-        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MatCapClay, "MatCap Clay (Form)");
-        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::MatCapChrome, "MatCap Chrome (Reflection)");
-        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::NormalInspection, "Normal Vector Inspection");
-        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Zebra, "Zebra Surfacing (Class-A Reflection)");
+        ui.selectable_value(
+            &mut state.viewport_shading,
+            ViewportShadingMode::Studio,
+            "Studio (Three-Point Lighting)",
+        );
+        ui.selectable_value(
+            &mut state.viewport_shading,
+            ViewportShadingMode::Pbr,
+            "PBR (Physically Based Cook-Torrance)",
+        );
+        ui.selectable_value(
+            &mut state.viewport_shading,
+            ViewportShadingMode::MatCapRedWax,
+            "MatCap Red Wax (Sculpt)",
+        );
+        ui.selectable_value(
+            &mut state.viewport_shading,
+            ViewportShadingMode::MatCapClay,
+            "MatCap Clay (Form)",
+        );
+        ui.selectable_value(
+            &mut state.viewport_shading,
+            ViewportShadingMode::MatCapChrome,
+            "MatCap Chrome (Reflection)",
+        );
+        ui.selectable_value(
+            &mut state.viewport_shading,
+            ViewportShadingMode::NormalInspection,
+            "Normal Vector Inspection",
+        );
+        ui.selectable_value(
+            &mut state.viewport_shading,
+            ViewportShadingMode::Zebra,
+            "Zebra Surfacing (Class-A Reflection)",
+        );
         ui.separator();
-        ui.selectable_value(&mut state.viewport_shading, ViewportShadingMode::Rendered, "Rendered (Live Path Tracer)");
+        ui.selectable_value(
+            &mut state.viewport_shading,
+            ViewportShadingMode::Rendered,
+            "Rendered (Live Path Tracer)",
+        );
         ui.separator();
         ui.checkbox(&mut state.ssr.enabled, "Screen-Space Reflections (SSR)");
         ui.checkbox(&mut state.dof.enabled, "Depth of Field (DoF)");
         if state.dof.enabled {
-            ui.add(egui::Slider::new(&mut state.dof.focus_distance, 0.5..=20.0).text("Focus Dist (m)"));
+            ui.add(
+                egui::Slider::new(&mut state.dof.focus_distance, 0.5..=20.0).text("Focus Dist (m)"),
+            );
             ui.add(egui::Slider::new(&mut state.dof.f_stop, 1.2..=16.0).text("f-stop"));
         }
     });
@@ -482,42 +904,91 @@ pub fn draw_shading_menu(state: &mut AppState, ui: &mut egui::Ui) {
 
 pub fn draw_uv_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut egui::Ui) {
     ui.menu_button("UV", |ui| {
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Unwrap (Seams) (U)")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Unwrap (Seams) (U)"),
+            )
+            .clicked()
+        {
             actions.trigger_unwrap_seams = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Smart UV Project")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Smart UV Project"),
+            )
+            .clicked()
+        {
             actions.trigger_smart_uv_project = true;
             ui.close_menu();
         }
         ui.separator();
-        let can_seam = state.interaction_mode == InteractionMode::Edit && !state.selected_edges.is_empty();
-        if ui.add_enabled(can_seam, egui::Button::new("Mark Seam")).clicked() {
+        let can_seam =
+            state.interaction_mode == InteractionMode::Edit && !state.selected_edges.is_empty();
+        if ui
+            .add_enabled(can_seam, egui::Button::new("Mark Seam"))
+            .clicked()
+        {
             actions.trigger_mark_seam = true;
             ui.close_menu();
         }
-        if ui.add_enabled(can_seam, egui::Button::new("Clear Seam")).clicked() {
+        if ui
+            .add_enabled(can_seam, egui::Button::new("Clear Seam"))
+            .clicked()
+        {
             actions.trigger_clear_seam = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Clear All Seams")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Clear All Seams"),
+            )
+            .clicked()
+        {
             actions.trigger_clear_all_seams = true;
             ui.close_menu();
         }
         ui.separator();
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Planar Projection")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Planar Projection"),
+            )
+            .clicked()
+        {
             actions.trigger_planar_uv = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Box / Cube Projection")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Box / Cube Projection"),
+            )
+            .clicked()
+        {
             actions.trigger_box_uv = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Cylindrical Projection")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Cylindrical Projection"),
+            )
+            .clicked()
+        {
             actions.trigger_cylindrical_uv = true;
             ui.close_menu();
         }
-        if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Spherical Projection")).clicked() {
+        if ui
+            .add_enabled(
+                state.selected_node.is_some(),
+                egui::Button::new("Spherical Projection"),
+            )
+            .clicked()
+        {
             actions.trigger_spherical_uv = true;
             ui.close_menu();
         }
@@ -525,7 +996,6 @@ pub fn draw_uv_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut egui
         ui.checkbox(&mut state.show_uv_editor, "2D UV Editor Window");
     });
 }
-
 
 pub fn draw_window_menu(state: &mut AppState, ui: &mut egui::Ui) {
     ui.menu_button("Window", |ui| {
@@ -549,7 +1019,10 @@ pub fn draw_window_menu(state: &mut AppState, ui: &mut egui::Ui) {
             }
         });
         ui.separator();
-        ui.checkbox(&mut state.docking_state.is_enabled, "Drag-and-Drop Docking Workspace");
+        ui.checkbox(
+            &mut state.docking_state.is_enabled,
+            "Drag-and-Drop Docking Workspace",
+        );
         ui.separator();
         ui.checkbox(&mut state.show_outliner, "Scene Outliner");
         ui.checkbox(&mut state.show_inspector, "Properties Inspector");
@@ -558,12 +1031,27 @@ pub fn draw_window_menu(state: &mut AppState, ui: &mut egui::Ui) {
         ui.separator();
         ui.checkbox(&mut state.show_node_editor, "Geometry Nodes Canvas");
         ui.checkbox(&mut state.show_uv_editor, "2D UV Editor Window");
-        ui.checkbox(&mut state.show_script_console, "Multi-Engine Scripting Console");
-        ui.checkbox(&mut state.show_collab_dialog, "Live Collaboration Session (Figma for 3D)");
-        ui.checkbox(&mut state.xr_session.is_active, "OpenXR Spatial Computing (VR 6-DoF)");
-        ui.checkbox(&mut state.production_render.show_dialog, "Production Render Result");
+        ui.checkbox(
+            &mut state.show_script_console,
+            "Multi-Engine Scripting Console",
+        );
+        ui.checkbox(
+            &mut state.show_collab_dialog,
+            "Live Collaboration Session (Figma for 3D)",
+        );
+        ui.checkbox(
+            &mut state.xr_session.is_active,
+            "OpenXR Spatial Computing (VR 6-DoF)",
+        );
+        ui.checkbox(
+            &mut state.production_render.show_dialog,
+            "Production Render Result",
+        );
         ui.checkbox(&mut state.bake_state.show_dialog, "PBR Texture Baker");
-        ui.checkbox(&mut state.print_inspector.show_dialog, "3D Print Quality Inspector");
+        ui.checkbox(
+            &mut state.print_inspector.show_dialog,
+            "3D Print Quality Inspector",
+        );
         ui.checkbox(&mut state.show_help_dialog, "User Manual & Shortcuts (F1)");
     });
 }
@@ -576,9 +1064,12 @@ pub fn draw_help_menu(state: &mut AppState, ui: &mut egui::Ui) {
         }
         ui.separator();
         for (label, tab) in [
-            ("User Manual & Shortcuts (F1)", 0), ("Beginner Tutorials", 1),
-            ("Modeling & Modals Guide", 2), ("Geometry Nodes Guide", 3),
-            ("Rhai Scripting API", 4), ("Path Tracer Rendering", 5),
+            ("User Manual & Shortcuts (F1)", 0),
+            ("Beginner Tutorials", 1),
+            ("Modeling & Modals Guide", 2),
+            ("Geometry Nodes Guide", 3),
+            ("Rhai Scripting API", 4),
+            ("Path Tracer Rendering", 5),
             ("3D Printing & CAD Interchange", 6),
         ] {
             if ui.button(label).clicked() {

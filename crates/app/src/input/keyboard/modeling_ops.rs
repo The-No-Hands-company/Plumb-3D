@@ -1,12 +1,14 @@
-use std::collections::HashSet;
 use core_math::Vec3;
 use geo_kernel::{BezierPoint, EdgeKey, FaceKey, VertexKey};
 use graph_engine::{InterpolationMode, NodeData};
+use std::collections::HashSet;
 use winit::keyboard::KeyCode;
 
 use crate::commands::*;
 use crate::state::AppState;
-use crate::types::{CurveHandleSelection, InteractionMode, SelectionToolMode, SnapTarget, SubElementLevel};
+use crate::types::{
+    CurveHandleSelection, InteractionMode, SelectionToolMode, SnapTarget, SubElementLevel,
+};
 
 pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
     match key_code {
@@ -14,8 +16,15 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             if state.interaction_mode == InteractionMode::CurveEdit {
                 if let Some(sel_id) = state.selected_node {
                     if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                        if let NodeData::Curve { spline, cached_render_mesh, .. } = &mut node.data {
-                            let cur_idx = state.selected_curve_knot.unwrap_or_else(|| spline.points.len().saturating_sub(1));
+                        if let NodeData::Curve {
+                            spline,
+                            cached_render_mesh,
+                            ..
+                        } = &mut node.data
+                        {
+                            let cur_idx = state
+                                .selected_curve_knot
+                                .unwrap_or_else(|| spline.points.len().saturating_sub(1));
                             if let Some(cur_pt) = spline.points.get(cur_idx).copied() {
                                 let dir = if cur_pt.handle_out.length_squared() > 1e-4 {
                                     cur_pt.handle_out.normalize()
@@ -54,7 +63,8 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                 if let Some(sel_id) = state.selected_node {
                     if let Some(node) = state.scene.nodes.get(sel_id) {
                         if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                            let edges: Vec<EdgeKey> = state.selected_edges.iter().copied().collect();
+                            let edges: Vec<EdgeKey> =
+                                state.selected_edges.iter().copied().collect();
                             if !edges.is_empty() {
                                 state.edge_crease_modal_edges = edges.clone();
                                 state.edge_crease_modal_original_weights = edges
@@ -66,7 +76,8 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                                     .first()
                                     .map(|&(_, w)| w)
                                     .unwrap_or(0.0);
-                                state.edge_crease_modal_start_mouse = state.last_mouse_pos.unwrap_or((0.0, 0.0));
+                                state.edge_crease_modal_start_mouse =
+                                    state.last_mouse_pos.unwrap_or((0.0, 0.0));
                                 state.edge_crease_modal_active = true;
                                 state.window.request_redraw();
                             }
@@ -94,15 +105,23 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                         if let Some(node) = state.scene.nodes.get(sel_id) {
                             if let NodeData::Mesh { base_mesh, .. } = &node.data {
                                 base_mesh.faces.keys().take(1).collect()
-                            } else { Vec::new() }
-                        } else { Vec::new() }
-                    } else { Vec::new() };
+                            } else {
+                                Vec::new()
+                            }
+                        } else {
+                            Vec::new()
+                        }
+                    } else {
+                        Vec::new()
+                    };
                 }
             }
             state.window.request_redraw();
             true
         }
-        KeyCode::KeyR if state.ctrl_pressed && state.interaction_mode == InteractionMode::Sculpt => {
+        KeyCode::KeyR
+            if state.ctrl_pressed && state.interaction_mode == InteractionMode::Sculpt =>
+        {
             if let Some(sel_id) = state.selected_node {
                 let cmd = Box::new(crate::commands::VoxelRemeshCommand {
                     node_id: sel_id,
@@ -126,7 +145,10 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             true
         }
         KeyCode::KeyB => {
-            if state.alt_pressed && state.shift_pressed && state.interaction_mode == InteractionMode::Edit {
+            if state.alt_pressed
+                && state.shift_pressed
+                && state.interaction_mode == InteractionMode::Edit
+            {
                 // MeshMachine Alt+Shift+B: Un-Bevel & Dissolve Chamfer Strip
                 if let Some(sel_id) = state.selected_node {
                     let target_faces: Vec<FaceKey> = state.selected_faces.iter().copied().collect();
@@ -147,12 +169,17 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                             }
                         }
                     } else {
-                        state.set_status_message("Select bevel/chamfer face(s) to un-bevel (Alt+Shift+B)");
+                        state.set_status_message(
+                            "Select bevel/chamfer face(s) to un-bevel (Alt+Shift+B)",
+                        );
                     }
                 }
                 state.window.request_redraw();
                 return true;
-            } else if state.ctrl_pressed && state.shift_pressed && state.interaction_mode == InteractionMode::Edit {
+            } else if state.ctrl_pressed
+                && state.shift_pressed
+                && state.interaction_mode == InteractionMode::Edit
+            {
                 if let Some(sel_id) = state.selected_node {
                     let target_verts: Vec<VertexKey> = if !state.selected_vertices.is_empty() {
                         state.selected_vertices.iter().copied().collect()
@@ -190,19 +217,36 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                         if let Some(node) = state.scene.nodes.get(sel_id) {
                             if let NodeData::Mesh { base_mesh, .. } = &node.data {
                                 base_mesh.edges.keys().take(1).collect()
-                            } else { Vec::new() }
-                        } else { Vec::new() }
-                    } else { Vec::new() };
+                            } else {
+                                Vec::new()
+                            }
+                        } else {
+                            Vec::new()
+                        }
+                    } else {
+                        Vec::new()
+                    };
                     state.bevel_modal_faces = state.selected_faces.iter().copied().collect();
                 }
             } else if state.alt_pressed {
                 state.selection_tool_mode = SelectionToolMode::Lasso;
                 state.is_box_selecting = !state.is_box_selecting;
-                state.set_status_message(if state.is_box_selecting { "Lasso Select Activated (Drag to outline)" } else { "Selection Deactivated" });
-            } else if state.shift_pressed || state.interaction_mode == InteractionMode::Object || (state.selected_faces.is_empty() && state.selected_edges.is_empty()) {
+                state.set_status_message(if state.is_box_selecting {
+                    "Lasso Select Activated (Drag to outline)"
+                } else {
+                    "Selection Deactivated"
+                });
+            } else if state.shift_pressed
+                || state.interaction_mode == InteractionMode::Object
+                || (state.selected_faces.is_empty() && state.selected_edges.is_empty())
+            {
                 state.selection_tool_mode = SelectionToolMode::Box;
                 state.is_box_selecting = !state.is_box_selecting;
-                state.set_status_message(if state.is_box_selecting { "Box Select Activated (Drag rectangle)" } else { "Selection Deactivated" });
+                state.set_status_message(if state.is_box_selecting {
+                    "Box Select Activated (Drag rectangle)"
+                } else {
+                    "Selection Deactivated"
+                });
             } else if state.interaction_mode == InteractionMode::Edit {
                 if let Some(sel_id) = state.selected_node {
                     let target_faces: Vec<FaceKey> = state.selected_faces.iter().copied().collect();
@@ -251,12 +295,16 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             true
         }
         KeyCode::KeyV => {
-            if state.shift_pressed && state.interaction_mode == InteractionMode::Edit && !state.selected_vertices.is_empty() {
+            if state.shift_pressed
+                && state.interaction_mode == InteractionMode::Edit
+                && !state.selected_vertices.is_empty()
+            {
                 // Blender Shift+V: Interactive Vertex Crease Modal (OpenSubdiv Semi-Sharp Corners)
                 if let Some(sel_id) = state.selected_node {
                     if let Some(node) = state.scene.nodes.get(sel_id) {
                         if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                            let verts: Vec<VertexKey> = state.selected_vertices.iter().copied().collect();
+                            let verts: Vec<VertexKey> =
+                                state.selected_vertices.iter().copied().collect();
                             if !verts.is_empty() {
                                 state.vertex_crease_modal_vertices = verts.clone();
                                 state.vertex_crease_modal_original_weights = verts
@@ -268,14 +316,17 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                                     .first()
                                     .map(|&(_, w)| w)
                                     .unwrap_or(0.0);
-                                state.vertex_crease_modal_start_mouse = state.last_mouse_pos.unwrap_or((0.0, 0.0));
+                                state.vertex_crease_modal_start_mouse =
+                                    state.last_mouse_pos.unwrap_or((0.0, 0.0));
                                 state.vertex_crease_modal_active = true;
                                 state.window.request_redraw();
                             }
                         }
                     }
                 }
-            } else if state.interaction_mode == InteractionMode::Edit && !state.selected_vertices.is_empty() {
+            } else if state.interaction_mode == InteractionMode::Edit
+                && !state.selected_vertices.is_empty()
+            {
                 if let Some(sel_id) = state.selected_node {
                     let verts: Vec<VertexKey> = state.selected_vertices.iter().copied().collect();
                     let cmd = Box::new(RipVerticesCommand {
@@ -301,7 +352,9 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             }
             true
         }
-        KeyCode::KeyK if state.shift_pressed || state.interaction_mode == InteractionMode::Object => {
+        KeyCode::KeyK
+            if state.shift_pressed || state.interaction_mode == InteractionMode::Object =>
+        {
             if state.kitbash_modal.is_some() {
                 state.kitbash_modal = None;
                 state.set_status_message("Exited Kitbash Tool");
@@ -324,7 +377,12 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             if state.alt_pressed {
                 if let Some(sel_id) = state.selected_node {
                     if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                        if let NodeData::Mesh {
+                            base_mesh,
+                            cached_render_mesh,
+                            ..
+                        } = &mut node.data
+                        {
                             base_mesh.clear_sculpt_mask();
                             *cached_render_mesh = None;
                             state.scene.mark_dirty(sel_id);
@@ -397,7 +455,12 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             if state.ctrl_pressed && state.interaction_mode == InteractionMode::Sculpt {
                 if let Some(sel_id) = state.selected_node {
                     if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                        if let NodeData::Mesh {
+                            base_mesh,
+                            cached_render_mesh,
+                            ..
+                        } = &mut node.data
+                        {
                             base_mesh.invert_sculpt_mask();
                             *cached_render_mesh = None;
                             state.scene.mark_dirty(sel_id);
@@ -410,16 +473,22 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                         if let NodeData::Mesh { base_mesh, .. } = &node.data {
                             match state.sub_element_level {
                                 SubElementLevel::Vertex => {
-                                    let all_v: HashSet<VertexKey> = base_mesh.vertices.keys().collect();
-                                    state.selected_vertices = all_v.difference(&state.selected_vertices).copied().collect();
+                                    let all_v: HashSet<VertexKey> =
+                                        base_mesh.vertices.keys().collect();
+                                    state.selected_vertices = all_v
+                                        .difference(&state.selected_vertices)
+                                        .copied()
+                                        .collect();
                                 }
                                 SubElementLevel::Edge => {
                                     let all_e: HashSet<EdgeKey> = base_mesh.edges.keys().collect();
-                                    state.selected_edges = all_e.difference(&state.selected_edges).copied().collect();
+                                    state.selected_edges =
+                                        all_e.difference(&state.selected_edges).copied().collect();
                                 }
                                 SubElementLevel::Face => {
                                     let all_f: HashSet<FaceKey> = base_mesh.faces.keys().collect();
-                                    state.selected_faces = all_f.difference(&state.selected_faces).copied().collect();
+                                    state.selected_faces =
+                                        all_f.difference(&state.selected_faces).copied().collect();
                                 }
                             }
                         }
@@ -472,7 +541,12 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             } else if let Some(sel_id) = state.selected_node {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     let frame = state.animation.current_frame.round();
-                    state.animation.insert_keyframe(sel_id, frame, node.local_transform, InterpolationMode::Linear);
+                    state.animation.insert_keyframe(
+                        sel_id,
+                        frame,
+                        node.local_transform,
+                        InterpolationMode::Linear,
+                    );
                 }
             }
             state.window.request_redraw();
@@ -535,9 +609,17 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
                 }
                 if let Some((hull_mesh, hull_mat)) = target_data {
                     if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                        if let NodeData::Mesh {
+                            base_mesh,
+                            cached_render_mesh,
+                            ..
+                        } = &mut node.data
+                        {
                             let decal_mat = node.world_matrix;
-                            if base_mesh.project_floating_decal(&hull_mesh, &decal_mat, &hull_mat, 0.0005).is_ok() {
+                            if base_mesh
+                                .project_floating_decal(&hull_mesh, &decal_mat, &hull_mat, 0.0005)
+                                .is_ok()
+                            {
                                 *cached_render_mesh = None;
                                 state.scene.mark_dirty(sel_id);
                                 state.set_status_message("✨ Floating Mesh Decal Projected & Boundary Normals Stamped (Alt+D)");
@@ -554,18 +636,25 @@ pub fn handle_modeling_key(state: &mut AppState, key_code: KeyCode) -> bool {
             let p_b = Vec3::new(1.0, 1.0, 0.0);
             let cable_mesh = geo_kernel::CableGenerator::create_cable(p_a, p_b, 0.04, 0.25, 12, 8);
             let name = format!("HydraulicHose_{}", state.scene.nodes.len());
-            let node = graph_engine::SceneNode::new_mesh(name, core_math::Transform::IDENTITY, cable_mesh);
+            let node =
+                graph_engine::SceneNode::new_mesh(name, core_math::Transform::IDENTITY, cable_mesh);
             let id = state.scene.add_node(node);
             state.selected_node = Some(id);
             state.sync_gpu_meshes();
-            state.set_status_message("✨ Dynamic Hydraulic Cable with Fittings Created (Ctrl+Shift+C)");
+            state.set_status_message(
+                "✨ Dynamic Hydraulic Cable with Fittings Created (Ctrl+Shift+C)",
+            );
             state.window.request_redraw();
             true
         }
         KeyCode::KeyC if state.shift_pressed && !state.ctrl_pressed => {
             state.selection_tool_mode = SelectionToolMode::CirclePaint;
             state.is_box_selecting = !state.is_box_selecting;
-            state.set_status_message(if state.is_box_selecting { "Paint / Circle Select Activated (Drag to paint)" } else { "Selection Deactivated" });
+            state.set_status_message(if state.is_box_selecting {
+                "Paint / Circle Select Activated (Drag to paint)"
+            } else {
+                "Selection Deactivated"
+            });
             state.window.request_redraw();
             true
         }

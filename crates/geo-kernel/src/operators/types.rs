@@ -1,5 +1,5 @@
-use core_math::Vec3;
 use crate::mesh::{EdgeKey, VertexKey};
+use core_math::Vec3;
 
 /// Target anchor for a knife / multi-cut point (either an existing vertex or a point along an edge)
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -40,4 +40,3 @@ pub fn triangle_min_angle(a: Vec3, b: Vec3, c: Vec3) -> f32 {
 
     cos_a.acos().min(cos_b.acos()).min(cos_c.acos())
 }
-

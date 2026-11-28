@@ -38,8 +38,16 @@ impl Mesh {
         writeln!(&mut out, "        {{").unwrap();
         writeln!(&mut out, "            def Shader \"PBRPreviewShader\"").unwrap();
         writeln!(&mut out, "            {{").unwrap();
-        writeln!(&mut out, "                uniform token info:id = \"UsdPreviewSurface\"").unwrap();
-        writeln!(&mut out, "                color3f inputs:diffuseColor = (0.72, 0.73, 0.75)").unwrap();
+        writeln!(
+            &mut out,
+            "                uniform token info:id = \"UsdPreviewSurface\""
+        )
+        .unwrap();
+        writeln!(
+            &mut out,
+            "                color3f inputs:diffuseColor = (0.72, 0.73, 0.75)"
+        )
+        .unwrap();
         writeln!(&mut out, "                float inputs:metallic = 0.0").unwrap();
         writeln!(&mut out, "                float inputs:roughness = 0.5").unwrap();
         writeln!(&mut out, "                float inputs:opacity = 1.0").unwrap();
@@ -52,11 +60,23 @@ impl Mesh {
 
         // 4. Mesh Prim
         writeln!(&mut out, "    def Mesh \"{}\" (", clean_name).unwrap();
-        writeln!(&mut out, "        prepend apiSchemas = [\"MaterialBindingAPI\"]").unwrap();
+        writeln!(
+            &mut out,
+            "        prepend apiSchemas = [\"MaterialBindingAPI\"]"
+        )
+        .unwrap();
         writeln!(&mut out, "    )").unwrap();
         writeln!(&mut out, "    {{").unwrap();
-        writeln!(&mut out, "        rel material:binding = </World/Materials/DefaultMaterial>").unwrap();
-        writeln!(&mut out, "        uniform token subdivisionScheme = \"none\"").unwrap();
+        writeln!(
+            &mut out,
+            "        rel material:binding = </World/Materials/DefaultMaterial>"
+        )
+        .unwrap();
+        writeln!(
+            &mut out,
+            "        uniform token subdivisionScheme = \"none\""
+        )
+        .unwrap();
 
         // Vertex Index Mapping
         let mut key_to_idx = HashMap::new();
@@ -71,9 +91,14 @@ impl Mesh {
         writeln!(
             &mut out,
             "        float3[] extent = [({}, {}, {}), ({}, {}, {})]",
-            format_f32(aabb.min.x), format_f32(aabb.min.y), format_f32(aabb.min.z),
-            format_f32(aabb.max.x), format_f32(aabb.max.y), format_f32(aabb.max.z)
-        ).unwrap();
+            format_f32(aabb.min.x),
+            format_f32(aabb.min.y),
+            format_f32(aabb.min.z),
+            format_f32(aabb.max.x),
+            format_f32(aabb.max.y),
+            format_f32(aabb.max.z)
+        )
+        .unwrap();
 
         // Points
         writeln!(&mut out, "        point3f[] points = [").unwrap();
@@ -82,8 +107,12 @@ impl Mesh {
             writeln!(
                 &mut out,
                 "            ({}, {}, {}){}",
-                format_f32(p.x), format_f32(p.y), format_f32(p.z), comma
-            ).unwrap();
+                format_f32(p.x),
+                format_f32(p.y),
+                format_f32(p.z),
+                comma
+            )
+            .unwrap();
         }
         writeln!(&mut out, "        ]").unwrap();
 
@@ -112,7 +141,13 @@ impl Mesh {
             if i % 20 == 0 {
                 write!(&mut out, "\n            ").unwrap();
             }
-            write!(&mut out, "{}{}", count, if i + 1 < face_counts.len() { ", " } else { "" }).unwrap();
+            write!(
+                &mut out,
+                "{}{}",
+                count,
+                if i + 1 < face_counts.len() { ", " } else { "" }
+            )
+            .unwrap();
         }
         writeln!(&mut out, "\n        ]").unwrap();
 
@@ -122,7 +157,13 @@ impl Mesh {
             if i % 20 == 0 {
                 write!(&mut out, "\n            ").unwrap();
             }
-            write!(&mut out, "{}{}", idx, if i + 1 < face_indices.len() { ", " } else { "" }).unwrap();
+            write!(
+                &mut out,
+                "{}{}",
+                idx,
+                if i + 1 < face_indices.len() { ", " } else { "" }
+            )
+            .unwrap();
         }
         writeln!(&mut out, "\n        ]").unwrap();
 
@@ -133,8 +174,12 @@ impl Mesh {
             writeln!(
                 &mut out,
                 "            ({}, {}, {}){}",
-                format_f32(n.x), format_f32(n.y), format_f32(n.z), comma
-            ).unwrap();
+                format_f32(n.x),
+                format_f32(n.y),
+                format_f32(n.z),
+                comma
+            )
+            .unwrap();
         }
         writeln!(&mut out, "        ] (").unwrap();
         writeln!(&mut out, "            interpolation = \"faceVarying\"").unwrap();
@@ -147,8 +192,11 @@ impl Mesh {
             writeln!(
                 &mut out,
                 "            ({}, {}){}",
-                format_f32(uv.x), format_f32(uv.y), comma
-            ).unwrap();
+                format_f32(uv.x),
+                format_f32(uv.y),
+                comma
+            )
+            .unwrap();
         }
         writeln!(&mut out, "        ] (").unwrap();
         writeln!(&mut out, "            interpolation = \"faceVarying\"").unwrap();

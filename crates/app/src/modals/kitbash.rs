@@ -49,7 +49,10 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
     for node in state.scene.nodes.values() {
         if let graph_engine::NodeData::Mesh { base_mesh, .. } = &node.data {
             if let Some(hit) = base_mesh.raycast(&ray, &node.world_matrix) {
-                if best_hit.as_ref().is_none_or(|b: &geo_kernel::RaycastHit| hit.distance < b.distance) {
+                if best_hit
+                    .as_ref()
+                    .is_none_or(|b: &geo_kernel::RaycastHit| hit.distance < b.distance)
+                {
                     best_hit = Some(hit);
                 }
             }
@@ -91,7 +94,9 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
                     KitbashHardwareType::LatchHandle => KitbashHardwareType::HexBolt,
                 };
                 Some(kb.hardware_type.label())
-            } else { None };
+            } else {
+                None
+            };
             if let Some(lbl) = label {
                 state.set_status_message(format!("Selected Hardware: {}", lbl));
                 state.window.request_redraw();
@@ -102,7 +107,9 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
             let label = if let Some(kb) = &mut state.kitbash_modal {
                 kb.hardware_type = KitbashHardwareType::HexBolt;
                 Some(kb.hardware_type.label())
-            } else { None };
+            } else {
+                None
+            };
             if let Some(lbl) = label {
                 state.set_status_message(format!("Selected Hardware: {}", lbl));
                 state.window.request_redraw();
@@ -113,7 +120,9 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
             let label = if let Some(kb) = &mut state.kitbash_modal {
                 kb.hardware_type = KitbashHardwareType::AllenScrew;
                 Some(kb.hardware_type.label())
-            } else { None };
+            } else {
+                None
+            };
             if let Some(lbl) = label {
                 state.set_status_message(format!("Selected Hardware: {}", lbl));
                 state.window.request_redraw();
@@ -124,7 +133,9 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
             let label = if let Some(kb) = &mut state.kitbash_modal {
                 kb.hardware_type = KitbashHardwareType::SlottedVent;
                 Some(kb.hardware_type.label())
-            } else { None };
+            } else {
+                None
+            };
             if let Some(lbl) = label {
                 state.set_status_message(format!("Selected Hardware: {}", lbl));
                 state.window.request_redraw();
@@ -135,7 +146,9 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
             let label = if let Some(kb) = &mut state.kitbash_modal {
                 kb.hardware_type = KitbashHardwareType::LatchHandle;
                 Some(kb.hardware_type.label())
-            } else { None };
+            } else {
+                None
+            };
             if let Some(lbl) = label {
                 state.set_status_message(format!("Selected Hardware: {}", lbl));
                 state.window.request_redraw();
@@ -145,8 +158,14 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
         KeyCode::KeyB => {
             let mode_str = if let Some(kb) = &mut state.kitbash_modal {
                 kb.is_subtractive = !kb.is_subtractive;
-                Some(if kb.is_subtractive { "Difference / Counterbore Cut" } else { "Union / Hardware Add" })
-            } else { None };
+                Some(if kb.is_subtractive {
+                    "Difference / Counterbore Cut"
+                } else {
+                    "Union / Hardware Add"
+                })
+            } else {
+                None
+            };
             if let Some(str_val) = mode_str {
                 state.set_status_message(format!("Hardware Mode: {}", str_val));
                 state.window.request_redraw();
@@ -211,7 +230,11 @@ pub fn commit(state: &mut AppState) {
 
     let name = format!(
         "{}_{}",
-        hw_type.label().split_whitespace().last().unwrap_or("Hardware"),
+        hw_type
+            .label()
+            .split_whitespace()
+            .last()
+            .unwrap_or("Hardware"),
         state.scene.nodes.len()
     );
     let new_node = SceneNode::new_mesh(name, transform, mesh);
@@ -219,7 +242,11 @@ pub fn commit(state: &mut AppState) {
     state.selected_node = Some(id);
     state.sync_gpu_meshes();
 
-    let op_msg = if is_subtractive { "Socket Cut" } else { "Placed" };
+    let op_msg = if is_subtractive {
+        "Socket Cut"
+    } else {
+        "Placed"
+    };
     state.set_status_message(format!("{} {} at surface normal", op_msg, hw_type.label()));
     state.window.request_redraw();
 }

@@ -10,7 +10,9 @@ impl Mesh {
     ) -> Result<(FaceKey, FaceKey), MeshError> {
         let v_keys = self.face_vertices(face_key);
         if v_keys.len() != 4 {
-            return Err(MeshError::InvariantFailed("Split quad face requires a 4-vertex quad".into()));
+            return Err(MeshError::InvariantFailed(
+                "Split quad face requires a 4-vertex quad".into(),
+            ));
         }
 
         let i0 = edge_index % 4;
@@ -100,7 +102,11 @@ impl Mesh {
             ));
         }
 
-        let (i_start, i_end) = if idx0 < idx1 { (idx0, idx1) } else { (idx1, idx0) };
+        let (i_start, i_end) = if idx0 < idx1 {
+            (idx0, idx1)
+        } else {
+            (idx1, idx0)
+        };
 
         // Sub-loop 1: from i_start to i_end inclusive
         let mut loop1 = Vec::new();

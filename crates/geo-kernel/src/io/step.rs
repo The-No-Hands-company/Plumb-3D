@@ -168,11 +168,7 @@ impl Mesh {
                 )?;
 
                 let line_vec_id = next_id();
-                writeln!(
-                    w,
-                    "#{}=VECTOR('',#{},1.0);",
-                    line_vec_id, line_dir_id
-                )?;
+                writeln!(w, "#{}=VECTOR('',#{},1.0);", line_vec_id, line_dir_id)?;
 
                 let line_pt_id = next_id();
                 writeln!(
@@ -182,11 +178,7 @@ impl Mesh {
                 )?;
 
                 let line_id = next_id();
-                writeln!(
-                    w,
-                    "#{}=LINE('',#{},#{});",
-                    line_id, line_pt_id, line_vec_id
-                )?;
+                writeln!(w, "#{}=LINE('',#{},#{});", line_id, line_pt_id, line_vec_id)?;
 
                 let edge_curve_id = next_id();
                 writeln!(
@@ -205,8 +197,10 @@ impl Mesh {
                 oriented_edge_ids.push(oriented_edge_id);
             }
 
-            let edge_list_str: Vec<String> =
-                oriented_edge_ids.iter().map(|eid| format!("#{}", eid)).collect();
+            let edge_list_str: Vec<String> = oriented_edge_ids
+                .iter()
+                .map(|eid| format!("#{}", eid))
+                .collect();
             let edge_loop_id = next_id();
             writeln!(
                 w,
@@ -216,7 +210,11 @@ impl Mesh {
             )?;
 
             let face_bound_id = next_id();
-            writeln!(w, "#{}=FACE_BOUND('',#{},.T.);", face_bound_id, edge_loop_id)?;
+            writeln!(
+                w,
+                "#{}=FACE_BOUND('',#{},.T.);",
+                face_bound_id, edge_loop_id
+            )?;
 
             let adv_face_id = next_id();
             writeln!(

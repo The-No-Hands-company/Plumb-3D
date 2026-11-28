@@ -50,10 +50,8 @@ impl Mesh {
         let existing_faces: Vec<FaceKey> = self.faces.keys().collect();
         for fk in existing_faces {
             let verts = self.face_vertices(fk);
-            let mut mirrored_face_verts: Vec<VertexKey> = verts
-                .iter()
-                .map(|k| old_to_mirrored_v[k])
-                .collect();
+            let mut mirrored_face_verts: Vec<VertexKey> =
+                verts.iter().map(|k| old_to_mirrored_v[k]).collect();
             mirrored_face_verts.reverse();
             let _ = self.add_face(&mirrored_face_verts);
         }

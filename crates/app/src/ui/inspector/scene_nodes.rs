@@ -20,138 +20,186 @@ pub fn draw_scene_nodes_panel(
 
     if let Some(node) = state.scene.nodes.get_mut(sel_id) {
         match &mut node.data {
-                            NodeData::Light { light_type, color, intensity, range, spot_inner_angle_radians, spot_outer_angle_radians } => {
-                                ui.collapsing("Light Properties", |ui| {
-                                    ui.horizontal(|ui| {
-                                        ui.label("Type:");
-                                        egui::ComboBox::from_id_salt("inspector_light_type")
-                                            .selected_text(match light_type {
-                                                LightType::Directional => "Directional (Sun)",
-                                                LightType::Point => "Point (Omni)",
-                                                LightType::Spot => "Spot (Cone)",
-                                            })
-                                            .show_ui(ui, |ui| {
-                                                ui.selectable_value(light_type, LightType::Directional, "Directional");
-                                                ui.selectable_value(light_type, LightType::Point, "Point");
-                                                ui.selectable_value(light_type, LightType::Spot, "Spot");
-                                            });
-                                    });
+            NodeData::Light {
+                light_type,
+                color,
+                intensity,
+                range,
+                spot_inner_angle_radians,
+                spot_outer_angle_radians,
+            } => {
+                ui.collapsing("Light Properties", |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label("Type:");
+                        egui::ComboBox::from_id_salt("inspector_light_type")
+                            .selected_text(match light_type {
+                                LightType::Directional => "Directional (Sun)",
+                                LightType::Point => "Point (Omni)",
+                                LightType::Spot => "Spot (Cone)",
+                            })
+                            .show_ui(ui, |ui| {
+                                ui.selectable_value(
+                                    light_type,
+                                    LightType::Directional,
+                                    "Directional",
+                                );
+                                ui.selectable_value(light_type, LightType::Point, "Point");
+                                ui.selectable_value(light_type, LightType::Spot, "Spot");
+                            });
+                    });
 
-                                    let mut rgb = [color.x, color.y, color.z];
-                                    ui.horizontal(|ui| {
-                                        ui.label("Color:");
-                                        if ui.color_edit_button_rgb(&mut rgb).changed() {
-                                            *color = vec3(rgb[0], rgb[1], rgb[2]);
-                                        }
-                                    });
+                    let mut rgb = [color.x, color.y, color.z];
+                    ui.horizontal(|ui| {
+                        ui.label("Color:");
+                        if ui.color_edit_button_rgb(&mut rgb).changed() {
+                            *color = vec3(rgb[0], rgb[1], rgb[2]);
+                        }
+                    });
 
-                                    ui.horizontal(|ui| {
-                                        ui.label("Intensity:");
-                                        ui.add(egui::Slider::new(intensity, 0.0..=50.0).step_by(0.1));
-                                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Intensity:");
+                        ui.add(egui::Slider::new(intensity, 0.0..=50.0).step_by(0.1));
+                    });
 
-                                    if *light_type != LightType::Directional {
-                                        ui.horizontal(|ui| {
-                                            ui.label("Range:");
-                                            ui.add(egui::Slider::new(range, 0.5..=100.0).step_by(0.5));
-                                        });
-                                    }
+                    if *light_type != LightType::Directional {
+                        ui.horizontal(|ui| {
+                            ui.label("Range:");
+                            ui.add(egui::Slider::new(range, 0.5..=100.0).step_by(0.5));
+                        });
+                    }
 
-                                    if *light_type == LightType::Spot {
-                                        let mut inner_deg = spot_inner_angle_radians.to_degrees();
-                                        let mut outer_deg = spot_outer_angle_radians.to_degrees();
-                                        ui.horizontal(|ui| {
-                                            ui.label("Inner Cone:");
-                                            if ui.add(egui::Slider::new(&mut inner_deg, 1.0..=85.0).suffix(" deg")).changed() {
-                                                if inner_deg > outer_deg { outer_deg = inner_deg; }
-                                                *spot_inner_angle_radians = inner_deg.to_radians();
-                                                *spot_outer_angle_radians = outer_deg.to_radians();
-                                            }
-                                        });
-                                        ui.horizontal(|ui| {
-                                            ui.label("Outer Cone:");
-                                            if ui.add(egui::Slider::new(&mut outer_deg, 1.0..=89.0).suffix(" deg")).changed() {
-                                                if outer_deg < inner_deg { inner_deg = outer_deg; }
-                                                *spot_inner_angle_radians = inner_deg.to_radians();
-                                                *spot_outer_angle_radians = outer_deg.to_radians();
-                                            }
-                                        });
-                                    }
-                                });
-                                ui.separator();
+                    if *light_type == LightType::Spot {
+                        let mut inner_deg = spot_inner_angle_radians.to_degrees();
+                        let mut outer_deg = spot_outer_angle_radians.to_degrees();
+                        ui.horizontal(|ui| {
+                            ui.label("Inner Cone:");
+                            if ui
+                                .add(egui::Slider::new(&mut inner_deg, 1.0..=85.0).suffix(" deg"))
+                                .changed()
+                            {
+                                if inner_deg > outer_deg {
+                                    outer_deg = inner_deg;
+                                }
+                                *spot_inner_angle_radians = inner_deg.to_radians();
+                                *spot_outer_angle_radians = outer_deg.to_radians();
                             }
-                            NodeData::Camera { fov_y_radians, z_near, z_far, aspect_ratio, orthographic, ortho_size } => {
-                                ui.collapsing("Camera Actor", |ui| {
-                                    let is_active_view = active_cam == Some(sel_id);
-                                    let btn_text = if is_active_view { "Exit Camera View (Free Orbit)" } else { "Look Through Camera" };
-                                    if ui.button(btn_text).clicked() {
-                                        if is_active_view {
-                                            active_cam = None;
-                                        } else {
-                                            active_cam = Some(sel_id);
-                                        }
-                                    }
-
-                                    ui.separator();
-                                    ui.checkbox(orthographic, "Orthographic Projection");
-
-                                    if *orthographic {
-                                        ui.horizontal(|ui| {
-                                            ui.label("Ortho Size:");
-                                            ui.add(egui::Slider::new(ortho_size, 0.5..=50.0).step_by(0.2));
-                                        });
-                                    } else {
-                                        let mut fov_deg = fov_y_radians.to_degrees();
-                                        ui.horizontal(|ui| {
-                                            ui.label("FOV:");
-                                            if ui.add(egui::Slider::new(&mut fov_deg, 10.0..=120.0).suffix(" deg")).changed() {
-                                                *fov_y_radians = fov_deg.to_radians();
-                                            }
-                                        });
-                                    }
-
-                                    ui.horizontal(|ui| {
-                                        ui.label("Near Clip:");
-                                        ui.add(egui::DragValue::new(z_near).speed(0.05).range(0.01..=10.0));
-                                    });
-                                    ui.horizontal(|ui| {
-                                        ui.label("Far Clip:");
-                                        ui.add(egui::DragValue::new(z_far).speed(10.0).range(10.0..=50000.0));
-                                    });
-                                    *aspect_ratio = camera_aspect;
-                                });
-                                ui.separator();
+                        });
+                        ui.horizontal(|ui| {
+                            ui.label("Outer Cone:");
+                            if ui
+                                .add(egui::Slider::new(&mut outer_deg, 1.0..=89.0).suffix(" deg"))
+                                .changed()
+                            {
+                                if outer_deg < inner_deg {
+                                    inner_deg = outer_deg;
+                                }
+                                *spot_inner_angle_radians = inner_deg.to_radians();
+                                *spot_outer_angle_radians = outer_deg.to_radians();
                             }
-                            NodeData::Joint { length, radius } => {
-                                ui.collapsing("Skeleton Joint / Bone", |ui| {
-                                    ui.horizontal(|ui| {
-                                        ui.label("Bone Length:");
-                                        ui.add(egui::DragValue::new(length).speed(0.05).range(0.05..=50.0));
-                                    });
-                                    ui.horizontal(|ui| {
-                                        ui.label("Bone Radius:");
-                                        ui.add(egui::DragValue::new(radius).speed(0.01).range(0.01..=5.0));
-                                    });
+                        });
+                    }
+                });
+                ui.separator();
+            }
+            NodeData::Camera {
+                fov_y_radians,
+                z_near,
+                z_far,
+                aspect_ratio,
+                orthographic,
+                ortho_size,
+            } => {
+                ui.collapsing("Camera Actor", |ui| {
+                    let is_active_view = active_cam == Some(sel_id);
+                    let btn_text = if is_active_view {
+                        "Exit Camera View (Free Orbit)"
+                    } else {
+                        "Look Through Camera"
+                    };
+                    if ui.button(btn_text).clicked() {
+                        if is_active_view {
+                            active_cam = None;
+                        } else {
+                            active_cam = Some(sel_id);
+                        }
+                    }
 
-                                    ui.separator();
-                                    if ui.button("+ Extrude Child Bone").clicked() {
-                                        actions.add_child_joint = Some((sel_id, *length));
-                                    }
+                    ui.separator();
+                    ui.checkbox(orthographic, "Orthographic Projection");
 
-                                    if !available_mesh_ids.is_empty() {
-                                        ui.separator();
-                                        ui.label("Armature Auto-Skinning:");
-                                        for (mesh_id, mesh_name) in available_mesh_ids {
-                                            if ui.button(format!("Bind '{}' to Armature", mesh_name)).clicked() {
-                                                actions.bind_armature_request = Some((*mesh_id, sel_id));
-                                            }
-                                        }
-                                    }
-                                });
-                                ui.separator();
+                    if *orthographic {
+                        ui.horizontal(|ui| {
+                            ui.label("Ortho Size:");
+                            ui.add(egui::Slider::new(ortho_size, 0.5..=50.0).step_by(0.2));
+                        });
+                    } else {
+                        let mut fov_deg = fov_y_radians.to_degrees();
+                        ui.horizontal(|ui| {
+                            ui.label("FOV:");
+                            if ui
+                                .add(egui::Slider::new(&mut fov_deg, 10.0..=120.0).suffix(" deg"))
+                                .changed()
+                            {
+                                *fov_y_radians = fov_deg.to_radians();
                             }
-                            NodeData::Curve { spline, bevel_radius, bevel_resolution, cached_render_mesh, profile_shape } => {
-                                ui.collapsing("Bezier Curve / Spline", |ui| {
+                        });
+                    }
+
+                    ui.horizontal(|ui| {
+                        ui.label("Near Clip:");
+                        ui.add(egui::DragValue::new(z_near).speed(0.05).range(0.01..=10.0));
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Far Clip:");
+                        ui.add(
+                            egui::DragValue::new(z_far)
+                                .speed(10.0)
+                                .range(10.0..=50000.0),
+                        );
+                    });
+                    *aspect_ratio = camera_aspect;
+                });
+                ui.separator();
+            }
+            NodeData::Joint { length, radius } => {
+                ui.collapsing("Skeleton Joint / Bone", |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label("Bone Length:");
+                        ui.add(egui::DragValue::new(length).speed(0.05).range(0.05..=50.0));
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Bone Radius:");
+                        ui.add(egui::DragValue::new(radius).speed(0.01).range(0.01..=5.0));
+                    });
+
+                    ui.separator();
+                    if ui.button("+ Extrude Child Bone").clicked() {
+                        actions.add_child_joint = Some((sel_id, *length));
+                    }
+
+                    if !available_mesh_ids.is_empty() {
+                        ui.separator();
+                        ui.label("Armature Auto-Skinning:");
+                        for (mesh_id, mesh_name) in available_mesh_ids {
+                            if ui
+                                .button(format!("Bind '{}' to Armature", mesh_name))
+                                .clicked()
+                            {
+                                actions.bind_armature_request = Some((*mesh_id, sel_id));
+                            }
+                        }
+                    }
+                });
+                ui.separator();
+            }
+            NodeData::Curve {
+                spline,
+                bevel_radius,
+                bevel_resolution,
+                cached_render_mesh,
+                profile_shape,
+            } => {
+                ui.collapsing("Bezier Curve / Spline", |ui| {
                                     let is_curve_edit = interaction_mode == InteractionMode::CurveEdit;
                                     let btn_text = if is_curve_edit {
                                         egui::RichText::new("Exit Curve Edit (Tab)").color(egui::Color32::from_rgb(100, 220, 255)).strong()
@@ -407,9 +455,9 @@ pub fn draw_scene_nodes_panel(
                                         }
                                     });
                                 });
-                                ui.separator();
-                            }
-                            _ => {}
+                ui.separator();
+            }
+            _ => {}
         }
     }
     state.active_camera_node = active_cam;

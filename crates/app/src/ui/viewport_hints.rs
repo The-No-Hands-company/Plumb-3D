@@ -87,16 +87,32 @@ pub fn draw_viewport_hints(state: &mut AppState) {
         .show(&ctx, |ui| {
             egui::Frame::none()
                 .fill(egui::Color32::from_rgba_premultiplied(16, 20, 28, 225))
-                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgba_premultiplied(226, 179, 87, 140)))
+                .stroke(egui::Stroke::new(
+                    1.0_f32,
+                    egui::Color32::from_rgba_premultiplied(226, 179, 87, 140),
+                ))
                 .rounding(egui::Rounding::same(6.0_f32))
                 .inner_margin(egui::Margin::symmetric(14.0, 6.0))
                 .show(ui, |ui| {
                     ui.horizontal(|ui| {
-                        ui.label(egui::RichText::new(icon).size(11.0).strong().color(egui::Color32::from_rgb(226, 179, 87)));
+                        ui.label(
+                            egui::RichText::new(icon)
+                                .size(11.0)
+                                .strong()
+                                .color(egui::Color32::from_rgb(226, 179, 87)),
+                        );
                         ui.separator();
-                        ui.label(egui::RichText::new(main_hint).size(11.0).color(egui::Color32::from_rgb(230, 238, 250)));
+                        ui.label(
+                            egui::RichText::new(main_hint)
+                                .size(11.0)
+                                .color(egui::Color32::from_rgb(230, 238, 250)),
+                        );
                         ui.separator();
-                        ui.label(egui::RichText::new(sub_hint).size(10.5).color(egui::Color32::from_rgb(160, 180, 210)));
+                        ui.label(
+                            egui::RichText::new(sub_hint)
+                                .size(10.5)
+                                .color(egui::Color32::from_rgb(160, 180, 210)),
+                        );
                     });
                 });
         });

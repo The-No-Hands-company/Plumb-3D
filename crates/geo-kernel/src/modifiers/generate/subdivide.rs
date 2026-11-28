@@ -79,8 +79,16 @@ impl SubdivideModifier {
                 let v_prev = v_keys[(i + n - 1) % n];
                 let v_next = v_keys[(i + 1) % n];
 
-                let pair_next = if v_curr < v_next { (v_curr, v_next) } else { (v_next, v_curr) };
-                let pair_prev = if v_prev < v_curr { (v_prev, v_curr) } else { (v_curr, v_prev) };
+                let pair_next = if v_curr < v_next {
+                    (v_curr, v_next)
+                } else {
+                    (v_next, v_curr)
+                };
+                let pair_prev = if v_prev < v_curr {
+                    (v_prev, v_curr)
+                } else {
+                    (v_curr, v_prev)
+                };
 
                 let new_curr = old_to_new_v[&v_curr];
                 let mid_next = edge_midpoints[&pair_next];

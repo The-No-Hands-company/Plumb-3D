@@ -16,7 +16,8 @@ impl Mesh {
         let r_sq = radius * radius;
         let mut affected = 0;
 
-        let to_update: Vec<(VertexKey, f32)> = self.vertices
+        let to_update: Vec<(VertexKey, f32)> = self
+            .vertices
             .iter()
             .filter_map(|(vk, v)| {
                 let d_sq = (v.position - hit_point).length_squared();
@@ -56,7 +57,8 @@ impl Mesh {
             return 0;
         }
 
-        let to_update: Vec<(VertexKey, f32)> = self.vertices
+        let to_update: Vec<(VertexKey, f32)> = self
+            .vertices
             .iter()
             .map(|(vk, v)| {
                 let t = ((v.position - start_point).dot(seg) / len_sq).clamp(0.0, 1.0);
@@ -85,7 +87,8 @@ impl Mesh {
         let r_sq = radius * radius;
         let mut affected = 0;
 
-        let to_update: Vec<(VertexKey, f32)> = self.vertices
+        let to_update: Vec<(VertexKey, f32)> = self
+            .vertices
             .iter()
             .filter_map(|(vk, v)| {
                 let d_sq = (v.position - hit_point).length_squared();
@@ -160,7 +163,11 @@ impl Mesh {
         }
 
         let count = mapped_weights.len();
-        let target_idx = if let Some(idx) = self.vertex_groups.iter().position(|vg| vg.name == target_group) {
+        let target_idx = if let Some(idx) = self
+            .vertex_groups
+            .iter()
+            .position(|vg| vg.name == target_group)
+        {
             idx
         } else {
             self.add_vertex_group(target_group)
@@ -217,7 +224,8 @@ impl Mesh {
             return 0;
         }
 
-        let to_update: Vec<(VertexKey, f32)> = self.vertices
+        let to_update: Vec<(VertexKey, f32)> = self
+            .vertices
             .iter()
             .filter_map(|(vk, v)| {
                 let d_sq = (v.position - hit_point).length_squared();

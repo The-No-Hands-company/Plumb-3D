@@ -112,7 +112,8 @@ impl ClothModifier {
                 let v0 = he.origin;
                 let v1 = he.target;
                 if let (Some(&i1), Some(&i2)) = (key_to_idx.get(&v0), key_to_idx.get(&v1)) {
-                    let rest_len = (self.particles[i1].position - self.particles[i2].position).length();
+                    let rest_len =
+                        (self.particles[i1].position - self.particles[i2].position).length();
                     self.constraints.push(DistanceConstraint {
                         p1: i1,
                         p2: i2,
@@ -127,8 +128,12 @@ impl ClothModifier {
         for fk in mesh.faces.keys() {
             let face_verts = mesh.face_vertices(fk);
             if face_verts.len() == 4 {
-                if let (Some(&i0), Some(&i2)) = (key_to_idx.get(&face_verts[0]), key_to_idx.get(&face_verts[2])) {
-                    let rest_len = (self.particles[i0].position - self.particles[i2].position).length();
+                if let (Some(&i0), Some(&i2)) = (
+                    key_to_idx.get(&face_verts[0]),
+                    key_to_idx.get(&face_verts[2]),
+                ) {
+                    let rest_len =
+                        (self.particles[i0].position - self.particles[i2].position).length();
                     self.constraints.push(DistanceConstraint {
                         p1: i0,
                         p2: i2,
@@ -136,8 +141,12 @@ impl ClothModifier {
                         stiffness: self.shear_stiffness,
                     });
                 }
-                if let (Some(&i1), Some(&i3)) = (key_to_idx.get(&face_verts[1]), key_to_idx.get(&face_verts[3])) {
-                    let rest_len = (self.particles[i1].position - self.particles[i3].position).length();
+                if let (Some(&i1), Some(&i3)) = (
+                    key_to_idx.get(&face_verts[1]),
+                    key_to_idx.get(&face_verts[3]),
+                ) {
+                    let rest_len =
+                        (self.particles[i1].position - self.particles[i3].position).length();
                     self.constraints.push(DistanceConstraint {
                         p1: i1,
                         p2: i3,

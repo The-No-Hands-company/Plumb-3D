@@ -7,13 +7,18 @@ use crate::types::*;
 
 /// Interactive 6-Axis 3D Viewport Navigation Orbit Gizmo (Blender 4.x / Maya / Plasticity Style)
 fn draw_viewport_orientation_compass(camera: &mut ViewportCamera, ui: &mut egui::Ui) -> bool {
-    let (rect, response) = ui.allocate_exact_size(egui::vec2(76.0, 76.0), egui::Sense::click_and_drag());
+    let (rect, response) =
+        ui.allocate_exact_size(egui::vec2(76.0, 76.0), egui::Sense::click_and_drag());
     let center = rect.center();
     let painter = ui.painter();
 
     // 1. Sleek dark frosted glass disc background
     painter.circle_filled(center, 34.0, egui::Color32::from_black_alpha(175));
-    painter.circle_stroke(center, 34.0, egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(60, 65, 78)));
+    painter.circle_stroke(
+        center,
+        34.0,
+        egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(60, 65, 78)),
+    );
 
     let view_mat = camera.view_matrix();
     let mut changed = false;
@@ -28,17 +33,59 @@ fn draw_viewport_orientation_compass(camera: &mut ViewportCamera, ui: &mut egui:
     // 6 Directional Cardinal View Axes (+X, -X, +Y, -Y, +Z, -Z)
     let axes = [
         // +X: Right
-        (Vec3::X, egui::Color32::from_rgb(250, 60, 60), "X", -std::f32::consts::FRAC_PI_2, 0.0_f32, "Right View (+X)"),
+        (
+            Vec3::X,
+            egui::Color32::from_rgb(250, 60, 60),
+            "X",
+            -std::f32::consts::FRAC_PI_2,
+            0.0_f32,
+            "Right View (+X)",
+        ),
         // -X: Left
-        (-Vec3::X, egui::Color32::from_rgb(140, 40, 40), "", std::f32::consts::FRAC_PI_2, 0.0_f32, "Left View (-X)"),
+        (
+            -Vec3::X,
+            egui::Color32::from_rgb(140, 40, 40),
+            "",
+            std::f32::consts::FRAC_PI_2,
+            0.0_f32,
+            "Left View (-X)",
+        ),
         // +Y: Top
-        (Vec3::Y, egui::Color32::from_rgb(50, 225, 75), "Y", 0.0_f32, std::f32::consts::FRAC_PI_2 - 0.001_f32, "Top View (+Y)"),
+        (
+            Vec3::Y,
+            egui::Color32::from_rgb(50, 225, 75),
+            "Y",
+            0.0_f32,
+            std::f32::consts::FRAC_PI_2 - 0.001_f32,
+            "Top View (+Y)",
+        ),
         // -Y: Bottom
-        (-Vec3::Y, egui::Color32::from_rgb(30, 120, 45), "", 0.0_f32, -std::f32::consts::FRAC_PI_2 + 0.001_f32, "Bottom View (-Y)"),
+        (
+            -Vec3::Y,
+            egui::Color32::from_rgb(30, 120, 45),
+            "",
+            0.0_f32,
+            -std::f32::consts::FRAC_PI_2 + 0.001_f32,
+            "Bottom View (-Y)",
+        ),
         // +Z: Front
-        (Vec3::Z, egui::Color32::from_rgb(50, 135, 255), "Z", 0.0_f32, 0.0_f32, "Front View (+Z)"),
+        (
+            Vec3::Z,
+            egui::Color32::from_rgb(50, 135, 255),
+            "Z",
+            0.0_f32,
+            0.0_f32,
+            "Front View (+Z)",
+        ),
         // -Z: Back
-        (-Vec3::Z, egui::Color32::from_rgb(28, 70, 145), "", std::f32::consts::PI, 0.0_f32, "Back View (-Z)"),
+        (
+            -Vec3::Z,
+            egui::Color32::from_rgb(28, 70, 145),
+            "",
+            std::f32::consts::PI,
+            0.0_f32,
+            "Back View (-Z)",
+        ),
     ];
 
     // Sort by Camera-Space Depth (Z) so front bubbles naturally overlap back bubbles
@@ -50,7 +97,11 @@ fn draw_viewport_orientation_compass(camera: &mut ViewportCamera, ui: &mut egui:
         })
         .collect();
 
-    sorted_axes.sort_by(|a, b| a.0.z.partial_cmp(&b.0.z).unwrap_or(std::cmp::Ordering::Equal));
+    sorted_axes.sort_by(|a, b| {
+        a.0.z
+            .partial_cmp(&b.0.z)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
 
     for (cam_space, color, label, target_yaw, target_pitch, tip) in sorted_axes {
         let len = 23.0_f32;
@@ -67,7 +118,11 @@ fn draw_viewport_orientation_compass(camera: &mut ViewportCamera, ui: &mut egui:
 
         // Hover glow
         if is_hovered {
-            painter.circle_stroke(bubble_pos, bubble_r + 2.5, egui::Stroke::new(1.8_f32, egui::Color32::from_rgb(255, 235, 80)));
+            painter.circle_stroke(
+                bubble_pos,
+                bubble_r + 2.5,
+                egui::Stroke::new(1.8_f32, egui::Color32::from_rgb(255, 235, 80)),
+            );
         }
 
         // Draw Axis Bubble
@@ -113,15 +168,24 @@ pub fn render(state: &mut AppState) {
             .collapsible(true)
             .resizable(false)
             .title_bar(true)
-            .frame(egui::Frame::popup(state.egui_ctx.style().as_ref())
-                .fill(egui::Color32::from_rgba_premultiplied(22, 24, 29, 230))
-                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_white_alpha(30)))
-                .rounding(egui::Rounding::same(8.0))
-                .inner_margin(egui::Margin::symmetric(10.0, 7.0)))
+            .frame(
+                egui::Frame::popup(state.egui_ctx.style().as_ref())
+                    .fill(egui::Color32::from_rgba_premultiplied(22, 24, 29, 230))
+                    .stroke(egui::Stroke::new(
+                        1.0_f32,
+                        egui::Color32::from_white_alpha(30),
+                    ))
+                    .rounding(egui::Rounding::same(8.0))
+                    .inner_margin(egui::Margin::symmetric(10.0, 7.0)),
+            )
             .show(&state.egui_ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(egui::RichText::new("Mode:").small().weak());
-                    ui.label(egui::RichText::new(format!("{:?}", state.interaction_mode)).small().color(egui::Color32::LIGHT_GRAY));
+                    ui.label(
+                        egui::RichText::new(format!("{:?}", state.interaction_mode))
+                            .small()
+                            .color(egui::Color32::LIGHT_GRAY),
+                    );
                 });
                 ui.separator();
 
@@ -153,26 +217,41 @@ pub fn render(state: &mut AppState) {
                 }
 
                 if let Some((name, v, e, f, dims, _center)) = active_mesh_stats {
-                    ui.label(egui::RichText::new(format!("Active: {}", name)).color(egui::Color32::WHITE).strong());
+                    ui.label(
+                        egui::RichText::new(format!("Active: {}", name))
+                            .color(egui::Color32::WHITE)
+                            .strong(),
+                    );
                     ui.horizontal(|ui| {
                         ui.monospace(format!("Verts: {} | Edges: {} | Faces: {}", v, e, f));
                     });
                     ui.horizontal(|ui| {
-                        ui.monospace(format!("Dims: [{:.2}, {:.2}, {:.2}]", dims.x, dims.y, dims.z));
+                        ui.monospace(format!(
+                            "Dims: [{:.2}, {:.2}, {:.2}]",
+                            dims.x, dims.y, dims.z
+                        ));
                     });
                     if state.interaction_mode == InteractionMode::Edit {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new(format!(
-                                "Selected: {} v | {} e | {} f",
-                                state.selected_vertices.len(),
-                                state.selected_edges.len(),
-                                state.selected_faces.len()
-                            )).color(egui::Color32::YELLOW));
+                            ui.label(
+                                egui::RichText::new(format!(
+                                    "Selected: {} v | {} e | {} f",
+                                    state.selected_vertices.len(),
+                                    state.selected_edges.len(),
+                                    state.selected_faces.len()
+                                ))
+                                .color(egui::Color32::YELLOW),
+                            );
                         });
                     }
                 } else {
-                    ui.label(egui::RichText::new("Total Scene Mesh Stats").color(egui::Color32::WHITE));
-                    ui.monospace(format!("Verts: {} | Edges: {} | Faces: {}", total_verts, total_edges, total_faces));
+                    ui.label(
+                        egui::RichText::new("Total Scene Mesh Stats").color(egui::Color32::WHITE),
+                    );
+                    ui.monospace(format!(
+                        "Verts: {} | Edges: {} | Faces: {}",
+                        total_verts, total_edges, total_faces
+                    ));
                 }
             });
     }

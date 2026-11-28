@@ -87,7 +87,12 @@ impl NlaClip {
     }
 
     /// Evaluates the transform of a specific node at `frame`, mapped to the clip's local timeline.
-    pub fn evaluate(&self, node_id: NodeId, frame: f32, default_transform: Transform) -> Option<(Transform, f32)> {
+    pub fn evaluate(
+        &self,
+        node_id: NodeId,
+        frame: f32,
+        default_transform: Transform,
+    ) -> Option<(Transform, f32)> {
         let influence = self.compute_influence(frame);
         if influence <= 0.0 {
             return None;
@@ -129,7 +134,12 @@ impl NlaTrack {
     }
 
     /// Evaluates active clips on this track at `frame`.
-    pub fn evaluate(&self, node_id: NodeId, frame: f32, default_transform: Transform) -> Option<(Transform, f32, NlaBlendMode)> {
+    pub fn evaluate(
+        &self,
+        node_id: NodeId,
+        frame: f32,
+        default_transform: Transform,
+    ) -> Option<(Transform, f32, NlaBlendMode)> {
         if self.is_muted {
             return None;
         }
@@ -160,7 +170,12 @@ impl NlaMixer {
     }
 
     /// Blends active NLA tracks on top of `base_transform` for `node_id` at `frame`.
-    pub fn blend_transforms(&self, node_id: NodeId, frame: f32, base_transform: Transform) -> Transform {
+    pub fn blend_transforms(
+        &self,
+        node_id: NodeId,
+        frame: f32,
+        base_transform: Transform,
+    ) -> Transform {
         if self.tracks.is_empty() {
             return base_transform;
         }
@@ -173,24 +188,31 @@ impl NlaMixer {
                 continue;
             }
 
-            if let Some((clip_tf, influence, mode)) = track.evaluate(node_id, frame, base_transform) {
+            if let Some((clip_tf, influence, mode)) = track.evaluate(node_id, frame, base_transform)
+            {
                 match mode {
                     NlaBlendMode::Replace => {
-                        result.translation = result.translation.lerp(clip_tf.translation, influence);
+                        result.translation =
+                            result.translation.lerp(clip_tf.translation, influence);
                         result.rotation = result.rotation.slerp(clip_tf.rotation, influence);
                         result.scale = result.scale.lerp(clip_tf.scale, influence);
                     }
                     NlaBlendMode::Add => {
-                        let add_trans = (clip_tf.translation - base_transform.translation) * influence;
+                        let add_trans =
+                            (clip_tf.translation - base_transform.translation) * influence;
                         let add_scale = (clip_tf.scale - base_transform.scale) * influence;
-                        let add_rot = Quat::IDENTITY.slerp(clip_tf.rotation * base_transform.rotation.inverse(), influence);
+                        let add_rot = Quat::IDENTITY.slerp(
+                            clip_tf.rotation * base_transform.rotation.inverse(),
+                            influence,
+                        );
 
                         result.translation += add_trans;
                         result.rotation = add_rot * result.rotation;
                         result.scale += add_scale;
                     }
                     NlaBlendMode::Multiply => {
-                        let mult_trans = result.translation * (Vec3::ONE.lerp(clip_tf.translation, influence));
+                        let mult_trans =
+                            result.translation * (Vec3::ONE.lerp(clip_tf.translation, influence));
                         let mult_scale = result.scale * (Vec3::ONE.lerp(clip_tf.scale, influence));
                         result.translation = mult_trans;
                         result.scale = mult_scale;
@@ -227,7 +249,12 @@ impl AudioScrubTrack {
     }
 
     /// Generates a synthetic sinusoidal tone for audio playback and scrub testing.
-    pub fn synthetic_sine_tone(name: impl Into<String>, sample_rate: u32, duration_secs: f32, freq_hz: f32) -> Self {
+    pub fn synthetic_sine_tone(
+        name: impl Into<String>,
+        sample_rate: u32,
+        duration_secs: f32,
+        freq_hz: f32,
+    ) -> Self {
         let total_samples = (sample_rate as f32 * duration_secs) as usize;
         let mut samples = Vec::with_capacity(total_samples);
         let tau = std::f32::consts::TAU;
@@ -332,12 +359,20 @@ mod tests {
 
         let mut clip1 = NlaClip::new("Walk", 0.0, 30.0);
         let mut track1 = TransformTrack::new();
-        track1.translation.insert_keyframe(0.0, Vec3::new(10.0, 0.0, 0.0), InterpolationMode::Linear);
+        track1.translation.insert_keyframe(
+            0.0,
+            Vec3::new(10.0, 0.0, 0.0),
+            InterpolationMode::Linear,
+        );
         clip1.node_tracks.insert(nid, track1);
 
         let mut clip2 = NlaClip::new("Jump", 10.0, 40.0);
         let mut track2 = TransformTrack::new();
-        track2.translation.insert_keyframe(0.0, Vec3::new(0.0, 20.0, 0.0), InterpolationMode::Linear);
+        track2.translation.insert_keyframe(
+            0.0,
+            Vec3::new(0.0, 20.0, 0.0),
+            InterpolationMode::Linear,
+        );
         clip2.blend_mode = NlaBlendMode::Add;
         clip2.node_tracks.insert(nid, track2);
 

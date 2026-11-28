@@ -12,11 +12,11 @@ pub mod camera;
 pub mod gizmo;
 pub mod gizmo_render;
 pub mod glyph_render;
+pub mod npr;
 pub mod overlay_render;
 pub mod pipeline;
 pub mod renderer;
 pub mod rtao;
-pub mod npr;
 pub mod shaders;
 pub mod spatial_xr;
 pub mod ssr_dof;
@@ -24,12 +24,12 @@ pub mod types;
 
 pub use camera::{CameraProjection, StandardView, ViewportCamera};
 pub use gizmo::{GizmoAxis, GizmoMode, TransformGizmo, TransformOrientation};
+pub use npr::{NprPipeline, NprSettings};
 pub use renderer::ViewportRenderer;
 pub use rtao::{RtaoKernel, RtaoSettings};
-pub use ssr_dof::{DofKernel, DofSettings, SsrRaymarcher, SsrSettings};
-pub use npr::{NprPipeline, NprSettings};
 pub use spatial_xr::{SpatialController, SpatialModelingSession, SpatialToolMode, StereoRig};
+pub use ssr_dof::{DofKernel, DofSettings, SsrRaymarcher, SsrSettings};
 pub use types::{
-    GpuLight, GpuMesh, LightsUniform, MeshDrawCall, SubMeshMaterial, TonemappingMode, ViewportShadingMode,
-    MAX_SCENE_LIGHTS,
+    GpuLight, GpuMesh, LightsUniform, MeshDrawCall, SubMeshMaterial, TonemappingMode,
+    ViewportShadingMode, MAX_SCENE_LIGHTS,
 };

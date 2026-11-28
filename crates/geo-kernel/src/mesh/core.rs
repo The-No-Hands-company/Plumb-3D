@@ -1,7 +1,10 @@
 use core_math::{Vec2, Vec3};
 use std::collections::HashSet;
 
-use super::types::{Edge, EdgeKey, Face, FaceKey, HalfEdge, HalfEdgeKey, Mesh, MeshError, Vertex, VertexGroup, VertexKey};
+use super::types::{
+    Edge, EdgeKey, Face, FaceKey, HalfEdge, HalfEdgeKey, Mesh, MeshError, Vertex, VertexGroup,
+    VertexKey,
+};
 
 impl Mesh {
     pub fn new() -> Self {
@@ -35,8 +38,14 @@ impl Mesh {
     }
 
     /// Add a new vertex with 3D position, UV coordinates, and RGBA color.
-    pub fn add_vertex_with_uv_and_color(&mut self, position: Vec3, uv: Vec2, color: [f32; 4]) -> VertexKey {
-        self.vertices.insert(Vertex::with_uv_and_color(position, uv, color))
+    pub fn add_vertex_with_uv_and_color(
+        &mut self,
+        position: Vec3,
+        uv: Vec2,
+        color: [f32; 4],
+    ) -> VertexKey {
+        self.vertices
+            .insert(Vertex::with_uv_and_color(position, uv, color))
     }
 
     /// Set RGBA color for an existing vertex.
@@ -48,7 +57,10 @@ impl Mesh {
 
     /// Query RGBA color of an existing vertex. Returns white `[1.0, 1.0, 1.0, 1.0]` if vertex is missing.
     pub fn get_vertex_color(&self, vertex: VertexKey) -> [f32; 4] {
-        self.vertices.get(vertex).map(|v| v.color).unwrap_or([1.0, 1.0, 1.0, 1.0])
+        self.vertices
+            .get(vertex)
+            .map(|v| v.color)
+            .unwrap_or([1.0, 1.0, 1.0, 1.0])
     }
 
     /// Fill all vertices of the mesh with a uniform color.
@@ -138,7 +150,9 @@ impl Mesh {
         }
 
         // Reserve face key
-        let face_key = self.faces.insert_with_key(|_fk| Face::new(HalfEdgeKey::default()));
+        let face_key = self
+            .faces
+            .insert_with_key(|_fk| Face::new(HalfEdgeKey::default()));
         let mut loop_he_keys = Vec::with_capacity(n);
 
         for i in 0..n {
@@ -151,7 +165,9 @@ impl Mesh {
                 loop_he_keys.push(existing_he);
             } else {
                 // Create brand new edge and pair of half-edges
-                let edge_key = self.edges.insert_with_key(|_ek| Edge::new(HalfEdgeKey::default()));
+                let edge_key = self
+                    .edges
+                    .insert_with_key(|_ek| Edge::new(HalfEdgeKey::default()));
 
                 let he_key = self.half_edges.insert_with_key(|_k| HalfEdge {
                     origin: v_curr,
@@ -209,7 +225,9 @@ impl Mesh {
     /// Adds an undirected wireframe edge between two vertices without creating a face.
     pub fn add_edge(&mut self, origin: VertexKey, target: VertexKey) -> Result<EdgeKey, MeshError> {
         if origin == target {
-            return Err(MeshError::InvariantFailed("Self-loop edge not allowed".into()));
+            return Err(MeshError::InvariantFailed(
+                "Self-loop edge not allowed".into(),
+            ));
         }
         if !self.vertices.contains_key(origin) {
             return Err(MeshError::InvalidVertex(origin));
@@ -221,7 +239,9 @@ impl Mesh {
             return Ok(existing);
         }
 
-        let edge_key = self.edges.insert_with_key(|_ek| Edge::new(HalfEdgeKey::default()));
+        let edge_key = self
+            .edges
+            .insert_with_key(|_ek| Edge::new(HalfEdgeKey::default()));
         let he_key = self.half_edges.insert_with_key(|_k| HalfEdge {
             origin,
             target,
@@ -286,7 +306,10 @@ impl Mesh {
     /// Find an existing half-edge directed from `origin` to `target`.
     pub fn find_half_edge(&self, origin: VertexKey, target: VertexKey) -> Option<HalfEdgeKey> {
         let v = self.vertices.get(origin)?;
-        (&v.half_edges).into_iter().find(|&&he_key| self.half_edges[he_key].target == target).copied()
+        (&v.half_edges)
+            .into_iter()
+            .find(|&&he_key| self.half_edges[he_key].target == target)
+            .copied()
     }
 
     /// Calculate face normal using Newell's method for arbitrary N-gons.
@@ -461,7 +484,10 @@ impl Mesh {
 
     /// Gets the crease weight of an edge.
     pub fn get_edge_crease(&self, edge_key: EdgeKey) -> f32 {
-        self.edges.get(edge_key).map(|e| e.crease_weight).unwrap_or(0.0)
+        self.edges
+            .get(edge_key)
+            .map(|e| e.crease_weight)
+            .unwrap_or(0.0)
     }
 
     /// Sets the crease weight on a vertex in [0.0, 1.0].
@@ -473,7 +499,10 @@ impl Mesh {
 
     /// Gets the crease weight of a vertex.
     pub fn get_vertex_crease(&self, vertex_key: VertexKey) -> f32 {
-        self.vertices.get(vertex_key).map(|v| v.crease_weight).unwrap_or(0.0)
+        self.vertices
+            .get(vertex_key)
+            .map(|v| v.crease_weight)
+            .unwrap_or(0.0)
     }
 
     /// Returns all creased vertices with their crease weight.

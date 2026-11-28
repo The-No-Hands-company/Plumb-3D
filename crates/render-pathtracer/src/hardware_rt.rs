@@ -82,7 +82,10 @@ pub struct MultiMillionBlasManager;
 
 impl MultiMillionBlasManager {
     /// Partitions massive production meshes (> 1,000,000 triangles) into hardware-friendly 64K chunks
-    pub fn partition_massive_mesh(total_triangles: usize, total_vertices: usize) -> Vec<BlasChunkDescriptor> {
+    pub fn partition_massive_mesh(
+        total_triangles: usize,
+        total_vertices: usize,
+    ) -> Vec<BlasChunkDescriptor> {
         let mut chunks = Vec::new();
         let chunk_size = MAX_PRIMITIVES_PER_BLAS_CHUNK as usize;
         let num_chunks = total_triangles.div_ceil(chunk_size);
@@ -100,11 +103,13 @@ impl MultiMillionBlasManager {
             let prim_count = (total_triangles - prim_offset as usize).min(chunk_size) as u32;
 
             let vert_offset = (i * vertices_per_chunk) as u32;
-            let vert_count = (total_vertices.saturating_sub(vert_offset as usize)).min(vertices_per_chunk) as u32;
+            let vert_count = (total_vertices.saturating_sub(vert_offset as usize))
+                .min(vertices_per_chunk) as u32;
 
             // Compute aligned byte stride for next chunk (256-byte aligned)
             let raw_geom_bytes = (prim_count as u64 * 3 * 4) + (vert_count as u64 * 32);
-            let aligned_geom_bytes = (raw_geom_bytes + BLAS_ADDRESS_ALIGNMENT_BYTES - 1) & !(BLAS_ADDRESS_ALIGNMENT_BYTES - 1);
+            let aligned_geom_bytes = (raw_geom_bytes + BLAS_ADDRESS_ALIGNMENT_BYTES - 1)
+                & !(BLAS_ADDRESS_ALIGNMENT_BYTES - 1);
 
             chunks.push(BlasChunkDescriptor {
                 chunk_index: i as u32,
@@ -180,9 +185,8 @@ impl TlasInstanceDesc {
         let cols = matrix.to_cols_array_2d();
         // Row-major 3x4
         let transform_3x4 = [
-            cols[0][0], cols[1][0], cols[2][0], cols[3][0],
-            cols[0][1], cols[1][1], cols[2][1], cols[3][1],
-            cols[0][2], cols[1][2], cols[2][2], cols[3][2],
+            cols[0][0], cols[1][0], cols[2][0], cols[3][0], cols[0][1], cols[1][1], cols[2][1],
+            cols[3][1], cols[0][2], cols[1][2], cols[2][2], cols[3][2],
         ];
 
         let id_24 = instance_id & 0x00ff_ffff;
@@ -362,7 +366,8 @@ mod tests {
         // Test partitioning 2,000,000 triangles into 64K chunks
         let total_triangles = 2_000_000;
         let total_vertices = 1_000_000;
-        let chunks = MultiMillionBlasManager::partition_massive_mesh(total_triangles, total_vertices);
+        let chunks =
+            MultiMillionBlasManager::partition_massive_mesh(total_triangles, total_vertices);
 
         // 2,000,000 / 65,536 = 30.51 => 31 chunks
         assert_eq!(chunks.len(), 31);
@@ -388,7 +393,10 @@ mod tests {
 
         // Check VRAM estimation
         let (blas_bytes, tlas_bytes, total_bytes) =
-            MultiMillionBlasManager::estimate_multi_million_vram_bytes(total_triangles, chunks.len());
+            MultiMillionBlasManager::estimate_multi_million_vram_bytes(
+                total_triangles,
+                chunks.len(),
+            );
         assert!(blas_bytes > 0);
         assert!(tlas_bytes > 0);
         assert_eq!(total_bytes, blas_bytes + tlas_bytes);

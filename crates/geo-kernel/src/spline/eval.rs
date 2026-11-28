@@ -38,7 +38,11 @@ impl Spline {
     pub fn eval(&self, u: f32) -> (Vec3, Vec3) {
         let n = self.points.len();
         if n < 2 {
-            let pos = self.points.first().map(|p| p.position).unwrap_or(Vec3::ZERO);
+            let pos = self
+                .points
+                .first()
+                .map(|p| p.position)
+                .unwrap_or(Vec3::ZERO);
             return (pos, Vec3::Z);
         }
 
@@ -100,7 +104,11 @@ impl Spline {
         }
         let max_seg = if self.is_closed { n } else { n - 1 };
         if segment_idx >= max_seg {
-            return Err(format!("Segment index {} out of bounds (max {})", segment_idx, max_seg.saturating_sub(1)));
+            return Err(format!(
+                "Segment index {} out of bounds (max {})",
+                segment_idx,
+                max_seg.saturating_sub(1)
+            ));
         }
 
         let next_idx = (segment_idx + 1) % n;
@@ -159,7 +167,11 @@ impl Spline {
     pub fn closest_point(&self, query: Vec3, samples_per_segment: usize) -> (f32, Vec3, f32) {
         let n = self.points.len();
         if n < 2 {
-            let pos = self.points.first().map(|p| p.position).unwrap_or(Vec3::ZERO);
+            let pos = self
+                .points
+                .first()
+                .map(|p| p.position)
+                .unwrap_or(Vec3::ZERO);
             return (0.0, pos, (pos - query).length());
         }
 
@@ -226,7 +238,11 @@ impl Spline {
 
             if accumulated + seg_len >= target || i == sampled.len() - 1 {
                 let remain = target - accumulated;
-                let factor = if seg_len > 1e-6 { (remain / seg_len).clamp(0.0, 1.0) } else { 0.0 };
+                let factor = if seg_len > 1e-6 {
+                    (remain / seg_len).clamp(0.0, 1.0)
+                } else {
+                    0.0
+                };
                 let pos = p_prev + (p_curr - p_prev) * factor;
                 let tangent = (p_curr - p_prev).normalize_or_zero();
                 return (pos, tangent);

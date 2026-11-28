@@ -34,8 +34,7 @@ pub use bvh::{BvhNode, RayHit, Triangle};
 pub use camera::PathtracerCamera;
 pub use denoiser::{denoise_radiance, DenoiseSettings};
 pub use gpu_pathtracer::{
-    pack_scene_for_gpu, GpuBvhNode, GpuCameraUniform, GpuMaterial, GpuTriangle,
-    GPU_PATHTRACER_WGSL,
+    pack_scene_for_gpu, GpuBvhNode, GpuCameraUniform, GpuMaterial, GpuTriangle, GPU_PATHTRACER_WGSL,
 };
 pub use hardware_rt::{
     evaluate_hardware_rt_speedup, BlasGeometryDesc, HardwareRtProfile, RtPerformanceReport,

@@ -3,7 +3,10 @@ use super::types::{FaceKey, Mesh, MeshError};
 impl Mesh {
     /// Set the material slot index for a face.
     pub fn set_face_material(&mut self, face: FaceKey, mat_id: u32) -> Result<(), MeshError> {
-        let f = self.faces.get_mut(face).ok_or(MeshError::InvalidFace(face))?;
+        let f = self
+            .faces
+            .get_mut(face)
+            .ok_or(MeshError::InvalidFace(face))?;
         f.material_id = mat_id;
         Ok(())
     }
@@ -27,7 +30,13 @@ impl Mesh {
     pub fn faces_with_material(&self, mat_id: u32) -> Vec<FaceKey> {
         self.faces
             .iter()
-            .filter_map(|(fk, f)| if f.material_id == mat_id { Some(fk) } else { None })
+            .filter_map(|(fk, f)| {
+                if f.material_id == mat_id {
+                    Some(fk)
+                } else {
+                    None
+                }
+            })
             .collect()
     }
 

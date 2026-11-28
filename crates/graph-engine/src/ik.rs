@@ -55,7 +55,8 @@ pub fn solve_two_bone_ik_advanced(
         Vec3::Z
     };
 
-    let cos_alpha = ((a * a + clamped_dist * clamped_dist - b * b) / (2.0 * a * clamped_dist)).clamp(-1.0, 1.0);
+    let cos_alpha =
+        ((a * a + clamped_dist * clamped_dist - b * b) / (2.0 * a * clamped_dist)).clamp(-1.0, 1.0);
     let alpha = cos_alpha.acos();
 
     // Compute the bend plane normal using pole vector
@@ -132,12 +133,7 @@ impl CcdIkSolver {
 
     /// Solves an arbitrary joint chain in the SceneGraph towards `target_pos`.
     /// `chain` must be ordered from root to end-effector `[root, joint_1, ..., tip]`.
-    pub fn solve(
-        &self,
-        chain: &[NodeId],
-        target_pos: Vec3,
-        scene: &mut SceneGraph,
-    ) -> bool {
+    pub fn solve(&self, chain: &[NodeId], target_pos: Vec3, scene: &mut SceneGraph) -> bool {
         if chain.len() < 2 {
             return false;
         }
@@ -197,7 +193,9 @@ impl CcdIkSolver {
         }
 
         scene.update_transforms();
-        let final_tip = scene.nodes[tip_id].world_matrix.transform_point3(Vec3::ZERO);
+        let final_tip = scene.nodes[tip_id]
+            .world_matrix
+            .transform_point3(Vec3::ZERO);
         (final_tip - target_pos).length() <= self.tolerance
     }
 }
@@ -257,25 +255,43 @@ impl IkConstraint {
             let mid_id = self.chain[1];
             let tip_id = self.chain[2];
 
-            let root_pos = scene.nodes[root_id].world_matrix.transform_point3(Vec3::ZERO);
-            let mid_pos = scene.nodes[mid_id].world_matrix.transform_point3(Vec3::ZERO);
-            let tip_pos = scene.nodes[tip_id].world_matrix.transform_point3(Vec3::ZERO);
+            let root_pos = scene.nodes[root_id]
+                .world_matrix
+                .transform_point3(Vec3::ZERO);
+            let mid_pos = scene.nodes[mid_id]
+                .world_matrix
+                .transform_point3(Vec3::ZERO);
+            let tip_pos = scene.nodes[tip_id]
+                .world_matrix
+                .transform_point3(Vec3::ZERO);
 
             let pole_pos = if let Some(pole_id) = self.pole_target {
-                scene.nodes.get(pole_id)
+                scene
+                    .nodes
+                    .get(pole_id)
                     .map(|n| n.world_matrix.transform_point3(Vec3::ZERO))
                     .unwrap_or(mid_pos + Vec3::Z)
             } else {
                 mid_pos + Vec3::Z
             };
 
-            if let Some(res) = solve_two_bone_ik_advanced(root_pos, mid_pos, tip_pos, target_pos, pole_pos, self.pole_angle, self.weight) {
+            if let Some(res) = solve_two_bone_ik_advanced(
+                root_pos,
+                mid_pos,
+                tip_pos,
+                target_pos,
+                pole_pos,
+                self.pole_angle,
+                self.weight,
+            ) {
                 if let Some(root_node) = scene.nodes.get_mut(root_id) {
-                    root_node.local_transform.rotation = (res.root_rot * root_node.local_transform.rotation).normalize();
+                    root_node.local_transform.rotation =
+                        (res.root_rot * root_node.local_transform.rotation).normalize();
                     scene.mark_dirty(root_id);
                 }
                 if let Some(mid_node) = scene.nodes.get_mut(mid_id) {
-                    mid_node.local_transform.rotation = (res.mid_rot * mid_node.local_transform.rotation).normalize();
+                    mid_node.local_transform.rotation =
+                        (res.mid_rot * mid_node.local_transform.rotation).normalize();
                     scene.mark_dirty(mid_id);
                 }
                 scene.update_transforms();
@@ -325,14 +341,20 @@ mod tests {
 
         // Create 3-bone chain (Root -> Mid -> Tip)
         let root_id = scene.add_node(SceneNode::new_transform("Root", Transform::IDENTITY));
-        let mid_id = scene.add_node(SceneNode::new_transform("Mid", Transform {
-            translation: Vec3::new(0.0, 2.0, 0.0),
-            ..Default::default()
-        }));
-        let tip_id = scene.add_node(SceneNode::new_transform("Tip", Transform {
-            translation: Vec3::new(0.0, 2.0, 0.0),
-            ..Default::default()
-        }));
+        let mid_id = scene.add_node(SceneNode::new_transform(
+            "Mid",
+            Transform {
+                translation: Vec3::new(0.0, 2.0, 0.0),
+                ..Default::default()
+            },
+        ));
+        let tip_id = scene.add_node(SceneNode::new_transform(
+            "Tip",
+            Transform {
+                translation: Vec3::new(0.0, 2.0, 0.0),
+                ..Default::default()
+            },
+        ));
 
         scene.set_parent(mid_id, Some(root_id));
         scene.set_parent(tip_id, Some(mid_id));
@@ -350,7 +372,9 @@ mod tests {
         let reached = solver.solve(&chain, target, &mut scene);
         assert!(reached);
 
-        let final_tip_pos = scene.nodes[tip_id].world_matrix.transform_point3(Vec3::ZERO);
+        let final_tip_pos = scene.nodes[tip_id]
+            .world_matrix
+            .transform_point3(Vec3::ZERO);
         assert!((final_tip_pos - target).length() < 0.05);
     }
 
@@ -366,7 +390,16 @@ mod tests {
         let res_std = solve_two_bone_ik_advanced(root, mid, tip, target, pole, 0.0, 1.0).unwrap();
 
         // 90 degree pole angle twist
-        let res_twist = solve_two_bone_ik_advanced(root, mid, tip, target, pole, std::f32::consts::FRAC_PI_2, 1.0).unwrap();
+        let res_twist = solve_two_bone_ik_advanced(
+            root,
+            mid,
+            tip,
+            target,
+            pole,
+            std::f32::consts::FRAC_PI_2,
+            1.0,
+        )
+        .unwrap();
         assert!((res_std.solved_mid_pos - res_twist.solved_mid_pos).length() > 0.1);
 
         // 0.0 weight: zero rotation delta

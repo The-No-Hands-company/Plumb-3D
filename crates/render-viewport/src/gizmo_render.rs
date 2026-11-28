@@ -25,13 +25,41 @@ impl ViewportRenderer {
 
         // DCC Professional High-Contrast Palette
         let c_active = [1.0_f32, 0.92, 0.23, 1.0]; // Glowing Electric Gold
-        let c_x = if active_axis == Some(GizmoAxis::X) { c_active } else { [0.96, 0.26, 0.21, 1.0] }; // Crimson Red
-        let c_y = if active_axis == Some(GizmoAxis::Y) { c_active } else { [0.24, 0.84, 0.38, 1.0] }; // Emerald Green
-        let c_z = if active_axis == Some(GizmoAxis::Z) { c_active } else { [0.18, 0.52, 0.98, 1.0] }; // Royal Blue
-        let c_xy = if active_axis == Some(GizmoAxis::XY) { c_active } else { [0.18, 0.52, 0.98, 0.75] };
-        let c_xz = if active_axis == Some(GizmoAxis::XZ) { c_active } else { [0.24, 0.84, 0.38, 0.75] };
-        let c_yz = if active_axis == Some(GizmoAxis::YZ) { c_active } else { [0.96, 0.26, 0.21, 0.75] };
-        let c_screen = if active_axis == Some(GizmoAxis::Screen) { c_active } else { [0.9, 0.92, 0.95, 0.85] };
+        let c_x = if active_axis == Some(GizmoAxis::X) {
+            c_active
+        } else {
+            [0.96, 0.26, 0.21, 1.0]
+        }; // Crimson Red
+        let c_y = if active_axis == Some(GizmoAxis::Y) {
+            c_active
+        } else {
+            [0.24, 0.84, 0.38, 1.0]
+        }; // Emerald Green
+        let c_z = if active_axis == Some(GizmoAxis::Z) {
+            c_active
+        } else {
+            [0.18, 0.52, 0.98, 1.0]
+        }; // Royal Blue
+        let c_xy = if active_axis == Some(GizmoAxis::XY) {
+            c_active
+        } else {
+            [0.18, 0.52, 0.98, 0.75]
+        };
+        let c_xz = if active_axis == Some(GizmoAxis::XZ) {
+            c_active
+        } else {
+            [0.24, 0.84, 0.38, 0.75]
+        };
+        let c_yz = if active_axis == Some(GizmoAxis::YZ) {
+            c_active
+        } else {
+            [0.96, 0.26, 0.21, 0.75]
+        };
+        let c_screen = if active_axis == Some(GizmoAxis::Screen) {
+            c_active
+        } else {
+            [0.9, 0.92, 0.95, 0.85]
+        };
 
         let mut gizmo_vertices = Vec::new();
 
@@ -41,10 +69,24 @@ impl ViewportRenderer {
         for i in 0..c_segs {
             let a0 = (i as f32 / c_segs as f32) * std::f32::consts::TAU;
             let a1 = ((i + 1) as f32 / c_segs as f32) * std::f32::consts::TAU;
-            let p0 = origin + camera.right() * (a0.cos() * center_radius) + camera.up() * (a0.sin() * center_radius);
-            let p1 = origin + camera.right() * (a1.cos() * center_radius) + camera.up() * (a1.sin() * center_radius);
-            gizmo_vertices.push(GpuVertex { position: p0.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_screen });
-            gizmo_vertices.push(GpuVertex { position: p1.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_screen });
+            let p0 = origin
+                + camera.right() * (a0.cos() * center_radius)
+                + camera.up() * (a0.sin() * center_radius);
+            let p1 = origin
+                + camera.right() * (a1.cos() * center_radius)
+                + camera.up() * (a1.sin() * center_radius);
+            gizmo_vertices.push(GpuVertex {
+                position: p0.to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: c_screen,
+            });
+            gizmo_vertices.push(GpuVertex {
+                position: p1.to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: c_screen,
+            });
         }
 
         match mode {
@@ -54,19 +96,73 @@ impl ViewportRenderer {
                 let dir_z = orientation * Vec3::new(0.0, 0.0, len);
 
                 // Axis Shafts
-                gizmo_vertices.push(GpuVertex { position: origin.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_x });
-                gizmo_vertices.push(GpuVertex { position: (origin + dir_x * 0.78).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_x });
+                gizmo_vertices.push(GpuVertex {
+                    position: origin.to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_x,
+                });
+                gizmo_vertices.push(GpuVertex {
+                    position: (origin + dir_x * 0.78).to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_x,
+                });
 
-                gizmo_vertices.push(GpuVertex { position: origin.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_y });
-                gizmo_vertices.push(GpuVertex { position: (origin + dir_y * 0.78).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_y });
+                gizmo_vertices.push(GpuVertex {
+                    position: origin.to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_y,
+                });
+                gizmo_vertices.push(GpuVertex {
+                    position: (origin + dir_y * 0.78).to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_y,
+                });
 
-                gizmo_vertices.push(GpuVertex { position: origin.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_z });
-                gizmo_vertices.push(GpuVertex { position: (origin + dir_z * 0.78).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_z });
+                gizmo_vertices.push(GpuVertex {
+                    position: origin.to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_z,
+                });
+                gizmo_vertices.push(GpuVertex {
+                    position: (origin + dir_z * 0.78).to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_z,
+                });
 
                 // 3D Arrowhead Cones for X, Y, Z
-                append_3d_cone(&mut gizmo_vertices, origin + dir_x * 0.78, origin + dir_x * 1.05, orientation * Vec3::Y, orientation * Vec3::Z, 0.07 * scale, c_x);
-                append_3d_cone(&mut gizmo_vertices, origin + dir_y * 0.78, origin + dir_y * 1.05, orientation * Vec3::X, orientation * Vec3::Z, 0.07 * scale, c_y);
-                append_3d_cone(&mut gizmo_vertices, origin + dir_z * 0.78, origin + dir_z * 1.05, orientation * Vec3::X, orientation * Vec3::Y, 0.07 * scale, c_z);
+                append_3d_cone(
+                    &mut gizmo_vertices,
+                    origin + dir_x * 0.78,
+                    origin + dir_x * 1.05,
+                    orientation * Vec3::Y,
+                    orientation * Vec3::Z,
+                    0.07 * scale,
+                    c_x,
+                );
+                append_3d_cone(
+                    &mut gizmo_vertices,
+                    origin + dir_y * 0.78,
+                    origin + dir_y * 1.05,
+                    orientation * Vec3::X,
+                    orientation * Vec3::Z,
+                    0.07 * scale,
+                    c_y,
+                );
+                append_3d_cone(
+                    &mut gizmo_vertices,
+                    origin + dir_z * 0.78,
+                    origin + dir_z * 1.05,
+                    orientation * Vec3::X,
+                    orientation * Vec3::Y,
+                    0.07 * scale,
+                    c_z,
+                );
 
                 // Planar translation handles (squares in XY, XZ, YZ)
                 let p_off = 0.32 * len;
@@ -98,14 +194,46 @@ impl ViewportRenderer {
                 let r = len * 0.95;
 
                 // X-axis ring (YZ plane)
-                append_circle_ring(&mut gizmo_vertices, origin, orientation * Vec3::Y, orientation * Vec3::Z, r, segs, c_x);
+                append_circle_ring(
+                    &mut gizmo_vertices,
+                    origin,
+                    orientation * Vec3::Y,
+                    orientation * Vec3::Z,
+                    r,
+                    segs,
+                    c_x,
+                );
                 // Y-axis ring (XZ plane)
-                append_circle_ring(&mut gizmo_vertices, origin, orientation * Vec3::X, orientation * Vec3::Z, r, segs, c_y);
+                append_circle_ring(
+                    &mut gizmo_vertices,
+                    origin,
+                    orientation * Vec3::X,
+                    orientation * Vec3::Z,
+                    r,
+                    segs,
+                    c_y,
+                );
                 // Z-axis ring (XY plane)
-                append_circle_ring(&mut gizmo_vertices, origin, orientation * Vec3::X, orientation * Vec3::Y, r, segs, c_z);
+                append_circle_ring(
+                    &mut gizmo_vertices,
+                    origin,
+                    orientation * Vec3::X,
+                    orientation * Vec3::Y,
+                    r,
+                    segs,
+                    c_z,
+                );
 
                 // Outer camera-facing trackball ring
-                append_circle_ring(&mut gizmo_vertices, origin, camera.right(), camera.up(), r * 1.15, segs, [0.85, 0.88, 0.92, 0.6]);
+                append_circle_ring(
+                    &mut gizmo_vertices,
+                    origin,
+                    camera.right(),
+                    camera.up(),
+                    r * 1.15,
+                    segs,
+                    [0.85, 0.88, 0.92, 0.6],
+                );
             }
             GizmoMode::Scale => {
                 let dir_x = orientation * Vec3::new(len, 0.0, 0.0);
@@ -113,23 +241,77 @@ impl ViewportRenderer {
                 let dir_z = orientation * Vec3::new(0.0, 0.0, len);
 
                 // Shafts
-                gizmo_vertices.push(GpuVertex { position: origin.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_x });
-                gizmo_vertices.push(GpuVertex { position: (origin + dir_x * 0.85).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_x });
+                gizmo_vertices.push(GpuVertex {
+                    position: origin.to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_x,
+                });
+                gizmo_vertices.push(GpuVertex {
+                    position: (origin + dir_x * 0.85).to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_x,
+                });
 
-                gizmo_vertices.push(GpuVertex { position: origin.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_y });
-                gizmo_vertices.push(GpuVertex { position: (origin + dir_y * 0.85).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_y });
+                gizmo_vertices.push(GpuVertex {
+                    position: origin.to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_y,
+                });
+                gizmo_vertices.push(GpuVertex {
+                    position: (origin + dir_y * 0.85).to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_y,
+                });
 
-                gizmo_vertices.push(GpuVertex { position: origin.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_z });
-                gizmo_vertices.push(GpuVertex { position: (origin + dir_z * 0.85).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: c_z });
+                gizmo_vertices.push(GpuVertex {
+                    position: origin.to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_z,
+                });
+                gizmo_vertices.push(GpuVertex {
+                    position: (origin + dir_z * 0.85).to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: c_z,
+                });
 
                 // Scale Box Cubes at the tips
                 let b_sz = 0.06 * scale;
-                append_cube(&mut gizmo_vertices, origin + dir_x * 0.92, orientation, b_sz, c_x);
-                append_cube(&mut gizmo_vertices, origin + dir_y * 0.92, orientation, b_sz, c_y);
-                append_cube(&mut gizmo_vertices, origin + dir_z * 0.92, orientation, b_sz, c_z);
+                append_cube(
+                    &mut gizmo_vertices,
+                    origin + dir_x * 0.92,
+                    orientation,
+                    b_sz,
+                    c_x,
+                );
+                append_cube(
+                    &mut gizmo_vertices,
+                    origin + dir_y * 0.92,
+                    orientation,
+                    b_sz,
+                    c_y,
+                );
+                append_cube(
+                    &mut gizmo_vertices,
+                    origin + dir_z * 0.92,
+                    orientation,
+                    b_sz,
+                    c_z,
+                );
 
                 // Center uniform scale box
-                append_cube(&mut gizmo_vertices, origin, orientation, b_sz * 0.9, c_screen);
+                append_cube(
+                    &mut gizmo_vertices,
+                    origin,
+                    orientation,
+                    b_sz * 0.9,
+                    c_screen,
+                );
             }
         }
 
@@ -137,22 +319,26 @@ impl ViewportRenderer {
             return;
         }
 
-        let v_buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Gizmo Vertices"),
-            contents: bytemuck::cast_slice(&gizmo_vertices),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
+        let v_buf = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Gizmo Vertices"),
+                contents: bytemuck::cast_slice(&gizmo_vertices),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
 
         let model_data = ModelUniform {
             model: Mat4::IDENTITY.to_cols_array(),
             color: [1.0, 1.0, 1.0, 1.0],
             material: [0.0, 1.0, 0.0, 0.0],
         };
-        let m_buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Gizmo Model Buffer"),
-            contents: bytemuck::bytes_of(&model_data),
-            usage: wgpu::BufferUsages::UNIFORM,
-        });
+        let m_buf = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Gizmo Model Buffer"),
+                contents: bytemuck::bytes_of(&model_data),
+                usage: wgpu::BufferUsages::UNIFORM,
+            });
         let m_bind = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Gizmo Model Bind Group"),
             layout: &self.model_bind_group_layout,
@@ -162,9 +348,11 @@ impl ViewportRenderer {
             }],
         });
 
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("Gizmo Encoder"),
-        });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Gizmo Encoder"),
+            });
 
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -222,12 +410,32 @@ fn append_3d_cone(
         let p1 = base_pts[(i + 1) % segs];
 
         // Side cone lines
-        verts.push(GpuVertex { position: p0.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
-        verts.push(GpuVertex { position: tip.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
+        verts.push(GpuVertex {
+            position: p0.to_array(),
+            normal: [0.0; 3],
+            uv: [0.0; 2],
+            color,
+        });
+        verts.push(GpuVertex {
+            position: tip.to_array(),
+            normal: [0.0; 3],
+            uv: [0.0; 2],
+            color,
+        });
 
         // Base circle ring lines
-        verts.push(GpuVertex { position: p0.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
-        verts.push(GpuVertex { position: p1.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
+        verts.push(GpuVertex {
+            position: p0.to_array(),
+            normal: [0.0; 3],
+            uv: [0.0; 2],
+            color,
+        });
+        verts.push(GpuVertex {
+            position: p1.to_array(),
+            normal: [0.0; 3],
+            uv: [0.0; 2],
+            color,
+        });
     }
 }
 
@@ -239,17 +447,57 @@ fn append_square(
     p3: Vec3,
     color: [f32; 4],
 ) {
-    verts.push(GpuVertex { position: p0.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
-    verts.push(GpuVertex { position: p1.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
+    verts.push(GpuVertex {
+        position: p0.to_array(),
+        normal: [0.0; 3],
+        uv: [0.0; 2],
+        color,
+    });
+    verts.push(GpuVertex {
+        position: p1.to_array(),
+        normal: [0.0; 3],
+        uv: [0.0; 2],
+        color,
+    });
 
-    verts.push(GpuVertex { position: p1.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
-    verts.push(GpuVertex { position: p2.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
+    verts.push(GpuVertex {
+        position: p1.to_array(),
+        normal: [0.0; 3],
+        uv: [0.0; 2],
+        color,
+    });
+    verts.push(GpuVertex {
+        position: p2.to_array(),
+        normal: [0.0; 3],
+        uv: [0.0; 2],
+        color,
+    });
 
-    verts.push(GpuVertex { position: p2.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
-    verts.push(GpuVertex { position: p3.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
+    verts.push(GpuVertex {
+        position: p2.to_array(),
+        normal: [0.0; 3],
+        uv: [0.0; 2],
+        color,
+    });
+    verts.push(GpuVertex {
+        position: p3.to_array(),
+        normal: [0.0; 3],
+        uv: [0.0; 2],
+        color,
+    });
 
-    verts.push(GpuVertex { position: p3.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
-    verts.push(GpuVertex { position: p0.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
+    verts.push(GpuVertex {
+        position: p3.to_array(),
+        normal: [0.0; 3],
+        uv: [0.0; 2],
+        color,
+    });
+    verts.push(GpuVertex {
+        position: p0.to_array(),
+        normal: [0.0; 3],
+        uv: [0.0; 2],
+        color,
+    });
 }
 
 fn append_circle_ring(
@@ -268,8 +516,18 @@ fn append_circle_ring(
         let p0 = center + u_axis * (th0.cos() * radius) + v_axis * (th0.sin() * radius);
         let p1 = center + u_axis * (th1.cos() * radius) + v_axis * (th1.sin() * radius);
 
-        verts.push(GpuVertex { position: p0.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
-        verts.push(GpuVertex { position: p1.to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
+        verts.push(GpuVertex {
+            position: p0.to_array(),
+            normal: [0.0; 3],
+            uv: [0.0; 2],
+            color,
+        });
+        verts.push(GpuVertex {
+            position: p1.to_array(),
+            normal: [0.0; 3],
+            uv: [0.0; 2],
+            color,
+        });
     }
 }
 
@@ -293,13 +551,32 @@ fn append_cube(
     ];
 
     let edges = [
-        (0, 1), (1, 2), (2, 3), (3, 0),
-        (4, 5), (5, 6), (6, 7), (7, 4),
-        (0, 4), (1, 5), (2, 6), (3, 7),
+        (0, 1),
+        (1, 2),
+        (2, 3),
+        (3, 0),
+        (4, 5),
+        (5, 6),
+        (6, 7),
+        (7, 4),
+        (0, 4),
+        (1, 5),
+        (2, 6),
+        (3, 7),
     ];
 
     for &(i0, i1) in &edges {
-        verts.push(GpuVertex { position: corners[i0].to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
-        verts.push(GpuVertex { position: corners[i1].to_array(), normal: [0.0; 3], uv: [0.0; 2], color });
+        verts.push(GpuVertex {
+            position: corners[i0].to_array(),
+            normal: [0.0; 3],
+            uv: [0.0; 2],
+            color,
+        });
+        verts.push(GpuVertex {
+            position: corners[i1].to_array(),
+            normal: [0.0; 3],
+            uv: [0.0; 2],
+            color,
+        });
     }
 }

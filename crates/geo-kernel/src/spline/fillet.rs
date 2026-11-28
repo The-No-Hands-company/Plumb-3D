@@ -106,19 +106,9 @@ impl Spline {
             // Cubic Bézier handle length for circular arc
             let handle_len = (4.0 / 3.0) * (arc_angle * 0.25).tan() * effective_radius;
 
-            let p1 = BezierPoint::with_type(
-                t1,
-                Vec3::ZERO,
-                -u1 * handle_len,
-                HandleType::Aligned,
-            );
+            let p1 = BezierPoint::with_type(t1, Vec3::ZERO, -u1 * handle_len, HandleType::Aligned);
 
-            let p2 = BezierPoint::with_type(
-                t2,
-                -u2 * handle_len,
-                Vec3::ZERO,
-                HandleType::Aligned,
-            );
+            let p2 = BezierPoint::with_type(t2, -u2 * handle_len, Vec3::ZERO, HandleType::Aligned);
 
             if continuity == FilletContinuity::G2Curvature {
                 let bisector = (u1 + u2).normalize_or_zero();

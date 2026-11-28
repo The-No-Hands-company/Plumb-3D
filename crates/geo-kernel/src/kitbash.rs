@@ -37,8 +37,12 @@ impl KitbashHardwareType {
         match self {
             Self::HexBolt => Kitbash::create_hex_bolt(0.1 * scale, 0.08 * scale, 0.15 * scale),
             Self::AllenScrew => Kitbash::create_allen_screw(0.1 * scale, 0.1 * scale, 0.15 * scale),
-            Self::SlottedVent => Kitbash::create_slotted_vent(0.3 * scale, 0.3 * scale, 0.05 * scale, 4),
-            Self::LatchHandle => Kitbash::create_latch_handle(0.25 * scale, 0.12 * scale, 0.04 * scale),
+            Self::SlottedVent => {
+                Kitbash::create_slotted_vent(0.3 * scale, 0.3 * scale, 0.05 * scale, 4)
+            }
+            Self::LatchHandle => {
+                Kitbash::create_latch_handle(0.25 * scale, 0.12 * scale, 0.04 * scale)
+            }
         }
     }
 }
@@ -60,8 +64,14 @@ impl Kitbash {
             let theta = (i as f32) * 2.0 * PI / 6.0;
             let x = r * theta.cos();
             let z = r * theta.sin();
-            top_hex.push(mesh.add_vertex_with_uv(vec3(x, h, z), vec2(0.5 + 0.5 * theta.cos(), 0.5 + 0.5 * theta.sin())));
-            bot_hex.push(mesh.add_vertex_with_uv(vec3(x, 0.0, z), vec2(0.5 + 0.5 * theta.cos(), 0.5 + 0.5 * theta.sin())));
+            top_hex.push(mesh.add_vertex_with_uv(
+                vec3(x, h, z),
+                vec2(0.5 + 0.5 * theta.cos(), 0.5 + 0.5 * theta.sin()),
+            ));
+            bot_hex.push(mesh.add_vertex_with_uv(
+                vec3(x, 0.0, z),
+                vec2(0.5 + 0.5 * theta.cos(), 0.5 + 0.5 * theta.sin()),
+            ));
         }
 
         // Top hex cap (CCW from above)
@@ -118,8 +128,12 @@ impl Kitbash {
             let theta = (i as f32) * 2.0 * PI / (segs as f32);
             let x = r * theta.cos();
             let z = r * theta.sin();
-            top_outer.push(mesh.add_vertex_with_uv(vec3(x, h, z), vec2((i as f32) / (segs as f32), 1.0)));
-            bot_outer.push(mesh.add_vertex_with_uv(vec3(x, 0.0, z), vec2((i as f32) / (segs as f32), 0.0)));
+            top_outer.push(
+                mesh.add_vertex_with_uv(vec3(x, h, z), vec2((i as f32) / (segs as f32), 1.0)),
+            );
+            bot_outer.push(
+                mesh.add_vertex_with_uv(vec3(x, 0.0, z), vec2((i as f32) / (segs as f32), 0.0)),
+            );
         }
 
         for i in 0..segs {
@@ -145,7 +159,12 @@ impl Kitbash {
         }
         for i in 0..6 {
             let next = (i + 1) % 6;
-            let _ = mesh.add_face(&[socket_top[i], socket_bot[i], socket_bot[next], socket_top[next]]);
+            let _ = mesh.add_face(&[
+                socket_top[i],
+                socket_bot[i],
+                socket_bot[next],
+                socket_top[next],
+            ]);
         }
         let _ = mesh.add_face(&socket_top);
         let mut s_bot_rev = socket_bot.clone();

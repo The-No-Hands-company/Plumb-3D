@@ -7,7 +7,10 @@ mod tests {
     #[test]
     fn test_default_graph_evaluation() {
         let mut graph = GeoNodeGraph::new();
-        let mesh = graph.evaluate().expect("Evaluation should succeed").expect("Should produce mesh");
+        let mesh = graph
+            .evaluate()
+            .expect("Evaluation should succeed")
+            .expect("Should produce mesh");
         assert_eq!(mesh.faces.len(), 6);
         assert_eq!(mesh.vertices.len(), 8);
     }
@@ -35,7 +38,10 @@ mod tests {
         assert!(graph.link(subd_key, 0, out_key, 0).is_ok());
 
         // 4. Evaluate procedural result
-        let mesh = graph.evaluate().expect("Graph evaluation should succeed").expect("Should produce mesh");
+        let mesh = graph
+            .evaluate()
+            .expect("Graph evaluation should succeed")
+            .expect("Should produce mesh");
         assert!(mesh.faces.len() > 20);
         assert!(mesh.vertices.len() > 20);
         assert!(mesh.validate().is_ok());
@@ -62,7 +68,10 @@ mod tests {
         assert!(graph.link(sphere_key, 0, bool_key, 1).is_ok());
         assert!(graph.link(bool_key, 0, out_key, 0).is_ok());
 
-        let mesh = graph.evaluate().expect("Boolean graph should succeed").expect("Should produce mesh");
+        let mesh = graph
+            .evaluate()
+            .expect("Boolean graph should succeed")
+            .expect("Should produce mesh");
         assert!(mesh.faces.len() > 6);
         assert!(mesh.validate().is_ok());
     }
@@ -99,10 +108,13 @@ mod tests {
         // Connect val_x -> CombineXyz (X), CombineXyz -> Transform (Translation)
         assert!(graph.link(val_x, 0, combine_key, 0).is_ok());
         assert!(graph.link(combine_key, 0, transform_key, 1).is_ok()); // Translation socket
-        assert!(graph.link(cube_key, 0, transform_key, 0).is_ok());   // Geometry socket
+        assert!(graph.link(cube_key, 0, transform_key, 0).is_ok()); // Geometry socket
         assert!(graph.link(transform_key, 0, out_key, 0).is_ok());
 
-        let mesh = graph.evaluate().expect("Transform graph should succeed").expect("Should produce mesh");
+        let mesh = graph
+            .evaluate()
+            .expect("Transform graph should succeed")
+            .expect("Should produce mesh");
         let center = mesh.bounding_center();
         assert!((center.x - 5.0).abs() < 1e-4);
     }
@@ -131,7 +143,10 @@ mod tests {
         // Instance -> Output
         assert!(graph.link(instance, 0, out_key, 0).is_ok());
 
-        let mesh = graph.evaluate().expect("Scattering should succeed").expect("Should produce mesh");
+        let mesh = graph
+            .evaluate()
+            .expect("Scattering should succeed")
+            .expect("Should produce mesh");
         // Verify multiple instances were scattered onto the plane surface
         assert!(mesh.vertex_count() >= 8 * 2);
         assert!(mesh.face_count() >= 6 * 2);
@@ -158,7 +173,10 @@ mod tests {
         // Displace -> Output
         assert!(graph.link(displace_key, 0, out_key, 0).is_ok());
 
-        let mesh = graph.evaluate().expect("Displacement should succeed").expect("Should produce mesh");
+        let mesh = graph
+            .evaluate()
+            .expect("Displacement should succeed")
+            .expect("Should produce mesh");
         assert_eq!(mesh.vertex_count(), 8);
         // Vertices should be displaced outward along normals
         let dims = mesh.bounding_dimensions();
@@ -186,7 +204,9 @@ mod tests {
 
         let modifier = GeometryNodesModifier::new("ProceduralGeoNodes", graph);
         let base_cube = Primitives::create_cube(2.0);
-        let result = modifier.apply(&base_cube).expect("Modifier evaluation should succeed");
+        let result = modifier
+            .apply(&base_cube)
+            .expect("Modifier evaluation should succeed");
 
         // Base cube (6 faces) subdivided -> 24 faces
         assert_eq!(result.face_count(), 24);
@@ -218,7 +238,10 @@ mod tests {
         let val_key = graph.add_node(Box::new(ValueNode { value: 3.0 }), [-100.0, 150.0]);
         assert!(graph.link(val_key, 0, mat_key, 1).is_ok());
 
-        let mesh = graph.evaluate().expect("Graph should evaluate").expect("Should produce mesh");
+        let mesh = graph
+            .evaluate()
+            .expect("Graph should evaluate")
+            .expect("Should produce mesh");
         // Cube (6 faces) + Plane (4x4 = 16 faces) = 22 faces
         assert_eq!(mesh.faces.len(), 22);
         for f in mesh.faces.values() {
@@ -227,7 +250,9 @@ mod tests {
 
         // Test MeshToPointsNode
         let m2p = MeshToPointsNode;
-        let points_res = m2p.execute(&[SocketValue::Geometry(Some(mesh))]).expect("MeshToPoints execution should succeed");
+        let points_res = m2p
+            .execute(&[SocketValue::Geometry(Some(mesh))])
+            .expect("MeshToPoints execution should succeed");
         if let SocketValue::Points(pts) = &points_res[0] {
             // Cube has 8 vertices, 4x4 plane has 25 vertices -> 33 points
             assert_eq!(pts.len(), 33);
@@ -255,7 +280,10 @@ mod tests {
         assert!(graph.link(cube_key, 0, remesh_key, 0).is_ok());
         assert!(graph.link(remesh_key, 0, out_key, 0).is_ok());
 
-        let mesh = graph.evaluate().expect("Graph should evaluate").expect("Should produce mesh");
+        let mesh = graph
+            .evaluate()
+            .expect("Graph should evaluate")
+            .expect("Should produce mesh");
         assert!(mesh.faces.len() > 10);
         assert!(mesh.vertices.len() > 10);
         assert!(mesh.validate().is_ok());
@@ -265,10 +293,9 @@ mod tests {
     fn test_procedural_curve_fillet_and_revolve_nodes() {
         // Test CurveFilletNode
         let fillet_node = CurveFilletNode;
-        let fillet_res = fillet_node.execute(&[
-            SocketValue::Float(0.3),
-            SocketValue::Float(0.1),
-        ]).expect("CurveFilletNode execution should succeed");
+        let fillet_res = fillet_node
+            .execute(&[SocketValue::Float(0.3), SocketValue::Float(0.1)])
+            .expect("CurveFilletNode execution should succeed");
 
         if let SocketValue::Geometry(Some(m)) = &fillet_res[0] {
             assert!(m.face_count() > 20);
@@ -279,12 +306,14 @@ mod tests {
 
         // Test CurveRevolveNode
         let revolve_node = CurveRevolveNode;
-        let revolve_res = revolve_node.execute(&[
-            SocketValue::Float(1.5),
-            SocketValue::Float(3.0),
-            SocketValue::Int(16),
-            SocketValue::Float(360.0),
-        ]).expect("CurveRevolveNode execution should succeed");
+        let revolve_res = revolve_node
+            .execute(&[
+                SocketValue::Float(1.5),
+                SocketValue::Float(3.0),
+                SocketValue::Int(16),
+                SocketValue::Float(360.0),
+            ])
+            .expect("CurveRevolveNode execution should succeed");
 
         if let SocketValue::Geometry(Some(m)) = &revolve_res[0] {
             assert!(m.face_count() > 30);
@@ -303,10 +332,12 @@ mod tests {
 
         // Test MirrorNode across X axis
         let mirror_node = MirrorNode;
-        let mirror_res = mirror_node.execute(&[
-            SocketValue::Geometry(Some(cube.clone())),
-            SocketValue::Int(0), // X axis
-        ]).expect("MirrorNode should succeed");
+        let mirror_res = mirror_node
+            .execute(&[
+                SocketValue::Geometry(Some(cube.clone())),
+                SocketValue::Int(0), // X axis
+            ])
+            .expect("MirrorNode should succeed");
 
         if let SocketValue::Geometry(Some(m)) = &mirror_res[0] {
             assert_eq!(m.faces.len(), 12);
@@ -316,10 +347,9 @@ mod tests {
 
         // Test BevelNode
         let bevel_node = BevelNode;
-        let bevel_res = bevel_node.execute(&[
-            SocketValue::Geometry(Some(cube)),
-            SocketValue::Float(0.1),
-        ]).expect("BevelNode should succeed");
+        let bevel_res = bevel_node
+            .execute(&[SocketValue::Geometry(Some(cube)), SocketValue::Float(0.1)])
+            .expect("BevelNode should succeed");
 
         if let SocketValue::Geometry(Some(m)) = &bevel_res[0] {
             assert!(m.faces.len() > 6);
@@ -340,10 +370,9 @@ mod tests {
             attribute_name: "Density".to_string(),
             domain: AttributeDomain::Vertex,
         };
-        let cap_res = capture_node.execute(&[
-            SocketValue::Geometry(Some(cube1)),
-            SocketValue::Float(0.75),
-        ]).expect("CaptureAttributeNode should succeed");
+        let cap_res = capture_node
+            .execute(&[SocketValue::Geometry(Some(cube1)), SocketValue::Float(0.75)])
+            .expect("CaptureAttributeNode should succeed");
 
         assert_eq!(cap_res.len(), 2);
         let captured_field = match &cap_res[1] {
@@ -360,15 +389,21 @@ mod tests {
         let transfer_node = TransferAttributeNode {
             attribute_name: "Density".to_string(),
         };
-        let trans_res = transfer_node.execute(&[
-            SocketValue::Geometry(Some(cube2)),
-            cap_res[0].clone(),
-            SocketValue::Field(captured_field),
-        ]).expect("TransferAttributeNode should succeed");
+        let trans_res = transfer_node
+            .execute(&[
+                SocketValue::Geometry(Some(cube2)),
+                cap_res[0].clone(),
+                SocketValue::Field(captured_field),
+            ])
+            .expect("TransferAttributeNode should succeed");
 
         assert_eq!(trans_res.len(), 2);
         if let SocketValue::Geometry(Some(tgt_m)) = &trans_res[0] {
-            let vg = tgt_m.vertex_groups.iter().find(|g| g.name == "Density").expect("Transferred group must exist");
+            let vg = tgt_m
+                .vertex_groups
+                .iter()
+                .find(|g| g.name == "Density")
+                .expect("Transferred group must exist");
             for vk in tgt_m.vertices.keys() {
                 assert!((vg.get_weight(vk) - 0.75).abs() < 1e-4);
             }

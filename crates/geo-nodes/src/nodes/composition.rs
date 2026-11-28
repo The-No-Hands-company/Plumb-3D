@@ -76,9 +76,12 @@ impl GeoNodeOp for MeshToPointsNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let mesh = inputs.first()
+        let mesh = inputs
+            .first()
             .and_then(|v| v.as_geometry())
-            .ok_or_else(|| NodeGraphError::ExecutionError("Mesh to Points requires valid input mesh".into()))?;
+            .ok_or_else(|| {
+                NodeGraphError::ExecutionError("Mesh to Points requires valid input mesh".into())
+            })?;
 
         let mut points = Vec::with_capacity(mesh.vertices.len());
         for v in mesh.vertices.values() {
@@ -126,9 +129,12 @@ impl GeoNodeOp for SetMaterialNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let mesh = inputs.first()
+        let mesh = inputs
+            .first()
             .and_then(|v| v.as_geometry())
-            .ok_or_else(|| NodeGraphError::ExecutionError("Set Material requires input geometry".into()))?;
+            .ok_or_else(|| {
+                NodeGraphError::ExecutionError("Set Material requires input geometry".into())
+            })?;
 
         let mat_idx = inputs.get(1).map(|v| v.as_int().max(0) as u32).unwrap_or(0);
 

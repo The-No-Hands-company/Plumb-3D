@@ -7,14 +7,20 @@ impl Mesh {
     /// Preserves arbitrary N-gons, quads, triangles, UVs, and vertex normals.
     pub fn to_obj(&self, object_name: &str) -> String {
         let mut out = String::new();
-        out.push_str(&format!("# Plumb 3D DCC Suite OBJ Exporter\no {}\n", object_name));
+        out.push_str(&format!(
+            "# Plumb 3D DCC Suite OBJ Exporter\no {}\n",
+            object_name
+        ));
 
         // 1. Write vertices (v) and map VertexKey -> 1-based OBJ index
         let mut key_to_idx = HashMap::new();
         let mut idx = 1;
 
         for (vk, v) in &self.vertices {
-            out.push_str(&format!("v {:.6} {:.6} {:.6}\n", v.position.x, v.position.y, v.position.z));
+            out.push_str(&format!(
+                "v {:.6} {:.6} {:.6}\n",
+                v.position.x, v.position.y, v.position.z
+            ));
             key_to_idx.insert(vk, idx);
             idx += 1;
         }
@@ -26,7 +32,10 @@ impl Mesh {
 
         // 3. Write vertex normals (vn)
         for (_, v) in &self.vertices {
-            out.push_str(&format!("vn {:.6} {:.6} {:.6}\n", v.normal.x, v.normal.y, v.normal.z));
+            out.push_str(&format!(
+                "vn {:.6} {:.6} {:.6}\n",
+                v.normal.x, v.normal.y, v.normal.z
+            ));
         }
 
         out.push_str("s 1\n");

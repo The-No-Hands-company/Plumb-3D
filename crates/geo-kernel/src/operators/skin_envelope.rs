@@ -5,7 +5,11 @@ use std::collections::HashMap;
 impl Mesh {
     /// Procedural Skin Envelope Generator (Blender Skin Modifier / ZBrush ZSpheres).
     /// Constructs an envelope of quad sleeves around arbitrary wireframe edge armatures.
-    pub fn generate_skin_envelope(&self, default_radius: f32, smooth_iterations: usize) -> Result<Mesh, MeshError> {
+    pub fn generate_skin_envelope(
+        &self,
+        default_radius: f32,
+        smooth_iterations: usize,
+    ) -> Result<Mesh, MeshError> {
         if self.edges.is_empty() {
             return Ok(self.clone());
         }
@@ -87,7 +91,9 @@ impl Mesh {
         }
 
         // 3. Weld coincident ring vertices at branching junctions
-        let welded = out_mesh.weld_vertices_by_distance(radius * 0.65).unwrap_or(out_mesh);
+        let welded = out_mesh
+            .weld_vertices_by_distance(radius * 0.65)
+            .unwrap_or(out_mesh);
 
         // 4. Optional Laplacian smoothing pass
         let mut final_mesh = welded;

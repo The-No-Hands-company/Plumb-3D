@@ -90,7 +90,9 @@ mod tests {
 
         let materials = vec![
             Material::lambertian(Vec3::new(0.8, 0.2, 0.2)),
-            Material::Emissive { radiance: Vec3::splat(10.0) },
+            Material::Emissive {
+                radiance: Vec3::splat(10.0),
+            },
         ];
 
         let scene = PathTracerScene::new(vec![tri1, tri2], materials);
@@ -125,7 +127,8 @@ mod tests {
         let ray1 = cam_pinhole.get_ray(0.5, 0.5, || 0.5);
         assert_eq!(ray1.origin, look_from);
 
-        let cam_dof = PathtracerCamera::new_thin_lens(look_from, look_at, vup, 0.785, 1.0, 0.5, 5.0);
+        let cam_dof =
+            PathtracerCamera::new_thin_lens(look_from, look_at, vup, 0.785, 1.0, 0.5, 5.0);
         assert!((cam_dof.lens_radius - 0.25).abs() < 1e-5);
         assert_eq!(cam_dof.focus_distance, 5.0);
 
@@ -147,9 +150,15 @@ mod tests {
         };
 
         // UV (0.1, 0.1) -> index (0, 0) -> sum 0 -> color_a
-        assert_eq!(checker.evaluate(Vec2::new(0.1, 0.1), Vec3::ZERO, Vec3::Y), col_a);
+        assert_eq!(
+            checker.evaluate(Vec2::new(0.1, 0.1), Vec3::ZERO, Vec3::Y),
+            col_a
+        );
         // UV (0.6, 0.1) -> index (1, 0) -> sum 1 -> color_b
-        assert_eq!(checker.evaluate(Vec2::new(0.6, 0.1), Vec3::ZERO, Vec3::Y), col_b);
+        assert_eq!(
+            checker.evaluate(Vec2::new(0.6, 0.1), Vec3::ZERO, Vec3::Y),
+            col_b
+        );
 
         let rings = TextureSource::Rings {
             color_a: col_a,
@@ -164,8 +173,8 @@ mod tests {
 
     #[test]
     fn test_texture_map_baking_normal_and_ao() {
-        use geo_kernel::Primitives;
         use crate::baker::{bake_texture, BakeMapType, BakeSettings};
+        use geo_kernel::Primitives;
 
         let low_poly = Primitives::create_cube(2.0);
         let high_poly = Primitives::create_uv_sphere(1.0, 16, 16);
@@ -212,7 +221,10 @@ mod tests {
             seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
             (seed >> 8) as f32 / 16777216.0
         };
-        let ray_in = Ray::new(Vec3::new(-1.0, 1.0, 0.0), Vec3::new(1.0, -1.0, 0.0).normalize());
+        let ray_in = Ray::new(
+            Vec3::new(-1.0, 1.0, 0.0),
+            Vec3::new(1.0, -1.0, 0.0).normalize(),
+        );
         let sample = gold_mat.sample(&ray_in, Vec3::ZERO, Vec3::Y, Vec2::ZERO, &mut rng);
         assert!(sample.is_some());
         let bsdf = sample.unwrap();
@@ -222,14 +234,8 @@ mod tests {
         assert!(bsdf.attenuation.x > bsdf.attenuation.z);
 
         // 2. Emissive Principled Material
-        let neon_mat = Material::principled(
-            Vec3::ONE,
-            0.0,
-            0.5,
-            1.5,
-            0.0,
-            Vec3::new(5.0, 10.0, 2.0),
-        );
+        let neon_mat =
+            Material::principled(Vec3::ONE, 0.0, 0.5, 1.5, 0.0, Vec3::new(5.0, 10.0, 2.0));
         assert!(neon_mat.is_emissive());
         assert_eq!(neon_mat.emission(), Vec3::new(5.0, 10.0, 2.0));
 
@@ -243,7 +249,13 @@ mod tests {
             Vec3::ZERO,
         );
         let ray_straight_down = Ray::new(Vec3::new(0.0, 1.0, 0.0), Vec3::new(0.0, -1.0, 0.0));
-        let glass_sample = glass_mat.sample(&ray_straight_down, Vec3::ZERO, Vec3::Y, Vec2::ZERO, &mut rng);
+        let glass_sample = glass_mat.sample(
+            &ray_straight_down,
+            Vec3::ZERO,
+            Vec3::Y,
+            Vec2::ZERO,
+            &mut rng,
+        );
         assert!(glass_sample.is_some());
         let glass_bsdf = glass_sample.unwrap();
         assert!(glass_bsdf.is_specular);
@@ -290,7 +302,12 @@ mod tests {
         let center_idx = (8 * 16 + 8) * 4;
         let warm_r = warm_bytes[center_idx];
         let warm_b = warm_bytes[center_idx + 2];
-        assert!(warm_r > warm_b, "Warm grading should boost red over blue: r={}, b={}", warm_r, warm_b);
+        assert!(
+            warm_r > warm_b,
+            "Warm grading should boost red over blue: r={}, b={}",
+            warm_r,
+            warm_b
+        );
 
         // 2. Cool grading test
         let mut cool_settings = PostProcessSettings::default();
@@ -300,7 +317,12 @@ mod tests {
         let cool_bytes = apply_post_processing(&radiance, width, height, 1, &cool_settings);
         let cool_r = cool_bytes[center_idx];
         let cool_b = cool_bytes[center_idx + 2];
-        assert!(cool_b > cool_r, "Cool grading should boost blue over red: r={}, b={}", cool_r, cool_b);
+        assert!(
+            cool_b > cool_r,
+            "Cool grading should boost blue over red: r={}, b={}",
+            cool_r,
+            cool_b
+        );
 
         // 3. Chromatic aberration test
         // Place a bright pixel at coordinate (14, 8) near right edge
@@ -319,16 +341,18 @@ mod tests {
     #[test]
     fn test_subsurface_scattering_diffusion_and_attenuation() {
         let sss_mat = Material::subsurface(
-            Vec3::new(0.9, 0.8, 0.7), // Jade / marble skin base
-            Vec3::new(1.0, 0.4, 0.2), // Subsurface red/amber inner tint
+            Vec3::new(0.9, 0.8, 0.7),    // Jade / marble skin base
+            Vec3::new(1.0, 0.4, 0.2),    // Subsurface red/amber inner tint
             Vec3::new(0.05, 0.02, 0.01), // Mean free path scatter radii
-            1.4,                      // IOR
-            0.1,                      // Roughness
+            1.4,                         // IOR
+            0.1,                         // Roughness
         );
 
         let mut seed = 42_u64;
         let mut rng = || {
-            seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            seed = seed
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
             ((seed >> 32) as u32 as f32) / (u32::MAX as f32)
         };
 

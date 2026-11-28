@@ -39,7 +39,12 @@ impl Mesh {
         }
 
         // Sort islands by height descending for shelf bin packing
-        islands.sort_by(|a, b| b.size.y.partial_cmp(&a.size.y).unwrap_or(std::cmp::Ordering::Equal));
+        islands.sort_by(|a, b| {
+            b.size
+                .y
+                .partial_cmp(&a.size.y)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
 
         let num_islands = islands.len();
         let grid_cols = ((num_islands as f32).sqrt().ceil() as usize).max(1);

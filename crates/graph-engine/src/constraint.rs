@@ -157,7 +157,8 @@ impl ParentConstraint {
 
         if let Some(node) = scene.nodes.get_mut(self.constrained_node) {
             if self.maintain_offset {
-                node.local_transform.translation = target_pos + target_rot.mul_vec3(self.offset_translation);
+                node.local_transform.translation =
+                    target_pos + target_rot.mul_vec3(self.offset_translation);
                 node.local_transform.rotation = (target_rot * self.offset_rotation).normalize();
             } else {
                 node.local_transform.translation = target_pos;
@@ -260,7 +261,10 @@ mod tests {
         // At u = 0.0
         constraint.u = 0.0;
         constraint.evaluate(&mut scene);
-        assert_eq!(scene.nodes[node_id].local_transform.translation, vec3(0.0, 0.0, 0.0));
+        assert_eq!(
+            scene.nodes[node_id].local_transform.translation,
+            vec3(0.0, 0.0, 0.0)
+        );
 
         // At u = 0.5 (halfway)
         constraint.u = 0.5;
@@ -281,47 +285,68 @@ mod tests {
     fn test_aim_constraint() {
         let mut scene = SceneGraph::new();
         let eye_id = scene.add_node(SceneNode::new_transform("Eye", Transform::IDENTITY));
-        let target_id = scene.add_node(SceneNode::new_transform("Target", Transform {
-            translation: vec3(0.0, 0.0, 10.0),
-            ..Default::default()
-        }));
+        let target_id = scene.add_node(SceneNode::new_transform(
+            "Target",
+            Transform {
+                translation: vec3(0.0, 0.0, 10.0),
+                ..Default::default()
+            },
+        ));
 
         let constraint = AimConstraint::new(eye_id, target_id);
         constraint.evaluate(&mut scene);
 
         // When target is along +Z, aim rotation should point forward
-        let fwd = scene.nodes[eye_id].local_transform.rotation.mul_vec3(Vec3::Z);
+        let fwd = scene.nodes[eye_id]
+            .local_transform
+            .rotation
+            .mul_vec3(Vec3::Z);
         assert!((fwd.z - 1.0).abs() < 1e-3);
     }
 
     #[test]
     fn test_parent_constraint() {
         let mut scene = SceneGraph::new();
-        let target_id = scene.add_node(SceneNode::new_transform("ParentTarget", Transform {
-            translation: vec3(3.0, 4.0, 5.0),
-            ..Default::default()
-        }));
+        let target_id = scene.add_node(SceneNode::new_transform(
+            "ParentTarget",
+            Transform {
+                translation: vec3(3.0, 4.0, 5.0),
+                ..Default::default()
+            },
+        ));
         let follower_id = scene.add_node(SceneNode::new_transform("Follower", Transform::IDENTITY));
 
         let constraint = ParentConstraint::new(follower_id, target_id);
         constraint.evaluate(&mut scene);
 
-        assert_eq!(scene.nodes[follower_id].local_transform.translation, vec3(3.0, 4.0, 5.0));
+        assert_eq!(
+            scene.nodes[follower_id].local_transform.translation,
+            vec3(3.0, 4.0, 5.0)
+        );
     }
 
     #[test]
     fn test_constraint_stack_evaluation() {
         let mut scene = SceneGraph::new();
-        let target_id = scene.add_node(SceneNode::new_transform("Target", Transform {
-            translation: vec3(1.0, 2.0, 3.0),
-            ..Default::default()
-        }));
+        let target_id = scene.add_node(SceneNode::new_transform(
+            "Target",
+            Transform {
+                translation: vec3(1.0, 2.0, 3.0),
+                ..Default::default()
+            },
+        ));
         let follower_id = scene.add_node(SceneNode::new_transform("Follower", Transform::IDENTITY));
 
         let mut stack = ConstraintStack::new();
-        stack.add(Constraint::Parent(ParentConstraint::new(follower_id, target_id)));
+        stack.add(Constraint::Parent(ParentConstraint::new(
+            follower_id,
+            target_id,
+        )));
         stack.evaluate(&mut scene);
 
-        assert_eq!(scene.nodes[follower_id].local_transform.translation, vec3(1.0, 2.0, 3.0));
+        assert_eq!(
+            scene.nodes[follower_id].local_transform.translation,
+            vec3(1.0, 2.0, 3.0)
+        );
     }
 }

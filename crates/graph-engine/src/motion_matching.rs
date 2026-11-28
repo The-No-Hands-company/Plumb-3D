@@ -113,20 +113,30 @@ impl MotionDatabase {
             let mut cost = 0.0f32;
 
             // 1. Joint Positions & Velocities distance
-            let joint_count = current_pose.joint_positions.len().min(pose.joint_positions.len());
+            let joint_count = current_pose
+                .joint_positions
+                .len()
+                .min(pose.joint_positions.len());
             for j in 0..joint_count {
-                cost += (current_pose.joint_positions[j] - pose.joint_positions[j]).length_squared()
+                cost += (current_pose.joint_positions[j] - pose.joint_positions[j])
+                    .length_squared()
                     * weights.joint_position;
-                cost += (current_pose.joint_velocities[j] - pose.joint_velocities[j]).length_squared()
+                cost += (current_pose.joint_velocities[j] - pose.joint_velocities[j])
+                    .length_squared()
                     * weights.joint_velocity;
             }
 
             // 2. Trajectory Matching (matching predicted future points)
             let traj_count = desired_trajectory.len().min(pose.trajectory.len());
             for t in 0..traj_count {
-                cost += (desired_trajectory[t].position - pose.trajectory[t].position).length_squared()
+                cost += (desired_trajectory[t].position - pose.trajectory[t].position)
+                    .length_squared()
                     * weights.trajectory_position;
-                cost += (1.0 - desired_trajectory[t].facing_direction.dot(pose.trajectory[t].facing_direction).clamp(-1.0, 1.0))
+                cost += (1.0
+                    - desired_trajectory[t]
+                        .facing_direction
+                        .dot(pose.trajectory[t].facing_direction)
+                        .clamp(-1.0, 1.0))
                     * weights.trajectory_direction;
             }
 
@@ -153,11 +163,23 @@ impl MotionDatabase {
             let root_vel = Vec3::new(0.0, 0.0, speed);
 
             let l_foot = Vec3::new(-0.2, (phase.sin()).max(0.0) * 0.15, (phase.cos()) * 0.3);
-            let r_foot = Vec3::new(0.2, (-(phase).sin()).max(0.0) * 0.15, (-(phase).cos()) * 0.3);
+            let r_foot = Vec3::new(
+                0.2,
+                (-(phase).sin()).max(0.0) * 0.15,
+                (-(phase).cos()) * 0.3,
+            );
 
             let trajectory = vec![
-                TrajectorySample { time_offset: 0.2, position: root_pos + Vec3::new(0.0, 0.0, speed * 0.2), facing_direction: Vec3::Z },
-                TrajectorySample { time_offset: 0.5, position: root_pos + Vec3::new(0.0, 0.0, speed * 0.5), facing_direction: Vec3::Z },
+                TrajectorySample {
+                    time_offset: 0.2,
+                    position: root_pos + Vec3::new(0.0, 0.0, speed * 0.2),
+                    facing_direction: Vec3::Z,
+                },
+                TrajectorySample {
+                    time_offset: 0.5,
+                    position: root_pos + Vec3::new(0.0, 0.0, speed * 0.5),
+                    facing_direction: Vec3::Z,
+                },
             ];
 
             poses.push(MotionPose {
@@ -183,11 +205,23 @@ impl MotionDatabase {
             let root_vel = Vec3::new(0.0, 0.0, speed);
 
             let l_foot = Vec3::new(-0.25, (phase.sin()).max(0.0) * 0.35, (phase.cos()) * 0.6);
-            let r_foot = Vec3::new(0.25, (-(phase).sin()).max(0.0) * 0.35, (-(phase).cos()) * 0.6);
+            let r_foot = Vec3::new(
+                0.25,
+                (-(phase).sin()).max(0.0) * 0.35,
+                (-(phase).cos()) * 0.6,
+            );
 
             let trajectory = vec![
-                TrajectorySample { time_offset: 0.2, position: root_pos + Vec3::new(0.0, 0.0, speed * 0.2), facing_direction: Vec3::Z },
-                TrajectorySample { time_offset: 0.5, position: root_pos + Vec3::new(0.0, 0.0, speed * 0.5), facing_direction: Vec3::Z },
+                TrajectorySample {
+                    time_offset: 0.2,
+                    position: root_pos + Vec3::new(0.0, 0.0, speed * 0.2),
+                    facing_direction: Vec3::Z,
+                },
+                TrajectorySample {
+                    time_offset: 0.5,
+                    position: root_pos + Vec3::new(0.0, 0.0, speed * 0.5),
+                    facing_direction: Vec3::Z,
+                },
             ];
 
             poses.push(MotionPose {
@@ -211,8 +245,16 @@ impl MotionDatabase {
             let pos = Vec3::new(-t * 1.5, 1.0, t * 1.5);
 
             let trajectory = vec![
-                TrajectorySample { time_offset: 0.2, position: pos + dir * 0.3, facing_direction: dir },
-                TrajectorySample { time_offset: 0.5, position: pos + dir * 0.8, facing_direction: dir },
+                TrajectorySample {
+                    time_offset: 0.2,
+                    position: pos + dir * 0.3,
+                    facing_direction: dir,
+                },
+                TrajectorySample {
+                    time_offset: 0.5,
+                    position: pos + dir * 0.8,
+                    facing_direction: dir,
+                },
             ];
 
             poses.push(MotionPose {
@@ -220,7 +262,10 @@ impl MotionDatabase {
                 clip_name: "TurnLeft".to_string(),
                 root_position: pos,
                 root_velocity: dir * 1.5,
-                joint_positions: vec![pos + Vec3::new(-0.2, 0.0, 0.0), pos + Vec3::new(0.2, 0.0, 0.0)],
+                joint_positions: vec![
+                    pos + Vec3::new(-0.2, 0.0, 0.0),
+                    pos + Vec3::new(0.2, 0.0, 0.0),
+                ],
                 joint_velocities: vec![dir * 1.5, dir * 1.5],
                 left_foot_contact: true,
                 right_foot_contact: false,
@@ -283,8 +328,17 @@ impl MotionMatchingController {
             self.facing_direction
         };
 
-        self.facing_direction = self.facing_direction.lerp(target_dir, (dt * 10.0).min(1.0)).normalize();
-        let speed = if input_len > 0.7 { 4.0 } else if input_len > 0.1 { 1.4 } else { 0.0 };
+        self.facing_direction = self
+            .facing_direction
+            .lerp(target_dir, (dt * 10.0).min(1.0))
+            .normalize();
+        let speed = if input_len > 0.7 {
+            4.0
+        } else if input_len > 0.1 {
+            1.4
+        } else {
+            0.0
+        };
         self.desired_speed = speed;
 
         // Build desired future trajectory
@@ -302,13 +356,16 @@ impl MotionMatchingController {
         ];
 
         // Search database for best matching pose
-        let best_idx = self.database.query_best_match(&self.current_pose, &desired_trajectory, &self.weights);
+        let best_idx =
+            self.database
+                .query_best_match(&self.current_pose, &desired_trajectory, &self.weights);
 
         if best_idx != self.current_pose_index {
             let next_pose = &self.database.poses[best_idx];
             let delta_pos = self.current_pose.root_position - next_pose.root_position;
             let delta_vel = self.current_pose.root_velocity - next_pose.root_velocity;
-            self.inertialization.trigger_transition(delta_pos, delta_vel, 0.25);
+            self.inertialization
+                .trigger_transition(delta_pos, delta_vel, 0.25);
             self.current_pose_index = best_idx;
         }
 
@@ -337,8 +394,16 @@ mod tests {
 
         let current = &db.poses[0];
         let desired_sprint = vec![
-            TrajectorySample { time_offset: 0.2, position: Vec3::new(0.0, 1.0, 0.8), facing_direction: Vec3::Z },
-            TrajectorySample { time_offset: 0.5, position: Vec3::new(0.0, 1.0, 2.1), facing_direction: Vec3::Z },
+            TrajectorySample {
+                time_offset: 0.2,
+                position: Vec3::new(0.0, 1.0, 0.8),
+                facing_direction: Vec3::Z,
+            },
+            TrajectorySample {
+                time_offset: 0.5,
+                position: Vec3::new(0.0, 1.0, 2.1),
+                facing_direction: Vec3::Z,
+            },
         ];
 
         let weights = MotionFeatureWeights {

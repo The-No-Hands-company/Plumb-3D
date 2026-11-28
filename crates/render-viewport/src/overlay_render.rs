@@ -23,24 +23,84 @@ impl ViewportRenderer {
         let tick = 0.03_f32;
         let v_color = [0.4, 0.65, 0.95, 0.75];
         for &v in vertices {
-            overlay_vertices.push(GpuVertex { position: (v - Vec3::X * tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: v_color });
-            overlay_vertices.push(GpuVertex { position: (v + Vec3::X * tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: v_color });
-            overlay_vertices.push(GpuVertex { position: (v - Vec3::Y * tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: v_color });
-            overlay_vertices.push(GpuVertex { position: (v + Vec3::Y * tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: v_color });
-            overlay_vertices.push(GpuVertex { position: (v - Vec3::Z * tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: v_color });
-            overlay_vertices.push(GpuVertex { position: (v + Vec3::Z * tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: v_color });
+            overlay_vertices.push(GpuVertex {
+                position: (v - Vec3::X * tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: v_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: (v + Vec3::X * tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: v_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: (v - Vec3::Y * tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: v_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: (v + Vec3::Y * tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: v_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: (v - Vec3::Z * tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: v_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: (v + Vec3::Z * tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: v_color,
+            });
         }
 
         // 2. Draw prominent diamond / star for all selected vertices
         let s_tick = 0.08_f32;
         let sel_color = [1.0, 0.9, 0.1, 1.0]; // Bright Gold
         for &sv in selected_vertices {
-            overlay_vertices.push(GpuVertex { position: (sv - Vec3::X * s_tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: sel_color });
-            overlay_vertices.push(GpuVertex { position: (sv + Vec3::X * s_tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: sel_color });
-            overlay_vertices.push(GpuVertex { position: (sv - Vec3::Y * s_tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: sel_color });
-            overlay_vertices.push(GpuVertex { position: (sv + Vec3::Y * s_tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: sel_color });
-            overlay_vertices.push(GpuVertex { position: (sv - Vec3::Z * s_tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: sel_color });
-            overlay_vertices.push(GpuVertex { position: (sv + Vec3::Z * s_tick).to_array(), normal: [0.0; 3], uv: [0.0; 2], color: sel_color });
+            overlay_vertices.push(GpuVertex {
+                position: (sv - Vec3::X * s_tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: sel_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: (sv + Vec3::X * s_tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: sel_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: (sv - Vec3::Y * s_tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: sel_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: (sv + Vec3::Y * s_tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: sel_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: (sv - Vec3::Z * s_tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: sel_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: (sv + Vec3::Z * s_tick).to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: sel_color,
+            });
 
             let corners = [
                 sv + Vec3::X * s_tick,
@@ -49,23 +109,53 @@ impl ViewportRenderer {
                 sv - Vec3::Y * s_tick,
             ];
             for i in 0..4 {
-                overlay_vertices.push(GpuVertex { position: corners[i].to_array(), normal: [0.0; 3], uv: [0.0; 2], color: sel_color });
-                overlay_vertices.push(GpuVertex { position: corners[(i + 1) % 4].to_array(), normal: [0.0; 3], uv: [0.0; 2], color: sel_color });
+                overlay_vertices.push(GpuVertex {
+                    position: corners[i].to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: sel_color,
+                });
+                overlay_vertices.push(GpuVertex {
+                    position: corners[(i + 1) % 4].to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: sel_color,
+                });
             }
         }
 
         // 3. Draw highlighted selected edges
         let edge_color = [0.05, 0.95, 1.0, 1.0]; // Bright Cyan
         for &(e0, e1) in selected_edges {
-            overlay_vertices.push(GpuVertex { position: e0.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: edge_color });
-            overlay_vertices.push(GpuVertex { position: e1.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: edge_color });
+            overlay_vertices.push(GpuVertex {
+                position: e0.to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: edge_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: e1.to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: edge_color,
+            });
         }
 
         // 3b. Draw creased edges (Blender / Maya OpenSubdiv magenta / hot pink)
         let crease_color = [1.0, 0.22, 0.78, 1.0];
         for &(e0, e1) in creased_edges {
-            overlay_vertices.push(GpuVertex { position: e0.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: crease_color });
-            overlay_vertices.push(GpuVertex { position: e1.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: crease_color });
+            overlay_vertices.push(GpuVertex {
+                position: e0.to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: crease_color,
+            });
+            overlay_vertices.push(GpuVertex {
+                position: e1.to_array(),
+                normal: [0.0; 3],
+                uv: [0.0; 2],
+                color: crease_color,
+            });
         }
 
         // 4. Draw highlighted selected face perimeter loops
@@ -76,8 +166,18 @@ impl ViewportRenderer {
                 for i in 0..n {
                     let p0 = loop_pts[i];
                     let p1 = loop_pts[(i + 1) % n];
-                    overlay_vertices.push(GpuVertex { position: p0.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: face_color });
-                    overlay_vertices.push(GpuVertex { position: p1.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: face_color });
+                    overlay_vertices.push(GpuVertex {
+                        position: p0.to_array(),
+                        normal: [0.0; 3],
+                        uv: [0.0; 2],
+                        color: face_color,
+                    });
+                    overlay_vertices.push(GpuVertex {
+                        position: p1.to_array(),
+                        normal: [0.0; 3],
+                        uv: [0.0; 2],
+                        color: face_color,
+                    });
                 }
             }
         }
@@ -93,14 +193,34 @@ impl ViewportRenderer {
                 // XZ ground ring
                 let p0_xz = center + Vec3::new(th0.cos() * radius, 0.0, th0.sin() * radius);
                 let p1_xz = center + Vec3::new(th1.cos() * radius, 0.0, th1.sin() * radius);
-                overlay_vertices.push(GpuVertex { position: p0_xz.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: circle_color });
-                overlay_vertices.push(GpuVertex { position: p1_xz.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: circle_color });
+                overlay_vertices.push(GpuVertex {
+                    position: p0_xz.to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: circle_color,
+                });
+                overlay_vertices.push(GpuVertex {
+                    position: p1_xz.to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: circle_color,
+                });
 
                 // XY ring
                 let p0_xy = center + Vec3::new(th0.cos() * radius, th0.sin() * radius, 0.0);
                 let p1_xy = center + Vec3::new(th1.cos() * radius, th1.sin() * radius, 0.0);
-                overlay_vertices.push(GpuVertex { position: p0_xy.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: circle_color });
-                overlay_vertices.push(GpuVertex { position: p1_xy.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: circle_color });
+                overlay_vertices.push(GpuVertex {
+                    position: p0_xy.to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: circle_color,
+                });
+                overlay_vertices.push(GpuVertex {
+                    position: p1_xy.to_array(),
+                    normal: [0.0; 3],
+                    uv: [0.0; 2],
+                    color: circle_color,
+                });
             }
         }
 
@@ -108,22 +228,26 @@ impl ViewportRenderer {
             return;
         }
 
-        let v_buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("SubElement Overlay Buffer"),
-            contents: bytemuck::cast_slice(&overlay_vertices),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
+        let v_buf = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("SubElement Overlay Buffer"),
+                contents: bytemuck::cast_slice(&overlay_vertices),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
 
         let model_data = ModelUniform {
             model: Mat4::IDENTITY.to_cols_array(),
             color: [1.0, 1.0, 1.0, 1.0],
             material: [0.0, 1.0, 0.0, 0.0],
         };
-        let m_buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("SubElement Model Buffer"),
-            contents: bytemuck::bytes_of(&model_data),
-            usage: wgpu::BufferUsages::UNIFORM,
-        });
+        let m_buf = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("SubElement Model Buffer"),
+                contents: bytemuck::bytes_of(&model_data),
+                usage: wgpu::BufferUsages::UNIFORM,
+            });
         let m_bind = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("SubElement Model Bind Group"),
             layout: &self.model_bind_group_layout,
@@ -133,9 +257,11 @@ impl ViewportRenderer {
             }],
         });
 
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("SubElement Overlay Encoder"),
-        });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("SubElement Overlay Encoder"),
+            });
 
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -216,23 +342,65 @@ impl ViewportRenderer {
                 for &y in &ys {
                     for &z in &zs {
                         let c = Vec3::new(x, y, z);
-                        let dx = if x == bbox_min.x { arm.min(span.x) } else { -arm.min(span.x) };
-                        let dy = if y == bbox_min.y { arm.min(span.y) } else { -arm.min(span.y) };
-                        let dz = if z == bbox_min.z { arm.min(span.z) } else { -arm.min(span.z) };
+                        let dx = if x == bbox_min.x {
+                            arm.min(span.x)
+                        } else {
+                            -arm.min(span.x)
+                        };
+                        let dy = if y == bbox_min.y {
+                            arm.min(span.y)
+                        } else {
+                            -arm.min(span.y)
+                        };
+                        let dz = if z == bbox_min.z {
+                            arm.min(span.z)
+                        } else {
+                            -arm.min(span.z)
+                        };
 
                         let wc = world_matrix.transform_point3(c);
                         let w_arm_x = world_matrix.transform_point3(c + Vec3::new(dx, 0.0, 0.0));
                         let w_arm_y = world_matrix.transform_point3(c + Vec3::new(0.0, dy, 0.0));
                         let w_arm_z = world_matrix.transform_point3(c + Vec3::new(0.0, 0.0, dz));
 
-                        overlay_vertices.push(GpuVertex { position: wc.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: bracket_col });
-                        overlay_vertices.push(GpuVertex { position: w_arm_x.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: bracket_col });
+                        overlay_vertices.push(GpuVertex {
+                            position: wc.to_array(),
+                            normal: [0.0; 3],
+                            uv: [0.0; 2],
+                            color: bracket_col,
+                        });
+                        overlay_vertices.push(GpuVertex {
+                            position: w_arm_x.to_array(),
+                            normal: [0.0; 3],
+                            uv: [0.0; 2],
+                            color: bracket_col,
+                        });
 
-                        overlay_vertices.push(GpuVertex { position: wc.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: bracket_col });
-                        overlay_vertices.push(GpuVertex { position: w_arm_y.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: bracket_col });
+                        overlay_vertices.push(GpuVertex {
+                            position: wc.to_array(),
+                            normal: [0.0; 3],
+                            uv: [0.0; 2],
+                            color: bracket_col,
+                        });
+                        overlay_vertices.push(GpuVertex {
+                            position: w_arm_y.to_array(),
+                            normal: [0.0; 3],
+                            uv: [0.0; 2],
+                            color: bracket_col,
+                        });
 
-                        overlay_vertices.push(GpuVertex { position: wc.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: bracket_col });
-                        overlay_vertices.push(GpuVertex { position: w_arm_z.to_array(), normal: [0.0; 3], uv: [0.0; 2], color: bracket_col });
+                        overlay_vertices.push(GpuVertex {
+                            position: wc.to_array(),
+                            normal: [0.0; 3],
+                            uv: [0.0; 2],
+                            color: bracket_col,
+                        });
+                        overlay_vertices.push(GpuVertex {
+                            position: w_arm_z.to_array(),
+                            normal: [0.0; 3],
+                            uv: [0.0; 2],
+                            color: bracket_col,
+                        });
                     }
                 }
             }
@@ -242,22 +410,26 @@ impl ViewportRenderer {
             return;
         }
 
-        let v_buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Object Selection Overlay Buffer"),
-            contents: bytemuck::cast_slice(&overlay_vertices),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
+        let v_buf = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Object Selection Overlay Buffer"),
+                contents: bytemuck::cast_slice(&overlay_vertices),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
 
         let model_data = ModelUniform {
             model: Mat4::IDENTITY.to_cols_array(),
             color: [1.0, 1.0, 1.0, 1.0],
             material: [0.0, 1.0, 0.0, 0.0],
         };
-        let m_buf = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Object Selection Model Buffer"),
-            contents: bytemuck::bytes_of(&model_data),
-            usage: wgpu::BufferUsages::UNIFORM,
-        });
+        let m_buf = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Object Selection Model Buffer"),
+                contents: bytemuck::bytes_of(&model_data),
+                usage: wgpu::BufferUsages::UNIFORM,
+            });
         let m_bind = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Object Selection Model Bind Group"),
             layout: &self.model_bind_group_layout,
@@ -267,9 +439,11 @@ impl ViewportRenderer {
             }],
         });
 
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("Object Selection Overlay Encoder"),
-        });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Object Selection Overlay Encoder"),
+            });
 
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {

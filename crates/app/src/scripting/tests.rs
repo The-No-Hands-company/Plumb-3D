@@ -43,7 +43,10 @@ mod tests {
         "#;
 
         let result = execute_script(script);
-        assert!(result.is_err(), "Sandbox should prevent runaway infinite loop");
+        assert!(
+            result.is_err(),
+            "Sandbox should prevent runaway infinite loop"
+        );
     }
 
     #[test]

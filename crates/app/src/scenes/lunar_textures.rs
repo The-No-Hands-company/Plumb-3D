@@ -3,8 +3,8 @@
 //! maps featuring major lunar maria, highland anorthosite terrae, and ray impact craters
 //! (Tycho, Copernicus, Kepler, Aristarchus).
 
-use std::path::PathBuf;
 use std::f32::consts::{PI, TAU};
+use std::path::PathBuf;
 
 /// Ensures authentic lunar surface textures exist on disk, generating them if absent.
 /// Returns (albedo_texture_path, normal_texture_path).
@@ -16,7 +16,11 @@ pub fn ensure_lunar_textures_exist() -> (String, String) {
 
     for dir in &candidates {
         let nasa_photo = dir.join("nasa_moon_photographic.jpg");
-        let alb = if nasa_photo.exists() { nasa_photo } else { dir.join("moon_albedo.png") };
+        let alb = if nasa_photo.exists() {
+            nasa_photo
+        } else {
+            dir.join("moon_albedo.png")
+        };
         let nrm = dir.join("moon_normal.png");
         if alb.exists() && nrm.exists() {
             return (
@@ -50,8 +54,8 @@ pub fn ensure_lunar_textures_exist() -> (String, String) {
 }
 
 struct LunarCrater {
-    lon: f32, // Longitude (radians, -PI to PI)
-    lat: f32, // Latitude (radians, -PI/2 to PI/2)
+    lon: f32,    // Longitude (radians, -PI to PI)
+    lat: f32,    // Latitude (radians, -PI/2 to PI/2)
     radius: f32, // Angular radius (radians)
     depth: f32,
     rim_height: f32,
@@ -344,9 +348,8 @@ fn smooth_noise(x: f32, y: f32, z: f32) -> f32 {
     let uz = fz * fz * (3.0 - 2.0 * fz);
 
     let hash = |px: i32, py: i32, pz: i32| -> f32 {
-        let mut n = px.wrapping_mul(374761393)
-            ^ py.wrapping_mul(668265263)
-            ^ pz.wrapping_mul(951234191);
+        let mut n =
+            px.wrapping_mul(374761393) ^ py.wrapping_mul(668265263) ^ pz.wrapping_mul(951234191);
         n = (n ^ (n >> 13)).wrapping_mul(1274126177);
         ((n as u32 >> 8) as f32) / 16777216.0
     };

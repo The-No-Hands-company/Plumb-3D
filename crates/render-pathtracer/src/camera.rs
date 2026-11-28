@@ -24,7 +24,15 @@ impl PathtracerCamera {
         aspect_ratio: f32,
     ) -> Self {
         let focus_dist = (look_from - look_at).length().max(0.1);
-        Self::new_thin_lens(look_from, look_at, vup, vfov_radians, aspect_ratio, 0.0, focus_dist)
+        Self::new_thin_lens(
+            look_from,
+            look_at,
+            vup,
+            vfov_radians,
+            aspect_ratio,
+            0.0,
+            focus_dist,
+        )
     }
 
     /// Creates a thin-lens camera with configurable aperture (blur / bokeh) and focal distance
@@ -76,7 +84,9 @@ impl PathtracerCamera {
     /// Generates a ray for normalized pixel coordinate (s, t) in [0, 1] with Depth of Field
     pub fn get_ray(&self, s: f32, t: f32, mut rng: impl FnMut() -> f32) -> Ray {
         if self.lens_radius <= 1e-5 {
-            let direction = (self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin).normalize();
+            let direction = (self.lower_left_corner + self.horizontal * s + self.vertical * t
+                - self.origin)
+                .normalize();
             return Ray::new(self.origin, direction);
         }
 

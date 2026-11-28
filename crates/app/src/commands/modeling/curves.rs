@@ -10,7 +10,6 @@ pub struct ConvertCurveToMeshCommand {
     pub old_profile_shape: ProfileShape,
 }
 
-
 impl Command for ConvertCurveToMeshCommand {
     fn name(&self) -> &str {
         "Convert Curve to Mesh"
@@ -19,14 +18,26 @@ impl Command for ConvertCurveToMeshCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         let (mesh, spline, r, res, shape) = match &node.data {
-            NodeData::Curve { spline, bevel_radius, bevel_resolution, profile_shape, .. } => {
+            NodeData::Curve {
+                spline,
+                bevel_radius,
+                bevel_resolution,
+                profile_shape,
+                ..
+            } => {
                 let r = (*bevel_radius).max(0.01);
                 let res = (*bevel_resolution).max(3);
                 let cs = profile_shape.generate_cross_section(r, res);
                 let sampled = spline.sample(12);
                 let mesh = Spline::sweep(&cs, &sampled, spline.is_closed)
                     .map_err(|e| format!("Failed to sweep curve: {:?}", e))?;
-                (mesh, spline.clone(), *bevel_radius, *bevel_resolution, *profile_shape)
+                (
+                    mesh,
+                    spline.clone(),
+                    *bevel_radius,
+                    *bevel_resolution,
+                    *profile_shape,
+                )
             }
             _ => return Err("Node is not a curve".into()),
         };
@@ -65,14 +76,12 @@ impl Command for ConvertCurveToMeshCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct ExtractCurveFromEdgesCommand {
     pub source_node_id: NodeId,
     pub edges: Vec<EdgeKey>,
     pub created_node_id: Option<NodeId>,
 }
-
 
 impl Command for ExtractCurveFromEdgesCommand {
     fn name(&self) -> &str {
@@ -81,10 +90,14 @@ impl Command for ExtractCurveFromEdgesCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let (spline, transform, name) = {
-            let node = scene.nodes.get(self.source_node_id).ok_or("Source node not found")?;
+            let node = scene
+                .nodes
+                .get(self.source_node_id)
+                .ok_or("Source node not found")?;
             match &node.data {
                 NodeData::Mesh { base_mesh, .. } => {
-                    let spline = base_mesh.extract_curve_from_edges(&self.edges)
+                    let spline = base_mesh
+                        .extract_curve_from_edges(&self.edges)
                         .map_err(|e| format!("Extract curve failed: {:?}", e))?;
                     (spline, node.local_transform, node.name.clone())
                 }
@@ -121,7 +134,11 @@ impl Command for CreateCurveNodeCommand {
     }
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
-        let node = SceneNode::new_curve(self.name.clone(), core_math::Transform::IDENTITY, self.spline.clone());
+        let node = SceneNode::new_curve(
+            self.name.clone(),
+            core_math::Transform::IDENTITY,
+            self.spline.clone(),
+        );
         let id = scene.add_node(node);
         self.created_node_id = Some(id);
         Ok(())
@@ -175,11 +192,8 @@ impl Command for LoftCurvesCommand {
         let loft_mesh = Spline::loft(&profile_loops, self.closed_u, self.closed_v)
             .map_err(|e| format!("Loft failed: {:?}", e))?;
 
-        let loft_node = SceneNode::new_mesh(
-            "Loft_Surface",
-            core_math::Transform::IDENTITY,
-            loft_mesh,
-        );
+        let loft_node =
+            SceneNode::new_mesh("Loft_Surface", core_math::Transform::IDENTITY, loft_mesh);
         let new_id = scene.add_node(loft_node);
         self.created_node_id = Some(new_id);
         Ok(())
@@ -246,15 +260,30 @@ impl Command for FilletCurveCommand {
     }
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
-        let node = scene.nodes.get_mut(self.node_id).ok_or("Curve node not found")?;
+        let node = scene
+            .nodes
+            .get_mut(self.node_id)
+            .ok_or("Curve node not found")?;
         match &mut node.data {
-            NodeData::Curve { spline, cached_render_mesh, .. } => {
+            NodeData::Curve {
+                spline,
+                cached_render_mesh,
+                ..
+            } => {
                 self.old_spline = Some(spline.clone());
                 if let Some(knots) = &self.selected_knots {
-                    *spline = spline.fillet_selected_corners_continuity(knots, self.radius, self.continuity);
+                    *spline = spline.fillet_selected_corners_continuity(
+                        knots,
+                        self.radius,
+                        self.continuity,
+                    );
                 } else {
                     let all: Vec<usize> = (0..spline.points.len()).collect();
-                    *spline = spline.fillet_selected_corners_continuity(&all, self.radius, self.continuity);
+                    *spline = spline.fillet_selected_corners_continuity(
+                        &all,
+                        self.radius,
+                        self.continuity,
+                    );
                 }
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -266,9 +295,16 @@ impl Command for FilletCurveCommand {
 
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = self.old_spline.take() {
-            let node = scene.nodes.get_mut(self.node_id).ok_or("Curve node not found")?;
+            let node = scene
+                .nodes
+                .get_mut(self.node_id)
+                .ok_or("Curve node not found")?;
             match &mut node.data {
-                NodeData::Curve { spline, cached_render_mesh, .. } => {
+                NodeData::Curve {
+                    spline,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *spline = old;
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -307,9 +343,16 @@ impl Command for ChamferCurveCommand {
     }
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
-        let node = scene.nodes.get_mut(self.node_id).ok_or("Curve node not found")?;
+        let node = scene
+            .nodes
+            .get_mut(self.node_id)
+            .ok_or("Curve node not found")?;
         match &mut node.data {
-            NodeData::Curve { spline, cached_render_mesh, .. } => {
+            NodeData::Curve {
+                spline,
+                cached_render_mesh,
+                ..
+            } => {
                 self.old_spline = Some(spline.clone());
                 *spline = spline.chamfer_selected_corners(&self.selected_knots, self.distance);
                 *cached_render_mesh = None;
@@ -322,9 +365,16 @@ impl Command for ChamferCurveCommand {
 
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = self.old_spline.take() {
-            let node = scene.nodes.get_mut(self.node_id).ok_or("Curve node not found")?;
+            let node = scene
+                .nodes
+                .get_mut(self.node_id)
+                .ok_or("Curve node not found")?;
             match &mut node.data {
-                NodeData::Curve { spline, cached_render_mesh, .. } => {
+                NodeData::Curve {
+                    spline,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *spline = old;
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -353,9 +403,16 @@ impl Command for SetKnotHandleTypeCommand {
     }
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
-        let node = scene.nodes.get_mut(self.node_id).ok_or("Curve node not found")?;
+        let node = scene
+            .nodes
+            .get_mut(self.node_id)
+            .ok_or("Curve node not found")?;
         match &mut node.data {
-            NodeData::Curve { spline, cached_render_mesh, .. } => {
+            NodeData::Curve {
+                spline,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_spline.is_none() {
                     self.old_spline = Some(spline.clone());
                 }
@@ -370,9 +427,16 @@ impl Command for SetKnotHandleTypeCommand {
 
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = self.old_spline.take() {
-            let node = scene.nodes.get_mut(self.node_id).ok_or("Curve node not found")?;
+            let node = scene
+                .nodes
+                .get_mut(self.node_id)
+                .ok_or("Curve node not found")?;
             match &mut node.data {
-                NodeData::Curve { spline, cached_render_mesh, .. } => {
+                NodeData::Curve {
+                    spline,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *spline = old;
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -402,9 +466,14 @@ impl Command for LatheCurveCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let (spline, transform, name) = {
-            let node = scene.nodes.get(self.curve_node_id).ok_or("Curve node not found")?;
+            let node = scene
+                .nodes
+                .get(self.curve_node_id)
+                .ok_or("Curve node not found")?;
             match &node.data {
-                NodeData::Curve { spline, .. } => (spline.clone(), node.local_transform, node.name.clone()),
+                NodeData::Curve { spline, .. } => {
+                    (spline.clone(), node.local_transform, node.name.clone())
+                }
                 _ => return Err("Node is not a curve".into()),
             }
         };
@@ -441,7 +510,12 @@ pub struct TrimCurveCommand {
 }
 
 impl TrimCurveCommand {
-    pub fn new(target_curve_id: NodeId, cutter_curve_id: NodeId, keep_inside: bool, tolerance: f32) -> Self {
+    pub fn new(
+        target_curve_id: NodeId,
+        cutter_curve_id: NodeId,
+        keep_inside: bool,
+        tolerance: f32,
+    ) -> Self {
         Self {
             target_curve_id,
             cutter_curve_id,
@@ -464,22 +538,31 @@ impl Command for TrimCurveCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let (target_spline, transform, name) = {
-            let node = scene.nodes.get(self.target_curve_id).ok_or("Target curve node not found")?;
+            let node = scene
+                .nodes
+                .get(self.target_curve_id)
+                .ok_or("Target curve node not found")?;
             match &node.data {
-                NodeData::Curve { spline, .. } => (spline.clone(), node.local_transform, node.name.clone()),
+                NodeData::Curve { spline, .. } => {
+                    (spline.clone(), node.local_transform, node.name.clone())
+                }
                 _ => return Err("Target node is not a curve".into()),
             }
         };
 
         let cutter_spline = {
-            let node = scene.nodes.get(self.cutter_curve_id).ok_or("Cutter curve node not found")?;
+            let node = scene
+                .nodes
+                .get(self.cutter_curve_id)
+                .ok_or("Cutter curve node not found")?;
             match &node.data {
                 NodeData::Curve { spline, .. } => spline.clone(),
                 _ => return Err("Cutter node is not a curve".into()),
             }
         };
 
-        let trimmed_sub_splines = target_spline.trim_with_spline(&cutter_spline, self.keep_inside, self.tolerance);
+        let trimmed_sub_splines =
+            target_spline.trim_with_spline(&cutter_spline, self.keep_inside, self.tolerance);
         if trimmed_sub_splines.is_empty() {
             return Err("Trimming resulted in an empty curve".into());
         }
@@ -489,7 +572,12 @@ impl Command for TrimCurveCommand {
 
         // 1. Replace target curve with first trimmed piece
         if let Some(node) = scene.nodes.get_mut(self.target_curve_id) {
-            if let NodeData::Curve { spline, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Curve {
+                spline,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 *spline = trimmed_sub_splines[0].clone();
                 *cached_render_mesh = None;
             }
@@ -514,7 +602,12 @@ impl Command for TrimCurveCommand {
 
         if let Some(old) = self.old_spline.take() {
             if let Some(node) = scene.nodes.get_mut(self.target_curve_id) {
-                if let NodeData::Curve { spline, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Curve {
+                    spline,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     *spline = old;
                     *cached_render_mesh = None;
                 }
@@ -555,7 +648,10 @@ impl Command for ConnectTangentArcCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let (pt_a, dir_a, transform_a) = {
-            let node = scene.nodes.get(self.curve_a_id).ok_or("Curve A not found")?;
+            let node = scene
+                .nodes
+                .get(self.curve_a_id)
+                .ok_or("Curve A not found")?;
             match &node.data {
                 NodeData::Curve { spline, .. } => {
                     let k = self.knot_a.min(spline.points.len().saturating_sub(1));
@@ -574,7 +670,10 @@ impl Command for ConnectTangentArcCommand {
         };
 
         let (pt_b, dir_b) = {
-            let node = scene.nodes.get(self.curve_b_id).ok_or("Curve B not found")?;
+            let node = scene
+                .nodes
+                .get(self.curve_b_id)
+                .ok_or("Curve B not found")?;
             match &node.data {
                 NodeData::Curve { spline, .. } => {
                     let k = self.knot_b.min(spline.points.len().saturating_sub(1));
@@ -609,8 +708,3 @@ impl Command for ConnectTangentArcCommand {
         Ok(())
     }
 }
-
-
-
-
-

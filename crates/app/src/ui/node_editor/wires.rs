@@ -1,13 +1,7 @@
 use egui::{epaint::CubicBezierShape, Color32, Painter, Pos2, Stroke, Vec2};
 
 /// Renders a smooth cubic Bezier cable between two node sockets.
-pub fn draw_bezier_cable(
-    painter: &Painter,
-    from: Pos2,
-    to: Pos2,
-    color: Color32,
-    thickness: f32,
-) {
+pub fn draw_bezier_cable(painter: &Painter, from: Pos2, to: Pos2, color: Color32, thickness: f32) {
     let dx = (to.x - from.x).abs();
     let curvature = (dx * 0.5).clamp(30.0, 150.0);
 

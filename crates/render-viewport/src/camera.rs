@@ -101,7 +101,8 @@ impl ViewportCamera {
     pub fn orbit(&mut self, delta_x: f32, delta_y: f32) {
         let sensitivity = 0.005;
         self.yaw -= delta_x * sensitivity;
-        self.pitch = (self.pitch + delta_y * sensitivity).clamp(-FRAC_PI_2 + 0.01, FRAC_PI_2 - 0.01);
+        self.pitch =
+            (self.pitch + delta_y * sensitivity).clamp(-FRAC_PI_2 + 0.01, FRAC_PI_2 - 0.01);
     }
 
     /// Forward view direction vector
@@ -218,7 +219,12 @@ impl ViewportCamera {
 
     /// Project a 3D world position to 2D screen coordinates in pixels.
     /// Returns None if the point lies behind the camera near plane.
-    pub fn world_to_screen(&self, world_point: Vec3, screen_width: f32, screen_height: f32) -> Option<Vec2> {
+    pub fn world_to_screen(
+        &self,
+        world_point: Vec3,
+        screen_width: f32,
+        screen_height: f32,
+    ) -> Option<Vec2> {
         let vp = self.view_projection_matrix();
         let clip = vp * world_point.extend(1.0);
         if clip.w <= 0.0 {

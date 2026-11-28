@@ -33,7 +33,6 @@ impl Mesh {
     /// - `clear_negative`: Deletes all geometry on the negative half-space (dot(pos - pt, n) < 0)
     /// - `fill_cut`: When one side is cleared, creates a planar cap polygon covering the cut boundary
 
-
     pub fn compute_weighted_normals(&mut self, mode: WeightedNormalMode, weight: f32) {
         let face_keys: Vec<FaceKey> = self.faces.keys().collect();
         for fk in face_keys {
@@ -83,5 +82,4 @@ impl Mesh {
             v.normal = v.normal.normalize_or_zero();
         }
     }
-
 }

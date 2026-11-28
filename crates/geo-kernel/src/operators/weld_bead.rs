@@ -89,7 +89,11 @@ impl Mesh {
                         (path_pts[i + 1] - path_pts[i - 1]).normalize_or_zero()
                     };
 
-                    let up = if tangent.y.abs() < 0.9 { Vec3::Y } else { Vec3::Z };
+                    let up = if tangent.y.abs() < 0.9 {
+                        Vec3::Y
+                    } else {
+                        Vec3::Z
+                    };
                     let binormal = tangent.cross(up).normalize_or_zero();
                     let normal = binormal.cross(tangent).normalize_or_zero();
 
@@ -158,7 +162,11 @@ impl Mesh {
                     let center = p0 + (p1 - p0) * frac;
                     let tangent = (p1 - p0).normalize_or_zero();
 
-                    let up = if tangent.y.abs() < 0.9 { Vec3::Y } else { Vec3::Z };
+                    let up = if tangent.y.abs() < 0.9 {
+                        Vec3::Y
+                    } else {
+                        Vec3::Z
+                    };
                     let binormal = tangent.cross(up).normalize_or_zero();
                     let normal = binormal.cross(tangent).normalize_or_zero();
 
@@ -166,7 +174,8 @@ impl Mesh {
                     let bead_r = r * crown_scale;
                     let b0 = self.add_vertex(center - binormal * bead_r);
                     let b1 = self.add_vertex(center + binormal * bead_r);
-                    let b2 = self.add_vertex(center + normal * (bead_r * 1.25) + tangent * (bead_r * 0.3));
+                    let b2 = self
+                        .add_vertex(center + normal * (bead_r * 1.25) + tangent * (bead_r * 0.3));
                     let b3 = self.add_vertex(center - tangent * (bead_r * 0.6));
 
                     if let Ok(fk1) = self.add_face(&[b0, b3, b2]) {

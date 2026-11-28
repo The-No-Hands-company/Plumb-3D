@@ -11,7 +11,11 @@ pub fn render_scifi_crate_step_buttons(
     ui.add_space(6.0);
     match step {
         0 => {
-            let has_crate = state.scene.nodes.values().any(|n| n.name == "SciFi_Cargo_Crate");
+            let has_crate = state
+                .scene
+                .nodes
+                .values()
+                .any(|n| n.name == "SciFi_Cargo_Crate");
             let btn_text = if has_crate {
                 "✓ Cargo Cube Ready (Refocus View)"
             } else {
@@ -25,7 +29,10 @@ pub fn render_scifi_crate_step_buttons(
                         Transform::from_translation(vec3(0.0, 1.0, 0.0)),
                         cube,
                     );
-                    if let graph_engine::NodeData::Mesh { ref mut materials, .. } = node.data {
+                    if let graph_engine::NodeData::Mesh {
+                        ref mut materials, ..
+                    } = node.data
+                    {
                         materials[0] = graph_engine::Material::new(
                             "IndustrialGunmetal",
                             [0.18, 0.20, 0.24, 1.0],
@@ -44,7 +51,10 @@ pub fn render_scifi_crate_step_buttons(
             }
         }
         1 => {
-            if ui.button("🔘 Enter Edit Mode & Select 4 Side Panels").clicked() {
+            if ui
+                .button("🔘 Enter Edit Mode & Select 4 Side Panels")
+                .clicked()
+            {
                 state.interaction_mode = InteractionMode::Edit;
                 state.sub_element_level = SubElementLevel::Face;
                 state.selected_faces.clear();
@@ -68,7 +78,10 @@ pub fn render_scifi_crate_step_buttons(
             }
         }
         2 => {
-            if ui.button("📐 Inset Individual Panels (0.18m Margins)").clicked() {
+            if ui
+                .button("📐 Inset Individual Panels (0.18m Margins)")
+                .clicked()
+            {
                 if let Some(id) = state.selected_node {
                     let faces: Vec<_> = state.selected_faces.iter().copied().collect();
                     if !faces.is_empty() {
@@ -88,8 +101,14 @@ pub fn render_scifi_crate_step_buttons(
                                         if f.normal.y.abs() < 0.2 {
                                             let verts = base_mesh.face_vertices(fk);
                                             if verts.len() == 4 {
-                                                let max_y = verts.iter().map(|&v| base_mesh.vertices[v].position.y).fold(f32::NEG_INFINITY, f32::max);
-                                                let min_y = verts.iter().map(|&v| base_mesh.vertices[v].position.y).fold(f32::INFINITY, f32::min);
+                                                let max_y = verts
+                                                    .iter()
+                                                    .map(|&v| base_mesh.vertices[v].position.y)
+                                                    .fold(f32::NEG_INFINITY, f32::max);
+                                                let min_y = verts
+                                                    .iter()
+                                                    .map(|&v| base_mesh.vertices[v].position.y)
+                                                    .fold(f32::INFINITY, f32::min);
                                                 if (max_y - min_y) < 1.75 {
                                                     state.selected_faces.insert(fk);
                                                 }
@@ -106,14 +125,19 @@ pub fn render_scifi_crate_step_buttons(
             }
         }
         3 => {
-            if ui.button("⚒ Extrude Inward (-0.12m Recessed Cavities)").clicked() {
+            if ui
+                .button("⚒ Extrude Inward (-0.12m Recessed Cavities)")
+                .clicked()
+            {
                 if let Some(id) = state.selected_node {
                     let faces: Vec<_> = state.selected_faces.iter().copied().collect();
                     if !faces.is_empty() {
                         let cmd = Box::new(crate::commands::ExtrudeCommand::new(id, faces, -0.12));
                         if state.history.execute(cmd, &mut state.scene).is_ok() {
                             state.sync_gpu_meshes();
-                            state.set_status_message("⚒ Extruded recessed panel cavities inward by -0.12m!");
+                            state.set_status_message(
+                                "⚒ Extruded recessed panel cavities inward by -0.12m!",
+                            );
                         }
                     }
                 }
@@ -123,7 +147,11 @@ pub fn render_scifi_crate_step_buttons(
             if ui.button("🛡 Add Chamfer Bevel Modifier (0.035m)").clicked() {
                 if let Some(id) = state.selected_node {
                     if let Some(node) = state.scene.nodes.get_mut(id) {
-                        if let graph_engine::NodeData::Mesh { ref mut modifier_stack, .. } = node.data {
+                        if let graph_engine::NodeData::Mesh {
+                            ref mut modifier_stack,
+                            ..
+                        } = node.data
+                        {
                             let bevel = geo_kernel::BevelModifier::new(0.035);
                             modifier_stack.add_modifier(Box::new(bevel));
                             state.inspector_tab = InspectorTab::Modifiers;
@@ -135,10 +163,16 @@ pub fn render_scifi_crate_step_buttons(
             }
         }
         5 => {
-            if ui.button("🎨 Assign Gunmetal Alloy & Cavity Shading").clicked() {
+            if ui
+                .button("🎨 Assign Gunmetal Alloy & Cavity Shading")
+                .clicked()
+            {
                 if let Some(id) = state.selected_node {
                     if let Some(node) = state.scene.nodes.get_mut(id) {
-                        if let graph_engine::NodeData::Mesh { ref mut materials, .. } = node.data {
+                        if let graph_engine::NodeData::Mesh {
+                            ref mut materials, ..
+                        } = node.data
+                        {
                             materials[0] = graph_engine::Material::new(
                                 "IndustrialGunmetal",
                                 [0.18, 0.20, 0.24, 1.0],
@@ -153,7 +187,9 @@ pub fn render_scifi_crate_step_buttons(
                 state.viewport_shading = render_viewport::ViewportShadingMode::Studio;
                 state.show_wireframe = true;
                 state.sync_gpu_meshes();
-                state.set_status_message("🎨 Assigned Industrial Gunmetal PBR (Metallic 0.88, Roughness 0.32)!");
+                state.set_status_message(
+                    "🎨 Assigned Industrial Gunmetal PBR (Metallic 0.88, Roughness 0.32)!",
+                );
             }
         }
         6 if ui.button("✨ Open Render Dialog (F11 / F12)").clicked() => {

@@ -158,7 +158,9 @@ fn main(@builtin(global_invocation_id) id: vec3<u32>) {
 "#;
 
 /// Serializes and packs a CPU scene into GPU-aligned buffers for compute shader execution
-pub fn pack_scene_for_gpu(scene: &PathTracerScene) -> (Vec<GpuBvhNode>, Vec<GpuTriangle>, Vec<GpuMaterial>) {
+pub fn pack_scene_for_gpu(
+    scene: &PathTracerScene,
+) -> (Vec<GpuBvhNode>, Vec<GpuTriangle>, Vec<GpuMaterial>) {
     let mut gpu_triangles = Vec::new();
     let mut gpu_materials = Vec::new();
 
@@ -166,27 +168,64 @@ pub fn pack_scene_for_gpu(scene: &PathTracerScene) -> (Vec<GpuBvhNode>, Vec<GpuT
         let (albedo_vec, roughness, metallic, emissive, transmission, ior) = match mat {
             Material::Lambertian { albedo } => (
                 albedo.evaluate(Vec2::ZERO, Vec3::ZERO, Vec3::Y),
-                1.0, 0.0, 0.0, 0.0, 1.5,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                1.5,
             ),
             Material::Metal { albedo, roughness } => (
                 albedo.evaluate(Vec2::ZERO, Vec3::ZERO, Vec3::Y),
-                *roughness, 1.0, 0.0, 0.0, 1.5,
+                *roughness,
+                1.0,
+                0.0,
+                0.0,
+                1.5,
             ),
             Material::Dielectric { albedo, ior } => (
                 albedo.evaluate(Vec2::ZERO, Vec3::ZERO, Vec3::Y),
-                0.05, 0.0, 0.0, 1.0, *ior,
+                0.05,
+                0.0,
+                0.0,
+                1.0,
+                *ior,
             ),
             Material::Emissive { radiance } => (
                 *radiance,
-                1.0, 0.0, radiance.x.max(radiance.y).max(radiance.z), 0.0, 1.0,
+                1.0,
+                0.0,
+                radiance.x.max(radiance.y).max(radiance.z),
+                0.0,
+                1.0,
             ),
-            Material::Principled { base_color, metallic, roughness, ior, transmission, emission, .. } => (
+            Material::Principled {
+                base_color,
+                metallic,
+                roughness,
+                ior,
+                transmission,
+                emission,
+                ..
+            } => (
                 base_color.evaluate(Vec2::ZERO, Vec3::ZERO, Vec3::Y),
-                *roughness, *metallic, emission.x.max(emission.y).max(emission.z), *transmission, *ior,
+                *roughness,
+                *metallic,
+                emission.x.max(emission.y).max(emission.z),
+                *transmission,
+                *ior,
             ),
-            Material::Subsurface { albedo, roughness, ior, .. } => (
+            Material::Subsurface {
+                albedo,
+                roughness,
+                ior,
+                ..
+            } => (
                 albedo.evaluate(Vec2::ZERO, Vec3::ZERO, Vec3::Y),
-                *roughness, 0.0, 0.0, 0.15, *ior,
+                *roughness,
+                0.0,
+                0.0,
+                0.15,
+                *ior,
             ),
         };
 

@@ -314,7 +314,10 @@ mod tests {
         );
 
         let updated_node = scene.nodes.get(node_id).unwrap();
-        assert_eq!(updated_node.local_transform.translation, Vec3::new(5.0, 0.0, 0.0));
+        assert_eq!(
+            updated_node.local_transform.translation,
+            Vec3::new(5.0, 0.0, 0.0)
+        );
     }
 
     #[test]

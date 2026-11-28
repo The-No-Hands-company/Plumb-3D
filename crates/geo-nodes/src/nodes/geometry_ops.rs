@@ -1,7 +1,10 @@
 use crate::nodes::traits::GeoNodeOp;
 use crate::types::*;
 use core_math::{EulerRot, Quat, Transform, Vec3};
-use geo_kernel::{decimate_mesh, BevelModifier, BooleanOp, CatmullClarkModifier, MirrorAxis, MirrorModifier, Modifier, SolidifyModifier};
+use geo_kernel::{
+    decimate_mesh, BevelModifier, BooleanOp, CatmullClarkModifier, MirrorAxis, MirrorModifier,
+    Modifier, SolidifyModifier,
+};
 
 #[derive(Debug, Clone)]
 pub struct TransformGeometryNode;
@@ -64,7 +67,6 @@ impl GeoNodeOp for TransformGeometryNode {
     }
 }
 
-
 #[derive(Debug, Clone)]
 pub struct SubdivideNode;
 
@@ -95,7 +97,9 @@ impl GeoNodeOp for SubdivideNode {
 
         let levels = inputs.get(1).map(|v| v.as_int()).unwrap_or(1).clamp(1, 4) as u32;
         let modifier = CatmullClarkModifier::new(levels);
-        let mesh = modifier.apply(&mesh).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        let mesh = modifier
+            .apply(&mesh)
+            .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
 
         Ok(vec![SocketValue::Geometry(Some(mesh))])
     }
@@ -104,7 +108,6 @@ impl GeoNodeOp for SubdivideNode {
         Box::new(self.clone())
     }
 }
-
 
 #[derive(Debug, Clone)]
 pub struct ExtrudeNode;
@@ -150,7 +153,6 @@ impl GeoNodeOp for ExtrudeNode {
     }
 }
 
-
 #[derive(Debug, Clone)]
 pub struct BooleanNode;
 
@@ -190,7 +192,9 @@ impl GeoNodeOp for BooleanNode {
             _ => BooleanOp::Difference,
         };
 
-        let res = mesh_a.boolean(mesh_b, op).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        let res = mesh_a
+            .boolean(mesh_b, op)
+            .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
         Ok(vec![SocketValue::Geometry(Some(res))])
     }
 
@@ -198,7 +202,6 @@ impl GeoNodeOp for BooleanNode {
         Box::new(self.clone())
     }
 }
-
 
 #[derive(Debug, Clone)]
 pub struct SolidifyNode;
@@ -230,7 +233,9 @@ impl GeoNodeOp for SolidifyNode {
 
         let thickness = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.2);
         let modifier = SolidifyModifier::new(thickness);
-        let res = modifier.apply(mesh).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        let res = modifier
+            .apply(mesh)
+            .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
 
         Ok(vec![SocketValue::Geometry(Some(res))])
     }
@@ -239,7 +244,6 @@ impl GeoNodeOp for SolidifyNode {
         Box::new(self.clone())
     }
 }
-
 
 #[derive(Debug, Clone)]
 pub struct DecimateNode;
@@ -269,8 +273,13 @@ impl GeoNodeOp for DecimateNode {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 
-        let ratio = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.5).clamp(0.01, 1.0);
-        let res = decimate_mesh(mesh, ratio).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        let ratio = inputs
+            .get(1)
+            .map(|v| v.as_float())
+            .unwrap_or(0.5)
+            .clamp(0.01, 1.0);
+        let res = decimate_mesh(mesh, ratio)
+            .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
 
         Ok(vec![SocketValue::Geometry(Some(res))])
     }
@@ -279,7 +288,6 @@ impl GeoNodeOp for DecimateNode {
         Box::new(self.clone())
     }
 }
-
 
 #[derive(Debug, Clone)]
 pub struct WeldNode;
@@ -309,8 +317,14 @@ impl GeoNodeOp for WeldNode {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 
-        let dist = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.001).max(1e-5);
-        let res = mesh.weld_vertices_by_distance(dist).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        let dist = inputs
+            .get(1)
+            .map(|v| v.as_float())
+            .unwrap_or(0.001)
+            .max(1e-5);
+        let res = mesh
+            .weld_vertices_by_distance(dist)
+            .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
 
         Ok(vec![SocketValue::Geometry(Some(res))])
     }
@@ -349,10 +363,15 @@ impl GeoNodeOp for VoxelRemeshNode {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 
-        let voxel_size = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.1).clamp(0.01, 2.0);
+        let voxel_size = inputs
+            .get(1)
+            .map(|v| v.as_float())
+            .unwrap_or(0.1)
+            .clamp(0.01, 2.0);
         let smooth_iters = inputs.get(2).map(|v| v.as_int()).unwrap_or(2).clamp(0, 10) as usize;
 
-        let mut remeshed = mesh.voxel_remesh(voxel_size)
+        let mut remeshed = mesh
+            .voxel_remesh(voxel_size)
             .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
         if smooth_iters > 0 {
             let all_verts: Vec<_> = remeshed.vertices.keys().collect();
@@ -403,7 +422,9 @@ impl GeoNodeOp for MirrorNode {
         };
 
         let modifier = MirrorModifier::new(axis);
-        let res = modifier.apply(mesh).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        let res = modifier
+            .apply(mesh)
+            .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
         Ok(vec![SocketValue::Geometry(Some(res))])
     }
 
@@ -440,9 +461,15 @@ impl GeoNodeOp for BevelNode {
             return Ok(vec![SocketValue::Geometry(None)]);
         };
 
-        let offset = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.05).max(0.001);
+        let offset = inputs
+            .get(1)
+            .map(|v| v.as_float())
+            .unwrap_or(0.05)
+            .max(0.001);
         let modifier = BevelModifier::new(offset);
-        let res = modifier.apply(mesh).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        let res = modifier
+            .apply(mesh)
+            .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
         Ok(vec![SocketValue::Geometry(Some(res))])
     }
 
@@ -450,4 +477,3 @@ impl GeoNodeOp for BevelNode {
         Box::new(self.clone())
     }
 }
-

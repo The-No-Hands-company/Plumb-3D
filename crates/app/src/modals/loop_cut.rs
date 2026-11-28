@@ -81,7 +81,10 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
                         let mut min_e_dist = f32::MAX;
                         for &he_key in &f_hes {
                             let he = &base_mesh.half_edges[he_key];
-                            if let (Some(v0), Some(v1)) = (base_mesh.vertices.get(he.origin), base_mesh.vertices.get(he.target)) {
+                            if let (Some(v0), Some(v1)) = (
+                                base_mesh.vertices.get(he.origin),
+                                base_mesh.vertices.get(he.target),
+                            ) {
                                 let p0 = v0.position;
                                 let p1 = v1.position;
                                 let seg = p1 - p0;

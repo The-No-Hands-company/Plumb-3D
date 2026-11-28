@@ -49,7 +49,11 @@ impl Mesh {
                     let he = &self.half_edges[he_k];
                     let ek = he.edge;
                     if !excluded_edges.contains(&ek) {
-                        let target_vk = if he.origin == vk { he.target } else { he.origin };
+                        let target_vk = if he.origin == vk {
+                            he.target
+                        } else {
+                            he.origin
+                        };
                         if target_vk != vk && !rail_neighbors.contains(&target_vk) {
                             rail_neighbors.push(target_vk);
                         }
@@ -65,7 +69,11 @@ impl Mesh {
                 for &he_k in &v.half_edges {
                     let he = &self.half_edges[he_k];
                     if excluded_edges.contains(&he.edge) {
-                        let other_vk = if he.origin == vk { he.target } else { he.origin };
+                        let other_vk = if he.origin == vk {
+                            he.target
+                        } else {
+                            he.origin
+                        };
                         if let Some(other_v) = self.vertices.get(other_vk) {
                             let dir = (other_v.position - v.position).normalize_or_zero();
                             if loop_tangent == Vec3::ZERO {
@@ -80,7 +88,9 @@ impl Mesh {
                 let transverse = v.normal.cross(loop_tangent).normalize_or_zero();
 
                 // Select target neighbor consistently aligned with the transverse direction
-                let target_neighbor = if rail_neighbors.len() >= 2 && transverse.length_squared() > 1e-4 {
+                let target_neighbor = if rail_neighbors.len() >= 2
+                    && transverse.length_squared() > 1e-4
+                {
                     if t >= 0.0 {
                         *rail_neighbors
                             .iter()
@@ -152,7 +162,12 @@ impl Mesh {
     /// Applies Laplacian umbrella relaxation/smoothing on selected vertices (Laplacian Relax).
     /// `factor`: blend factor towards the centroid of 1-ring neighbors (typically 0.1 - 0.5).
     /// `iterations`: number of smoothing passes.
-    pub fn relax_vertices(&mut self, vertices: &[VertexKey], iterations: usize, factor: f32) -> Result<(), MeshError> {
+    pub fn relax_vertices(
+        &mut self,
+        vertices: &[VertexKey],
+        iterations: usize,
+        factor: f32,
+    ) -> Result<(), MeshError> {
         if vertices.is_empty() || iterations == 0 || factor.abs() < 1e-6 {
             return Ok(());
         }

@@ -74,7 +74,11 @@ impl Mesh {
 
                 for &he_k in &v.half_edges {
                     let he = &self.half_edges[he_k];
-                    let target_vk = if he.origin == vk { he.target } else { he.origin };
+                    let target_vk = if he.origin == vk {
+                        he.target
+                    } else {
+                        he.origin
+                    };
                     neighbor_sum += self.vertices[target_vk].position;
                     count += 1;
                 }

@@ -118,7 +118,11 @@ impl Command for RipVerticesCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -138,7 +142,11 @@ impl Command for RipVerticesCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -170,11 +178,21 @@ impl Command for TriangulateCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.triangulate_faces(&self.faces, self.quad_method, self.ngon_method, self.min_vertices)
+                base_mesh
+                    .triangulate_faces(
+                        &self.faces,
+                        self.quad_method,
+                        self.ngon_method,
+                        self.min_vertices,
+                    )
                     .map_err(|e| format!("Triangulate failed: {:?}", e))?;
                 base_mesh.update_normals();
                 *cached_render_mesh = None;
@@ -189,7 +207,11 @@ impl Command for TriangulateCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -218,11 +240,16 @@ impl Command for MergeVerticesCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.merge_vertices_at_center(&self.vertices)
+                base_mesh
+                    .merge_vertices_at_center(&self.vertices)
                     .map_err(|e| format!("Merge vertices failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -236,7 +263,11 @@ impl Command for MergeVerticesCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -265,7 +296,11 @@ impl Command for DeleteFacesCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -285,7 +320,11 @@ impl Command for DeleteFacesCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -314,7 +353,11 @@ impl Command for DeleteVerticesCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -334,7 +377,11 @@ impl Command for DeleteVerticesCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -363,7 +410,11 @@ impl Command for UnBevelFacesCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -383,7 +434,11 @@ impl Command for UnBevelFacesCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -412,7 +467,11 @@ impl Command for DissolveFacesCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -432,7 +491,11 @@ impl Command for DissolveFacesCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);

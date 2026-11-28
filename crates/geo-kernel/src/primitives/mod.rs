@@ -8,10 +8,12 @@ pub mod polyhedral;
 pub use architectural::{create_geodesic_dome, create_pipe_thread};
 pub use box_plane::{create_box_parametric, create_cube, create_plane};
 pub use curved::{
-    create_capsule, create_cone, create_cone_parametric, create_cylinder, create_cylinder_parametric,
-    create_icosphere, create_torus, create_uv_sphere, CapFillType,
+    create_capsule, create_cone, create_cone_parametric, create_cylinder,
+    create_cylinder_parametric, create_icosphere, create_torus, create_uv_sphere, CapFillType,
 };
-pub use polyhedral::{create_plumb_bob, create_plumb_bob_detailed, create_pyramid, create_pyramid_parametric};
+pub use polyhedral::{
+    create_plumb_bob, create_plumb_bob_detailed, create_pyramid, create_pyramid_parametric,
+};
 
 use crate::mesh::Mesh;
 
@@ -25,7 +27,14 @@ impl Primitives {
     }
 
     #[inline]
-    pub fn create_box_parametric(width: f32, height: f32, depth: f32, seg_x: u32, seg_y: u32, seg_z: u32) -> Mesh {
+    pub fn create_box_parametric(
+        width: f32,
+        height: f32,
+        depth: f32,
+        seg_x: u32,
+        seg_y: u32,
+        seg_z: u32,
+    ) -> Mesh {
         create_box_parametric(width, height, depth, seg_x, seg_y, seg_z)
     }
 
@@ -45,7 +54,12 @@ impl Primitives {
     }
 
     #[inline]
-    pub fn create_cylinder_parametric(radius: f32, height: f32, segments: u32, cap_fill: CapFillType) -> Mesh {
+    pub fn create_cylinder_parametric(
+        radius: f32,
+        height: f32,
+        segments: u32,
+        cap_fill: CapFillType,
+    ) -> Mesh {
         create_cylinder_parametric(radius, height, segments, cap_fill)
     }
 
@@ -55,12 +69,23 @@ impl Primitives {
     }
 
     #[inline]
-    pub fn create_cone_parametric(radius_bottom: f32, radius_top: f32, height: f32, segments: u32, cap_fill: CapFillType) -> Mesh {
+    pub fn create_cone_parametric(
+        radius_bottom: f32,
+        radius_top: f32,
+        height: f32,
+        segments: u32,
+        cap_fill: CapFillType,
+    ) -> Mesh {
         create_cone_parametric(radius_bottom, radius_top, height, segments, cap_fill)
     }
 
     #[inline]
-    pub fn create_torus(major_radius: f32, minor_radius: f32, major_segments: u32, minor_segments: u32) -> Mesh {
+    pub fn create_torus(
+        major_radius: f32,
+        minor_radius: f32,
+        major_segments: u32,
+        minor_segments: u32,
+    ) -> Mesh {
         create_torus(major_radius, minor_radius, major_segments, minor_segments)
     }
 
@@ -75,7 +100,12 @@ impl Primitives {
     }
 
     #[inline]
-    pub fn create_capsule(radius: f32, cylinder_height: f32, segments: u32, hemisphere_rings: u32) -> Mesh {
+    pub fn create_capsule(
+        radius: f32,
+        cylinder_height: f32,
+        segments: u32,
+        hemisphere_rings: u32,
+    ) -> Mesh {
         create_capsule(radius, cylinder_height, segments, hemisphere_rings)
     }
 

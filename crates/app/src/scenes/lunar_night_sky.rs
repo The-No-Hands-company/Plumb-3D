@@ -26,12 +26,11 @@ pub fn build_lunar_night_sky_graph() -> (SceneGraph, ViewportCamera, NodeId, Nod
 
     // 2. The Celestial Body: High-resolution UV Sphere with Sub-pixel Smooth Silhouette
     let moon_mesh = Primitives::create_uv_sphere(3.0, 128, 128);
-    let mut moon_node = SceneNode::new_mesh(
-        "Moon_Body",
-        Transform::IDENTITY,
-        moon_mesh,
-    );
-    if let NodeData::Mesh { ref mut materials, .. } = moon_node.data {
+    let mut moon_node = SceneNode::new_mesh("Moon_Body", Transform::IDENTITY, moon_mesh);
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = moon_node.data
+    {
         materials[0] = mat_regolith;
     }
     let moon_id = scene.add_node(moon_node);
@@ -179,14 +178,21 @@ mod tests {
         let mut rng = || 0.5_f32;
         let color = render_pathtracer::integrator::trace_path(&pt_scene, &center_ray, 4, &mut rng);
         println!("Calibrated Moon Radiance: {:?}", color);
-        assert!(color.length() > 0.1, "Moon surface must be illuminated by sunlight: {:?}", color);
+        assert!(
+            color.length() > 0.1,
+            "Moon surface must be illuminated by sunlight: {:?}",
+            color
+        );
 
         // Render 160x90 test frame to verify complete render output
         let mut buffer = render_pathtracer::RenderBuffer::new(160, 90);
         buffer.render_sample_pass(&pt_scene, &pt_cam, 4, None);
         assert!(buffer.samples_rendered == 1);
         let has_lit_pixels = buffer.accumulated_radiance.iter().any(|p| p.length() > 0.1);
-        assert!(has_lit_pixels, "Render buffer must contain illuminated moon pixels");
+        assert!(
+            has_lit_pixels,
+            "Render buffer must contain illuminated moon pixels"
+        );
 
         let post_process = render_pathtracer::PostProcessSettings {
             bloom_enabled: true,
@@ -199,8 +205,15 @@ mod tests {
         let rgba = buffer.to_rgba8_post_processed(&post_process);
         let lit_pixels: Vec<_> = rgba.chunks_exact(4).filter(|p| p[0] > 10).collect();
         assert!(!lit_pixels.is_empty(), "Must have illuminated moon pixels");
-        let blown_out = lit_pixels.iter().filter(|p| p[0] == 255 && p[1] == 255 && p[2] == 255).count();
+        let blown_out = lit_pixels
+            .iter()
+            .filter(|p| p[0] == 255 && p[1] == 255 && p[2] == 255)
+            .count();
         let blown_ratio = blown_out as f32 / lit_pixels.len() as f32;
-        assert!(blown_ratio < 0.05, "Calibrated render must not blow out to solid white (got {:.2}%)", blown_ratio * 100.0);
+        assert!(
+            blown_ratio < 0.05,
+            "Calibrated render must not blow out to solid white (got {:.2}%)",
+            blown_ratio * 100.0
+        );
     }
 }

@@ -9,8 +9,11 @@ impl AppState {
         let ray = self.get_screen_ray(x, y);
 
         let now = std::time::Instant::now();
-        let is_double_click = if let (Some(last_time), Some((lx, ly))) = (self.last_click_instant, self.last_click_pos) {
-            now.duration_since(last_time).as_millis() < 350 && ((lx - x).powi(2) + (ly - y).powi(2)) < 64.0
+        let is_double_click = if let (Some(last_time), Some((lx, ly))) =
+            (self.last_click_instant, self.last_click_pos)
+        {
+            now.duration_since(last_time).as_millis() < 350
+                && ((lx - x).powi(2) + (ly - y).powi(2)) < 64.0
         } else {
             false
         };
@@ -26,15 +29,19 @@ impl AppState {
 
                         for (idx, pt) in spline.points.iter().enumerate() {
                             let p_world = node.world_matrix.transform_point3(pt.position);
-                            let d = (p_world - ray.origin).cross(ray.direction).length() / ray.direction.length();
+                            let d = (p_world - ray.origin).cross(ray.direction).length()
+                                / ray.direction.length();
                             if d < min_dist {
                                 min_dist = d;
                                 best_hit = Some((idx, CurveHandleSelection::Knot));
                             }
 
                             if pt.handle_in.length_squared() > 1e-6 {
-                                let p_hin = node.world_matrix.transform_point3(pt.position + pt.handle_in);
-                                let d = (p_hin - ray.origin).cross(ray.direction).length() / ray.direction.length();
+                                let p_hin = node
+                                    .world_matrix
+                                    .transform_point3(pt.position + pt.handle_in);
+                                let d = (p_hin - ray.origin).cross(ray.direction).length()
+                                    / ray.direction.length();
                                 if d < min_dist {
                                     min_dist = d;
                                     best_hit = Some((idx, CurveHandleSelection::HandleIn));
@@ -42,8 +49,11 @@ impl AppState {
                             }
 
                             if pt.handle_out.length_squared() > 1e-6 {
-                                let p_hout = node.world_matrix.transform_point3(pt.position + pt.handle_out);
-                                let d = (p_hout - ray.origin).cross(ray.direction).length() / ray.direction.length();
+                                let p_hout = node
+                                    .world_matrix
+                                    .transform_point3(pt.position + pt.handle_out);
+                                let d = (p_hout - ray.origin).cross(ray.direction).length()
+                                    / ray.direction.length();
                                 if d < min_dist {
                                     min_dist = d;
                                     best_hit = Some((idx, CurveHandleSelection::HandleOut));
@@ -68,7 +78,12 @@ impl AppState {
                         let occlude = !self.show_wireframe;
                         match self.sub_element_level {
                             SubElementLevel::Vertex => {
-                                if let Some(vk) = base_mesh.pick_vertex_occluded(&ray, &node.world_matrix, 0.25, occlude) {
+                                if let Some(vk) = base_mesh.pick_vertex_occluded(
+                                    &ray,
+                                    &node.world_matrix,
+                                    0.25,
+                                    occlude,
+                                ) {
                                     if self.ctrl_pressed && self.selected_vertices.len() == 1 {
                                         // Blender Ctrl+Click: Topological shortest path
                                         let start = *self.selected_vertices.iter().next().unwrap();
@@ -91,7 +106,12 @@ impl AppState {
                                 }
                             }
                             SubElementLevel::Edge => {
-                                if let Some(ek) = base_mesh.pick_edge_occluded(&ray, &node.world_matrix, 0.2, occlude) {
+                                if let Some(ek) = base_mesh.pick_edge_occluded(
+                                    &ray,
+                                    &node.world_matrix,
+                                    0.2,
+                                    occlude,
+                                ) {
                                     if self.alt_pressed && self.ctrl_pressed {
                                         // Blender / Maya Ctrl+Alt+Click: Edge Ring selection
                                         let ring_edges = base_mesh.select_edge_ring(ek);
@@ -122,7 +142,11 @@ impl AppState {
                                 }
                             }
                             SubElementLevel::Face => {
-                                if let Some(hit) = base_mesh.raycast_backface_culled(&ray, &node.world_matrix, occlude) {
+                                if let Some(hit) = base_mesh.raycast_backface_culled(
+                                    &ray,
+                                    &node.world_matrix,
+                                    occlude,
+                                ) {
                                     let fk = hit.face_key;
                                     if self.alt_pressed && self.ctrl_pressed {
                                         // CAD / Blender Ctrl+Alt+Click: Coplanar faces
@@ -165,7 +189,9 @@ impl AppState {
             if !node.visible {
                 continue;
             }
-            if self.interaction_mode == InteractionMode::Pose && !matches!(node.data, NodeData::Joint { .. }) {
+            if self.interaction_mode == InteractionMode::Pose
+                && !matches!(node.data, NodeData::Joint { .. })
+            {
                 continue;
             }
             match &node.data {
@@ -183,14 +209,17 @@ impl AppState {
                     if proj > 0.0 {
                         let perp_dist_sq = to_pos.length_squared() - proj * proj;
                         if perp_dist_sq <= 0.45 * 0.45
-                            && (closest_hit.is_none() || proj < closest_hit.unwrap().2) {
-                                closest_hit = Some((node_id, None, proj));
-                            }
+                            && (closest_hit.is_none() || proj < closest_hit.unwrap().2)
+                        {
+                            closest_hit = Some((node_id, None, proj));
+                        }
                     }
                 }
                 NodeData::Joint { length, radius } => {
                     let p_base = node.world_matrix.transform_point3(Vec3::ZERO);
-                    let p_tip = node.world_matrix.transform_point3(Vec3::new(0.0, *length, 0.0));
+                    let p_tip = node
+                        .world_matrix
+                        .transform_point3(Vec3::new(0.0, *length, 0.0));
                     for frac in [0.0, 0.25, 0.5, 0.75, 1.0] {
                         let pt = p_base * (1.0 - frac) + p_tip * frac;
                         let to_pt = pt - ray.origin;
@@ -199,9 +228,10 @@ impl AppState {
                             let perp_dist_sq = to_pt.length_squared() - proj * proj;
                             let threshold = (radius * 1.5).max(0.25);
                             if perp_dist_sq <= threshold * threshold
-                                && (closest_hit.is_none() || proj < closest_hit.unwrap().2) {
-                                    closest_hit = Some((node_id, None, proj));
-                                }
+                                && (closest_hit.is_none() || proj < closest_hit.unwrap().2)
+                            {
+                                closest_hit = Some((node_id, None, proj));
+                            }
                         }
                     }
                 }
@@ -213,9 +243,10 @@ impl AppState {
                         if proj > 0.0 {
                             let perp_dist_sq = to_pt.length_squared() - proj * proj;
                             if perp_dist_sq <= 0.3 * 0.3
-                                && (closest_hit.is_none() || proj < closest_hit.unwrap().2) {
-                                    closest_hit = Some((node_id, None, proj));
-                                }
+                                && (closest_hit.is_none() || proj < closest_hit.unwrap().2)
+                            {
+                                closest_hit = Some((node_id, None, proj));
+                            }
                         }
                     }
                 }

@@ -1,9 +1,7 @@
 use app::scenes::lunar_night_sky::build_lunar_night_sky_graph;
 use core_math::vec3;
 use render_pathtracer::{
-    camera::PathtracerCamera,
-    post_process::PostProcessSettings,
-    renderer::RenderBuffer,
+    camera::PathtracerCamera, post_process::PostProcessSettings, renderer::RenderBuffer,
     scene::PathTracerScene,
 };
 use std::time::Instant;
@@ -14,12 +12,11 @@ fn main() {
 
     let (scene, camera_state, _, _) = build_lunar_night_sky_graph();
 
-    let pt_scene = PathTracerScene::from_scene_graph(&scene)
-        .with_background(
-            vec3(0.001, 0.002, 0.004),
-            vec3(0.002, 0.003, 0.006),
-            vec3(0.0, 0.0, 0.0),
-        );
+    let pt_scene = PathTracerScene::from_scene_graph(&scene).with_background(
+        vec3(0.001, 0.002, 0.004),
+        vec3(0.002, 0.003, 0.006),
+        vec3(0.0, 0.0, 0.0),
+    );
 
     println!(
         "✓ BVH constructed successfully (directional lights: {})",

@@ -97,7 +97,8 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
     } else {
         let dx = (state.inset_modal_start_mouse.0 - position.x) as f32;
         state.inset_modal_factor = (0.8 + dx * 0.003).clamp(0.01, 0.99);
-        state.inset_modal_thickness = (1.0 - state.inset_modal_factor) * state.inset_modal_initial_radius;
+        state.inset_modal_thickness =
+            (1.0 - state.inset_modal_factor) * state.inset_modal_initial_radius;
         state.set_status_message(format!(
             "📐 Insetting: Thickness {:.3}m (Factor: {:.2}) | 'I' toggle Individual | Type numbers + Enter",
             state.inset_modal_thickness,

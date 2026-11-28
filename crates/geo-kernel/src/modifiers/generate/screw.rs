@@ -56,7 +56,8 @@ impl Modifier for ScrewModifier {
         let mut output = Mesh::new();
 
         // 1. Generate vertices for all step rings
-        let mut step_v_maps: Vec<HashMap<VertexKey, VertexKey>> = Vec::with_capacity(total_steps + 1);
+        let mut step_v_maps: Vec<HashMap<VertexKey, VertexKey>> =
+            Vec::with_capacity(total_steps + 1);
 
         for step in 0..=total_steps {
             let frac = step as f32 / total_steps as f32;
@@ -97,7 +98,11 @@ impl Modifier for ScrewModifier {
                 // Find open boundary half-edges
                 for he in input.half_edges.values() {
                     if he.face.is_some() {
-                        let is_boundary = input.half_edges.get(he.twin).map(|t| t.face.is_none()).unwrap_or(true);
+                        let is_boundary = input
+                            .half_edges
+                            .get(he.twin)
+                            .map(|t| t.face.is_none())
+                            .unwrap_or(true);
                         if is_boundary {
                             list.push((he.origin, he.target));
                         }
@@ -123,14 +128,18 @@ impl Modifier for ScrewModifier {
             // Start cap at step 0 (reverse winding for outward normal)
             for fk in input.faces.keys() {
                 let f_verts = input.face_vertices(fk);
-                let cap_verts: Vec<VertexKey> = f_verts.iter().rev().map(|k| step_v_maps[0][k]).collect();
+                let cap_verts: Vec<VertexKey> =
+                    f_verts.iter().rev().map(|k| step_v_maps[0][k]).collect();
                 let _ = output.add_face(&cap_verts);
             }
 
             // End cap at step total_steps (forward winding)
             for fk in input.faces.keys() {
                 let f_verts = input.face_vertices(fk);
-                let cap_verts: Vec<VertexKey> = f_verts.iter().map(|k| step_v_maps[total_steps][k]).collect();
+                let cap_verts: Vec<VertexKey> = f_verts
+                    .iter()
+                    .map(|k| step_v_maps[total_steps][k])
+                    .collect();
                 let _ = output.add_face(&cap_verts);
             }
         }

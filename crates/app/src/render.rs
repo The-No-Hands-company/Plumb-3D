@@ -28,7 +28,12 @@ pub fn render_frame(state: &mut AppState) {
         // Advance dynamic physics simulation modifiers (Cloth, Particles)
         let mut dirty_sim_nodes = Vec::new();
         for (node_id, node) in &mut state.scene.nodes {
-            if let NodeData::Mesh { modifier_stack, base_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                modifier_stack,
+                base_mesh,
+                ..
+            } = &mut node.data
+            {
                 let mut stepped_sim = false;
                 for m in modifier_stack.modifiers_mut() {
                     if let Some(cloth) = m.as_cloth_mut() {
@@ -73,7 +78,9 @@ pub fn render_frame(state: &mut AppState) {
     let output = match state.surface.get_current_texture() {
         Ok(tex) => tex,
         Err(wgpu::SurfaceError::Lost) => {
-            state.surface.configure(&state.device, &state.surface_config);
+            state
+                .surface
+                .configure(&state.device, &state.surface_config);
             return;
         }
         Err(wgpu::SurfaceError::OutOfMemory) => {
@@ -86,12 +93,22 @@ pub fn render_frame(state: &mut AppState) {
         }
     };
 
-    let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
+    let view = output
+        .texture
+        .create_view(&wgpu::TextureViewDescriptor::default());
 
     // Update active scene camera override
     if let Some(cam_id) = state.active_camera_node {
         if let Some(cam_node) = state.scene.nodes.get(cam_id) {
-            if let NodeData::Camera { fov_y_radians, z_near, z_far, aspect_ratio, orthographic, ortho_size } = cam_node.data {
+            if let NodeData::Camera {
+                fov_y_radians,
+                z_near,
+                z_far,
+                aspect_ratio,
+                orthographic,
+                ortho_size,
+            } = cam_node.data
+            {
                 let eye = cam_node.world_matrix.transform_point3(Vec3::ZERO);
                 let view_mat = cam_node.world_matrix.inverse();
                 let proj = if orthographic {
@@ -119,7 +136,12 @@ pub fn render_frame(state: &mut AppState) {
                 .iter()
                 .map(|m| SubMeshMaterial {
                     color: m.base_color,
-                    material: [m.metallic, m.roughness, m.emissive, m.texture_pattern as f32],
+                    material: [
+                        m.metallic,
+                        m.roughness,
+                        m.emissive,
+                        m.texture_pattern as f32,
+                    ],
                 })
                 .collect();
             submesh_materials_storage.insert(node_id, sm_mats);
@@ -131,10 +153,23 @@ pub fn render_frame(state: &mut AppState) {
     for (_node_id, node) in &state.scene.nodes {
         if let NodeData::Mesh { materials, .. } = &node.data {
             for m in materials {
-                if m.albedo_texture_path.is_some() || m.normal_texture_path.is_some() || m.roughness_metallic_texture_path.is_some() {
-                    let key = format!("{:?}|{:?}|{:?}", m.albedo_texture_path, m.normal_texture_path, m.roughness_metallic_texture_path);
+                if m.albedo_texture_path.is_some()
+                    || m.normal_texture_path.is_some()
+                    || m.roughness_metallic_texture_path.is_some()
+                {
+                    let key = format!(
+                        "{:?}|{:?}|{:?}",
+                        m.albedo_texture_path,
+                        m.normal_texture_path,
+                        m.roughness_metallic_texture_path
+                    );
                     if !state.gpu_texture_bind_groups.contains_key(&key) {
-                        custom_texture_requests.push((key, m.albedo_texture_path.clone(), m.normal_texture_path.clone(), m.roughness_metallic_texture_path.clone()));
+                        custom_texture_requests.push((
+                            key,
+                            m.albedo_texture_path.clone(),
+                            m.normal_texture_path.clone(),
+                            m.roughness_metallic_texture_path.clone(),
+                        ));
                     }
                 }
             }
@@ -142,28 +177,49 @@ pub fn render_frame(state: &mut AppState) {
     }
 
     for (key, albedo_p, norm_p, rm_p) in custom_texture_requests {
-        let (_albedo_tex, albedo_view) = if let Some(p) = albedo_p.and_then(|p| image::open(p).ok()) {
+        let (_albedo_tex, albedo_view) = if let Some(p) = albedo_p.and_then(|p| image::open(p).ok())
+        {
             let rgba = p.to_rgba8();
-            state.renderer.create_texture_from_rgba(rgba.width(), rgba.height(), &rgba, "Custom Albedo")
+            state.renderer.create_texture_from_rgba(
+                rgba.width(),
+                rgba.height(),
+                &rgba,
+                "Custom Albedo",
+            )
         } else {
-            state.renderer.create_texture_from_rgba(1, 1, &[255, 255, 255, 255], "White Albedo")
+            state
+                .renderer
+                .create_texture_from_rgba(1, 1, &[255, 255, 255, 255], "White Albedo")
         };
 
         let (_norm_tex, norm_view) = if let Some(p) = norm_p.and_then(|p| image::open(p).ok()) {
             let rgba = p.to_rgba8();
-            state.renderer.create_texture_from_rgba(rgba.width(), rgba.height(), &rgba, "Custom Normal")
+            state.renderer.create_texture_from_rgba(
+                rgba.width(),
+                rgba.height(),
+                &rgba,
+                "Custom Normal",
+            )
         } else {
-            state.renderer.create_texture_from_rgba(1, 1, &[128, 128, 255, 255], "Flat Normal")
+            state
+                .renderer
+                .create_texture_from_rgba(1, 1, &[128, 128, 255, 255], "Flat Normal")
         };
 
         let (_rm_tex, rm_view) = if let Some(p) = rm_p.and_then(|p| image::open(p).ok()) {
             let rgba = p.to_rgba8();
-            state.renderer.create_texture_from_rgba(rgba.width(), rgba.height(), &rgba, "Custom RM")
+            state
+                .renderer
+                .create_texture_from_rgba(rgba.width(), rgba.height(), &rgba, "Custom RM")
         } else {
-            state.renderer.create_texture_from_rgba(1, 1, &[255, 255, 255, 255], "White RM")
+            state
+                .renderer
+                .create_texture_from_rgba(1, 1, &[255, 255, 255, 255], "White RM")
         };
 
-        let bg = state.renderer.create_pbr_texture_bind_group(&albedo_view, &norm_view, &rm_view);
+        let bg = state
+            .renderer
+            .create_pbr_texture_bind_group(&albedo_view, &norm_view, &rm_view);
         state.gpu_texture_bind_groups.insert(key, bg);
     }
 
@@ -192,7 +248,11 @@ pub fn render_frame(state: &mut AppState) {
                     } else {
                         state.show_wireframe || is_selected
                     };
-                    let base_rgb = state.object_colors.get(&node_id).copied().unwrap_or([0.72, 0.73, 0.75]);
+                    let base_rgb = state
+                        .object_colors
+                        .get(&node_id)
+                        .copied()
+                        .unwrap_or([0.72, 0.73, 0.75]);
                     let color = if is_active {
                         if state.interaction_mode == InteractionMode::Edit {
                             [0.92, 0.52, 0.32, 1.0]
@@ -204,7 +264,11 @@ pub fn render_frame(state: &mut AppState) {
                     } else {
                         [base_rgb[0], base_rgb[1], base_rgb[2], 1.0]
                     };
-                    let base_mat = state.object_materials.get(&node_id).copied().unwrap_or([0.0, 0.5, 0.0, 0.0]);
+                    let base_mat = state
+                        .object_materials
+                        .get(&node_id)
+                        .copied()
+                        .unwrap_or([0.0, 0.5, 0.0, 0.0]);
                     let sub_mats = submesh_materials_storage
                         .get(&node_id)
                         .map(|v| v.as_slice())
@@ -212,7 +276,12 @@ pub fn render_frame(state: &mut AppState) {
 
                     let tex_bg = if let NodeData::Mesh { materials, .. } = &node.data {
                         materials.first().and_then(|m| {
-                            let key = format!("{:?}|{:?}|{:?}", m.albedo_texture_path, m.normal_texture_path, m.roughness_metallic_texture_path);
+                            let key = format!(
+                                "{:?}|{:?}|{:?}",
+                                m.albedo_texture_path,
+                                m.normal_texture_path,
+                                m.roughness_metallic_texture_path
+                            );
                             state.gpu_texture_bind_groups.get(&key)
                         })
                     } else {
@@ -230,7 +299,14 @@ pub fn render_frame(state: &mut AppState) {
                     });
                 }
             }
-            NodeData::Light { light_type, color, intensity, range, spot_inner_angle_radians, spot_outer_angle_radians } => {
+            NodeData::Light {
+                light_type,
+                color,
+                intensity,
+                range,
+                spot_inner_angle_radians,
+                spot_outer_angle_radians,
+            } => {
                 let world_pos = node.world_matrix.transform_point3(Vec3::ZERO);
                 let forward_dir = -node.world_matrix.transform_vector3(Vec3::Z).normalize();
                 let type_id = match light_type {
@@ -242,28 +318,60 @@ pub fn render_frame(state: &mut AppState) {
                     position: [world_pos.x, world_pos.y, world_pos.z, type_id as f32],
                     direction: [forward_dir.x, forward_dir.y, forward_dir.z, *range],
                     color: [color.x, color.y, color.z, *intensity],
-                    spot_params: [spot_inner_angle_radians.cos(), spot_outer_angle_radians.cos(), 1.0, 0.0],
+                    spot_params: [
+                        spot_inner_angle_radians.cos(),
+                        spot_outer_angle_radians.cos(),
+                        1.0,
+                        0.0,
+                    ],
                 });
-                light_glyphs.push((world_pos, forward_dir, [color.x, color.y, color.z, 1.0], type_id, is_selected));
+                light_glyphs.push((
+                    world_pos,
+                    forward_dir,
+                    [color.x, color.y, color.z, 1.0],
+                    type_id,
+                    is_selected,
+                ));
             }
-            NodeData::Camera { fov_y_radians, aspect_ratio, .. } => {
+            NodeData::Camera {
+                fov_y_radians,
+                aspect_ratio,
+                ..
+            } => {
                 if Some(node_id) != state.active_camera_node {
-                    camera_glyphs.push((node.world_matrix, *fov_y_radians, *aspect_ratio, is_selected));
+                    camera_glyphs.push((
+                        node.world_matrix,
+                        *fov_y_radians,
+                        *aspect_ratio,
+                        is_selected,
+                    ));
                 }
             }
             NodeData::Joint { length, radius } => {
                 joint_glyphs.push((node.world_matrix, *length, *radius, is_selected));
             }
-            NodeData::Curve { spline, bevel_radius, .. } => {
+            NodeData::Curve {
+                spline,
+                bevel_radius,
+                ..
+            } => {
                 if *bevel_radius > 0.0 {
                     if let Some(gpu_mesh) = state.gpu_mesh_cache.get(&node_id) {
-                        let base_rgb = state.object_colors.get(&node_id).copied().unwrap_or([0.3, 0.7, 0.95]);
+                        let base_rgb = state
+                            .object_colors
+                            .get(&node_id)
+                            .copied()
+                            .unwrap_or([0.3, 0.7, 0.95]);
                         let color = if is_selected {
                             [0.88, 0.68, 0.38, 1.0]
                         } else {
                             [base_rgb[0], base_rgb[1], base_rgb[2], 1.0]
                         };
-                        let base_mat = state.object_materials.get(&node_id).copied().unwrap_or([0.0, 0.4, 0.0, 0.0]);
+                        let base_mat = state
+                            .object_materials
+                            .get(&node_id)
+                            .copied()
+                            .unwrap_or([0.0, 0.4, 0.0, 0.0]);
                         meshes_to_render.push(MeshDrawCall {
                             mesh: gpu_mesh,
                             model_matrix: node.world_matrix,
@@ -276,15 +384,29 @@ pub fn render_frame(state: &mut AppState) {
                     }
                 }
                 let sampled = spline.sample(16);
-                let knots = spline.points.iter().map(|p| (p.position, p.handle_in, p.handle_out)).collect();
-                curve_glyphs.push((node.world_matrix, sampled, knots, spline.is_closed, is_selected));
+                let knots = spline
+                    .points
+                    .iter()
+                    .map(|p| (p.position, p.handle_in, p.handle_out))
+                    .collect();
+                curve_glyphs.push((
+                    node.world_matrix,
+                    sampled,
+                    knots,
+                    spline.is_closed,
+                    is_selected,
+                ));
             }
             _ => {}
         }
     }
 
     // 1. Viewport 3D Geometry Pass
-    let cavity = if state.show_cavity { state.cavity_intensity } else { 0.0 };
+    let cavity = if state.show_cavity {
+        state.cavity_intensity
+    } else {
+        0.0
+    };
     state.renderer.render_scene(
         &view,
         &state.depth_view,
@@ -469,13 +591,19 @@ pub fn render_frame(state: &mut AppState) {
             .update_texture(&state.device, &state.queue, *id, delta);
     }
 
-    let mut encoder = state.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-        label: Some("Egui Render Encoder"),
-    });
+    let mut encoder = state
+        .device
+        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Egui Render Encoder"),
+        });
 
-    state
-        .egui_renderer
-        .update_buffers(&state.device, &state.queue, &mut encoder, &tris, &screen_descriptor);
+    state.egui_renderer.update_buffers(
+        &state.device,
+        &state.queue,
+        &mut encoder,
+        &tris,
+        &screen_descriptor,
+    );
 
     {
         let mut pass = encoder
@@ -561,8 +689,14 @@ impl AppState {
             let needs_upload = {
                 if let Some(node) = self.scene.nodes.get(node_id) {
                     match &node.data {
-                        NodeData::Mesh { cached_render_mesh, .. } | NodeData::Curve { cached_render_mesh, .. } => {
-                            cached_render_mesh.is_none() || !self.gpu_mesh_cache.contains_key(&node_id)
+                        NodeData::Mesh {
+                            cached_render_mesh, ..
+                        }
+                        | NodeData::Curve {
+                            cached_render_mesh, ..
+                        } => {
+                            cached_render_mesh.is_none()
+                                || !self.gpu_mesh_cache.contains_key(&node_id)
                         }
                         _ => false,
                     }
@@ -571,14 +705,18 @@ impl AppState {
                 }
             };
 
-            let weight_group = if self.interaction_mode == InteractionMode::WeightPaint && Some(node_id) == self.selected_node {
+            let weight_group = if self.interaction_mode == InteractionMode::WeightPaint
+                && Some(node_id) == self.selected_node
+            {
                 self.active_vertex_group.as_deref()
             } else {
                 None
             };
 
             if needs_upload {
-                if let Some(render_mesh) = self.scene.evaluate_mesh_with_weights(node_id, weight_group) {
+                if let Some(render_mesh) =
+                    self.scene.evaluate_mesh_with_weights(node_id, weight_group)
+                {
                     let gpu_mesh = self.renderer.upload_mesh(render_mesh);
                     self.gpu_mesh_cache.insert(node_id, gpu_mesh);
                 } else {

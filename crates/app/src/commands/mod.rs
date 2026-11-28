@@ -15,10 +15,10 @@ pub use uv::*;
 pub use workplane::*;
 
 #[cfg(test)]
-mod tests;
+mod mutation_tests;
 #[cfg(test)]
 mod precision_tests;
 #[cfg(test)]
-mod mutation_tests;
-#[cfg(test)]
 mod stress_tests;
+#[cfg(test)]
+mod tests;

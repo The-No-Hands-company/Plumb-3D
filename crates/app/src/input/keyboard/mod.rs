@@ -34,6 +34,5 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) {
         return;
     }
 
-    if animation::handle_animation_key(state, key_code) {
-    }
+    if animation::handle_animation_key(state, key_code) {}
 }

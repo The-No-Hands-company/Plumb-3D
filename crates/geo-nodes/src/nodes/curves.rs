@@ -28,12 +28,22 @@ impl GeoNodeOp for SplineCircleNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let radius = inputs.first().map(|v| v.as_float()).unwrap_or(1.5).max(0.01);
-        let pipe_radius = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.15).max(0.005);
+        let radius = inputs
+            .first()
+            .map(|v| v.as_float())
+            .unwrap_or(1.5)
+            .max(0.01);
+        let pipe_radius = inputs
+            .get(1)
+            .map(|v| v.as_float())
+            .unwrap_or(0.15)
+            .max(0.005);
         let res = inputs.get(2).map(|v| v.as_int()).unwrap_or(16).clamp(3, 64) as usize;
 
         let spline = Spline::circle(radius, Vec3::ZERO);
-        let mesh = spline.to_pipe_mesh(pipe_radius, res, 16).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        let mesh = spline
+            .to_pipe_mesh(pipe_radius, res, 16)
+            .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
 
         Ok(vec![SocketValue::Geometry(Some(mesh))])
     }
@@ -69,13 +79,23 @@ impl GeoNodeOp for SplineSpiralNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let radius = inputs.first().map(|v| v.as_float()).unwrap_or(1.0).max(0.01);
+        let radius = inputs
+            .first()
+            .map(|v| v.as_float())
+            .unwrap_or(1.0)
+            .max(0.01);
         let height = inputs.get(1).map(|v| v.as_float()).unwrap_or(3.0).max(0.01);
         let revs = inputs.get(2).map(|v| v.as_float()).unwrap_or(3.0).max(0.5);
-        let pipe_r = inputs.get(3).map(|v| v.as_float()).unwrap_or(0.1).max(0.005);
+        let pipe_r = inputs
+            .get(3)
+            .map(|v| v.as_float())
+            .unwrap_or(0.1)
+            .max(0.005);
 
         let spline = Spline::helix(radius, height, revs, 24);
-        let mesh = spline.to_pipe_mesh(pipe_r, 12, 16).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        let mesh = spline
+            .to_pipe_mesh(pipe_r, 12, 16)
+            .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
 
         Ok(vec![SocketValue::Geometry(Some(mesh))])
     }
@@ -109,15 +129,25 @@ impl GeoNodeOp for CurveFilletNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let radius = inputs.first().map(|v| v.as_float()).unwrap_or(0.3).max(0.001);
-        let pipe_r = inputs.get(1).map(|v| v.as_float()).unwrap_or(0.1).max(0.005);
+        let radius = inputs
+            .first()
+            .map(|v| v.as_float())
+            .unwrap_or(0.3)
+            .max(0.001);
+        let pipe_r = inputs
+            .get(1)
+            .map(|v| v.as_float())
+            .unwrap_or(0.1)
+            .max(0.005);
 
         let p0 = geo_kernel::BezierPoint::sharp(Vec3::new(0.0, 0.0, 0.0));
         let p1 = geo_kernel::BezierPoint::sharp(Vec3::new(2.0, 0.0, 0.0));
         let p2 = geo_kernel::BezierPoint::sharp(Vec3::new(2.0, 2.0, 0.0));
         let spline = Spline::with_points(vec![p0, p1, p2], false);
         let filleted = spline.fillet_all_corners(radius);
-        let mesh = filleted.to_pipe_mesh(pipe_r, 8, 16).map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
+        let mesh = filleted
+            .to_pipe_mesh(pipe_r, 8, 16)
+            .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
 
         Ok(vec![SocketValue::Geometry(Some(mesh))])
     }
@@ -153,10 +183,22 @@ impl GeoNodeOp for CurveRevolveNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let radius = inputs.first().map(|v| v.as_float()).unwrap_or(1.0).max(0.01);
+        let radius = inputs
+            .first()
+            .map(|v| v.as_float())
+            .unwrap_or(1.0)
+            .max(0.01);
         let height = inputs.get(1).map(|v| v.as_float()).unwrap_or(2.0).max(0.01);
-        let segs = inputs.get(2).map(|v| v.as_int()).unwrap_or(16).clamp(3, 128) as u32;
-        let angle = inputs.get(3).map(|v| v.as_float()).unwrap_or(360.0).clamp(1.0, 360.0);
+        let segs = inputs
+            .get(2)
+            .map(|v| v.as_int())
+            .unwrap_or(16)
+            .clamp(3, 128) as u32;
+        let angle = inputs
+            .get(3)
+            .map(|v| v.as_float())
+            .unwrap_or(360.0)
+            .clamp(1.0, 360.0);
 
         let p0 = geo_kernel::BezierPoint::sharp(Vec3::new(0.0, 0.0, 0.0));
         let p1 = geo_kernel::BezierPoint::sharp(Vec3::new(radius, 0.0, 0.0));
@@ -164,7 +206,8 @@ impl GeoNodeOp for CurveRevolveNode {
         let p3 = geo_kernel::BezierPoint::sharp(Vec3::new(radius, height, 0.0));
         let spline = Spline::with_points(vec![p0, p1, p2, p3], false);
 
-        let mesh = spline.lathe_spline(12, segs, angle.to_radians())
+        let mesh = spline
+            .lathe_spline(12, segs, angle.to_radians())
             .map_err(|e| NodeGraphError::ExecutionError(e.to_string()))?;
 
         Ok(vec![SocketValue::Geometry(Some(mesh))])

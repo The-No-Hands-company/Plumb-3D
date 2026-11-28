@@ -142,7 +142,11 @@ impl Mesh {
         // ---------------------------------------------------------
         // Chunk 4: b"CREA" (Creased & Sharp Edges)
         // ---------------------------------------------------------
-        let creased_edges: Vec<_> = self.edges.values().filter(|e| e.crease_weight > 0.0 || e.is_sharp).collect();
+        let creased_edges: Vec<_> = self
+            .edges
+            .values()
+            .filter(|e| e.crease_weight > 0.0 || e.is_sharp)
+            .collect();
         if !creased_edges.is_empty() {
             let mut crea_bytes = Vec::new();
             crea_bytes.extend_from_slice(&(creased_edges.len() as u32).to_le_bytes());
@@ -169,9 +173,11 @@ impl Mesh {
                 vgrp_bytes.extend_from_slice(&(g_name.len() as u16).to_le_bytes());
                 vgrp_bytes.extend_from_slice(g_name);
 
-                let weights: Vec<_> = vg.weights.iter().filter_map(|(&vk, &w)| {
-                    vert_map.get(&vk).map(|&i| (i, w))
-                }).collect();
+                let weights: Vec<_> = vg
+                    .weights
+                    .iter()
+                    .filter_map(|(&vk, &w)| vert_map.get(&vk).map(|&i| (i, w)))
+                    .collect();
 
                 vgrp_bytes.extend_from_slice(&(weights.len() as u32).to_le_bytes());
                 for (v_idx, w) in weights {
@@ -225,7 +231,11 @@ impl Mesh {
         let _flags = u16::from_le_bytes([bytes[10], bytes[11]]);
         let expected_checksum = u32::from_le_bytes([bytes[12], bytes[13], bytes[14], bytes[15]]);
 
-        let file_version = PlmbVersion { major, minor, patch };
+        let file_version = PlmbVersion {
+            major,
+            minor,
+            patch,
+        };
 
         // Compatibility check
         if major > PLMB_VERSION_MAJOR {
@@ -250,7 +260,8 @@ impl Mesh {
         if payload.len() < 4 {
             return Err("Corrupted payload: missing chunk count".into());
         }
-        let chunk_count = u32::from_le_bytes([payload[0], payload[1], payload[2], payload[3]]) as usize;
+        let chunk_count =
+            u32::from_le_bytes([payload[0], payload[1], payload[2], payload[3]]) as usize;
         cursor += 4;
 
         let mut metadata = PlmbMetadata {
@@ -290,7 +301,8 @@ impl Mesh {
                     if chunk_data.len() >= 2 {
                         let name_len = u16::from_le_bytes([chunk_data[0], chunk_data[1]]) as usize;
                         if chunk_data.len() >= 2 + name_len {
-                            if let Ok(name_str) = std::str::from_utf8(&chunk_data[2..2 + name_len]) {
+                            if let Ok(name_str) = std::str::from_utf8(&chunk_data[2..2 + name_len])
+                            {
                                 metadata.model_name = name_str.to_string();
                             }
                         }
@@ -301,7 +313,12 @@ impl Mesh {
                     if chunk_data.len() < 4 {
                         return Err("Invalid GEOM chunk: missing vertex count".into());
                     }
-                    let v_count = u32::from_le_bytes([chunk_data[0], chunk_data[1], chunk_data[2], chunk_data[3]]) as usize;
+                    let v_count = u32::from_le_bytes([
+                        chunk_data[0],
+                        chunk_data[1],
+                        chunk_data[2],
+                        chunk_data[3],
+                    ]) as usize;
                     g_cur += 4;
 
                     vertex_keys.reserve(v_count);
@@ -311,14 +328,54 @@ impl Mesh {
                         if g_cur + 32 > chunk_data.len() {
                             return Err("Incomplete vertex data in GEOM chunk".into());
                         }
-                        let px = f32::from_le_bytes([chunk_data[g_cur], chunk_data[g_cur+1], chunk_data[g_cur+2], chunk_data[g_cur+3]]);
-                        let py = f32::from_le_bytes([chunk_data[g_cur+4], chunk_data[g_cur+5], chunk_data[g_cur+6], chunk_data[g_cur+7]]);
-                        let pz = f32::from_le_bytes([chunk_data[g_cur+8], chunk_data[g_cur+9], chunk_data[g_cur+10], chunk_data[g_cur+11]]);
-                        let nx = f32::from_le_bytes([chunk_data[g_cur+12], chunk_data[g_cur+13], chunk_data[g_cur+14], chunk_data[g_cur+15]]);
-                        let ny = f32::from_le_bytes([chunk_data[g_cur+16], chunk_data[g_cur+17], chunk_data[g_cur+18], chunk_data[g_cur+19]]);
-                        let nz = f32::from_le_bytes([chunk_data[g_cur+20], chunk_data[g_cur+21], chunk_data[g_cur+22], chunk_data[g_cur+23]]);
-                        let u = f32::from_le_bytes([chunk_data[g_cur+24], chunk_data[g_cur+25], chunk_data[g_cur+26], chunk_data[g_cur+27]]);
-                        let v = f32::from_le_bytes([chunk_data[g_cur+28], chunk_data[g_cur+29], chunk_data[g_cur+30], chunk_data[g_cur+31]]);
+                        let px = f32::from_le_bytes([
+                            chunk_data[g_cur],
+                            chunk_data[g_cur + 1],
+                            chunk_data[g_cur + 2],
+                            chunk_data[g_cur + 3],
+                        ]);
+                        let py = f32::from_le_bytes([
+                            chunk_data[g_cur + 4],
+                            chunk_data[g_cur + 5],
+                            chunk_data[g_cur + 6],
+                            chunk_data[g_cur + 7],
+                        ]);
+                        let pz = f32::from_le_bytes([
+                            chunk_data[g_cur + 8],
+                            chunk_data[g_cur + 9],
+                            chunk_data[g_cur + 10],
+                            chunk_data[g_cur + 11],
+                        ]);
+                        let nx = f32::from_le_bytes([
+                            chunk_data[g_cur + 12],
+                            chunk_data[g_cur + 13],
+                            chunk_data[g_cur + 14],
+                            chunk_data[g_cur + 15],
+                        ]);
+                        let ny = f32::from_le_bytes([
+                            chunk_data[g_cur + 16],
+                            chunk_data[g_cur + 17],
+                            chunk_data[g_cur + 18],
+                            chunk_data[g_cur + 19],
+                        ]);
+                        let nz = f32::from_le_bytes([
+                            chunk_data[g_cur + 20],
+                            chunk_data[g_cur + 21],
+                            chunk_data[g_cur + 22],
+                            chunk_data[g_cur + 23],
+                        ]);
+                        let u = f32::from_le_bytes([
+                            chunk_data[g_cur + 24],
+                            chunk_data[g_cur + 25],
+                            chunk_data[g_cur + 26],
+                            chunk_data[g_cur + 27],
+                        ]);
+                        let v = f32::from_le_bytes([
+                            chunk_data[g_cur + 28],
+                            chunk_data[g_cur + 29],
+                            chunk_data[g_cur + 30],
+                            chunk_data[g_cur + 31],
+                        ]);
                         g_cur += 32;
 
                         let vk = mesh.add_vertex_with_uv(vec3(px, py, pz), vec2(u, v));
@@ -331,7 +388,12 @@ impl Mesh {
                     if g_cur + 4 > chunk_data.len() {
                         return Err("Invalid GEOM chunk: missing face count".into());
                     }
-                    let f_count = u32::from_le_bytes([chunk_data[g_cur], chunk_data[g_cur+1], chunk_data[g_cur+2], chunk_data[g_cur+3]]) as usize;
+                    let f_count = u32::from_le_bytes([
+                        chunk_data[g_cur],
+                        chunk_data[g_cur + 1],
+                        chunk_data[g_cur + 2],
+                        chunk_data[g_cur + 3],
+                    ]) as usize;
                     g_cur += 4;
                     metadata.face_count = f_count as u32;
 
@@ -339,7 +401,12 @@ impl Mesh {
                         if g_cur + 4 > chunk_data.len() {
                             return Err("Incomplete face vertex count in GEOM chunk".into());
                         }
-                        let face_v_count = u32::from_le_bytes([chunk_data[g_cur], chunk_data[g_cur+1], chunk_data[g_cur+2], chunk_data[g_cur+3]]) as usize;
+                        let face_v_count = u32::from_le_bytes([
+                            chunk_data[g_cur],
+                            chunk_data[g_cur + 1],
+                            chunk_data[g_cur + 2],
+                            chunk_data[g_cur + 3],
+                        ]) as usize;
                         g_cur += 4;
 
                         let mut f_verts = Vec::with_capacity(face_v_count);
@@ -347,7 +414,12 @@ impl Mesh {
                             if g_cur + 4 > chunk_data.len() {
                                 return Err("Incomplete face vertex indices".into());
                             }
-                            let v_idx = u32::from_le_bytes([chunk_data[g_cur], chunk_data[g_cur+1], chunk_data[g_cur+2], chunk_data[g_cur+3]]) as usize;
+                            let v_idx = u32::from_le_bytes([
+                                chunk_data[g_cur],
+                                chunk_data[g_cur + 1],
+                                chunk_data[g_cur + 2],
+                                chunk_data[g_cur + 3],
+                            ]) as usize;
                             g_cur += 4;
                             if v_idx >= vertex_keys.len() {
                                 return Err("Vertex index out of bounds in face declaration".into());
@@ -356,7 +428,12 @@ impl Mesh {
                         }
 
                         let mat_id = if g_cur + 4 <= chunk_data.len() {
-                            let m = u32::from_le_bytes([chunk_data[g_cur], chunk_data[g_cur+1], chunk_data[g_cur+2], chunk_data[g_cur+3]]);
+                            let m = u32::from_le_bytes([
+                                chunk_data[g_cur],
+                                chunk_data[g_cur + 1],
+                                chunk_data[g_cur + 2],
+                                chunk_data[g_cur + 3],
+                            ]);
                             g_cur += 4;
                             m
                         } else {
@@ -373,12 +450,27 @@ impl Mesh {
                 b"SEAM" => {
                     let mut s_cur = 0usize;
                     if chunk_data.len() >= 4 {
-                        let seam_count = u32::from_le_bytes([chunk_data[0], chunk_data[1], chunk_data[2], chunk_data[3]]) as usize;
+                        let seam_count = u32::from_le_bytes([
+                            chunk_data[0],
+                            chunk_data[1],
+                            chunk_data[2],
+                            chunk_data[3],
+                        ]) as usize;
                         s_cur += 4;
                         for _ in 0..seam_count {
                             if s_cur + 8 <= chunk_data.len() {
-                                let i0 = u32::from_le_bytes([chunk_data[s_cur], chunk_data[s_cur+1], chunk_data[s_cur+2], chunk_data[s_cur+3]]) as usize;
-                                let i1 = u32::from_le_bytes([chunk_data[s_cur+4], chunk_data[s_cur+5], chunk_data[s_cur+6], chunk_data[s_cur+7]]) as usize;
+                                let i0 = u32::from_le_bytes([
+                                    chunk_data[s_cur],
+                                    chunk_data[s_cur + 1],
+                                    chunk_data[s_cur + 2],
+                                    chunk_data[s_cur + 3],
+                                ]) as usize;
+                                let i1 = u32::from_le_bytes([
+                                    chunk_data[s_cur + 4],
+                                    chunk_data[s_cur + 5],
+                                    chunk_data[s_cur + 6],
+                                    chunk_data[s_cur + 7],
+                                ]) as usize;
                                 s_cur += 8;
                                 if i0 < vertex_keys.len() && i1 < vertex_keys.len() {
                                     let v0 = vertex_keys[i0];
@@ -396,14 +488,34 @@ impl Mesh {
                 b"CREA" => {
                     let mut c_cur = 0usize;
                     if chunk_data.len() >= 4 {
-                        let crea_count = u32::from_le_bytes([chunk_data[0], chunk_data[1], chunk_data[2], chunk_data[3]]) as usize;
+                        let crea_count = u32::from_le_bytes([
+                            chunk_data[0],
+                            chunk_data[1],
+                            chunk_data[2],
+                            chunk_data[3],
+                        ]) as usize;
                         c_cur += 4;
                         for _ in 0..crea_count {
                             if c_cur + 13 <= chunk_data.len() {
-                                let i0 = u32::from_le_bytes([chunk_data[c_cur], chunk_data[c_cur+1], chunk_data[c_cur+2], chunk_data[c_cur+3]]) as usize;
-                                let i1 = u32::from_le_bytes([chunk_data[c_cur+4], chunk_data[c_cur+5], chunk_data[c_cur+6], chunk_data[c_cur+7]]) as usize;
-                                let weight = f32::from_le_bytes([chunk_data[c_cur+8], chunk_data[c_cur+9], chunk_data[c_cur+10], chunk_data[c_cur+11]]);
-                                let is_sharp = chunk_data[c_cur+12] != 0;
+                                let i0 = u32::from_le_bytes([
+                                    chunk_data[c_cur],
+                                    chunk_data[c_cur + 1],
+                                    chunk_data[c_cur + 2],
+                                    chunk_data[c_cur + 3],
+                                ]) as usize;
+                                let i1 = u32::from_le_bytes([
+                                    chunk_data[c_cur + 4],
+                                    chunk_data[c_cur + 5],
+                                    chunk_data[c_cur + 6],
+                                    chunk_data[c_cur + 7],
+                                ]) as usize;
+                                let weight = f32::from_le_bytes([
+                                    chunk_data[c_cur + 8],
+                                    chunk_data[c_cur + 9],
+                                    chunk_data[c_cur + 10],
+                                    chunk_data[c_cur + 11],
+                                ]);
+                                let is_sharp = chunk_data[c_cur + 12] != 0;
                                 c_cur += 13;
                                 if i0 < vertex_keys.len() && i1 < vertex_keys.len() {
                                     let v0 = vertex_keys[i0];
@@ -422,27 +534,58 @@ impl Mesh {
                 b"VGRP" => {
                     let mut vg_cur = 0usize;
                     if chunk_data.len() >= 4 {
-                        let vg_count = u32::from_le_bytes([chunk_data[0], chunk_data[1], chunk_data[2], chunk_data[3]]) as usize;
+                        let vg_count = u32::from_le_bytes([
+                            chunk_data[0],
+                            chunk_data[1],
+                            chunk_data[2],
+                            chunk_data[3],
+                        ]) as usize;
                         vg_cur += 4;
                         for _ in 0..vg_count {
                             if vg_cur + 2 <= chunk_data.len() {
-                                let n_len = u16::from_le_bytes([chunk_data[vg_cur], chunk_data[vg_cur+1]]) as usize;
+                                let n_len = u16::from_le_bytes([
+                                    chunk_data[vg_cur],
+                                    chunk_data[vg_cur + 1],
+                                ]) as usize;
                                 vg_cur += 2;
                                 if vg_cur + n_len <= chunk_data.len() {
-                                    if let Ok(name) = std::str::from_utf8(&chunk_data[vg_cur..vg_cur + n_len]) {
+                                    if let Ok(name) =
+                                        std::str::from_utf8(&chunk_data[vg_cur..vg_cur + n_len])
+                                    {
                                         mesh.add_vertex_group(name);
                                         vg_cur += n_len;
 
                                         if vg_cur + 4 <= chunk_data.len() {
-                                            let w_count = u32::from_le_bytes([chunk_data[vg_cur], chunk_data[vg_cur+1], chunk_data[vg_cur+2], chunk_data[vg_cur+3]]) as usize;
+                                            let w_count = u32::from_le_bytes([
+                                                chunk_data[vg_cur],
+                                                chunk_data[vg_cur + 1],
+                                                chunk_data[vg_cur + 2],
+                                                chunk_data[vg_cur + 3],
+                                            ])
+                                                as usize;
                                             vg_cur += 4;
                                             for _ in 0..w_count {
                                                 if vg_cur + 8 <= chunk_data.len() {
-                                                    let v_idx = u32::from_le_bytes([chunk_data[vg_cur], chunk_data[vg_cur+1], chunk_data[vg_cur+2], chunk_data[vg_cur+3]]) as usize;
-                                                    let w = f32::from_le_bytes([chunk_data[vg_cur+4], chunk_data[vg_cur+5], chunk_data[vg_cur+6], chunk_data[vg_cur+7]]);
+                                                    let v_idx = u32::from_le_bytes([
+                                                        chunk_data[vg_cur],
+                                                        chunk_data[vg_cur + 1],
+                                                        chunk_data[vg_cur + 2],
+                                                        chunk_data[vg_cur + 3],
+                                                    ])
+                                                        as usize;
+                                                    let w = f32::from_le_bytes([
+                                                        chunk_data[vg_cur + 4],
+                                                        chunk_data[vg_cur + 5],
+                                                        chunk_data[vg_cur + 6],
+                                                        chunk_data[vg_cur + 7],
+                                                    ]);
                                                     vg_cur += 8;
                                                     if v_idx < vertex_keys.len() {
-                                                        mesh.set_vertex_weight(name, vertex_keys[v_idx], w);
+                                                        mesh.set_vertex_weight(
+                                                            name,
+                                                            vertex_keys[v_idx],
+                                                            w,
+                                                        );
                                                     }
                                                 }
                                             }
@@ -477,7 +620,8 @@ mod tests {
         assert_eq!(&plmb_bytes[0..4], b"PLMB");
         assert!(plmb_bytes.len() > 100);
 
-        let (loaded_mesh, meta) = Mesh::from_plmb(&plmb_bytes).expect("Failed to deserialize .plmb");
+        let (loaded_mesh, meta) =
+            Mesh::from_plmb(&plmb_bytes).expect("Failed to deserialize .plmb");
         assert_eq!(meta.model_name, "TestCube");
         assert_eq!(meta.version, PlmbVersion::CURRENT);
         assert_eq!(loaded_mesh.vertices.len(), cube.vertices.len());
@@ -510,6 +654,8 @@ mod tests {
 
         let err = Mesh::from_plmb(&plmb_bytes);
         assert!(err.is_err());
-        assert!(err.unwrap_err().contains("created with newer Plumb 3D version"));
+        assert!(err
+            .unwrap_err()
+            .contains("created with newer Plumb 3D version"));
     }
 }

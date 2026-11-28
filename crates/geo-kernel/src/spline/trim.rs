@@ -34,10 +34,13 @@ impl TangentArc {
         let len_start = v_start.length();
         let len_end = v_end.length();
         if len_start < 1e-4 || len_end < 1e-4 {
-            return Spline::with_points(vec![
-                BezierPoint::sharp(self.start_point),
-                BezierPoint::sharp(self.end_point),
-            ], false);
+            return Spline::with_points(
+                vec![
+                    BezierPoint::sharp(self.start_point),
+                    BezierPoint::sharp(self.end_point),
+                ],
+                false,
+            );
         }
 
         let u_start = v_start / len_start;
@@ -51,7 +54,11 @@ impl TangentArc {
         let t_end = self.normal.cross(u_end).normalize_or_zero();
 
         // Orient tangents along the arc direction from start_point to end_point
-        let dir_sign = if t_start.dot(self.end_point - self.start_point) >= 0.0 { 1.0 } else { -1.0 };
+        let dir_sign = if t_start.dot(self.end_point - self.start_point) >= 0.0 {
+            1.0
+        } else {
+            -1.0
+        };
         let t_start_directed = t_start * dir_sign;
         let t_end_directed = t_end * dir_sign;
 
@@ -91,12 +98,16 @@ impl Spline {
 
         for (idx_a, p_a0, p_a1, t_a0, t_a1) in &segs_a {
             for (idx_b, p_b0, p_b1, t_b0, t_b1) in &segs_b {
-                if let Some((pt, u_a, u_b)) = segment_segment_intersection(*p_a0, *p_a1, *p_b0, *p_b1, tol_sq) {
+                if let Some((pt, u_a, u_b)) =
+                    segment_segment_intersection(*p_a0, *p_a1, *p_b0, *p_b1, tol_sq)
+                {
                     let final_t_a = t_a0 + u_a * (t_a1 - t_a0);
                     let final_t_b = t_b0 + u_b * (t_b1 - t_b0);
 
                     // Avoid duplicate nearby intersections
-                    let is_dup = results.iter().any(|r: &SplineIntersection| (r.point - pt).length_squared() < tol_sq);
+                    let is_dup = results
+                        .iter()
+                        .any(|r: &SplineIntersection| (r.point - pt).length_squared() < tol_sq);
                     if !is_dup {
                         results.push(SplineIntersection {
                             point: pt,
@@ -122,7 +133,11 @@ impl Spline {
 
         // Sort intersections by segment index and parameter t_a descending so insertions don't invalidate indices
         intersections.sort_by(|a, b| {
-            b.segment_a.cmp(&a.segment_a).then_with(|| b.t_a.partial_cmp(&a.t_a).unwrap_or(std::cmp::Ordering::Equal))
+            b.segment_a.cmp(&a.segment_a).then_with(|| {
+                b.t_a
+                    .partial_cmp(&a.t_a)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
         });
 
         let mut out = self.clone();
@@ -136,7 +151,12 @@ impl Spline {
     }
 
     /// Trims this spline against another cutting spline, keeping either the segments inside or outside the cutter.
-    pub fn trim_with_spline(&self, cutter: &Spline, keep_inside: bool, tolerance: f32) -> Vec<Spline> {
+    pub fn trim_with_spline(
+        &self,
+        cutter: &Spline,
+        keep_inside: bool,
+        tolerance: f32,
+    ) -> Vec<Spline> {
         let split = self.split_at_intersections(cutter, tolerance);
         let n = split.points.len();
         if n < 2 {
@@ -275,11 +295,26 @@ impl Spline {
             return None; // Collinear points
         }
         let norm = axb / n_sq.sqrt();
-        let center = p1 + (b * a.length_squared() - a * b.length_squared()).cross(axb) / (2.0 * n_sq);
+        let center =
+            p1 + (b * a.length_squared() - a * b.length_squared()).cross(axb) / (2.0 * n_sq);
         let radius = (p1 - center).length();
 
-        let arc1 = TangentArc { center, radius, start_point: p1, end_point: p2, normal: norm }.to_spline();
-        let arc2 = TangentArc { center, radius, start_point: p2, end_point: p3, normal: norm }.to_spline();
+        let arc1 = TangentArc {
+            center,
+            radius,
+            start_point: p1,
+            end_point: p2,
+            normal: norm,
+        }
+        .to_spline();
+        let arc2 = TangentArc {
+            center,
+            radius,
+            start_point: p2,
+            end_point: p3,
+            normal: norm,
+        }
+        .to_spline();
 
         let mut pts = arc1.points;
         if pts.len() >= 2 && arc2.points.len() >= 2 {
@@ -291,7 +326,11 @@ impl Spline {
 
     /// Finds the nearest tangent snap point along this spline from an external cursor or reference point.
     pub fn snap_tangent_to_curve(&self, cursor_pt: Vec3) -> Option<(usize, f32, Vec3)> {
-        let seg_count = if self.is_closed { self.points.len() } else { self.points.len().saturating_sub(1) };
+        let seg_count = if self.is_closed {
+            self.points.len()
+        } else {
+            self.points.len().saturating_sub(1)
+        };
         if seg_count == 0 {
             return None;
         }
@@ -332,7 +371,11 @@ impl Spline {
     fn tessellate_segments(&self, steps_per_seg: usize) -> Vec<(usize, Vec3, Vec3, f32, f32)> {
         let mut segments = Vec::new();
         let n = self.points.len();
-        let seg_count = if self.is_closed { n } else { n.saturating_sub(1) };
+        let seg_count = if self.is_closed {
+            n
+        } else {
+            n.saturating_sub(1)
+        };
 
         for i in 0..seg_count {
             let next_i = (i + 1) % n;
@@ -397,8 +440,14 @@ mod tests {
 
     #[test]
     fn test_spline_intersection_and_trim() {
-        let a = Spline::polyline(&[Vec3::new(-2.0, 0.0, 0.0), Vec3::new(2.0, 0.0, 0.0)], false);
-        let b = Spline::polyline(&[Vec3::new(0.0, 0.0, -2.0), Vec3::new(0.0, 0.0, 2.0)], false);
+        let a = Spline::polyline(
+            &[Vec3::new(-2.0, 0.0, 0.0), Vec3::new(2.0, 0.0, 0.0)],
+            false,
+        );
+        let b = Spline::polyline(
+            &[Vec3::new(0.0, 0.0, -2.0), Vec3::new(0.0, 0.0, 2.0)],
+            false,
+        );
 
         let isects = a.find_intersections(&b, 0.1);
         assert_eq!(isects.len(), 1);

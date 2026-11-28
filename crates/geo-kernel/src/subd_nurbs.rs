@@ -74,12 +74,7 @@ fn bernstein_poly_cubic(t: f32) -> [f32; 4] {
     let om_t2 = om_t * om_t;
     let om_t3 = om_t2 * om_t;
 
-    [
-        om_t3,
-        3.0 * t * om_t2,
-        3.0 * t2 * om_t,
-        t3,
-    ]
+    [om_t3, 3.0 * t * om_t2, 3.0 * t2 * om_t, t3]
 }
 
 /// Evaluates derivatives of cubic Bernstein polynomials dB_i,3/dt for i in 0..4
@@ -191,8 +186,12 @@ pub fn export_subd_nurbs_step(mesh: &Mesh, model_name: &str) -> String {
     out.push_str("DATA;\n");
 
     let mut id = 10;
-    out.push_str(&format!("#{} = APPLICATION_CONTEXT('mechanical design');\n", id));
-    let ctx_id = id; id += 1;
+    out.push_str(&format!(
+        "#{} = APPLICATION_CONTEXT('mechanical design');\n",
+        id
+    ));
+    let ctx_id = id;
+    id += 1;
     out.push_str(&format!("#{} = APPLICATION_PROTOCOL_DEFINITION('international standard','config_control_design',2026,#{}) ;\n", id, ctx_id));
     id += 1;
 
@@ -216,10 +215,14 @@ pub fn export_subd_nurbs_step(mesh: &Mesh, model_name: &str) -> String {
         // 2. Write B_SPLINE_SURFACE_WITH_KNOTS entity
         let mut grid_str = String::new();
         for i in 0..4 {
-            if i > 0 { grid_str.push(','); }
+            if i > 0 {
+                grid_str.push(',');
+            }
             grid_str.push('(');
             for j in 0..4 {
-                if j > 0 { grid_str.push(','); }
+                if j > 0 {
+                    grid_str.push(',');
+                }
                 grid_str.push_str(&format!("#{}", cp_ids[i][j]));
             }
             grid_str.push(')');
@@ -244,7 +247,11 @@ pub fn export_subd_nurbs_step(mesh: &Mesh, model_name: &str) -> String {
 
     // 4. Closed Shell & Manifold Solid B-Rep
     let shell_id = id;
-    let faces_str = face_ids.iter().map(|f| format!("#{}", f)).collect::<Vec<_>>().join(",");
+    let faces_str = face_ids
+        .iter()
+        .map(|f| format!("#{}", f))
+        .collect::<Vec<_>>()
+        .join(",");
     out.push_str(&format!(
         "#{} = CLOSED_SHELL('SubD_NURBS_Shell',({}));\n",
         shell_id, faces_str
@@ -264,7 +271,10 @@ pub fn export_subd_nurbs_step(mesh: &Mesh, model_name: &str) -> String {
 
 impl Mesh {
     /// Converts this mesh's subdivision limit surface to an exact ISO 10303-21 STEP CAD file
-    pub fn export_subd_nurbs_step_file<P: AsRef<Path>>(&self, path: P) -> Result<(), std::io::Error> {
+    pub fn export_subd_nurbs_step_file<P: AsRef<Path>>(
+        &self,
+        path: P,
+    ) -> Result<(), std::io::Error> {
         let stem = path
             .as_ref()
             .file_stem()

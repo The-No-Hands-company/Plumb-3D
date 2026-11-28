@@ -32,17 +32,18 @@ pub fn handle_mouse_input(state: &mut AppState, button: MouseButton, is_pressed:
             state.show_context_menu = false;
             state.is_panning = is_pressed;
         }
-        MouseButton::Right
-            if is_pressed => {
-                if let Some((x, y)) = state.last_mouse_pos {
-                    if state.interaction_mode == InteractionMode::Object || state.selected_node.is_none() {
-                        state.pick_at_screen_pos(x, y);
-                    }
-                    state.context_menu_pos = Some((x as f32, y as f32));
-                    state.show_context_menu = true;
-                    state.window.request_redraw();
+        MouseButton::Right if is_pressed => {
+            if let Some((x, y)) = state.last_mouse_pos {
+                if state.interaction_mode == InteractionMode::Object
+                    || state.selected_node.is_none()
+                {
+                    state.pick_at_screen_pos(x, y);
                 }
+                state.context_menu_pos = Some((x as f32, y as f32));
+                state.show_context_menu = true;
+                state.window.request_redraw();
             }
+        }
         _ => {}
     }
 }
@@ -72,14 +73,20 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
         if state.box_select_start.is_some() {
             state.box_select_current = Some((position.x as f32, position.y as f32));
             state.window.request_redraw();
-        } else if state.is_box_selecting && state.selection_tool_mode == SelectionToolMode::Lasso && !state.lasso_points.is_empty() {
+        } else if state.is_box_selecting
+            && state.selection_tool_mode == SelectionToolMode::Lasso
+            && !state.lasso_points.is_empty()
+        {
             let (px, py) = (position.x as f32, position.y as f32);
             let last = state.lasso_points.last().copied().unwrap_or((px, py));
             if (px - last.0).abs() > 3.0 || (py - last.1).abs() > 3.0 {
                 state.lasso_points.push((px, py));
                 state.window.request_redraw();
             }
-        } else if state.is_box_selecting && state.selection_tool_mode == SelectionToolMode::CirclePaint && state.last_mouse_pos.is_some() {
+        } else if state.is_box_selecting
+            && state.selection_tool_mode == SelectionToolMode::CirclePaint
+            && state.last_mouse_pos.is_some()
+        {
             let (px, py) = (position.x as f32, position.y as f32);
             state.select_in_circle((px, py), state.circle_select_radius);
             state.window.request_redraw();
@@ -93,9 +100,13 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
             let ray = state.get_screen_ray(position.x, position.y);
             if let Some(gizmo_origin) = state.get_gizmo_world_position() {
                 let gizmo_orient = state.get_gizmo_orientation();
-                let dist = (state.camera.eye_position() - gizmo_origin).length().max(0.1);
+                let dist = (state.camera.eye_position() - gizmo_origin)
+                    .length()
+                    .max(0.1);
                 let scale = (dist * 0.16).clamp(0.4, 30.0);
-                let hovered = state.gizmo.hit_test_scaled(&ray, gizmo_origin, gizmo_orient, scale);
+                let hovered = state
+                    .gizmo
+                    .hit_test_scaled(&ray, gizmo_origin, gizmo_orient, scale);
                 if hovered != state.hovered_gizmo_axis {
                     state.hovered_gizmo_axis = hovered;
                     state.window.request_redraw();

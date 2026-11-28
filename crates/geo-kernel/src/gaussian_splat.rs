@@ -8,7 +8,7 @@ pub struct GaussianSplat {
     pub scale: Vec3,
     pub rotation: [f32; 4], // Quaternion (w, x, y, z)
     pub opacity: f32,       // Sigmoid activated opacity [0, 1]
-    pub color: [f32; 3],     // Linear RGB radiance from spherical harmonics SH_0
+    pub color: [f32; 3],    // Linear RGB radiance from spherical harmonics SH_0
 }
 
 impl Default for GaussianSplat {
@@ -31,9 +31,7 @@ pub struct GaussianCloud {
 
 impl GaussianCloud {
     pub fn new() -> Self {
-        Self {
-            splats: Vec::new(),
-        }
+        Self { splats: Vec::new() }
     }
 
     /// Synthesizes a 3D Gaussian Splat cloud from an existing surface mesh (useful for scan simulation)
@@ -65,7 +63,9 @@ impl GaussianCloud {
             let depth_a = (a.position - camera_pos).dot(dir);
             let depth_b = (b.position - camera_pos).dot(dir);
             // Sort descending: farthest first for front-to-back or back-to-front compositing
-            depth_b.partial_cmp(&depth_a).unwrap_or(std::cmp::Ordering::Equal)
+            depth_b
+                .partial_cmp(&depth_a)
+                .unwrap_or(std::cmp::Ordering::Equal)
         });
     }
 
@@ -191,11 +191,7 @@ mod tests {
             ..Default::default()
         });
 
-        let proj = cloud.evaluate_splat_projection(
-            0,
-            vec3(0.0, 0.0, 0.0),
-            vec3(0.0, 0.0, 1.0),
-        );
+        let proj = cloud.evaluate_splat_projection(0, vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0));
 
         assert!(proj.is_some());
         let (screen_pos, conic) = proj.unwrap();

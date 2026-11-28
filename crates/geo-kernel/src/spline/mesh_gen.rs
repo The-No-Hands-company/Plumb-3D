@@ -1,7 +1,7 @@
+use crate::mesh::{EdgeKey, Mesh, MeshError, VertexKey};
+use core_math::{vec2, Vec2, Vec3};
 use std::collections::{HashMap, HashSet};
 use std::f32::consts::PI;
-use core_math::{vec2, Vec2, Vec3};
-use crate::mesh::{EdgeKey, Mesh, MeshError, VertexKey};
 
 use super::profiles::ProfileShape;
 use super::types::{BezierPoint, Spline};
@@ -19,8 +19,18 @@ impl Spline {
     }
 
     /// Converts the spline directly into a 3D cylindrical pipe/tube mesh.
-    pub fn to_pipe_mesh(&self, radius: f32, radial_segments: usize, samples_per_segment: usize) -> Result<Mesh, MeshError> {
-        self.to_extruded_mesh(ProfileShape::Circle, radius, radial_segments, samples_per_segment)
+    pub fn to_pipe_mesh(
+        &self,
+        radius: f32,
+        radial_segments: usize,
+        samples_per_segment: usize,
+    ) -> Result<Mesh, MeshError> {
+        self.to_extruded_mesh(
+            ProfileShape::Circle,
+            radius,
+            radial_segments,
+            samples_per_segment,
+        )
     }
 
     /// Converts the spline directly into a 3D extruded mesh using the specified cross-section profile.
@@ -59,7 +69,8 @@ impl Mesh {
         }
 
         // 2. Identify start vertex: endpoint (degree == 1) if open, or any vertex if closed
-        let start_vk = adj.iter()
+        let start_vk = adj
+            .iter()
             .find(|(_, neighbors)| neighbors.len() == 1)
             .map(|(&vk, _)| vk)
             .or_else(|| adj.keys().next().copied())
@@ -74,9 +85,9 @@ impl Mesh {
         let mut is_closed = false;
         loop {
             // Find next unvisited edge incident to current_vk
-            let next_step = adj.get(&current_vk).and_then(|neighbors| {
-                neighbors.iter().find(|(_, ek)| !visited_edges.contains(ek))
-            });
+            let next_step = adj
+                .get(&current_vk)
+                .and_then(|neighbors| neighbors.iter().find(|(_, ek)| !visited_edges.contains(ek)));
 
             if let Some(&(next_vk, ek)) = next_step {
                 visited_edges.insert(ek);

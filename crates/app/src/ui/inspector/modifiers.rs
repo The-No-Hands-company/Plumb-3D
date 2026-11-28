@@ -19,130 +19,146 @@ pub fn draw_modifiers_panel(
         ui.heading("3ds Max Modifier Stack");
         let node_name = &node.name;
 
-                        if let NodeData::Mesh { modifier_stack, .. } = &mut node.data {
-                            ui.horizontal(|ui| {
-                                ui.menu_button("+ Add Modifier", |ui| {
-                                    ui.set_min_width(180.0);
-                                    ui.label(egui::RichText::new("GENERATE").small().color(egui::Color32::from_rgb(100, 180, 255)));
-                                    if ui.button("Geometry Nodes").clicked() {
-                                        actions.add_geometry_nodes_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Subdivide (Catmull-Clark)").clicked() {
-                                        actions.add_catmull_clark_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Linear Subdivide").clicked() {
-                                        actions.add_subdivide_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Solidify (Thicken)").clicked() {
-                                        actions.add_solidify_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Array (Duplicate)").clicked() {
-                                        actions.add_array_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Bevel (Chamfer)").clicked() {
-                                        actions.add_bevel_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Boolean Cut (Difference)").clicked() {
-                                        actions.add_boolean_diff = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Decimate (QEM Simplify)").clicked() {
-                                        actions.add_decimate_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Screw (Lathe / Revolve)").clicked() {
-                                        actions.add_screw_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Triangulate").clicked() {
-                                        actions.add_triangulate_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Wireframe").clicked() {
-                                        actions.add_wireframe_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Skin Envelope (ZSpheres)").clicked() {
-                                        actions.add_skin_envelope_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Voxel Remesh (DynaMesh)").clicked() {
-                                        actions.add_remesh_to_selected = true;
-                                        ui.close_menu();
-                                    }
+        if let NodeData::Mesh { modifier_stack, .. } = &mut node.data {
+            ui.horizontal(|ui| {
+                ui.menu_button("+ Add Modifier", |ui| {
+                    ui.set_min_width(180.0);
+                    ui.label(
+                        egui::RichText::new("GENERATE")
+                            .small()
+                            .color(egui::Color32::from_rgb(100, 180, 255)),
+                    );
+                    if ui.button("Geometry Nodes").clicked() {
+                        actions.add_geometry_nodes_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Subdivide (Catmull-Clark)").clicked() {
+                        actions.add_catmull_clark_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Linear Subdivide").clicked() {
+                        actions.add_subdivide_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Solidify (Thicken)").clicked() {
+                        actions.add_solidify_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Array (Duplicate)").clicked() {
+                        actions.add_array_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Bevel (Chamfer)").clicked() {
+                        actions.add_bevel_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Boolean Cut (Difference)").clicked() {
+                        actions.add_boolean_diff = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Decimate (QEM Simplify)").clicked() {
+                        actions.add_decimate_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Screw (Lathe / Revolve)").clicked() {
+                        actions.add_screw_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Triangulate").clicked() {
+                        actions.add_triangulate_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Wireframe").clicked() {
+                        actions.add_wireframe_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Skin Envelope (ZSpheres)").clicked() {
+                        actions.add_skin_envelope_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Voxel Remesh (DynaMesh)").clicked() {
+                        actions.add_remesh_to_selected = true;
+                        ui.close_menu();
+                    }
 
-                                    ui.separator();
-                                    ui.label(egui::RichText::new("DEFORM").small().color(egui::Color32::from_rgb(255, 180, 100)));
-                                    if ui.button("Displace (Texture / Normal)").clicked() {
-                                        actions.add_displace_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Simple Deform (Twist/Bend)").clicked() {
-                                        actions.add_simple_deform_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Taper").clicked() {
-                                        actions.add_taper_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Smooth (Relax)").clicked() {
-                                        actions.add_smooth_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Shrinkwrap (Wrap onto mesh)").clicked() {
-                                        actions.add_shrinkwrap_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Curve Deform (Path follow)").clicked() {
-                                        actions.add_curve_mod_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Lattice (FFD Cage)").clicked() {
-                                        actions.add_lattice_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    ui.separator();
-                                    ui.label(egui::RichText::new("SIMULATION & DYNAMICS").small().color(egui::Color32::from_rgb(255, 140, 180)));
-                                    if ui.button("Cloth Simulation").clicked() {
-                                        actions.add_cloth_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Particle System").clicked() {
-                                        actions.add_particle_system_to_selected = true;
-                                        ui.close_menu();
-                                    }
+                    ui.separator();
+                    ui.label(
+                        egui::RichText::new("DEFORM")
+                            .small()
+                            .color(egui::Color32::from_rgb(255, 180, 100)),
+                    );
+                    if ui.button("Displace (Texture / Normal)").clicked() {
+                        actions.add_displace_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Simple Deform (Twist/Bend)").clicked() {
+                        actions.add_simple_deform_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Taper").clicked() {
+                        actions.add_taper_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Smooth (Relax)").clicked() {
+                        actions.add_smooth_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Shrinkwrap (Wrap onto mesh)").clicked() {
+                        actions.add_shrinkwrap_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Curve Deform (Path follow)").clicked() {
+                        actions.add_curve_mod_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Lattice (FFD Cage)").clicked() {
+                        actions.add_lattice_to_selected = true;
+                        ui.close_menu();
+                    }
+                    ui.separator();
+                    ui.label(
+                        egui::RichText::new("SIMULATION & DYNAMICS")
+                            .small()
+                            .color(egui::Color32::from_rgb(255, 140, 180)),
+                    );
+                    if ui.button("Cloth Simulation").clicked() {
+                        actions.add_cloth_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Particle System").clicked() {
+                        actions.add_particle_system_to_selected = true;
+                        ui.close_menu();
+                    }
 
-                                    ui.separator();
-                                    ui.label(egui::RichText::new("MODIFY & NORMALS").small().color(egui::Color32::from_rgb(180, 255, 100)));
-                                    if ui.button("Mirror (Symmetry)").clicked() {
-                                        actions.add_mirror_to_selected = Some(MirrorAxis::X);
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Vertex Weld (Merge by dist)").clicked() {
-                                        actions.add_weld_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Weighted Normal").clicked() {
-                                        actions.add_weighted_normal_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                    if ui.button("Morpher (Blendshapes)").clicked() {
-                                        actions.add_morpher_to_selected = true;
-                                        ui.close_menu();
-                                    }
-                                });
-                            });
+                    ui.separator();
+                    ui.label(
+                        egui::RichText::new("MODIFY & NORMALS")
+                            .small()
+                            .color(egui::Color32::from_rgb(180, 255, 100)),
+                    );
+                    if ui.button("Mirror (Symmetry)").clicked() {
+                        actions.add_mirror_to_selected = Some(MirrorAxis::X);
+                        ui.close_menu();
+                    }
+                    if ui.button("Vertex Weld (Merge by dist)").clicked() {
+                        actions.add_weld_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Weighted Normal").clicked() {
+                        actions.add_weighted_normal_to_selected = true;
+                        ui.close_menu();
+                    }
+                    if ui.button("Morpher (Blendshapes)").clicked() {
+                        actions.add_morpher_to_selected = true;
+                        ui.close_menu();
+                    }
+                });
+            });
 
-                            ui.separator();
-                            let mod_count = modifier_stack.modifiers().len();
-                            for (i, modifier) in modifier_stack.modifiers_mut().iter_mut().enumerate() {
-                                ui.group(|ui| {
+            ui.separator();
+            let mod_count = modifier_stack.modifiers().len();
+            for (i, modifier) in modifier_stack.modifiers_mut().iter_mut().enumerate() {
+                ui.group(|ui| {
                                     ui.horizontal(|ui| {
                                         let mut enabled = modifier.is_enabled();
                                         if ui.checkbox(&mut enabled, "").changed() {
@@ -589,18 +605,21 @@ pub fn draw_modifiers_panel(
                                                 let count = morph_mod.targets.len() + 1;
                                                 morph_mod.add_target(MorphTarget::new(format!("Channel_{}", count)));
                                             }
-                                            
                                             if ui.add_enabled(can_capture, egui::Button::new("Capture Target from Selection")).clicked() {
                                                 actions.trigger_capture_morph_target = true;
                                             }
                                         });
                                     }
                                 });
-                            }
-                            if !modifier_stack.modifiers().is_empty()
-                                && ui.button("Collapse All Modifiers").on_hover_text("Bake entire stack into base mesh").clicked() {
-                                    actions.collapse_modifiers = true;
-                                }
-                        }
+            }
+            if !modifier_stack.modifiers().is_empty()
+                && ui
+                    .button("Collapse All Modifiers")
+                    .on_hover_text("Bake entire stack into base mesh")
+                    .clicked()
+            {
+                actions.collapse_modifiers = true;
+            }
+        }
     }
 }

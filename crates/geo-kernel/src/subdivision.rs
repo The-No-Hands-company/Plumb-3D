@@ -156,7 +156,9 @@ impl CatmullClarkModifier {
                 smooth_pos * (1.0 - c_avg) + crease_pos * c_avg
             } else {
                 // Corner / junction (>=3 creased edges): vertex remains fixed at V_old
-                let c_avg = (creased_edges.iter().map(|(_, c)| *c).sum::<f32>() / creased_edges.len() as f32).clamp(0.0, 1.0);
+                let c_avg = (creased_edges.iter().map(|(_, c)| *c).sum::<f32>()
+                    / creased_edges.len() as f32)
+                    .clamp(0.0, 1.0);
                 smooth_pos * (1.0 - c_avg) + v_old * c_avg
             };
 
@@ -186,8 +188,16 @@ impl CatmullClarkModifier {
                 let v_prev = v_keys[(i + n - 1) % n];
                 let v_next = v_keys[(i + 1) % n];
 
-                let pair_next = if v_curr < v_next { (v_curr, v_next) } else { (v_next, v_curr) };
-                let pair_prev = if v_prev < v_curr { (v_prev, v_curr) } else { (v_curr, v_prev) };
+                let pair_next = if v_curr < v_next {
+                    (v_curr, v_next)
+                } else {
+                    (v_next, v_curr)
+                };
+                let pair_prev = if v_prev < v_curr {
+                    (v_prev, v_curr)
+                } else {
+                    (v_curr, v_prev)
+                };
 
                 let new_curr = old_to_new_v[&v_curr];
                 let edge_next = edge_point_vks[&pair_next];
@@ -204,7 +214,11 @@ impl CatmullClarkModifier {
                 let v0 = he.origin;
                 let v1 = he.target;
                 let pair = if v0 < v1 { (v0, v1) } else { (v1, v0) };
-                if let (Some(&new_v0), Some(&new_v1), Some(&edge_pt)) = (old_to_new_v.get(&v0), old_to_new_v.get(&v1), edge_point_vks.get(&pair)) {
+                if let (Some(&new_v0), Some(&new_v1), Some(&edge_pt)) = (
+                    old_to_new_v.get(&v0),
+                    old_to_new_v.get(&v1),
+                    edge_point_vks.get(&pair),
+                ) {
                     if let Some(e_a) = sub.find_edge(new_v0, edge_pt) {
                         sub.set_edge_crease(e_a, edge.crease_weight);
                     }

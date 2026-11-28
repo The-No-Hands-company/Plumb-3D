@@ -520,12 +520,8 @@ pub fn create_grid_pipeline(
 
     // Fullscreen screen-space quad in NDC [-1, 1] for raycast infinite ground grid
     let grid_vertices: [f32; 18] = [
-        -1.0, -1.0, 0.0,
-         1.0, -1.0, 0.0,
-         1.0,  1.0, 0.0,
-        -1.0, -1.0, 0.0,
-         1.0,  1.0, 0.0,
-        -1.0,  1.0, 0.0,
+        -1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, 1.0,
+        0.0,
     ];
 
     let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {

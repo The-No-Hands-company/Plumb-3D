@@ -14,11 +14,19 @@ pub fn render_lunar_step_buttons(
     match step {
         0 => {
             let has_moon = state.scene.nodes.values().any(|n| n.name == "Moon_Body");
-            let btn_text = if has_moon { "✓ Moon Sphere Ready (Refocus View)" } else { "➕ Spawn Moon UV Sphere (128x128)" };
+            let btn_text = if has_moon {
+                "✓ Moon Sphere Ready (Refocus View)"
+            } else {
+                "➕ Spawn Moon UV Sphere (128x128)"
+            };
             if ui.button(btn_text).clicked() {
                 if !has_moon {
                     let moon_mesh = geo_kernel::Primitives::create_uv_sphere(3.0, 128, 128);
-                    let moon_node = graph_engine::SceneNode::new_mesh("Moon_Body", Transform::IDENTITY, moon_mesh);
+                    let moon_node = graph_engine::SceneNode::new_mesh(
+                        "Moon_Body",
+                        Transform::IDENTITY,
+                        moon_mesh,
+                    );
                     let id = state.scene.add_node(moon_node);
                     state.selected_node = Some(id);
                     state.sync_gpu_meshes();
@@ -28,8 +36,12 @@ pub fn render_lunar_step_buttons(
             }
         }
         1 => {
-            if ui.button("🎨 Assign NASA 2K Cartography & Regolith Maps").clicked() {
-                let (albedo_path, normal_path) = crate::scenes::lunar_textures::ensure_lunar_textures_exist();
+            if ui
+                .button("🎨 Assign NASA 2K Cartography & Regolith Maps")
+                .clicked()
+            {
+                let (albedo_path, normal_path) =
+                    crate::scenes::lunar_textures::ensure_lunar_textures_exist();
                 let mut mat_regolith = graph_engine::Material::new(
                     "LunarRegolith",
                     [1.0, 1.0, 1.0, 1.0],
@@ -42,7 +54,10 @@ pub fn render_lunar_step_buttons(
                 mat_regolith.normal_texture_path = Some(normal_path);
                 for (_id, node) in state.scene.nodes.iter_mut() {
                     if node.name == "Moon_Body" {
-                        if let graph_engine::NodeData::Mesh { ref mut materials, .. } = node.data {
+                        if let graph_engine::NodeData::Mesh {
+                            ref mut materials, ..
+                        } = node.data
+                        {
                             if materials.is_empty() {
                                 materials.push(mat_regolith.clone());
                             } else {
@@ -52,13 +67,18 @@ pub fn render_lunar_step_buttons(
                     }
                 }
                 state.sync_gpu_meshes();
-                state.set_status_message("🎨 Assigned 2K NASA Regolith PBR Material & Normal Relief!");
+                state.set_status_message(
+                    "🎨 Assigned 2K NASA Regolith PBR Material & Normal Relief!",
+                );
             }
         }
         2 => {
             let has_sun = state.scene.nodes.values().any(|n| n.name == "Sun_KeyLight");
             if !has_sun {
-                if ui.button("➕ Add Directional Sun & Earthshine Lights").clicked() {
+                if ui
+                    .button("➕ Add Directional Sun & Earthshine Lights")
+                    .clicked()
+                {
                     let sun = graph_engine::SceneNode::new_directional_light(
                         "Sun_KeyLight",
                         Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.2, 0.65, 0.0)),
@@ -73,7 +93,9 @@ pub fn render_lunar_step_buttons(
                         0.25,
                     );
                     state.scene.add_node(earthshine);
-                    state.set_status_message("☀️ Solar Key Light and Earthshine Fill added to scene!");
+                    state.set_status_message(
+                        "☀️ Solar Key Light and Earthshine Fill added to scene!",
+                    );
                 }
             } else {
                 ui.horizontal(|ui| {
@@ -87,13 +109,25 @@ pub fn render_lunar_step_buttons(
             }
         }
         3 => {
-            if ui.button("🌌 Bind ESO 360 Deep Space Milky Way Skybox").clicked() {
-                state.set_status_message("🌌 ESO 360 Deep Space Milky Way Panorama active in Skybox!");
+            if ui
+                .button("🌌 Bind ESO 360 Deep Space Milky Way Skybox")
+                .clicked()
+            {
+                state.set_status_message(
+                    "🌌 ESO 360 Deep Space Milky Way Panorama active in Skybox!",
+                );
             }
         }
         4 => {
-            if ui.button("📷 Setup Telephoto Astrophotography Camera").clicked() {
-                let has_cam = state.scene.nodes.values().any(|n| n.name == "Astrophotography_Camera");
+            if ui
+                .button("📷 Setup Telephoto Astrophotography Camera")
+                .clicked()
+            {
+                let has_cam = state
+                    .scene
+                    .nodes
+                    .values()
+                    .any(|n| n.name == "Astrophotography_Camera");
                 if !has_cam {
                     let cam_node = graph_engine::SceneNode::new_camera(
                         "Astrophotography_Camera",
@@ -105,27 +139,37 @@ pub fn render_lunar_step_buttons(
                     state.active_camera_node = Some(cam_id);
                 }
                 *focus_camera = true;
-                state.set_status_message("📷 Telephoto Astrophotography Camera aligned (40° FOV, 8.5m)");
+                state.set_status_message(
+                    "📷 Telephoto Astrophotography Camera aligned (40° FOV, 8.5m)",
+                );
             }
         }
         5 => {
             ui.add_space(2.0);
             ui.horizontal(|ui| {
-                if ui.button(
-                    egui::RichText::new("⚡ Direct PBR (F11)")
-                        .strong()
-                        .color(egui::Color32::from_rgb(130, 200, 255)),
-                ).clicked() {
-                    state.production_render.engine = crate::ui::render_dialog::RenderEngine::DirectPbr;
+                if ui
+                    .button(
+                        egui::RichText::new("⚡ Direct PBR (F11)")
+                            .strong()
+                            .color(egui::Color32::from_rgb(130, 200, 255)),
+                    )
+                    .clicked()
+                {
+                    state.production_render.engine =
+                        crate::ui::render_dialog::RenderEngine::DirectPbr;
                     state.production_render.show_dialog = true;
                     crate::ui::render_dialog::start_production_render(state);
                 }
-                if ui.button(
-                    egui::RichText::new("✨ Path Tracer (F12)")
-                        .strong()
-                        .color(egui::Color32::from_rgb(226, 179, 87)),
-                ).clicked() {
-                    state.production_render.engine = crate::ui::render_dialog::RenderEngine::PathTracer;
+                if ui
+                    .button(
+                        egui::RichText::new("✨ Path Tracer (F12)")
+                            .strong()
+                            .color(egui::Color32::from_rgb(226, 179, 87)),
+                    )
+                    .clicked()
+                {
+                    state.production_render.engine =
+                        crate::ui::render_dialog::RenderEngine::PathTracer;
                     state.production_render.show_dialog = true;
                     crate::ui::render_dialog::start_production_render(state);
                 }
@@ -145,7 +189,11 @@ pub fn render_castle_tower_step_buttons(
     match step {
         0 => {
             let has_tower = state.scene.nodes.values().any(|n| n.name == "Castle_Tower");
-            let btn_text = if has_tower { "✓ Cylinder Base Ready (Refocus)" } else { "➕ Spawn Base Tower Cylinder (16 Segs)" };
+            let btn_text = if has_tower {
+                "✓ Cylinder Base Ready (Refocus)"
+            } else {
+                "➕ Spawn Base Tower Cylinder (16 Segs)"
+            };
             if ui.button(btn_text).clicked() {
                 if !has_tower {
                     let cyl = geo_kernel::Primitives::create_cylinder(2.0, 6.0, 16);
@@ -154,7 +202,10 @@ pub fn render_castle_tower_step_buttons(
                         Transform::from_translation(vec3(0.0, 3.0, 0.0)),
                         cyl,
                     );
-                    if let graph_engine::NodeData::Mesh { ref mut materials, .. } = node.data {
+                    if let graph_engine::NodeData::Mesh {
+                        ref mut materials, ..
+                    } = node.data
+                    {
                         materials[0] = graph_engine::Material::new(
                             "StoneGranite",
                             [0.42, 0.44, 0.48, 1.0],
@@ -167,7 +218,9 @@ pub fn render_castle_tower_step_buttons(
                     let id = state.scene.add_node(node);
                     state.selected_node = Some(id);
                     state.sync_gpu_meshes();
-                    state.set_status_message("🏰 Spawned Castle_Tower Cylinder (R: 2m, H: 6m, 16 segments)");
+                    state.set_status_message(
+                        "🏰 Spawned Castle_Tower Cylinder (R: 2m, H: 6m, 16 segments)",
+                    );
                 }
                 *focus_camera = true;
             }
@@ -182,9 +235,16 @@ pub fn render_castle_tower_step_buttons(
                 if let Some(id) = state.selected_node {
                     if let Some(node) = state.scene.nodes.get(id) {
                         if let graph_engine::NodeData::Mesh { base_mesh, .. } = &node.data {
-                            if let Some(top_cap) = base_mesh.faces.iter().find(|(_, f)| f.normal.y > 0.9).map(|(k, _)| k) {
+                            if let Some(top_cap) = base_mesh
+                                .faces
+                                .iter()
+                                .find(|(_, f)| f.normal.y > 0.9)
+                                .map(|(k, _)| k)
+                            {
                                 state.selected_faces.insert(top_cap);
-                                state.set_status_message("🔘 Edit Mode Active (Face 3): Top Circular Cap Selected!");
+                                state.set_status_message(
+                                    "🔘 Edit Mode Active (Face 3): Top Circular Cap Selected!",
+                                );
                             }
                         }
                     }
@@ -192,7 +252,10 @@ pub fn render_castle_tower_step_buttons(
             }
         }
         2 => {
-            if ui.button("📐 Inset Outer Parapet Wall (0.3m Thickness)").clicked() {
+            if ui
+                .button("📐 Inset Outer Parapet Wall (0.3m Thickness)")
+                .clicked()
+            {
                 if let Some(id) = state.selected_node {
                     let faces: Vec<_> = state.selected_faces.iter().copied().collect();
                     if !faces.is_empty() {
@@ -214,14 +277,19 @@ pub fn render_castle_tower_step_buttons(
                                 }
                             }
                             state.sync_gpu_meshes();
-                            state.set_status_message("📐 Outer stone parapet wall inset by 0.3m (R: 2.0m -> 1.7m)!");
+                            state.set_status_message(
+                                "📐 Outer stone parapet wall inset by 0.3m (R: 2.0m -> 1.7m)!",
+                            );
                         }
                     }
                 }
             }
         }
         3 => {
-            if ui.button("📐 Inset Sentry Walkway Loop (0.8m Width)").clicked() {
+            if ui
+                .button("📐 Inset Sentry Walkway Loop (0.8m Width)")
+                .clicked()
+            {
                 if let Some(id) = state.selected_node {
                     let faces: Vec<_> = state.selected_faces.iter().copied().collect();
                     if !faces.is_empty() {
@@ -259,7 +327,10 @@ pub fn render_castle_tower_step_buttons(
             }
         }
         4 => {
-            if ui.button("⬇ Extrude Sunken Walkway Trench (-0.8m)").clicked() {
+            if ui
+                .button("⬇ Extrude Sunken Walkway Trench (-0.8m)")
+                .clicked()
+            {
                 if let Some(id) = state.selected_node {
                     let faces: Vec<_> = state.selected_faces.iter().copied().collect();
                     if !faces.is_empty() {
@@ -272,7 +343,10 @@ pub fn render_castle_tower_step_buttons(
                                         if f.normal.y > 0.9 {
                                             let v = base_mesh.face_vertices(fk);
                                             if !v.is_empty() {
-                                                let r = (base_mesh.vertices[v[0]].position.x.powi(2)
+                                                let r = (base_mesh.vertices[v[0]]
+                                                    .position
+                                                    .x
+                                                    .powi(2)
                                                     + base_mesh.vertices[v[0]].position.z.powi(2))
                                                 .sqrt();
                                                 if r > 1.65 {
@@ -291,7 +365,10 @@ pub fn render_castle_tower_step_buttons(
             }
         }
         5 => {
-            if ui.button("🏰 Extrude 8 Battlement Merlons (+0.5m)").clicked() {
+            if ui
+                .button("🏰 Extrude 8 Battlement Merlons (+0.5m)")
+                .clicked()
+            {
                 if let Some(id) = state.selected_node {
                     let mut rim_faces: Vec<_> = state.selected_faces.iter().copied().collect();
                     rim_faces.sort_unstable();
@@ -302,7 +379,8 @@ pub fn render_castle_tower_step_buttons(
                         .map(|(_, fk)| *fk)
                         .collect();
                     if !alternating.is_empty() {
-                        let cmd = Box::new(crate::commands::ExtrudeCommand::new(id, alternating, 0.5));
+                        let cmd =
+                            Box::new(crate::commands::ExtrudeCommand::new(id, alternating, 0.5));
                         if state.history.execute(cmd, &mut state.scene).is_ok() {
                             state.selected_faces.clear();
                             state.sync_gpu_meshes();
@@ -312,7 +390,10 @@ pub fn render_castle_tower_step_buttons(
                 }
             }
         }
-        6 if ui.button("✨ Add Bevel Modifier & Granite Material").clicked() => {
+        6 if ui
+            .button("✨ Add Bevel Modifier & Granite Material")
+            .clicked() =>
+        {
             if let Some(id) = state.selected_node {
                 if let Some(node) = state.scene.nodes.get_mut(id) {
                     if let graph_engine::NodeData::Mesh {
@@ -321,9 +402,13 @@ pub fn render_castle_tower_step_buttons(
                         ..
                     } = node.data
                     {
-                        let has_bevel = modifier_stack.modifiers().iter().any(|m| m.name() == "Bevel");
+                        let has_bevel = modifier_stack
+                            .modifiers()
+                            .iter()
+                            .any(|m| m.name() == "Bevel");
                         if !has_bevel {
-                            modifier_stack.add_modifier(Box::new(geo_kernel::BevelModifier::new(0.05)));
+                            modifier_stack
+                                .add_modifier(Box::new(geo_kernel::BevelModifier::new(0.05)));
                         }
                         materials[0] = graph_engine::Material::new(
                             "WeatheredGranite",
@@ -339,7 +424,9 @@ pub fn render_castle_tower_step_buttons(
                 state.show_cavity = true;
                 state.cavity_intensity = 0.8;
                 state.sync_gpu_meshes();
-                state.set_status_message("✨ Bevel Modifier (0.05m chamfers) and Weathered Granite stone applied!");
+                state.set_status_message(
+                    "✨ Bevel Modifier (0.05m chamfers) and Weathered Granite stone applied!",
+                );
             }
         }
         _ => {}

@@ -1,5 +1,5 @@
 use core_math::{Mat4, Transform, Vec3};
-use geo_kernel::{Mesh, ModifierStack, RenderMesh, ShadingMode, Spline, ProfileShape};
+use geo_kernel::{Mesh, ModifierStack, ProfileShape, RenderMesh, ShadingMode, Spline};
 use slotmap::new_key_type;
 
 use crate::material::{LightType, Material};
@@ -95,7 +95,12 @@ impl SceneNode {
         }
     }
 
-    pub fn new_camera(name: impl Into<String>, transform: Transform, fov_y: f32, aspect: f32) -> Self {
+    pub fn new_camera(
+        name: impl Into<String>,
+        transform: Transform,
+        fov_y: f32,
+        aspect: f32,
+    ) -> Self {
         Self {
             name: name.into(),
             local_transform: transform,
@@ -194,7 +199,12 @@ impl SceneNode {
         }
     }
 
-    pub fn new_joint(name: impl Into<String>, transform: Transform, length: f32, radius: f32) -> Self {
+    pub fn new_joint(
+        name: impl Into<String>,
+        transform: Transform,
+        length: f32,
+        radius: f32,
+    ) -> Self {
         Self {
             name: name.into(),
             local_transform: transform,

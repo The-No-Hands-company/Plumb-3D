@@ -282,7 +282,10 @@ pub fn draw_print_inspector(state: &mut AppState) {
                         settings.bed_temp = state.print_inspector.bed_temp_c;
 
                         if base_mesh.export_gcode_file(&path, &settings).is_ok() {
-                            state.set_status_message(format!("Exported G-code toolpath to: {}", path.display()));
+                            state.set_status_message(format!(
+                                "Exported G-code toolpath to: {}",
+                                path.display()
+                            ));
                         }
                     }
                 }

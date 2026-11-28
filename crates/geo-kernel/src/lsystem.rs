@@ -163,7 +163,13 @@ impl LSystem {
         let mut stack: Vec<TurtleState> = Vec::new();
 
         // Create base root ring
-        let base_ring = create_ring(&mut mesh, turtle.position, turtle.heading, turtle.radius, self.radial_segments);
+        let base_ring = create_ring(
+            &mut mesh,
+            turtle.position,
+            turtle.heading,
+            turtle.radius,
+            self.radial_segments,
+        );
         turtle.last_ring = Some(base_ring);
 
         for ch in grammar.chars() {
@@ -177,7 +183,13 @@ impl LSystem {
 
                     let next_pos = turtle.position + turtle.heading * turtle.length;
                     let next_radius = (turtle.radius * self.radius_decay).max(0.005);
-                    let next_ring = create_ring(&mut mesh, next_pos, turtle.heading, next_radius, self.radial_segments);
+                    let next_ring = create_ring(
+                        &mut mesh,
+                        next_pos,
+                        turtle.heading,
+                        next_radius,
+                        self.radial_segments,
+                    );
 
                     // Connect rings with quad strip
                     if let Some(ref prev_ring) = turtle.last_ring {
@@ -229,7 +241,12 @@ impl LSystem {
                     }
                 }
                 'L' if self.generate_leaves => {
-                    create_leaf(&mut mesh, turtle.position, turtle.heading, turtle.radius * 2.5);
+                    create_leaf(
+                        &mut mesh,
+                        turtle.position,
+                        turtle.heading,
+                        turtle.radius * 2.5,
+                    );
                 }
                 _ => {}
             }
@@ -247,9 +264,19 @@ fn rotate_turtle(turtle: &mut TurtleState, axis: Vec3, angle: f32) {
     turtle.right = turtle.heading.cross(turtle.up).normalize();
 }
 
-fn create_ring(mesh: &mut Mesh, center: Vec3, normal: Vec3, radius: f32, segments: usize) -> Vec<VertexKey> {
+fn create_ring(
+    mesh: &mut Mesh,
+    center: Vec3,
+    normal: Vec3,
+    radius: f32,
+    segments: usize,
+) -> Vec<VertexKey> {
     let n = normal.normalize();
-    let arbitrary = if n.y.abs() < 0.9 { vec3(0.0, 1.0, 0.0) } else { vec3(1.0, 0.0, 0.0) };
+    let arbitrary = if n.y.abs() < 0.9 {
+        vec3(0.0, 1.0, 0.0)
+    } else {
+        vec3(1.0, 0.0, 0.0)
+    };
     let t = n.cross(arbitrary).normalize();
     let b = n.cross(t).normalize();
 

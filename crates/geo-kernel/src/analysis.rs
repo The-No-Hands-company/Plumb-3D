@@ -79,7 +79,11 @@ impl Mesh {
         let center = (min_b + max_b) * 0.5;
 
         // 2. Open boundary edges check
-        let open_boundary_edges = self.half_edges.values().filter(|he| he.face.is_none()).count();
+        let open_boundary_edges = self
+            .half_edges
+            .values()
+            .filter(|he| he.face.is_none())
+            .count();
 
         // 3. Overhang calculation
         let thresh_rad = overhang_threshold_deg.clamp(10.0, 85.0).to_radians();

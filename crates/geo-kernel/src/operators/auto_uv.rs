@@ -79,7 +79,9 @@ impl Mesh {
             for &fk in island {
                 for vk in self.face_vertices(fk) {
                     let p = self.vertices[vk].position;
-                    let uv = if avg_norm.y.abs() > avg_norm.x.abs() && avg_norm.y.abs() > avg_norm.z.abs() {
+                    let uv = if avg_norm.y.abs() > avg_norm.x.abs()
+                        && avg_norm.y.abs() > avg_norm.z.abs()
+                    {
                         vec2(p.x, p.z)
                     } else if avg_norm.x.abs() > avg_norm.z.abs() {
                         vec2(p.z, p.y)

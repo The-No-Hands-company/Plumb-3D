@@ -1,9 +1,7 @@
 use app::scenes::citadel::build_medieval_citadel_graph;
 use core_math::vec3;
 use render_pathtracer::{
-    camera::PathtracerCamera,
-    post_process::PostProcessSettings,
-    renderer::RenderBuffer,
+    camera::PathtracerCamera, post_process::PostProcessSettings, renderer::RenderBuffer,
     scene::PathTracerScene,
 };
 use std::time::Instant;
@@ -21,12 +19,11 @@ fn main() {
     }
 
     // 2. Build BVH with atmospheric dusk/night sky environment
-    let pt_scene = PathTracerScene::from_scene_graph(&scene)
-        .with_background(
-            vec3(0.018, 0.032, 0.065), // Sapphire twilight zenith
-            vec3(0.035, 0.045, 0.080), // Moody dusk horizon
-            vec3(0.010, 0.012, 0.018), // Deep courtyard shadow ground
-        );
+    let pt_scene = PathTracerScene::from_scene_graph(&scene).with_background(
+        vec3(0.018, 0.032, 0.065), // Sapphire twilight zenith
+        vec3(0.035, 0.045, 0.080), // Moody dusk horizon
+        vec3(0.010, 0.012, 0.018), // Deep courtyard shadow ground
+    );
 
     println!(
         "✓ BVH constructed successfully (emissive triangles: {})",
@@ -45,13 +42,7 @@ fn main() {
     let aperture = 0.008; // Crisp architectural depth across wide panoramic frame
 
     let camera = PathtracerCamera::new_thin_lens(
-        look_from,
-        look_at,
-        vup,
-        vfov,
-        aspect,
-        aperture,
-        focus_dist,
+        look_from, look_at, vup, vfov, aspect, aperture, focus_dist,
     );
 
     let mut buffer = RenderBuffer::new(width, height);

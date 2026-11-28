@@ -1,7 +1,7 @@
-use core_math::Vec3;
-use render_pathtracer::{PathtracerCamera, PathTracerScene, RenderBuffer};
-use render_viewport::ViewportShadingMode;
 use crate::state::AppState;
+use core_math::Vec3;
+use render_pathtracer::{PathTracerScene, PathtracerCamera, RenderBuffer};
+use render_viewport::ViewportShadingMode;
 
 pub fn step_live_viewport_pathtracer(state: &mut AppState) {
     if state.viewport_shading != ViewportShadingMode::Rendered {
@@ -55,7 +55,11 @@ pub fn step_live_viewport_pathtracer(state: &mut AppState) {
             if let Some(handle) = &mut state.live_pathtracer_tex_handle {
                 handle.set(color_image, egui::TextureOptions::LINEAR);
             } else {
-                let handle = state.egui_ctx.load_texture("live_pathtracer_tex", color_image, egui::TextureOptions::LINEAR);
+                let handle = state.egui_ctx.load_texture(
+                    "live_pathtracer_tex",
+                    color_image,
+                    egui::TextureOptions::LINEAR,
+                );
                 state.live_pathtracer_tex_handle = Some(handle);
             }
             state.window.request_redraw();
@@ -77,10 +81,19 @@ pub fn render_live_pathtracer_overlay(state: &mut AppState) {
             egui::Id::new("live_pathtracer_background"),
         ));
         let rect = egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(width, height));
-        painter.image(tex.id(), rect, egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)), egui::Color32::WHITE);
+        painter.image(
+            tex.id(),
+            rect,
+            egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
+            egui::Color32::WHITE,
+        );
     }
 
-    let samples = state.live_pathtracer_buffer.as_ref().map(|b| b.samples_rendered).unwrap_or(0);
+    let samples = state
+        .live_pathtracer_buffer
+        .as_ref()
+        .map(|b| b.samples_rendered)
+        .unwrap_or(0);
     let max_s = state.live_pathtracer_max_samples;
     let ctx = state.egui_ctx.clone();
     egui::Area::new(egui::Id::new("live_pathtracer_hud"))
@@ -89,14 +102,28 @@ pub fn render_live_pathtracer_overlay(state: &mut AppState) {
         .show(&ctx, |ui| {
             egui::Frame::window(ui.style())
                 .fill(egui::Color32::from_rgba_premultiplied(18, 22, 28, 230))
-                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(255, 180, 50)))
+                .stroke(egui::Stroke::new(
+                    1.0_f32,
+                    egui::Color32::from_rgb(255, 180, 50),
+                ))
                 .rounding(egui::Rounding::same(5.0))
                 .inner_margin(egui::Margin::symmetric(10.0, 5.0))
                 .show(ui, |ui| {
                     ui.horizontal(|ui| {
                         let icon = if samples < max_s { "☀" } else { "✓" };
-                        let color = if samples < max_s { egui::Color32::from_rgb(255, 200, 80) } else { egui::Color32::from_rgb(100, 255, 120) };
-                        ui.label(egui::RichText::new(format!("{} Live Path Tracer: {}/{} SPP", icon, samples, max_s)).strong().color(color));
+                        let color = if samples < max_s {
+                            egui::Color32::from_rgb(255, 200, 80)
+                        } else {
+                            egui::Color32::from_rgb(100, 255, 120)
+                        };
+                        ui.label(
+                            egui::RichText::new(format!(
+                                "{} Live Path Tracer: {}/{} SPP",
+                                icon, samples, max_s
+                            ))
+                            .strong()
+                            .color(color),
+                        );
                     });
                 });
         });

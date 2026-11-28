@@ -234,20 +234,16 @@ pub fn import_scene_from_usda(
                 let mut cur_idx = 0;
                 for &cnt in &face_counts {
                     if cur_idx + cnt <= face_indices.len() {
-                        let face_vkeys: Vec<VertexKey> = (0..cnt)
-                            .map(|i| vkeys[face_indices[cur_idx + i]])
-                            .collect();
+                        let face_vkeys: Vec<VertexKey> =
+                            (0..cnt).map(|i| vkeys[face_indices[cur_idx + i]]).collect();
                         let _ = mesh.add_face(&face_vkeys);
                         cur_idx += cnt;
                     }
                 }
                 mesh.update_normals();
 
-                let node = SceneNode::new_mesh(
-                    current_mesh_name.clone(),
-                    Transform::IDENTITY,
-                    mesh,
-                );
+                let node =
+                    SceneNode::new_mesh(current_mesh_name.clone(), Transform::IDENTITY, mesh);
                 let node_id = scene.add_node(node);
                 imported_nodes.push(node_id);
 
@@ -321,7 +317,13 @@ fn parse_usda_int_array(line: &str) -> Result<Vec<usize>, String> {
 fn sanitize_usd_identifier(name: &str) -> String {
     let sanitized: String = name
         .chars()
-        .map(|c| if c.is_alphanumeric() || c == '_' { c } else { '_' })
+        .map(|c| {
+            if c.is_alphanumeric() || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect();
     if sanitized.is_empty()
         || sanitized

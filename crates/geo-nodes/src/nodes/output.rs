@@ -22,7 +22,10 @@ impl GeoNodeOp for GroupOutputNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let geo = inputs.first().cloned().unwrap_or(SocketValue::Geometry(None));
+        let geo = inputs
+            .first()
+            .cloned()
+            .unwrap_or(SocketValue::Geometry(None));
         Ok(vec![geo])
     }
 

@@ -131,8 +131,10 @@ impl StereoRig {
         let forward = head_rot * Vec3::NEG_Z;
         let up = head_rot * Vec3::Y;
 
-        self.left_view_matrix = Mat4::look_at_rh(self.left_eye_pos, self.left_eye_pos + forward, up);
-        self.right_view_matrix = Mat4::look_at_rh(self.right_eye_pos, self.right_eye_pos + forward, up);
+        self.left_view_matrix =
+            Mat4::look_at_rh(self.left_eye_pos, self.left_eye_pos + forward, up);
+        self.right_view_matrix =
+            Mat4::look_at_rh(self.right_eye_pos, self.right_eye_pos + forward, up);
         self.projection_matrix = Mat4::perspective_rh(fov_y_rad, aspect_ratio, 0.05, 500.0);
     }
 }
@@ -218,7 +220,11 @@ impl SpatialModelingSession {
     }
 
     /// Converts finished in-air sketched strokes to a polygonal mesh
-    pub fn generate_air_curve_mesh(&self, stroke_idx: usize, tube_radius: f32) -> Option<geo_kernel::Mesh> {
+    pub fn generate_air_curve_mesh(
+        &self,
+        stroke_idx: usize,
+        tube_radius: f32,
+    ) -> Option<geo_kernel::Mesh> {
         let pts = self.sketched_curves.get(stroke_idx)?;
         if pts.len() < 2 {
             return None;

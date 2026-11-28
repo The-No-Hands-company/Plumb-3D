@@ -12,10 +12,31 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
     let mut scene = SceneGraph::new();
 
     // 1. Materials Palette
-    let mat_stone = Material::new("WeatheredGranite", [0.42, 0.44, 0.48, 1.0], 0.15, 0.82, 0.0, 2); // Micro-grid stone pattern
-    let mat_timber = Material::new("FortressDarkOak", [0.24, 0.16, 0.10, 1.0], 0.05, 0.68, 0.0, 0);
+    let mat_stone = Material::new(
+        "WeatheredGranite",
+        [0.42, 0.44, 0.48, 1.0],
+        0.15,
+        0.82,
+        0.0,
+        2,
+    ); // Micro-grid stone pattern
+    let mat_timber = Material::new(
+        "FortressDarkOak",
+        [0.24, 0.16, 0.10, 1.0],
+        0.05,
+        0.68,
+        0.0,
+        0,
+    );
     let mat_iron = Material::new("ForgedSteel", [0.18, 0.19, 0.22, 1.0], 0.92, 0.35, 0.0, 0);
-    let mat_ground = Material::new("CourtyardCobble", [0.12, 0.13, 0.15, 1.0], 0.20, 0.75, 0.0, 2);
+    let mat_ground = Material::new(
+        "CourtyardCobble",
+        [0.12, 0.13, 0.15, 1.0],
+        0.20,
+        0.75,
+        0.0,
+        2,
+    );
     let mat_torch_flame = Material::new("TorchFlame", [1.0, 0.65, 0.18, 1.0], 0.0, 0.0, 6.0, 0);
 
     // 2. Main Donjon Keep Tower
@@ -26,7 +47,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         Transform::from_translation(vec3(0.0, 1.0, 0.0)),
         base_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = base_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = base_node.data
+    {
         materials[0] = mat_stone.clone();
     }
     scene.add_node(base_node);
@@ -38,7 +62,12 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         Transform::from_translation(vec3(0.0, 5.75, 0.0)),
         tower_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, ref mut modifier_stack, .. } = tower_node.data {
+    if let NodeData::Mesh {
+        ref mut materials,
+        ref mut modifier_stack,
+        ..
+    } = tower_node.data
+    {
         materials[0] = mat_stone.clone();
         // Add non-destructive Bevel modifier to showcase DCC modifier pipeline
         modifier_stack.add_modifier(Box::new(geo_kernel::BevelModifier::new(0.05)));
@@ -52,7 +81,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         Transform::from_translation(vec3(0.0, 9.8, 0.0)),
         corbel_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = corbel_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = corbel_node.data
+    {
         materials[0] = mat_stone.clone();
     }
     scene.add_node(corbel_node);
@@ -64,7 +96,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         Transform::from_translation(vec3(0.0, 10.65, 0.0)),
         battlement_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = battlement_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = battlement_node.data
+    {
         materials[0] = mat_stone.clone();
     }
     scene.add_node(battlement_node);
@@ -76,7 +111,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         Transform::from_translation(vec3(0.0, 12.8, 0.0)),
         roof_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = roof_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = roof_node.data
+    {
         materials[0] = mat_timber.clone();
     }
     scene.add_node(roof_node);
@@ -88,7 +126,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         Transform::from_translation(vec3(0.0, 15.0, 0.0)),
         finial_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = finial_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = finial_node.data
+    {
         materials[0] = mat_iron.clone();
     }
     scene.add_node(finial_node);
@@ -105,7 +146,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         },
         wall_west_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = wall_west_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = wall_west_node.data
+    {
         materials[0] = mat_stone.clone();
     }
     scene.add_node(wall_west_node);
@@ -121,7 +165,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         },
         wall_east_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = wall_east_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = wall_east_node.data
+    {
         materials[0] = mat_stone.clone();
     }
     scene.add_node(wall_east_node);
@@ -133,7 +180,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         Transform::from_translation(vec3(9.2, 3.25, 0.0)),
         bastion_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = bastion_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = bastion_node.data
+    {
         materials[0] = mat_stone.clone();
     }
     scene.add_node(bastion_node);
@@ -149,7 +199,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         },
         gate_arch_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = gate_arch_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = gate_arch_node.data
+    {
         materials[0] = mat_stone.clone();
     }
     scene.add_node(gate_arch_node);
@@ -164,7 +217,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         },
         portcullis_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = portcullis_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = portcullis_node.data
+    {
         materials[0] = mat_iron.clone();
     }
     scene.add_node(portcullis_node);
@@ -176,7 +232,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         Transform::from_translation(vec3(0.0, -0.15, 0.0)),
         ground_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = ground_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = ground_node.data
+    {
         materials[0] = mat_ground;
     }
     scene.add_node(ground_node);
@@ -188,7 +247,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         Transform::from_translation(vec3(-2.1, 2.8, 4.0)),
         torch_l_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = torch_l_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = torch_l_node.data
+    {
         materials[0] = mat_torch_flame.clone();
     }
     scene.add_node(torch_l_node);
@@ -199,7 +261,10 @@ pub fn build_medieval_citadel_graph() -> (SceneGraph, ViewportCamera, NodeId) {
         Transform::from_translation(vec3(2.1, 2.8, 4.0)),
         torch_r_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = torch_r_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = torch_r_node.data
+    {
         materials[0] = mat_torch_flame;
     }
     scene.add_node(torch_r_node);
@@ -334,5 +399,7 @@ pub fn build_castle_tower_tutorial_blank(state: &mut AppState) {
     state.walkthrough = WalkthroughState::castle_tower();
     state.walkthrough.current_step = 0;
     state.sync_gpu_meshes();
-    state.set_status_message("🏰 Castle Tower Tutorial started: Click Step 1 to spawn your cylinder base!");
+    state.set_status_message(
+        "🏰 Castle Tower Tutorial started: Click Step 1 to spawn your cylinder base!",
+    );
 }

@@ -97,10 +97,21 @@ pub fn draw_script_console(state: &mut AppState) {
 pub fn draw_script_console_inner(state: &mut AppState, ui: &mut egui::Ui) {
     // Synchronize macro recorder with history manager
     if state.script_console_state.macro_recorder.is_recording {
-        if state.history.command_counter > state.script_console_state.macro_recorder.last_recorded_counter {
+        if state.history.command_counter
+            > state
+                .script_console_state
+                .macro_recorder
+                .last_recorded_counter
+        {
             if let Some(cmd_name) = state.history.undo_name() {
-                state.script_console_state.macro_recorder.record_command_name(cmd_name);
-                state.script_console_state.macro_recorder.last_recorded_counter = state.history.command_counter;
+                state
+                    .script_console_state
+                    .macro_recorder
+                    .record_command_name(cmd_name);
+                state
+                    .script_console_state
+                    .macro_recorder
+                    .last_recorded_counter = state.history.command_counter;
             }
         }
     }
@@ -120,19 +131,37 @@ pub fn draw_script_console_inner(state: &mut AppState, ui: &mut egui::Ui) {
         // Macro Recorder Controls
         let is_rec = state.script_console_state.macro_recorder.is_recording;
         if is_rec {
-            if ui.button(egui::RichText::new("Stop [■]").color(egui::Color32::from_rgb(255, 60, 60))).on_hover_text("Stop macro recording").clicked() {
+            if ui
+                .button(egui::RichText::new("Stop [■]").color(egui::Color32::from_rgb(255, 60, 60)))
+                .on_hover_text("Stop macro recording")
+                .clicked()
+            {
                 state.script_console_state.macro_recorder.stop_recording();
             }
-        } else if ui.button("Record [●]").on_hover_text("Record viewport actions into an executable script").clicked() {
-            state.script_console_state.macro_recorder.last_recorded_counter = state.history.command_counter;
+        } else if ui
+            .button("Record [●]")
+            .on_hover_text("Record viewport actions into an executable script")
+            .clicked()
+        {
+            state
+                .script_console_state
+                .macro_recorder
+                .last_recorded_counter = state.history.command_counter;
             state.script_console_state.macro_recorder.start_recording();
         }
 
         let entries_count = state.script_console_state.macro_recorder.entries.len();
         if entries_count > 0 {
-            if ui.button(format!("Insert Macro ({})", entries_count)).on_hover_text("Insert recorded macro script into editor buffer").clicked() {
+            if ui
+                .button(format!("Insert Macro ({})", entries_count))
+                .on_hover_text("Insert recorded macro script into editor buffer")
+                .clicked()
+            {
                 let lang = state.script_console_state.language;
-                let script = state.script_console_state.macro_recorder.generate_script(lang);
+                let script = state
+                    .script_console_state
+                    .macro_recorder
+                    .generate_script(lang);
                 state.script_console_state.script_buffer = script;
             }
             if ui.small_button("Clear").clicked() {
@@ -168,8 +197,7 @@ pub fn draw_script_console_inner(state: &mut AppState, ui: &mut egui::Ui) {
                     .clicked()
                     && current_lang != ScriptLanguage::Python
                 {
-                    state.script_console_state.script_buffer =
-                        PRESET_PYTHON_GEAR.to_string();
+                    state.script_console_state.script_buffer = PRESET_PYTHON_GEAR.to_string();
                 }
                 if ui
                     .selectable_value(
@@ -180,8 +208,7 @@ pub fn draw_script_console_inner(state: &mut AppState, ui: &mut egui::Ui) {
                     .clicked()
                     && current_lang != ScriptLanguage::Lua
                 {
-                    state.script_console_state.script_buffer =
-                        PRESET_LUA_PYRAMID.to_string();
+                    state.script_console_state.script_buffer = PRESET_LUA_PYRAMID.to_string();
                 }
             });
 
@@ -191,25 +218,34 @@ pub fn draw_script_console_inner(state: &mut AppState, ui: &mut egui::Ui) {
         egui::ComboBox::from_id_salt("script_preset_select")
             .selected_text("Load Template Preset...")
             .show_ui(ui, |ui| {
-                if ui.selectable_label(false, "Procedural Building (Rhai)").clicked() {
+                if ui
+                    .selectable_label(false, "Procedural Building (Rhai)")
+                    .clicked()
+                {
                     state.script_console_state.language = ScriptLanguage::Rhai;
                     state.script_console_state.script_buffer =
                         PRESET_PROCEDURAL_BUILDING.to_string();
                 }
-                if ui.selectable_label(false, "Parametric Column (Rhai)").clicked() {
+                if ui
+                    .selectable_label(false, "Parametric Column (Rhai)")
+                    .clicked()
+                {
                     state.script_console_state.language = ScriptLanguage::Rhai;
-                    state.script_console_state.script_buffer =
-                        PRESET_PARAMETRIC_COLUMN.to_string();
+                    state.script_console_state.script_buffer = PRESET_PARAMETRIC_COLUMN.to_string();
                 }
-                if ui.selectable_label(false, "Mechanical Gear (Python)").clicked() {
+                if ui
+                    .selectable_label(false, "Mechanical Gear (Python)")
+                    .clicked()
+                {
                     state.script_console_state.language = ScriptLanguage::Python;
-                    state.script_console_state.script_buffer =
-                        PRESET_PYTHON_GEAR.to_string();
+                    state.script_console_state.script_buffer = PRESET_PYTHON_GEAR.to_string();
                 }
-                if ui.selectable_label(false, "Subdivided Model (Lua)").clicked() {
+                if ui
+                    .selectable_label(false, "Subdivided Model (Lua)")
+                    .clicked()
+                {
                     state.script_console_state.language = ScriptLanguage::Lua;
-                    state.script_console_state.script_buffer =
-                        PRESET_LUA_PYRAMID.to_string();
+                    state.script_console_state.script_buffer = PRESET_LUA_PYRAMID.to_string();
                 }
             });
 

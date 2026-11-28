@@ -13,76 +13,83 @@
 //! - [`io`]: CAD, 3D printing, and interchange exporters (STL ASCII/Binary, PLY ASCII/Binary, glTF 2.0, OBJ).
 
 pub mod analysis;
-pub mod mesh;
-pub mod primitives;
-pub mod triangulation;
-pub mod modifiers;
-pub mod validation;
-pub mod raycast;
-pub mod operators;
-pub mod io;
-pub mod subdivision;
 pub mod boolean;
-pub mod uv;
 pub mod decimate;
-pub mod spline;
+pub mod fluid_sph;
+pub mod gaussian_splat;
+pub mod groom;
+pub mod io;
+pub mod kitbash;
+pub mod lsystem;
+pub mod mesh;
+pub mod modifiers;
+pub mod multires;
+pub mod openvdb;
+pub mod operators;
+pub mod plugin;
+pub mod primitives;
+pub mod quadriflow;
+pub mod raycast;
 pub mod sculpt;
 pub mod sculpt_dyntopo;
-pub mod texture_paint;
-pub mod xpbd_cloth;
-pub mod multires;
-pub mod gaussian_splat;
-pub mod lsystem;
-pub mod groom;
-pub mod fluid_sph;
-pub mod quadriflow;
 pub mod slicer;
+pub mod spline;
 pub mod subd_nurbs;
-pub mod openvdb;
-pub mod plugin;
-pub mod kitbash;
+pub mod subdivision;
+pub mod texture_paint;
+pub mod triangulation;
+pub mod uv;
+pub mod validation;
+pub mod xpbd_cloth;
 
-pub use io::{PlmbMetadata, PlmbVersion, PLMB_MAGIC};
-pub use plugin::{
-    PluginRegistry, PlumbMeshBuffer, PlumbPlugin, PlumbPluginDescriptor, PlumbPluginHeader,
-    PlumbPluginType, PluginError, PLUMB_PLUGIN_API_VERSION, PLUMB_PLUGIN_MAGIC,
-};
 pub use analysis::MeshAnalysisReport;
-pub use mesh::{Edge, EdgeKey, Face, FaceKey, HalfEdge, HalfEdgeKey, Mesh, MeshError, MeshManifoldReport, Vertex, VertexGroup, VertexKey};
-pub use primitives::{CapFillType, Primitives};
-pub use triangulation::{GpuVertex, RenderMesh, ShadingMode, SubMeshRange};
-pub use uv::ProjectionAxis;
-pub use operators::{bevel::BevelProfile, CableGenerator, CutPoint, FilletContinuity, NgonMethod, QuadMethod, SymmetrizeDirection, WeldStyle};
-pub use modifiers::{
-    ArrayMode, ArrayModifier, BevelModifier, BooleanModifier, ClothModifier, ClothParticle, CurveModifier, DeformAxis, DisplaceModifier, LatticeModifier,
-    MirrorAxis, MirrorModifier, Modifier, ModifierStack, MorphTarget, MorpherModifier, Particle, ParticleRenderShape, ParticleSystemModifier,
-    RadialAxis, RemeshModifier, ScrewModifier, ShrinkwrapMethod, ShrinkwrapModifier,
-    SimpleDeformMethod, SimpleDeformModifier, SkinBone, SkinEnvelopeModifier, SkinModifier, SmoothModifier, SolidifyModifier,
-    SubdivideModifier, TaperModifier, TransformModifier, TriangulateModifier, WeldModifier, WeightedNormalMode,
-    WeightedNormalModifier, WireframeModifier,
-};
 pub use boolean::BooleanOp;
-pub use subdivision::CatmullClarkModifier;
 pub use decimate::{decimate_mesh, DecimateModifier, SymmQuadric};
-pub use spline::{BezierPoint, HandleType, ProfileShape, Spline};
+pub use fluid_sph::{FluidParticle, SphFluidSimulator, SphSettings};
+pub use gaussian_splat::{GaussianCloud, GaussianSplat};
+pub use groom::{GroomBrush, GroomSettings, GroomSystem, HairGuide, HairStrand};
+pub use io::{PlmbMetadata, PlmbVersion, PLMB_MAGIC};
+pub use kitbash::{Kitbash, KitbashHardwareType};
+pub use lsystem::{LSystem, LSystemPreset};
+pub use mesh::{
+    Edge, EdgeKey, Face, FaceKey, HalfEdge, HalfEdgeKey, Mesh, MeshError, MeshManifoldReport,
+    Vertex, VertexGroup, VertexKey,
+};
+pub use modifiers::{
+    ArrayMode, ArrayModifier, BevelModifier, BooleanModifier, ClothModifier, ClothParticle,
+    CurveModifier, DeformAxis, DisplaceModifier, LatticeModifier, MirrorAxis, MirrorModifier,
+    Modifier, ModifierStack, MorphTarget, MorpherModifier, Particle, ParticleRenderShape,
+    ParticleSystemModifier, RadialAxis, RemeshModifier, ScrewModifier, ShrinkwrapMethod,
+    ShrinkwrapModifier, SimpleDeformMethod, SimpleDeformModifier, SkinBone, SkinEnvelopeModifier,
+    SkinModifier, SmoothModifier, SolidifyModifier, SubdivideModifier, TaperModifier,
+    TransformModifier, TriangulateModifier, WeightedNormalMode, WeightedNormalModifier,
+    WeldModifier, WireframeModifier,
+};
+pub use multires::{MultiresLevel, MultiresMesh};
+pub use openvdb::{VdbGrid, VdbLeafBrick, VolumeGenerators, VolumetricSample};
+pub use operators::{
+    bevel::BevelProfile, CableGenerator, CutPoint, FilletContinuity, NgonMethod, QuadMethod,
+    SymmetrizeDirection, WeldStyle,
+};
+pub use plugin::{
+    PluginError, PluginRegistry, PlumbMeshBuffer, PlumbPlugin, PlumbPluginDescriptor,
+    PlumbPluginHeader, PlumbPluginType, PLUMB_PLUGIN_API_VERSION, PLUMB_PLUGIN_MAGIC,
+};
+pub use primitives::{CapFillType, Primitives};
+pub use quadriflow::{CrossField4RoSy, QuadriflowSettings};
+pub use raycast::RaycastHit;
 pub use sculpt::{BrushAlphaTexture, BrushFalloff, SculptBrush, SculptSettings};
 pub use sculpt_dyntopo::{DyntopoDetailMode, DyntopoMode, DyntopoSettings, DyntopoStats};
+pub use slicer::{InfillPattern, SlicedLayer, SlicerSettings, ToolpathSegment};
+pub use spline::{BezierPoint, HandleType, ProfileShape, Spline};
+pub use subd_nurbs::{convert_mesh_to_nurbs_patches, export_subd_nurbs_step, BicubicNurbsPatch};
+pub use subdivision::CatmullClarkModifier;
 pub use texture_paint::{PaintBlendMode, PaintChannel, PaintTexture, TexturePaintBrush};
+pub use triangulation::{GpuVertex, RenderMesh, ShadingMode, SubMeshRange};
+pub use uv::ProjectionAxis;
 pub use xpbd_cloth::{
     SphereCollider, XpbdBendingConstraint, XpbdClothSimulator, XpbdDistanceConstraint, XpbdParticle,
 };
-pub use multires::{MultiresLevel, MultiresMesh};
-pub use gaussian_splat::{GaussianCloud, GaussianSplat};
-pub use lsystem::{LSystem, LSystemPreset};
-pub use groom::{GroomBrush, GroomSettings, GroomSystem, HairGuide, HairStrand};
-pub use fluid_sph::{FluidParticle, SphFluidSimulator, SphSettings};
-pub use quadriflow::{CrossField4RoSy, QuadriflowSettings};
-pub use slicer::{InfillPattern, SlicedLayer, SlicerSettings, ToolpathSegment};
-pub use subd_nurbs::{BicubicNurbsPatch, convert_mesh_to_nurbs_patches, export_subd_nurbs_step};
-pub use openvdb::{VdbGrid, VdbLeafBrick, VolumeGenerators, VolumetricSample};
-pub use raycast::RaycastHit;
-pub use kitbash::{Kitbash, KitbashHardwareType};
-
 
 #[cfg(test)]
 mod tests;

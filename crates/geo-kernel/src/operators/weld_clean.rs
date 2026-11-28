@@ -39,7 +39,8 @@ impl Mesh {
         }
 
         // Group into clusters and compute centroids
-        let mut cluster_members: std::collections::HashMap<usize, Vec<usize>> = std::collections::HashMap::new();
+        let mut cluster_members: std::collections::HashMap<usize, Vec<usize>> =
+            std::collections::HashMap::new();
         for i in 0..n {
             let root = find(&mut parent, i);
             cluster_members.entry(root).or_default().push(i);
@@ -47,7 +48,8 @@ impl Mesh {
 
         let mut welded = Mesh::new();
         // Map original VertexKey -> new VertexKey in welded mesh
-        let mut old_to_new_v: std::collections::HashMap<VertexKey, VertexKey> = std::collections::HashMap::new();
+        let mut old_to_new_v: std::collections::HashMap<VertexKey, VertexKey> =
+            std::collections::HashMap::new();
 
         for members in cluster_members.values() {
             let mut sum_pos = Vec3::ZERO;
@@ -120,7 +122,10 @@ impl Mesh {
 
     /// Bridge two equal-length edge loops with bridging quad faces (Blender Bridge Edge Loops).
 
-    pub fn merge_vertices_at_center(&mut self, vertices_to_merge: &[VertexKey]) -> Result<Option<VertexKey>, MeshError> {
+    pub fn merge_vertices_at_center(
+        &mut self,
+        vertices_to_merge: &[VertexKey],
+    ) -> Result<Option<VertexKey>, MeshError> {
         let merge_set: HashSet<VertexKey> = vertices_to_merge.iter().copied().collect();
         if merge_set.len() < 2 {
             return Ok(vertices_to_merge.first().copied());
@@ -216,7 +221,11 @@ impl Mesh {
     /// Slides vertices of selected edges along adjacent non-selected rail edges by `factor` in [-1.0, 1.0].
     /// Does not alter mesh topology.
 
-    pub fn clean_degenerate_geometry(&mut self, min_area: f32, min_edge_len: f32) -> Result<usize, MeshError> {
+    pub fn clean_degenerate_geometry(
+        &mut self,
+        min_area: f32,
+        min_edge_len: f32,
+    ) -> Result<usize, MeshError> {
         let mut cleaned_count = 0;
 
         // 1. Weld overlapping vertices
@@ -242,7 +251,9 @@ impl Mesh {
 
         if !degenerate_faces.is_empty() {
             cleaned_count += degenerate_faces.len();
-            let valid_faces: Vec<FaceKey> = self.faces.keys()
+            let valid_faces: Vec<FaceKey> = self
+                .faces
+                .keys()
                 .filter(|k| !degenerate_faces.contains(k))
                 .collect();
 

@@ -22,7 +22,10 @@ pub fn handle_transform_gizmo_key(state: &mut AppState, key_code: KeyCode) -> bo
             crate::commands::workplane::symmetrize_active(state);
             true
         }
-        KeyCode::KeyE if state.interaction_mode == InteractionMode::Object || state.interaction_mode == InteractionMode::Pose => {
+        KeyCode::KeyE
+            if state.interaction_mode == InteractionMode::Object
+                || state.interaction_mode == InteractionMode::Pose =>
+        {
             state.gizmo.mode = GizmoMode::Rotate;
             state.window.request_redraw();
             true
@@ -52,7 +55,8 @@ pub fn handle_transform_gizmo_key(state: &mut AppState, key_code: KeyCode) -> bo
             } else if state.interaction_mode == InteractionMode::Edit {
                 if let Some(sel_id) = state.selected_node {
                     let target_edges: Vec<EdgeKey> = state.selected_edges.iter().copied().collect();
-                    let target_verts: Vec<VertexKey> = state.selected_vertices.iter().copied().collect();
+                    let target_verts: Vec<VertexKey> =
+                        state.selected_vertices.iter().copied().collect();
                     if !target_edges.is_empty() || !target_verts.is_empty() {
                         let cmd = Box::new(SlideEdgesCommand {
                             node_id: sel_id,

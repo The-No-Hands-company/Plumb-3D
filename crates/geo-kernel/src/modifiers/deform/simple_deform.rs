@@ -74,9 +74,10 @@ impl Modifier for SimpleDeformModifier {
         let mid_val = (min_val + max_val) * 0.5;
 
         // 2. Vertex group lookup
-        let vg_ref = self.vertex_group.as_ref().and_then(|vg_name| {
-            input.vertex_groups.iter().find(|vg| &vg.name == vg_name)
-        });
+        let vg_ref = self
+            .vertex_group
+            .as_ref()
+            .and_then(|vg_name| input.vertex_groups.iter().find(|vg| &vg.name == vg_name));
 
         // 3. Deform vertices
         for (vk, v) in output.vertices.iter_mut() {

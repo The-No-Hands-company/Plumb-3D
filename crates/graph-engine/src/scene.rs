@@ -91,11 +91,17 @@ impl SceneGraph {
             if let Some(node) = self.nodes.get_mut(current) {
                 node.is_dirty = true;
                 match &mut node.data {
-                    NodeData::Mesh { cached_render_mesh, modifier_stack, .. } => {
+                    NodeData::Mesh {
+                        cached_render_mesh,
+                        modifier_stack,
+                        ..
+                    } => {
                         *cached_render_mesh = None;
                         modifier_stack.mark_dirty();
                     }
-                    NodeData::Curve { cached_render_mesh, .. } => {
+                    NodeData::Curve {
+                        cached_render_mesh, ..
+                    } => {
                         *cached_render_mesh = None;
                     }
                     _ => {}
@@ -136,7 +142,11 @@ impl SceneGraph {
     }
 
     /// Pull-based evaluation: obtain or compute render mesh with optional vertex group heatmap weighting
-    pub fn evaluate_mesh_with_weights(&mut self, node_id: NodeId, weight_group: Option<&str>) -> Option<&RenderMesh> {
+    pub fn evaluate_mesh_with_weights(
+        &mut self,
+        node_id: NodeId,
+        weight_group: Option<&str>,
+    ) -> Option<&RenderMesh> {
         let node = self.nodes.get_mut(node_id)?;
         match &mut node.data {
             NodeData::Mesh {
@@ -170,7 +180,8 @@ impl SceneGraph {
             } => {
                 if *bevel_radius > 0.0 && spline.points.len() >= 2 {
                     if cached_render_mesh.is_none() {
-                        let cs = profile_shape.generate_cross_section(*bevel_radius, *bevel_resolution);
+                        let cs =
+                            profile_shape.generate_cross_section(*bevel_radius, *bevel_resolution);
                         let sampled = spline.sample(12);
                         if let Ok(beveled_mesh) = Spline::sweep(&cs, &sampled, spline.is_closed) {
                             let render_mesh = beveled_mesh.to_render_mesh(ShadingMode::Smooth);
@@ -200,13 +211,20 @@ impl SceneGraph {
         }
 
         for (_, node) in &mut self.nodes {
-            if let NodeData::Mesh { modifier_stack, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                modifier_stack,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 let mut modified = false;
                 for modifier in modifier_stack.modifiers_mut() {
                     if let Some(skin) = modifier.as_skin_mut() {
                         for bone in &mut skin.bones {
                             if let Some(&new_wm) = joint_world_transforms.get(&bone.name) {
-                                if !(bone.current_world_matrix - new_wm).abs_diff_eq(Mat4::ZERO, 1e-4) {
+                                if !(bone.current_world_matrix - new_wm)
+                                    .abs_diff_eq(Mat4::ZERO, 1e-4)
+                                {
                                     bone.current_world_matrix = new_wm;
                                     modified = true;
                                 }
@@ -235,7 +253,12 @@ impl SceneGraph {
         }
 
         for (_, node) in &mut self.nodes {
-            if let NodeData::Mesh { modifier_stack, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                modifier_stack,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 let mut modified = false;
                 for modifier in modifier_stack.modifiers_mut() {
                     if let Some(curve_mod) = modifier.as_curve_mut() {
@@ -269,12 +292,19 @@ impl SceneGraph {
 
         for (_, node) in &mut self.nodes {
             let self_world_inv = node.world_matrix.inverse();
-            if let NodeData::Mesh { modifier_stack, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                modifier_stack,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 let mut modified = false;
                 for modifier in modifier_stack.modifiers_mut() {
                     if let Some(bool_mod) = modifier.as_boolean_mut() {
                         if let Some(ref target_name) = bool_mod.target_node_name {
-                            if let Some((target_base_mesh, target_world)) = mesh_sources.get(target_name) {
+                            if let Some((target_base_mesh, target_world)) =
+                                mesh_sources.get(target_name)
+                            {
                                 let local_transform = self_world_inv * *target_world;
                                 let mut local_operand = target_base_mesh.clone();
                                 for v in local_operand.vertices.values_mut() {
@@ -309,12 +339,19 @@ impl SceneGraph {
 
         for (_, node) in &mut self.nodes {
             let self_world_inv = node.world_matrix.inverse();
-            if let NodeData::Mesh { modifier_stack, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                modifier_stack,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 let mut modified = false;
                 for modifier in modifier_stack.modifiers_mut() {
                     if let Some(shrink_mod) = modifier.as_shrinkwrap_mut() {
                         if let Some(ref target_name) = shrink_mod.target_node_name {
-                            if let Some((target_base_mesh, target_world)) = mesh_sources.get(target_name) {
+                            if let Some((target_base_mesh, target_world)) =
+                                mesh_sources.get(target_name)
+                            {
                                 let local_transform = self_world_inv * *target_world;
                                 let mut local_target = target_base_mesh.clone();
                                 for v in local_target.vertices.values_mut() {
@@ -368,14 +405,16 @@ impl SceneGraph {
         let mesh_node = self.nodes.get_mut(mesh_id).ok_or("Mesh node not found")?;
         let mesh_world_mat = mesh_node.world_matrix;
 
-        if let NodeData::Mesh { base_mesh, modifier_stack, cached_render_mesh, .. } = &mut mesh_node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            modifier_stack,
+            cached_render_mesh,
+            ..
+        } = &mut mesh_node.data
+        {
             let mut bones = Vec::with_capacity(joint_info.len());
             for (name, _, wm) in &joint_info {
-                bones.push(SkinBone::new(
-                    name.clone(),
-                    wm.inverse(),
-                    *wm,
-                ));
+                bones.push(SkinBone::new(name.clone(), wm.inverse(), *wm));
             }
 
             // Create/populate vertex groups for each bone
@@ -432,12 +471,20 @@ impl SceneGraph {
     /// Apply an individual modifier from the node's modifier stack to its base mesh (Blender "Apply Modifier").
     pub fn apply_modifier(&mut self, node_id: NodeId, modifier_idx: usize) -> Result<(), String> {
         let node = self.nodes.get_mut(node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, modifier_stack, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            modifier_stack,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             if modifier_idx >= modifier_stack.modifiers().len() {
                 return Err("Modifier index out of bounds".into());
             }
             let modifier = modifier_stack.remove_modifier(modifier_idx);
-            *base_mesh = modifier.apply(base_mesh).map_err(|e| format!("Failed to apply modifier: {:?}", e))?;
+            *base_mesh = modifier
+                .apply(base_mesh)
+                .map_err(|e| format!("Failed to apply modifier: {:?}", e))?;
             *cached_render_mesh = None;
             node.is_dirty = true;
             Ok(())
@@ -449,8 +496,17 @@ impl SceneGraph {
     /// Collapse all modifiers in the stack directly into the base mesh (3ds Max "Collapse All").
     pub fn collapse_modifier_stack(&mut self, node_id: NodeId) -> Result<(), String> {
         let node = self.nodes.get_mut(node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, modifier_stack, cached_render_mesh, .. } = &mut node.data {
-            let final_mesh = modifier_stack.evaluate(base_mesh).map_err(|e| format!("Failed to evaluate stack: {:?}", e))?.clone();
+        if let NodeData::Mesh {
+            base_mesh,
+            modifier_stack,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
+            let final_mesh = modifier_stack
+                .evaluate(base_mesh)
+                .map_err(|e| format!("Failed to evaluate stack: {:?}", e))?
+                .clone();
             *base_mesh = final_mesh;
             modifier_stack.clear();
             *cached_render_mesh = None;

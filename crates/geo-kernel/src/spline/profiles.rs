@@ -1,5 +1,5 @@
-use std::f32::consts::PI;
 use core_math::{vec2, Vec2};
+use std::f32::consts::PI;
 
 use super::types::Spline;
 
@@ -21,39 +21,25 @@ impl ProfileShape {
             ProfileShape::Circle => Spline::circle_cross_section(radius, subdivisions),
             ProfileShape::Square => {
                 let r = radius;
-                vec![
-                    vec2(-r, -r),
-                    vec2(r, -r),
-                    vec2(r, r),
-                    vec2(-r, r),
-                ]
+                vec![vec2(-r, -r), vec2(r, -r), vec2(r, r), vec2(-r, r)]
             }
             ProfileShape::Rectangle => {
                 let rx = radius;
                 let ry = radius * 0.5;
-                vec![
-                    vec2(-rx, -ry),
-                    vec2(rx, -ry),
-                    vec2(rx, ry),
-                    vec2(-rx, ry),
-                ]
+                vec![vec2(-rx, -ry), vec2(rx, -ry), vec2(rx, ry), vec2(-rx, ry)]
             }
-            ProfileShape::Triangle => {
-                (0..3)
-                    .map(|i| {
-                        let a = (i as f32 / 3.0) * 2.0 * PI - PI * 0.5;
-                        vec2(radius * a.cos(), radius * a.sin())
-                    })
-                    .collect()
-            }
-            ProfileShape::Hexagon => {
-                (0..6)
-                    .map(|i| {
-                        let a = (i as f32 / 6.0) * 2.0 * PI;
-                        vec2(radius * a.cos(), radius * a.sin())
-                    })
-                    .collect()
-            }
+            ProfileShape::Triangle => (0..3)
+                .map(|i| {
+                    let a = (i as f32 / 3.0) * 2.0 * PI - PI * 0.5;
+                    vec2(radius * a.cos(), radius * a.sin())
+                })
+                .collect(),
+            ProfileShape::Hexagon => (0..6)
+                .map(|i| {
+                    let a = (i as f32 / 6.0) * 2.0 * PI;
+                    vec2(radius * a.cos(), radius * a.sin())
+                })
+                .collect(),
             ProfileShape::Star => {
                 let points = 5;
                 let r_inner = radius * 0.45;

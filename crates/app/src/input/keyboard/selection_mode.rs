@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use graph_engine::NodeData;
+use std::collections::HashSet;
 use winit::keyboard::KeyCode;
 
 use crate::state::AppState;
@@ -70,7 +70,8 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
                                     if state.selected_vertices.len() == base_mesh.vertex_count() {
                                         state.selected_vertices.clear();
                                     } else {
-                                        state.selected_vertices = base_mesh.vertices.keys().collect();
+                                        state.selected_vertices =
+                                            base_mesh.vertices.keys().collect();
                                     }
                                 }
                                 SubElementLevel::Edge => {
@@ -106,13 +107,16 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
                         if let NodeData::Mesh { base_mesh, .. } = &node.data {
                             match state.sub_element_level {
                                 SubElementLevel::Vertex => {
-                                    state.selected_vertices = base_mesh.grow_vertex_selection(&state.selected_vertices);
+                                    state.selected_vertices =
+                                        base_mesh.grow_vertex_selection(&state.selected_vertices);
                                 }
                                 SubElementLevel::Edge => {
-                                    state.selected_edges = base_mesh.grow_edge_selection(&state.selected_edges);
+                                    state.selected_edges =
+                                        base_mesh.grow_edge_selection(&state.selected_edges);
                                 }
                                 SubElementLevel::Face => {
-                                    state.selected_faces = base_mesh.grow_face_selection(&state.selected_faces);
+                                    state.selected_faces =
+                                        base_mesh.grow_face_selection(&state.selected_faces);
                                 }
                             }
                         }
@@ -129,13 +133,16 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
                         if let NodeData::Mesh { base_mesh, .. } = &node.data {
                             match state.sub_element_level {
                                 SubElementLevel::Vertex => {
-                                    state.selected_vertices = base_mesh.shrink_vertex_selection(&state.selected_vertices);
+                                    state.selected_vertices =
+                                        base_mesh.shrink_vertex_selection(&state.selected_vertices);
                                 }
                                 SubElementLevel::Edge => {
-                                    state.selected_edges = base_mesh.shrink_edge_selection(&state.selected_edges);
+                                    state.selected_edges =
+                                        base_mesh.shrink_edge_selection(&state.selected_edges);
                                 }
                                 SubElementLevel::Face => {
-                                    state.selected_faces = base_mesh.shrink_face_selection(&state.selected_faces);
+                                    state.selected_faces =
+                                        base_mesh.shrink_face_selection(&state.selected_faces);
                                 }
                             }
                         }
@@ -148,9 +155,18 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
         KeyCode::KeyL => {
             if state.ctrl_pressed {
                 // Plasticity / Rhino: Ctrl+L: Loft Selected Curves
-                let curve_ids: Vec<_> = state.selected_nodes.iter().copied().filter(|&id| {
-                    state.scene.nodes.get(id).is_some_and(|n| matches!(n.data, NodeData::Curve { .. }))
-                }).collect();
+                let curve_ids: Vec<_> = state
+                    .selected_nodes
+                    .iter()
+                    .copied()
+                    .filter(|&id| {
+                        state
+                            .scene
+                            .nodes
+                            .get(id)
+                            .is_some_and(|n| matches!(n.data, NodeData::Curve { .. }))
+                    })
+                    .collect();
                 if curve_ids.len() >= 2 {
                     let cmd = Box::new(crate::commands::LoftCurvesCommand {
                         curve_node_ids: curve_ids,

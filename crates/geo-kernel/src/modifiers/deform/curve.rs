@@ -62,7 +62,10 @@ impl Modifier for CurveModifier {
         }
 
         let range = (max_coord - min_coord).max(1e-4);
-        let vg = self.vertex_group.as_ref().and_then(|name| input.get_vertex_group(name));
+        let vg = self
+            .vertex_group
+            .as_ref()
+            .and_then(|name| input.get_vertex_group(name));
         let world_up = Vec3::Y;
 
         for (vk, v) in &mut output.vertices {
@@ -92,7 +95,11 @@ impl Modifier for CurveModifier {
             } else {
                 world_up
             };
-            let normal = if right.length_squared() > 1e-4 { right } else { Vec3::X };
+            let normal = if right.length_squared() > 1e-4 {
+                right
+            } else {
+                Vec3::X
+            };
 
             let deformed = pos + normal * offset_a + up * offset_b;
             let mask = vg.map(|g| g.get_weight(vk)).unwrap_or(1.0);

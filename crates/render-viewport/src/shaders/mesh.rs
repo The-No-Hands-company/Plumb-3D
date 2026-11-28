@@ -472,4 +472,3 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     return vec4<f32>(apply_tonemapping(final_color, normal, exposure, tonemap_mode, cavity), in.color.a);
 }
 "#;
-

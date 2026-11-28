@@ -11,9 +11,11 @@ use graph_engine::{NodeData, NodeId, SceneNode};
 pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
     ui.heading("Hair & Fur Grooming Studio");
     ui.label(
-        egui::RichText::new("Guide curves, directional styling, clumping, and hair ribbon generation.")
-            .small()
-            .weak(),
+        egui::RichText::new(
+            "Guide curves, directional styling, clumping, and hair ribbon generation.",
+        )
+        .small()
+        .weak(),
     );
     ui.separator();
 
@@ -58,7 +60,8 @@ pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
                 .weak(),
         );
 
-        if ui.button("Generate Guides From Surface")
+        if ui
+            .button("Generate Guides From Surface")
             .on_hover_text("Spawns normal-aligned guide splines on all surface vertices")
             .clicked()
         {
@@ -71,7 +74,10 @@ pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
             let new_id = state.scene.add_node(new_node);
             state.selected_node = Some(new_id);
             state.sync_gpu_meshes();
-            state.set_status_message(format!("Generated {} hair guide splines and ribbon mesh.", guide_count));
+            state.set_status_message(format!(
+                "Generated {} hair guide splines and ribbon mesh.",
+                guide_count
+            ));
         }
     });
 
@@ -86,7 +92,8 @@ pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
                 .weak(),
         );
 
-        if ui.button("Bake Dense Hair Ribbons (10x)")
+        if ui
+            .button("Bake Dense Hair Ribbons (10x)")
             .on_hover_text("Interpolates dense clumped strands into camera-facing ribbon polygons")
             .clicked()
         {
@@ -103,7 +110,10 @@ pub fn draw_groom_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
             let new_id = state.scene.add_node(new_node);
             state.selected_node = Some(new_id);
             state.sync_gpu_meshes();
-            state.set_status_message(format!("Synthesized {} dense hair ribbon strands.", strand_count));
+            state.set_status_message(format!(
+                "Synthesized {} dense hair ribbon strands.",
+                strand_count
+            ));
         }
     });
 }

@@ -5,7 +5,9 @@ use geo_kernel::{
     modifiers::deform::cloth::ClothModifier, CableGenerator, SphFluidSimulator, SphSettings,
     XpbdClothSimulator,
 };
-use graph_engine::{CollisionShape, NodeData, NodeId, RigidBodyComponent, RigidBodyType, SceneNode};
+use graph_engine::{
+    CollisionShape, NodeData, NodeId, RigidBodyComponent, RigidBodyType, SceneNode,
+};
 
 /// Selected physics simulation subsystem tab in the Inspector
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -23,16 +25,40 @@ pub fn draw_physics_panel(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
 
     // Subsystem Tabs
     ui.horizontal(|ui| {
-        if ui.selectable_label(state.physics_sub_tab == PhysicsSubTab::RigidBody, "Rigid Bodies").clicked() {
+        if ui
+            .selectable_label(
+                state.physics_sub_tab == PhysicsSubTab::RigidBody,
+                "Rigid Bodies",
+            )
+            .clicked()
+        {
             state.physics_sub_tab = PhysicsSubTab::RigidBody;
         }
-        if ui.selectable_label(state.physics_sub_tab == PhysicsSubTab::SphFluids, "SPH Fluids").clicked() {
+        if ui
+            .selectable_label(
+                state.physics_sub_tab == PhysicsSubTab::SphFluids,
+                "SPH Fluids",
+            )
+            .clicked()
+        {
             state.physics_sub_tab = PhysicsSubTab::SphFluids;
         }
-        if ui.selectable_label(state.physics_sub_tab == PhysicsSubTab::XpbdCloth, "XPBD Cloth").clicked() {
+        if ui
+            .selectable_label(
+                state.physics_sub_tab == PhysicsSubTab::XpbdCloth,
+                "XPBD Cloth",
+            )
+            .clicked()
+        {
             state.physics_sub_tab = PhysicsSubTab::XpbdCloth;
         }
-        if ui.selectable_label(state.physics_sub_tab == PhysicsSubTab::CatenaryCables, "Cables").clicked() {
+        if ui
+            .selectable_label(
+                state.physics_sub_tab == PhysicsSubTab::CatenaryCables,
+                "Cables",
+            )
+            .clicked()
+        {
             state.physics_sub_tab = PhysicsSubTab::CatenaryCables;
         }
     });
@@ -53,7 +79,11 @@ fn draw_rigid_body_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
         ui.label("No Rigid Body component attached to active node.");
         ui.add_space(4.0);
         ui.horizontal(|ui| {
-            if ui.button("+ Add Active Rigid Body").on_hover_text("Dynamic body influenced by gravity and impulses").clicked() {
+            if ui
+                .button("+ Add Active Rigid Body")
+                .on_hover_text("Dynamic body influenced by gravity and impulses")
+                .clicked()
+            {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     let shape = match &node.data {
                         NodeData::Mesh { base_mesh, .. } => {
@@ -73,7 +103,11 @@ fn draw_rigid_body_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
                     state.set_status_message("Added active dynamic rigid body.");
                 }
             }
-            if ui.button("+ Add Passive Obstacle").on_hover_text("Static obstacle collider (floor, wall, pillar)").clicked() {
+            if ui
+                .button("+ Add Passive Obstacle")
+                .on_hover_text("Static obstacle collider (floor, wall, pillar)")
+                .clicked()
+            {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     let shape = match &node.data {
                         NodeData::Mesh { base_mesh, .. } => {
@@ -81,7 +115,9 @@ fn draw_rigid_body_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
                             let half_extents = (max - min) * 0.5;
                             CollisionShape::Box { half_extents }
                         }
-                        _ => CollisionShape::Box { half_extents: Vec3::splat(1.0) },
+                        _ => CollisionShape::Box {
+                            half_extents: Vec3::splat(1.0),
+                        },
                     };
                     let body = RigidBodyComponent::new_passive(
                         shape,
@@ -116,7 +152,10 @@ fn draw_rigid_body_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
                             body.mass = 1.0;
                         }
                     }
-                    if ui.selectable_label(!is_active, "Passive (Static)").clicked() {
+                    if ui
+                        .selectable_label(!is_active, "Passive (Static)")
+                        .clicked()
+                    {
                         body.body_type = RigidBodyType::Passive;
                     }
                 });
@@ -127,20 +166,29 @@ fn draw_rigid_body_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
                     let is_sphere = matches!(body.shape, CollisionShape::Sphere { .. });
                     let is_cyl = matches!(body.shape, CollisionShape::Cylinder { .. });
                     if ui.selectable_label(is_box, "Box").clicked() {
-                        body.shape = CollisionShape::Box { half_extents: Vec3::splat(0.5) };
+                        body.shape = CollisionShape::Box {
+                            half_extents: Vec3::splat(0.5),
+                        };
                     }
                     if ui.selectable_label(is_sphere, "Sphere").clicked() {
                         body.shape = CollisionShape::Sphere { radius: 0.5 };
                     }
                     if ui.selectable_label(is_cyl, "Cylinder").clicked() {
-                        body.shape = CollisionShape::Cylinder { radius: 1.0, half_height: 2.0 };
+                        body.shape = CollisionShape::Cylinder {
+                            radius: 1.0,
+                            half_height: 2.0,
+                        };
                     }
                 });
 
                 if body.body_type == RigidBodyType::Active {
                     ui.horizontal(|ui| {
                         ui.label("Mass (kg):");
-                        ui.add(egui::DragValue::new(&mut body.mass).speed(0.1).range(0.01..=1000.0));
+                        ui.add(
+                            egui::DragValue::new(&mut body.mass)
+                                .speed(0.1)
+                                .range(0.01..=1000.0),
+                        );
                     });
                     ui.horizontal(|ui| {
                         if ui.button("Forward Kick (+Z)").clicked() {
@@ -173,16 +221,26 @@ fn draw_rigid_body_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
     ui.add_space(8.0);
     ui.separator();
     ui.heading("World Physics Settings");
-    ui.checkbox(&mut state.physics.is_simulating, "Active Simulation on Play");
+    ui.checkbox(
+        &mut state.physics.is_simulating,
+        "Active Simulation on Play",
+    );
 
     let mut has_ground = state.physics.ground_plane_y.is_some();
-    if ui.checkbox(&mut has_ground, "Floor Collision Plane (Y = 0)").changed() {
+    if ui
+        .checkbox(&mut has_ground, "Floor Collision Plane (Y = 0)")
+        .changed()
+    {
         state.physics.ground_plane_y = if has_ground { Some(0.0) } else { None };
     }
 
     ui.horizontal(|ui| {
         ui.label("Gravity Y (m/s2):");
-        ui.add(egui::DragValue::new(&mut state.physics.gravity.y).speed(0.1).range(-50.0..=50.0));
+        ui.add(
+            egui::DragValue::new(&mut state.physics.gravity.y)
+                .speed(0.1)
+                .range(-50.0..=50.0),
+        );
     });
 
     ui.horizontal(|ui| {
@@ -194,7 +252,13 @@ fn draw_rigid_body_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
             let start = state.animation.start_frame as u32;
             let end = state.animation.end_frame as u32;
             let fps = state.animation.fps;
-            state.physics.bake_to_keyframes(&mut state.scene, &mut state.animation, start, end, fps);
+            state.physics.bake_to_keyframes(
+                &mut state.scene,
+                &mut state.animation,
+                start,
+                end,
+                fps,
+            );
             state.set_status_message("Baked physics motion to animation keyframes.");
         }
     });
@@ -277,7 +341,11 @@ fn draw_sph_fluids_tab(ui: &mut Ui, state: &mut AppState) {
                 }
             });
             ui.add_space(4.0);
-            if ui.button("Reconstruct Watertight Fluid Mesh").on_hover_text("Generates surface via Marching Cubes").clicked() {
+            if ui
+                .button("Reconstruct Watertight Fluid Mesh")
+                .on_hover_text("Generates surface via Marching Cubes")
+                .clicked()
+            {
                 reconstruct = true;
             }
         });
@@ -303,7 +371,13 @@ fn draw_sph_fluids_tab(ui: &mut Ui, state: &mut AppState) {
 
 fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
     ui.heading("XPBD Cloth & Soft-Body Dynamics");
-    ui.label(egui::RichText::new("Extended Position Based Dynamics (XPBD) with distance and bending compliance.").small().weak());
+    ui.label(
+        egui::RichText::new(
+            "Extended Position Based Dynamics (XPBD) with distance and bending compliance.",
+        )
+        .small()
+        .weak(),
+    );
     ui.separator();
 
     ui.horizontal(|ui| {
@@ -313,7 +387,11 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
 
     let vertex_groups: Vec<String> = if let Some(node) = state.scene.nodes.get(sel_id) {
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
-            base_mesh.vertex_groups.iter().map(|g| g.name.clone()).collect()
+            base_mesh
+                .vertex_groups
+                .iter()
+                .map(|g| g.name.clone())
+                .collect()
         } else {
             Vec::new()
         }
@@ -323,11 +401,17 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
 
     ui.horizontal(|ui| {
         ui.label("Pin Group:");
-        let current_pin = state.cloth_pin_group.as_deref().unwrap_or("None (Unpinned)");
+        let current_pin = state
+            .cloth_pin_group
+            .as_deref()
+            .unwrap_or("None (Unpinned)");
         egui::ComboBox::from_id_salt("cloth_pin_group")
             .selected_text(current_pin)
             .show_ui(ui, |ui| {
-                if ui.selectable_label(state.cloth_pin_group.is_none(), "None (Unpinned)").clicked() {
+                if ui
+                    .selectable_label(state.cloth_pin_group.is_none(), "None (Unpinned)")
+                    .clicked()
+                {
                     state.cloth_pin_group = None;
                 }
                 for gname in &vertex_groups {
@@ -341,9 +425,21 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
 
     ui.horizontal(|ui| {
         ui.label("Wind Vector:");
-        ui.add(egui::DragValue::new(&mut state.cloth_wind.x).speed(0.1_f32).prefix("X: "));
-        ui.add(egui::DragValue::new(&mut state.cloth_wind.y).speed(0.1_f32).prefix("Y: "));
-        ui.add(egui::DragValue::new(&mut state.cloth_wind.z).speed(0.1_f32).prefix("Z: "));
+        ui.add(
+            egui::DragValue::new(&mut state.cloth_wind.x)
+                .speed(0.1_f32)
+                .prefix("X: "),
+        );
+        ui.add(
+            egui::DragValue::new(&mut state.cloth_wind.y)
+                .speed(0.1_f32)
+                .prefix("Y: "),
+        );
+        ui.add(
+            egui::DragValue::new(&mut state.cloth_wind.z)
+                .speed(0.1_f32)
+                .prefix("Z: "),
+        );
     });
 
     ui.horizontal(|ui| {
@@ -355,7 +451,11 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
     ui.horizontal(|ui| {
         if ui.button("Spawn Cloth Sheet (4x4m)").clicked() {
             let cloth_mesh = geo_kernel::Primitives::create_plane(4.0, 4.0, 8, 8);
-            let node = SceneNode::new_mesh("XpbdClothSheet", Transform::from_translation(vec3(0.0, 3.0, 0.0)), cloth_mesh);
+            let node = SceneNode::new_mesh(
+                "XpbdClothSheet",
+                Transform::from_translation(vec3(0.0, 3.0, 0.0)),
+                cloth_mesh,
+            );
             let id = state.scene.add_node(node);
             state.selected_node = Some(id);
             state.sync_gpu_meshes();
@@ -383,7 +483,10 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
     ui.group(|ui| {
         ui.label(egui::RichText::new("Interactive XPBD Simulator").strong());
         if state.active_cloth_sim.is_none() {
-            if ui.button("Initialize XPBD Simulator from Active Mesh").clicked() {
+            if ui
+                .button("Initialize XPBD Simulator from Active Mesh")
+                .clicked()
+            {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     if let NodeData::Mesh { base_mesh, .. } = &node.data {
                         let mut sim = XpbdClothSimulator::new();
@@ -393,12 +496,18 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
                         sim.pin_group = state.cloth_pin_group.clone();
                         sim.initialize(base_mesh);
                         state.active_cloth_sim = Some(sim);
-                        state.set_status_message("Initialized XPBD cloth simulator with pin constraints.");
+                        state.set_status_message(
+                            "Initialized XPBD cloth simulator with pin constraints.",
+                        );
                     }
                 }
             }
         } else if let Some(ref sim) = state.active_cloth_sim {
-            ui.label(format!("XPBD Particles: {} | Constraints: {}", sim.particles.len(), sim.distance_constraints.len()));
+            ui.label(format!(
+                "XPBD Particles: {} | Constraints: {}",
+                sim.particles.len(),
+                sim.distance_constraints.len()
+            ));
             ui.horizontal(|ui| {
                 if ui.button("Drape Step (16ms)").clicked() {
                     step_cloth = true;
@@ -438,7 +547,13 @@ fn draw_xpbd_cloth_tab(ui: &mut Ui, state: &mut AppState, sel_id: NodeId) {
 
 fn draw_catenary_cables_tab(ui: &mut Ui, state: &mut AppState, _sel_id: NodeId) {
     ui.heading("Dynamic Catenary Hydraulic Cables");
-    ui.label(egui::RichText::new("Generates physical catenary droop cables, braided harnesses, and pneumatic couplings.").small().weak());
+    ui.label(
+        egui::RichText::new(
+            "Generates physical catenary droop cables, braided harnesses, and pneumatic couplings.",
+        )
+        .small()
+        .weak(),
+    );
     ui.separator();
 
     ui.horizontal(|ui| {
@@ -453,10 +568,21 @@ fn draw_catenary_cables_tab(ui: &mut Ui, state: &mut AppState, _sel_id: NodeId) 
 
     ui.add_space(6.0);
     ui.horizontal(|ui| {
-        if ui.button("Drop Catenary Cable (Spanning Ports)").on_hover_text("Spans hydraulic hose with industrial hex fittings").clicked() {
+        if ui
+            .button("Drop Catenary Cable (Spanning Ports)")
+            .on_hover_text("Spans hydraulic hose with industrial hex fittings")
+            .clicked()
+        {
             let p_a = vec3(-2.0, 2.5, 0.0);
             let p_b = vec3(2.0, 2.0, 0.0);
-            let cable = CableGenerator::create_cable(p_a, p_b, state.cable_radius, state.cable_slack, 24, 8);
+            let cable = CableGenerator::create_cable(
+                p_a,
+                p_b,
+                state.cable_radius,
+                state.cable_slack,
+                24,
+                8,
+            );
             let node = SceneNode::new_mesh("HydraulicCatenaryCable", Transform::IDENTITY, cable);
             let id = state.scene.add_node(node);
             state.selected_node = Some(id);
@@ -466,7 +592,14 @@ fn draw_catenary_cables_tab(ui: &mut Ui, state: &mut AppState, _sel_id: NodeId) 
         if ui.button("High-Density Braided Cable (48 segs)").clicked() {
             let p_a = vec3(-1.5, 3.0, -1.0);
             let p_b = vec3(1.5, 1.5, 1.0);
-            let cable = CableGenerator::create_cable(p_a, p_b, state.cable_radius * 0.75, state.cable_slack * 1.2, 48, 12);
+            let cable = CableGenerator::create_cable(
+                p_a,
+                p_b,
+                state.cable_radius * 0.75,
+                state.cable_slack * 1.2,
+                48,
+                12,
+            );
             let node = SceneNode::new_mesh("BraidedHarnessCable", Transform::IDENTITY, cable);
             let id = state.scene.add_node(node);
             state.selected_node = Some(id);

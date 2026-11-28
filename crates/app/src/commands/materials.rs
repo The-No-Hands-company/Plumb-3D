@@ -9,7 +9,6 @@ pub struct AssignMaterialCommand {
     pub old_assignments: Vec<(FaceKey, u32)>,
 }
 
-
 impl Command for AssignMaterialCommand {
     fn name(&self) -> &str {
         "Assign Material to Faces"
@@ -18,11 +17,17 @@ impl Command for AssignMaterialCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_assignments.is_empty() {
-                    self.old_assignments = self.faces.iter().filter_map(|&fk| {
-                        base_mesh.faces.get(fk).map(|f| (fk, f.material_id))
-                    }).collect();
+                    self.old_assignments = self
+                        .faces
+                        .iter()
+                        .filter_map(|&fk| base_mesh.faces.get(fk).map(|f| (fk, f.material_id)))
+                        .collect();
                 }
                 base_mesh.set_faces_material(&self.faces, self.material_id);
                 *cached_render_mesh = None;
@@ -36,7 +41,11 @@ impl Command for AssignMaterialCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 for &(fk, old_mat_id) in &self.old_assignments {
                     if let Some(f) = base_mesh.faces.get_mut(fk) {
                         f.material_id = old_mat_id;
@@ -51,13 +60,11 @@ impl Command for AssignMaterialCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct AddMaterialSlotCommand {
     pub node_id: NodeId,
     pub material: Material,
 }
-
 
 impl Command for AddMaterialSlotCommand {
     fn name(&self) -> &str {
@@ -87,14 +94,12 @@ impl Command for AddMaterialSlotCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct RemoveMaterialSlotCommand {
     pub node_id: NodeId,
     pub slot_index: usize,
     pub removed_material: Option<Material>,
 }
-
 
 impl Command for RemoveMaterialSlotCommand {
     fn name(&self) -> &str {
@@ -104,7 +109,11 @@ impl Command for RemoveMaterialSlotCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { materials, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                materials,
+                cached_render_mesh,
+                ..
+            } => {
                 if materials.len() <= 1 {
                     return Err("Cannot remove only material slot".into());
                 }
@@ -124,7 +133,11 @@ impl Command for RemoveMaterialSlotCommand {
         if let Some(mat) = self.removed_material.take() {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { materials, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    materials,
+                    cached_render_mesh,
+                    ..
+                } => {
                     let idx = self.slot_index.min(materials.len());
                     materials.insert(idx, mat);
                     *cached_render_mesh = None;
@@ -138,4 +151,3 @@ impl Command for RemoveMaterialSlotCommand {
         }
     }
 }
-

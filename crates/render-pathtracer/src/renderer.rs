@@ -77,12 +77,13 @@ impl RenderBuffer {
                 let y = (height - 1 - y_idx as u32) as f32;
 
                 // Deterministic seed per pixel and sample
-                let mut seed = ((y_idx as u64) << 32)
-                    | ((sample_idx as u64) << 16)
-                    | (0x9E3779B97F4A7C15);
+                let mut seed =
+                    ((y_idx as u64) << 32) | ((sample_idx as u64) << 16) | (0x9E3779B97F4A7C15);
 
                 let mut rng = || {
-                    seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+                    seed = seed
+                        .wrapping_mul(6364136223846793005)
+                        .wrapping_add(1442695040888963407);
                     ((seed >> 32) as u32 as f32) / (u32::MAX as f32)
                 };
 
@@ -97,11 +98,12 @@ impl RenderBuffer {
                     let color = trace_path(scene, &ray, max_bounces, &mut rng);
 
                     // Nan/Inf guard
-                    let valid_color = if color.x.is_finite() && color.y.is_finite() && color.z.is_finite() {
-                        color.max(Vec3::ZERO)
-                    } else {
-                        Vec3::ZERO
-                    };
+                    let valid_color =
+                        if color.x.is_finite() && color.y.is_finite() && color.z.is_finite() {
+                            color.max(Vec3::ZERO)
+                        } else {
+                            Vec3::ZERO
+                        };
 
                     *pixel_radiance += valid_color;
                 }
@@ -182,7 +184,10 @@ impl RenderBuffer {
     }
 
     /// Converts using full post-production pipeline (bloom, vignette, color grading, ACES filmic)
-    pub fn to_rgba8_post_processed(&self, settings: &crate::post_process::PostProcessSettings) -> Vec<u8> {
+    pub fn to_rgba8_post_processed(
+        &self,
+        settings: &crate::post_process::PostProcessSettings,
+    ) -> Vec<u8> {
         crate::post_process::apply_post_processing(
             &self.accumulated_radiance,
             self.width,

@@ -77,15 +77,24 @@ impl BspPlane {
 
         for v in &polygon.vertices {
             let t = self.normal.dot(v.pos) - self.w;
-            let v_type = if t < -PLANE_EPSILON { BACK } else if t > PLANE_EPSILON { FRONT } else { COPLANAR };
+            let v_type = if t < -PLANE_EPSILON {
+                BACK
+            } else if t > PLANE_EPSILON {
+                FRONT
+            } else {
+                COPLANAR
+            };
             polygon_type |= v_type;
             types.push(v_type);
         }
 
         match polygon_type {
             COPLANAR => {
-                if self.normal.dot(polygon.plane.normal) > 0.0 { coplanar_front.push(polygon.clone()); }
-                else { coplanar_back.push(polygon.clone()); }
+                if self.normal.dot(polygon.plane.normal) > 0.0 {
+                    coplanar_front.push(polygon.clone());
+                } else {
+                    coplanar_back.push(polygon.clone());
+                }
             }
             FRONT => front.push(polygon.clone()),
             BACK => back.push(polygon.clone()),
@@ -97,8 +106,12 @@ impl BspPlane {
                     let (ti, tj) = (types[i], types[j]);
                     let (vi, vj) = (&polygon.vertices[i], &polygon.vertices[j]);
 
-                    if ti != BACK { f_verts.push(*vi); }
-                    if ti != FRONT { b_verts.push(*vi); }
+                    if ti != BACK {
+                        f_verts.push(*vi);
+                    }
+                    if ti != FRONT {
+                        b_verts.push(*vi);
+                    }
                     if (ti | tj) == SPANNING {
                         let denom = self.normal.dot(vj.pos - vi.pos);
                         if denom.abs() > 1e-8 {
@@ -110,10 +123,14 @@ impl BspPlane {
                     }
                 }
                 if f_verts.len() >= 3 {
-                    if let Some(p) = BspPolygon::from_vertices(f_verts) { front.push(p); }
+                    if let Some(p) = BspPolygon::from_vertices(f_verts) {
+                        front.push(p);
+                    }
                 }
                 if b_verts.len() >= 3 {
-                    if let Some(p) = BspPolygon::from_vertices(b_verts) { back.push(p); }
+                    if let Some(p) = BspPolygon::from_vertices(b_verts) {
+                        back.push(p);
+                    }
                 }
             }
             _ => {}
@@ -301,9 +318,12 @@ impl Mesh {
     /// Uses 3D Jordan ray intersection parity with jittered rays to prevent edge grazing.
     pub fn is_point_inside(&self, point: Vec3) -> bool {
         let aabb = self.compute_aabb();
-        if point.x < aabb.min.x || point.x > aabb.max.x
-            || point.y < aabb.min.y || point.y > aabb.max.y
-            || point.z < aabb.min.z || point.z > aabb.max.z
+        if point.x < aabb.min.x
+            || point.x > aabb.max.x
+            || point.y < aabb.min.y
+            || point.y > aabb.max.y
+            || point.z < aabb.min.z
+            || point.z > aabb.max.z
         {
             return false;
         }
@@ -407,9 +427,9 @@ impl Mesh {
                 let mut vks = Vec::with_capacity(poly.vertices.len());
                 for v in &poly.vertices {
                     let key = quantize(v.pos);
-                    let vk = *pos_map.entry(key).or_insert_with(|| {
-                        mesh.add_vertex_with_uv(v.pos, v.uv)
-                    });
+                    let vk = *pos_map
+                        .entry(key)
+                        .or_insert_with(|| mesh.add_vertex_with_uv(v.pos, v.uv));
                     if vks.is_empty() || *vks.last().unwrap() != vk {
                         vks.push(vk);
                     }
@@ -440,9 +460,9 @@ impl Mesh {
                 let mut tri_keys = Vec::with_capacity(3);
                 for v in &tri {
                     let key = quantize(v.pos);
-                    let vk = *pos_map.entry(key).or_insert_with(|| {
-                        mesh.add_vertex_with_uv(v.pos, v.uv)
-                    });
+                    let vk = *pos_map
+                        .entry(key)
+                        .or_insert_with(|| mesh.add_vertex_with_uv(v.pos, v.uv));
                     if tri_keys.is_empty() || *tri_keys.last().unwrap() != vk {
                         tri_keys.push(vk);
                     }
@@ -484,9 +504,12 @@ impl Mesh {
 
         // Check if bounding boxes overlap with epsilon margin
         let margin = 1e-4;
-        let overlaps = aabb_a.min.x <= aabb_b.max.x + margin && aabb_a.max.x >= aabb_b.min.x - margin
-            && aabb_a.min.y <= aabb_b.max.y + margin && aabb_a.max.y >= aabb_b.min.y - margin
-            && aabb_a.min.z <= aabb_b.max.z + margin && aabb_a.max.z >= aabb_b.min.z - margin;
+        let overlaps = aabb_a.min.x <= aabb_b.max.x + margin
+            && aabb_a.max.x >= aabb_b.min.x - margin
+            && aabb_a.min.y <= aabb_b.max.y + margin
+            && aabb_a.max.y >= aabb_b.min.y - margin
+            && aabb_a.min.z <= aabb_b.max.z + margin
+            && aabb_a.max.z >= aabb_b.min.z - margin;
 
         if !overlaps {
             return match op {
@@ -510,9 +533,12 @@ impl Mesh {
         }
 
         // Check if other is nested entirely inside self without boundary contact
-        let b_inside_a = aabb_b.min.x > aabb_a.min.x + margin && aabb_b.max.x < aabb_a.max.x - margin
-            && aabb_b.min.y > aabb_a.min.y + margin && aabb_b.max.y < aabb_a.max.y - margin
-            && aabb_b.min.z > aabb_a.min.z + margin && aabb_b.max.z < aabb_a.max.z - margin;
+        let b_inside_a = aabb_b.min.x > aabb_a.min.x + margin
+            && aabb_b.max.x < aabb_a.max.x - margin
+            && aabb_b.min.y > aabb_a.min.y + margin
+            && aabb_b.max.y < aabb_a.max.y - margin
+            && aabb_b.min.z > aabb_a.min.z + margin
+            && aabb_b.max.z < aabb_a.max.z - margin;
 
         if b_inside_a {
             match op {

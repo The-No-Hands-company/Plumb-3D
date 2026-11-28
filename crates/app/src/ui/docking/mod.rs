@@ -2,9 +2,9 @@ pub mod tab_viewer;
 
 pub use tab_viewer::*;
 
-use egui_dock::{DockArea, DockState, NodeIndex, Style};
 use crate::state::AppState;
 use crate::ui::actions::UiActions;
+use egui_dock::{DockArea, DockState, NodeIndex, Style};
 
 /// Docking layout manager for customizable drag-and-drop workspace panes
 #[derive(Debug, Clone)]
@@ -25,17 +25,21 @@ impl Default for AppDockState {
         );
 
         // Split right from center: Inspector
-        let [center_pane, _right] = dock_state.main_surface_mut().split_right(
-            center,
-            0.75,
-            vec![DockTab::Inspector],
-        );
+        let [center_pane, _right] =
+            dock_state
+                .main_surface_mut()
+                .split_right(center, 0.75, vec![DockTab::Inspector]);
 
         // Split below center pane: Timeline, Geometry Nodes, UV Editor, Console
         dock_state.main_surface_mut().split_below(
             center_pane,
             0.70,
-            vec![DockTab::Timeline, DockTab::NodeEditor, DockTab::UvEditor, DockTab::ScriptConsole],
+            vec![
+                DockTab::Timeline,
+                DockTab::NodeEditor,
+                DockTab::UvEditor,
+                DockTab::ScriptConsole,
+            ],
         );
 
         Self {
@@ -53,7 +57,8 @@ pub fn draw_dock_area(state: &mut AppState, actions: &mut UiActions) {
     let egui_ctx = state.egui_ctx.clone();
     let style = Style::from_egui(egui_ctx.style().as_ref());
 
-    let mut dock_state = std::mem::replace(&mut state.docking_state.dock_state, DockState::new(vec![]));
+    let mut dock_state =
+        std::mem::replace(&mut state.docking_state.dock_state, DockState::new(vec![]));
     let mut tab_viewer = PlumbTabViewer { state, actions };
 
     egui::CentralPanel::default()

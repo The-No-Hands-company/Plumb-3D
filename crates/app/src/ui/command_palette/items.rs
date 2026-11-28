@@ -45,7 +45,14 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Bevel Edges / Vertices",
         category: "Modeling",
         shortcut: "Ctrl+B",
-        keywords: &["bevel", "chamfer", "round", "fillet", "smooth corners", "edges"],
+        keywords: &[
+            "bevel",
+            "chamfer",
+            "round",
+            "fillet",
+            "smooth corners",
+            "edges",
+        ],
         action: PaletteAction::TriggerAction(|state, actions| {
             state.interaction_mode = InteractionMode::Edit;
             actions.trigger_bevel = true;
@@ -85,7 +92,13 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Bridge Edge Loops",
         category: "Modeling",
         shortcut: "Alt+B / Edge Menu",
-        keywords: &["bridge", "edge loops", "connect loops", "loft quads", "bridge rings"],
+        keywords: &[
+            "bridge",
+            "edge loops",
+            "connect loops",
+            "loft quads",
+            "bridge rings",
+        ],
         action: PaletteAction::TriggerAction(|state, actions| {
             state.interaction_mode = InteractionMode::Edit;
             actions.trigger_bridge_edge_loops = true;
@@ -95,7 +108,13 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Subdivide Mesh / Faces",
         category: "Modeling",
         shortcut: "W -> Subd",
-        keywords: &["subdivide", "subdiv", "smooth", "increase density", "resolution"],
+        keywords: &[
+            "subdivide",
+            "subdiv",
+            "smooth",
+            "increase density",
+            "resolution",
+        ],
         action: PaletteAction::TriggerAction(|state, actions| {
             state.interaction_mode = InteractionMode::Edit;
             actions.add_subdivide_to_selected = true;
@@ -115,7 +134,13 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Relax / Smooth Vertices (Laplacian)",
         category: "Modeling",
         shortcut: "Alt+R",
-        keywords: &["relax", "smooth", "laplacian", "straighten", "distribute evenly"],
+        keywords: &[
+            "relax",
+            "smooth",
+            "laplacian",
+            "straighten",
+            "distribute evenly",
+        ],
         action: PaletteAction::TriggerAction(|state, actions| {
             state.interaction_mode = InteractionMode::Edit;
             actions.trigger_relax_vertices = true;
@@ -217,7 +242,14 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Hardware Kitbash Drop Tool",
         category: "Modeling",
         shortcut: "K / Shift+K",
-        keywords: &["kitbash", "bolt", "screw", "vent", "latch", "insert hardware"],
+        keywords: &[
+            "kitbash",
+            "bolt",
+            "screw",
+            "vent",
+            "latch",
+            "insert hardware",
+        ],
         action: PaletteAction::TriggerAction(|state, _| {
             crate::modals::kitbash::start(state);
         }),
@@ -227,14 +259,27 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Toggle CAD Caliper / 3D Measure",
         category: "CAD",
         shortcut: "M (Measure)",
-        keywords: &["measure", "caliper", "dimension", "distance", "cad", "distance between"],
+        keywords: &[
+            "measure",
+            "caliper",
+            "dimension",
+            "distance",
+            "cad",
+            "distance between",
+        ],
         action: PaletteAction::ToggleMeasure,
     },
     PaletteItem {
         name: "Recalculate Surface Normals Outside",
         category: "CAD",
         shortcut: "Shift+N",
-        keywords: &["recalculate normals", "flip", "facing", "outside", "inverted faces"],
+        keywords: &[
+            "recalculate normals",
+            "flip",
+            "facing",
+            "outside",
+            "inverted faces",
+        ],
         action: PaletteAction::TriggerAction(|_, actions| {
             actions.trigger_recalculate_normals = Some(true);
         }),
@@ -243,7 +288,14 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "3D Print & CAD Quality Inspector",
         category: "CAD",
         shortcut: "File > Print",
-        keywords: &["3d print", "slicer", "stl", "manifold", "watertight check", "wall thickness"],
+        keywords: &[
+            "3d print",
+            "slicer",
+            "stl",
+            "manifold",
+            "watertight check",
+            "wall thickness",
+        ],
         action: PaletteAction::TriggerAction(|state, _| {
             state.print_inspector.show_dialog = true;
         }),
@@ -252,7 +304,14 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Fillet Spline Corners (G2 Curvature)",
         category: "CAD",
         shortcut: "Curve > Fillet",
-        keywords: &["fillet", "curvature", "g2", "spline", "smooth corners", "plasticity"],
+        keywords: &[
+            "fillet",
+            "curvature",
+            "g2",
+            "spline",
+            "smooth corners",
+            "plasticity",
+        ],
         action: PaletteAction::TriggerAction(|state, _| {
             if let Some(id) = state.selected_node {
                 let cmd = Box::new(crate::commands::FilletCurveCommand::with_continuity(
@@ -318,7 +377,15 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Export Active Mesh as CAD STEP Solid (.step)",
         category: "File",
         shortcut: "File > Export",
-        keywords: &["step", "stp", "cad solid", "brep", "solidworks", "cnc", "cam"],
+        keywords: &[
+            "step",
+            "stp",
+            "cad solid",
+            "brep",
+            "solidworks",
+            "cnc",
+            "cam",
+        ],
         action: PaletteAction::TriggerAction(|_, a| {
             a.export_step = true;
         }),
@@ -327,7 +394,15 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Export Full Scene as Pixar OpenUSD (.usda)",
         category: "File",
         shortcut: "File > Export",
-        keywords: &["usd", "usda", "openusd", "pixar", "houdini", "unreal", "materialx"],
+        keywords: &[
+            "usd",
+            "usda",
+            "openusd",
+            "pixar",
+            "houdini",
+            "unreal",
+            "materialx",
+        ],
         action: PaletteAction::TriggerAction(|_, a| {
             a.export_usd = true;
         }),
@@ -345,7 +420,9 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Export Sliced 3D Print G-code (.gcode)",
         category: "File",
         shortcut: "File > Export",
-        keywords: &["gcode", "slicer", "toolpath", "3d print", "bambu", "prusa", "creality"],
+        keywords: &[
+            "gcode", "slicer", "toolpath", "3d print", "bambu", "prusa", "creality",
+        ],
         action: PaletteAction::TriggerAction(|_, a| {
             a.export_gcode = true;
         }),
@@ -354,7 +431,16 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Toggle OpenXR Spatial Computing (VR 6-DoF)",
         category: "View",
         shortcut: "Window > OpenXR",
-        keywords: &["xr", "openxr", "vr", "spatial", "headset", "immersive", "vision pro", "quest"],
+        keywords: &[
+            "xr",
+            "openxr",
+            "vr",
+            "spatial",
+            "headset",
+            "immersive",
+            "vision pro",
+            "quest",
+        ],
         action: PaletteAction::TriggerAction(|s, _| {
             s.xr_session.is_active = !s.xr_session.is_active;
         }),
@@ -363,23 +449,45 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Step Inertial Motion Matching Locomotion",
         category: "Animation",
         shortcut: "Animation > Motion",
-        keywords: &["motion matching", "locomotion", "sprint", "run", "walk", "inertialization"],
+        keywords: &[
+            "motion matching",
+            "locomotion",
+            "sprint",
+            "run",
+            "walk",
+            "inertialization",
+        ],
         action: PaletteAction::TriggerAction(|s, _| {
-            s.motion_matching.step(0.016, core_math::Vec2::new(0.0, 1.0));
+            s.motion_matching
+                .step(0.016, core_math::Vec2::new(0.0, 1.0));
         }),
     },
     PaletteItem {
         name: "Welcome & Quick-Start Hub",
         category: "App",
         shortcut: "F2",
-        keywords: &["welcome", "splash", "start", "templates", "new project", "hub"],
+        keywords: &[
+            "welcome",
+            "splash",
+            "start",
+            "templates",
+            "new project",
+            "hub",
+        ],
         action: PaletteAction::OpenWelcomeHub,
     },
     PaletteItem {
         name: "Preferences & UI Density",
         category: "App",
         shortcut: "Ctrl+,",
-        keywords: &["preferences", "settings", "density", "keymap", "options", "configure"],
+        keywords: &[
+            "preferences",
+            "settings",
+            "density",
+            "keymap",
+            "options",
+            "configure",
+        ],
         action: PaletteAction::OpenPreferences,
     },
     // --- Workspaces ---
@@ -430,7 +538,14 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Spawn Procedural Oak Tree (L-System)",
         category: "Add",
         shortcut: "Add > Bio",
-        keywords: &["tree", "lsystem", "plant", "organic", "foliage", "procedural"],
+        keywords: &[
+            "tree",
+            "lsystem",
+            "plant",
+            "organic",
+            "foliage",
+            "procedural",
+        ],
         action: PaletteAction::TriggerAction(|_, a| {
             if let Ok(m) =
                 geo_kernel::LSystem::from_preset(geo_kernel::LSystemPreset::OakTree).generate_mesh()
@@ -443,7 +558,14 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Spawn Biomechanical Conduit (L-System)",
         category: "Add",
         shortcut: "Add > Bio",
-        keywords: &["conduit", "pipe", "cable", "biomechanical", "sci-fi", "lsystem"],
+        keywords: &[
+            "conduit",
+            "pipe",
+            "cable",
+            "biomechanical",
+            "sci-fi",
+            "lsystem",
+        ],
         action: PaletteAction::TriggerAction(|_, a| {
             if let Ok(m) = geo_kernel::LSystem::from_preset(
                 geo_kernel::LSystemPreset::SciFiBiomechanicalConduit,
@@ -460,7 +582,10 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         shortcut: "Add > Mesh",
         keywords: &["geodesic", "dome", "hemisphere", "sphere", "architecture"],
         action: PaletteAction::TriggerAction(|_, a| {
-            a.spawn_mesh = Some(("GeodesicDome", geo_kernel::Primitives::create_geodesic_dome(2.0, 2)));
+            a.spawn_mesh = Some((
+                "GeodesicDome",
+                geo_kernel::Primitives::create_geodesic_dome(2.0, 2),
+            ));
         }),
     },
     PaletteItem {
@@ -469,7 +594,10 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         shortcut: "Add > Mesh",
         keywords: &["pipe", "thread", "screw", "helix", "cad", "mechanical"],
         action: PaletteAction::TriggerAction(|_, a| {
-            a.spawn_mesh = Some(("PipeThread", geo_kernel::Primitives::create_pipe_thread(1.2, 0.3, 2.0, 16)));
+            a.spawn_mesh = Some((
+                "PipeThread",
+                geo_kernel::Primitives::create_pipe_thread(1.2, 0.3, 2.0, 16),
+            ));
         }),
     },
     // --- Themes ---
@@ -548,14 +676,22 @@ pub const COMMAND_LIST: &[PaletteItem] = &[
         name: "Viewport Shading: Live Path Tracer",
         category: "Shading",
         shortcut: "F12",
-        keywords: &["render", "path tracer", "raytracing", "production renderer", "global illumination"],
+        keywords: &[
+            "render",
+            "path tracer",
+            "raytracing",
+            "production renderer",
+            "global illumination",
+        ],
         action: PaletteAction::SetShading(ViewportShadingMode::Rendered),
     },
     PaletteItem {
         name: "Direct PBR Snapshot Render",
         category: "Rendering",
         shortcut: "F11",
-        keywords: &["render", "snapshot", "pbr", "instant", "hardware", "viewport"],
+        keywords: &[
+            "render", "snapshot", "pbr", "instant", "hardware", "viewport",
+        ],
         action: PaletteAction::TriggerAction(|state, _| {
             state.production_render.engine = crate::ui::render_dialog::RenderEngine::DirectPbr;
             state.production_render.show_dialog = true;

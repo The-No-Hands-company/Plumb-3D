@@ -45,17 +45,15 @@ pub fn draw_help_dialog(state: &mut AppState) {
 
             let query = state.help_search_query.trim().to_lowercase();
 
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                match state.help_dialog_tab {
-                    0 => draw_tab_shortcuts(ui, &query),
-                    1 => draw_tab_tutorials(ui, state, &query),
-                    2 => draw_tab_modeling(ui, &query),
-                    3 => draw_tab_geo_nodes(ui, &query),
-                    4 => draw_tab_rhai(ui, &query),
-                    5 => draw_tab_pathtracer(ui, &query),
-                    6 => draw_tab_printing(ui, &query),
-                    _ => draw_tab_about(ui),
-                }
+            egui::ScrollArea::vertical().show(ui, |ui| match state.help_dialog_tab {
+                0 => draw_tab_shortcuts(ui, &query),
+                1 => draw_tab_tutorials(ui, state, &query),
+                2 => draw_tab_modeling(ui, &query),
+                3 => draw_tab_geo_nodes(ui, &query),
+                4 => draw_tab_rhai(ui, &query),
+                5 => draw_tab_pathtracer(ui, &query),
+                6 => draw_tab_printing(ui, &query),
+                _ => draw_tab_about(ui),
             });
         });
 
@@ -177,34 +175,59 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
         ui.label(egui::RichText::new("Choose Tutorial:").strong());
         for (idx, (title, _, _, _)) in tutorials.iter().enumerate() {
             let short_title = title.split('.').next().unwrap_or(title);
-            if ui.selectable_label(state.selected_tutorial == idx, short_title).clicked() {
+            if ui
+                .selectable_label(state.selected_tutorial == idx, short_title)
+                .clicked()
+            {
                 state.selected_tutorial = idx;
             }
         }
     });
     ui.separator();
 
-    let (title, category, summary, steps) = tutorials[state.selected_tutorial.min(tutorials.len() - 1)];
+    let (title, category, summary, steps) =
+        tutorials[state.selected_tutorial.min(tutorials.len() - 1)];
 
     if !query.is_empty()
         && !title.to_lowercase().contains(query)
         && !summary.to_lowercase().contains(query)
-        && !steps.iter().any(|(s_title, s_desc)| s_title.to_lowercase().contains(query) || s_desc.to_lowercase().contains(query))
+        && !steps.iter().any(|(s_title, s_desc)| {
+            s_title.to_lowercase().contains(query) || s_desc.to_lowercase().contains(query)
+        })
     {
-        ui.label(egui::RichText::new("No tutorial matches your search query. Clear search to view selected tutorial.").italics().color(egui::Color32::GRAY));
+        ui.label(
+            egui::RichText::new(
+                "No tutorial matches your search query. Clear search to view selected tutorial.",
+            )
+            .italics()
+            .color(egui::Color32::GRAY),
+        );
         return;
     }
 
     ui.horizontal(|ui| {
-        ui.label(egui::RichText::new(title).size(18.0).strong().color(egui::Color32::from_rgb(100, 200, 255)));
-        ui.label(egui::RichText::new(format!("[ {} ]", category)).size(11.0).color(egui::Color32::from_rgb(255, 200, 100)));
+        ui.label(
+            egui::RichText::new(title)
+                .size(18.0)
+                .strong()
+                .color(egui::Color32::from_rgb(100, 200, 255)),
+        );
+        ui.label(
+            egui::RichText::new(format!("[ {} ]", category))
+                .size(11.0)
+                .color(egui::Color32::from_rgb(255, 200, 100)),
+        );
     });
     ui.label(egui::RichText::new(summary).italics());
     ui.add_space(8.0);
 
     for (step_title, step_desc) in steps.iter() {
         ui.group(|ui| {
-            ui.label(egui::RichText::new(*step_title).strong().color(egui::Color32::from_rgb(130, 220, 160)));
+            ui.label(
+                egui::RichText::new(*step_title)
+                    .strong()
+                    .color(egui::Color32::from_rgb(130, 220, 160)),
+            );
             ui.label(*step_desc);
         });
         ui.add_space(4.0);
@@ -213,18 +236,24 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
     if state.selected_tutorial == 0 {
         ui.add_space(8.0);
         ui.horizontal(|ui| {
-            if ui.button(
-                egui::RichText::new("🚀 Start Guided Tutorial (From Scratch)")
-                    .strong()
-                    .color(egui::Color32::from_rgb(226, 179, 87)),
-            ).clicked() {
+            if ui
+                .button(
+                    egui::RichText::new("🚀 Start Guided Tutorial (From Scratch)")
+                        .strong()
+                        .color(egui::Color32::from_rgb(226, 179, 87)),
+                )
+                .clicked()
+            {
                 crate::scenes::build_scifi_crate_tutorial_blank(state);
                 state.show_help_dialog = false;
             }
-            if ui.button(
-                egui::RichText::new("📦 Load Completed Crate Scene")
-                    .color(egui::Color32::from_rgb(130, 200, 255)),
-            ).clicked() {
+            if ui
+                .button(
+                    egui::RichText::new("📦 Load Completed Crate Scene")
+                        .color(egui::Color32::from_rgb(130, 200, 255)),
+                )
+                .clicked()
+            {
                 let (scene, camera, id) = crate::scenes::build_scifi_crate_finished_graph();
                 state.scene = scene;
                 state.camera = camera;
@@ -241,18 +270,24 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
     if state.selected_tutorial == 1 {
         ui.add_space(8.0);
         ui.horizontal(|ui| {
-            if ui.button(
-                egui::RichText::new("🚀 Start Guided Tutorial (From Scratch)")
-                    .strong()
-                    .color(egui::Color32::from_rgb(226, 179, 87)),
-            ).clicked() {
+            if ui
+                .button(
+                    egui::RichText::new("🚀 Start Guided Tutorial (From Scratch)")
+                        .strong()
+                        .color(egui::Color32::from_rgb(226, 179, 87)),
+                )
+                .clicked()
+            {
                 crate::scenes::build_castle_tower_tutorial_blank(state);
                 state.show_help_dialog = false;
             }
-            if ui.button(
-                egui::RichText::new("🏰 Load Completed Citadel Scene")
-                    .color(egui::Color32::from_rgb(130, 200, 255)),
-            ).clicked() {
+            if ui
+                .button(
+                    egui::RichText::new("🏰 Load Completed Citadel Scene")
+                        .color(egui::Color32::from_rgb(130, 200, 255)),
+                )
+                .clicked()
+            {
                 crate::scenes::build_medieval_citadel_scene(state);
                 state.show_help_dialog = false;
             }
@@ -262,18 +297,24 @@ fn draw_tab_tutorials(ui: &mut egui::Ui, state: &mut AppState, query: &str) {
     if state.selected_tutorial == 7 {
         ui.add_space(8.0);
         ui.horizontal(|ui| {
-            if ui.button(
-                egui::RichText::new("🚀 Start Guided Tutorial (From Scratch)")
-                    .strong()
-                    .color(egui::Color32::from_rgb(226, 179, 87)),
-            ).clicked() {
+            if ui
+                .button(
+                    egui::RichText::new("🚀 Start Guided Tutorial (From Scratch)")
+                        .strong()
+                        .color(egui::Color32::from_rgb(226, 179, 87)),
+                )
+                .clicked()
+            {
                 crate::scenes::build_lunar_night_sky_tutorial_blank(state);
                 state.show_help_dialog = false;
             }
-            if ui.button(
-                egui::RichText::new("🌕 Load Completed Showcase Scene")
-                    .color(egui::Color32::from_rgb(130, 200, 255)),
-            ).clicked() {
+            if ui
+                .button(
+                    egui::RichText::new("🌕 Load Completed Showcase Scene")
+                        .color(egui::Color32::from_rgb(130, 200, 255)),
+                )
+                .clicked()
+            {
                 crate::scenes::build_lunar_night_sky_scene(state);
                 state.show_help_dialog = false;
             }
@@ -288,52 +329,136 @@ fn draw_tab_shortcuts(ui: &mut egui::Ui, query: &str) {
 
     let shortcuts: &[(&str, &str, &str)] = &[
         // Navigation
-        ("Alt + Left Mouse / Middle Mouse", "Orbit Viewport Camera", "Navigation"),
-        ("Alt + Middle Mouse / Shift + MMB", "Pan Viewport Camera", "Navigation"),
-        ("Mouse Scroll Wheel", "Zoom Viewport Camera In/Out", "Navigation"),
-        ("F", "Focus Camera on Selected Object / Elements", "Navigation"),
-        ("Numpad 1 / 3 / 7", "Front / Right / Top Orthographic View", "Navigation"),
-        ("Numpad 5", "Toggle Perspective / Orthographic Projection", "Navigation"),
-        ("Numpad 0", "Align View to Active Scene Camera", "Navigation"),
+        (
+            "Alt + Left Mouse / Middle Mouse",
+            "Orbit Viewport Camera",
+            "Navigation",
+        ),
+        (
+            "Alt + Middle Mouse / Shift + MMB",
+            "Pan Viewport Camera",
+            "Navigation",
+        ),
+        (
+            "Mouse Scroll Wheel",
+            "Zoom Viewport Camera In/Out",
+            "Navigation",
+        ),
+        (
+            "F",
+            "Focus Camera on Selected Object / Elements",
+            "Navigation",
+        ),
+        (
+            "Numpad 1 / 3 / 7",
+            "Front / Right / Top Orthographic View",
+            "Navigation",
+        ),
+        (
+            "Numpad 5",
+            "Toggle Perspective / Orthographic Projection",
+            "Navigation",
+        ),
+        (
+            "Numpad 0",
+            "Align View to Active Scene Camera",
+            "Navigation",
+        ),
         // Selection
-        ("Left Mouse Click", "Select Object or Sub-Element", "Selection"),
-        ("Shift + Left Mouse Click", "Multi-Select / Toggle Element Selection", "Selection"),
+        (
+            "Left Mouse Click",
+            "Select Object or Sub-Element",
+            "Selection",
+        ),
+        (
+            "Shift + Left Mouse Click",
+            "Multi-Select / Toggle Element Selection",
+            "Selection",
+        ),
         ("B", "Box / Marquee Drag Selection", "Selection"),
         ("A", "Select All Elements in Active Mode", "Selection"),
         ("Alt + A", "Deselect All Elements", "Selection"),
-        ("L", "Select Linked Connected Geometry (Hover or Selection)", "Selection"),
+        (
+            "L",
+            "Select Linked Connected Geometry (Hover or Selection)",
+            "Selection",
+        ),
         ("Alt + L", "Select Edge Loop", "Selection"),
         ("Ctrl + I", "Invert Current Selection", "Selection"),
         // Transform
         ("W", "Activate Translation Gizmo (Move)", "Transform"),
         ("E", "Activate Rotation Gizmo (Rotate)", "Transform"),
         ("R", "Activate Scaling Gizmo (Scale)", "Transform"),
-        ("Shift + Tab", "Toggle Geometry Snapping (Grid / Vertex)", "Transform"),
-        ("O", "Toggle Proportional Editing (Soft Selection)", "Transform"),
+        (
+            "Shift + Tab",
+            "Toggle Geometry Snapping (Grid / Vertex)",
+            "Transform",
+        ),
+        (
+            "O",
+            "Toggle Proportional Editing (Soft Selection)",
+            "Transform",
+        ),
         // Modes & Sub-Elements
         ("Tab", "Toggle Object Mode / Edit Mode", "Mode"),
         ("1", "Vertex Selection Level (Edit Mode)", "Mode"),
         ("2", "Edge Selection Level (Edit Mode)", "Mode"),
         ("3", "Face Selection Level (Edit Mode)", "Mode"),
         // Interactive Modeling Modals
-        ("E", "Extrude Region / Faces along normal (Modal Drag)", "Modeling"),
-        ("Ctrl + B", "Bevel Edges / Faces (Modal Drag + Wheel Segments)", "Modeling"),
+        (
+            "E",
+            "Extrude Region / Faces along normal (Modal Drag)",
+            "Modeling",
+        ),
+        (
+            "Ctrl + B",
+            "Bevel Edges / Faces (Modal Drag + Wheel Segments)",
+            "Modeling",
+        ),
         ("Shift + Ctrl + B", "Bevel Vertices", "Modeling"),
-        ("I", "Inset Faces (Modal Drag, 'I' toggles individual)", "Modeling"),
-        ("Ctrl + R", "Loop Cut & Slide (Modal Edge Cut + Position Slide)", "Modeling"),
+        (
+            "I",
+            "Inset Faces (Modal Drag, 'I' toggles individual)",
+            "Modeling",
+        ),
+        (
+            "Ctrl + R",
+            "Loop Cut & Slide (Modal Edge Cut + Position Slide)",
+            "Modeling",
+        ),
         ("K", "Interactive Knife Face Bisect Tool", "Modeling"),
-        ("Shift + E", "Crease Edges (Catmull-Clark Semi-Sharp Creasing)", "Modeling"),
-        ("Shift + V", "Crease Vertices (Catmull-Clark Corner Creasing)", "Modeling"),
+        (
+            "Shift + E",
+            "Crease Edges (Catmull-Clark Semi-Sharp Creasing)",
+            "Modeling",
+        ),
+        (
+            "Shift + V",
+            "Crease Vertices (Catmull-Clark Corner Creasing)",
+            "Modeling",
+        ),
         ("J", "Connect Selected Vertices Across Face", "Modeling"),
         ("V", "Rip / Detach Vertices", "Modeling"),
         ("Alt + M", "Merge Selected Vertices at Center", "Modeling"),
         ("X / Delete", "Delete Selected Elements", "Modeling"),
         // Context & Windows
-        ("Right Mouse Button (RMB)", "Context-Sensitive Floating Menu", "Interface"),
+        (
+            "Right Mouse Button (RMB)",
+            "Context-Sensitive Floating Menu",
+            "Interface",
+        ),
         ("F1", "Open User Manual & Shortcuts Reference", "Interface"),
-        ("F12", "Render Scene with Monte Carlo Path Tracer", "Interface"),
+        (
+            "F12",
+            "Render Scene with Monte Carlo Path Tracer",
+            "Interface",
+        ),
         ("Ctrl + Z", "Undo Last Command", "History"),
-        ("Ctrl + Y / Ctrl + Shift + Z", "Redo Last Command", "History"),
+        (
+            "Ctrl + Y / Ctrl + Shift + Z",
+            "Redo Last Command",
+            "History",
+        ),
     ];
 
     let mut current_category = "";
@@ -349,11 +474,19 @@ fn draw_tab_shortcuts(ui: &mut egui::Ui, query: &str) {
         if cat != current_category {
             current_category = cat;
             ui.add_space(6.0);
-            ui.label(egui::RichText::new(format!("--- {} ---", current_category)).strong().color(egui::Color32::from_rgb(100, 185, 255)));
+            ui.label(
+                egui::RichText::new(format!("--- {} ---", current_category))
+                    .strong()
+                    .color(egui::Color32::from_rgb(100, 185, 255)),
+            );
         }
 
         ui.horizontal(|ui| {
-            ui.monospace(egui::RichText::new(format!("{: <28}", hotkey)).strong().color(egui::Color32::from_rgb(255, 205, 100)));
+            ui.monospace(
+                egui::RichText::new(format!("{: <28}", hotkey))
+                    .strong()
+                    .color(egui::Color32::from_rgb(255, 205, 100)),
+            );
             ui.label(desc);
         });
     }
@@ -375,11 +508,18 @@ fn draw_tab_modeling(ui: &mut egui::Ui, query: &str) {
     ];
 
     for &(title, text) in sections {
-        if !query.is_empty() && !title.to_lowercase().contains(query) && !text.to_lowercase().contains(query) {
+        if !query.is_empty()
+            && !title.to_lowercase().contains(query)
+            && !text.to_lowercase().contains(query)
+        {
             continue;
         }
         ui.group(|ui| {
-            ui.label(egui::RichText::new(title).strong().color(egui::Color32::from_rgb(100, 210, 255)));
+            ui.label(
+                egui::RichText::new(title)
+                    .strong()
+                    .color(egui::Color32::from_rgb(100, 210, 255)),
+            );
             ui.label(text);
         });
         ui.add_space(4.0);
@@ -400,11 +540,18 @@ fn draw_tab_geo_nodes(ui: &mut egui::Ui, query: &str) {
     ];
 
     for &(title, text) in &info {
-        if !query.is_empty() && !title.to_lowercase().contains(query) && !text.to_lowercase().contains(query) {
+        if !query.is_empty()
+            && !title.to_lowercase().contains(query)
+            && !text.to_lowercase().contains(query)
+        {
             continue;
         }
         ui.group(|ui| {
-            ui.label(egui::RichText::new(title).strong().color(egui::Color32::from_rgb(130, 230, 130)));
+            ui.label(
+                egui::RichText::new(title)
+                    .strong()
+                    .color(egui::Color32::from_rgb(130, 230, 130)),
+            );
             ui.label(text);
         });
         ui.add_space(4.0);
@@ -425,11 +572,18 @@ fn draw_tab_rhai(ui: &mut egui::Ui, query: &str) {
     ];
 
     for &(title, text) in &script_topics {
-        if !query.is_empty() && !title.to_lowercase().contains(query) && !text.to_lowercase().contains(query) {
+        if !query.is_empty()
+            && !title.to_lowercase().contains(query)
+            && !text.to_lowercase().contains(query)
+        {
             continue;
         }
         ui.group(|ui| {
-            ui.label(egui::RichText::new(title).strong().color(egui::Color32::from_rgb(255, 180, 100)));
+            ui.label(
+                egui::RichText::new(title)
+                    .strong()
+                    .color(egui::Color32::from_rgb(255, 180, 100)),
+            );
             ui.label(text);
         });
         ui.add_space(4.0);
@@ -438,12 +592,13 @@ fn draw_tab_rhai(ui: &mut egui::Ui, query: &str) {
     ui.add_space(6.0);
     ui.label(egui::RichText::new("Example Procedural Pipeline:").strong());
     ui.code(
-r#"// Create a procedural sci-fi building
+        r#"// Create a procedural sci-fi building
 let bldg = Primitives::create_cube(2.0);
 bldg.subdivide(1);
 bldg.extrude_all_faces(0.5);
 scene.add_mesh("ProceduralTower", bldg);
-scene.add_point_light("AccentLight", 3.0, 5.0, 3.0, 0.2, 0.8, 1.0, 15.0);"#);
+scene.add_point_light("AccentLight", 3.0, 5.0, 3.0, 0.2, 0.8, 1.0, 15.0);"#,
+    );
 }
 
 fn draw_tab_pathtracer(ui: &mut egui::Ui, query: &str) {
@@ -460,11 +615,18 @@ fn draw_tab_pathtracer(ui: &mut egui::Ui, query: &str) {
     ];
 
     for &(title, text) in &pt_topics {
-        if !query.is_empty() && !title.to_lowercase().contains(query) && !text.to_lowercase().contains(query) {
+        if !query.is_empty()
+            && !title.to_lowercase().contains(query)
+            && !text.to_lowercase().contains(query)
+        {
             continue;
         }
         ui.group(|ui| {
-            ui.label(egui::RichText::new(title).strong().color(egui::Color32::from_rgb(255, 140, 200)));
+            ui.label(
+                egui::RichText::new(title)
+                    .strong()
+                    .color(egui::Color32::from_rgb(255, 140, 200)),
+            );
             ui.label(text);
         });
         ui.add_space(4.0);
@@ -484,11 +646,18 @@ fn draw_tab_printing(ui: &mut egui::Ui, query: &str) {
     ];
 
     for &(title, text) in &cad_topics {
-        if !query.is_empty() && !title.to_lowercase().contains(query) && !text.to_lowercase().contains(query) {
+        if !query.is_empty()
+            && !title.to_lowercase().contains(query)
+            && !text.to_lowercase().contains(query)
+        {
             continue;
         }
         ui.group(|ui| {
-            ui.label(egui::RichText::new(title).strong().color(egui::Color32::from_rgb(255, 230, 110)));
+            ui.label(
+                egui::RichText::new(title)
+                    .strong()
+                    .color(egui::Color32::from_rgb(255, 230, 110)),
+            );
             ui.label(text);
         });
         ui.add_space(4.0);
@@ -517,7 +686,9 @@ fn draw_tab_about(ui: &mut egui::Ui) {
     ui.add_space(8.0);
     ui.label(egui::RichText::new("Engine Status:").strong());
     ui.label("Plumb 3D Suite Version: 1.0.0 Official Release");
-    ui.label("All 7 workspace crates verified with 175 passing unit tests and 0 compiler warnings.");
+    ui.label(
+        "All 7 workspace crates verified with 175 passing unit tests and 0 compiler warnings.",
+    );
 }
 
 #[cfg(test)]

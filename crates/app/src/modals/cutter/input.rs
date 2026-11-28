@@ -138,10 +138,15 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
         }
         KeyCode::Enter | KeyCode::NumpadEnter => {
             if let Some(c) = &mut state.cutter_modal {
-                if c.stage == CutterStage::DrawFootprint && c.shape == CutterShape::Ngon && c.polygon_points.len() >= 3 {
+                if c.stage == CutterStage::DrawFootprint
+                    && c.shape == CutterShape::Ngon
+                    && c.polygon_points.len() >= 3
+                {
                     c.stage = CutterStage::ExtrudeDepth;
                     c.depth = 0.2;
-                    state.set_status_message("Move mouse to set cut depth | LMB to cut | Esc to cancel");
+                    state.set_status_message(
+                        "Move mouse to set cut depth | LMB to cut | Esc to cancel",
+                    );
                     state.window.request_redraw();
                     return true;
                 }

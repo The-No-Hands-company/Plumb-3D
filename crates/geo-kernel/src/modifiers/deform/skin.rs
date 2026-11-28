@@ -19,7 +19,11 @@ pub struct SkinBone {
 }
 
 impl SkinBone {
-    pub fn new(name: impl Into<String>, inverse_bind_matrix: Mat4, current_world_matrix: Mat4) -> Self {
+    pub fn new(
+        name: impl Into<String>,
+        inverse_bind_matrix: Mat4,
+        current_world_matrix: Mat4,
+    ) -> Self {
         Self {
             name: name.into(),
             inverse_bind_matrix,
@@ -114,12 +118,14 @@ impl Modifier for SkinModifier {
         }
 
         let mut output = input.clone();
-        let skin_matrices: Vec<Mat4> = self.bones
+        let skin_matrices: Vec<Mat4> = self
+            .bones
             .iter()
             .map(|b| b.current_world_matrix * b.inverse_bind_matrix)
             .collect();
 
-        let bone_indices: HashMap<&str, usize> = self.bones
+        let bone_indices: HashMap<&str, usize> = self
+            .bones
             .iter()
             .enumerate()
             .map(|(i, b)| (b.name.as_str(), i))
@@ -137,7 +143,8 @@ impl Modifier for SkinModifier {
                             let w = vg.get_weight(vk);
                             if w > 0.0 {
                                 total_weight += w;
-                                let transformed_p = skin_matrices[bone_idx].transform_point3(orig_pos);
+                                let transformed_p =
+                                    skin_matrices[bone_idx].transform_point3(orig_pos);
                                 deformed_pos += transformed_p * w;
                             }
                         }
@@ -167,7 +174,11 @@ impl Modifier for SkinModifier {
                             if w > 0.0 {
                                 let dq = dual_quats[bone_idx];
                                 let sign = if let Some(p) = pivot_real {
-                                    if p.dot(dq.real) < 0.0 { -1.0 } else { 1.0 }
+                                    if p.dot(dq.real) < 0.0 {
+                                        -1.0
+                                    } else {
+                                        1.0
+                                    }
                                 } else {
                                     pivot_real = Some(dq.real);
                                     1.0
@@ -222,8 +233,16 @@ mod tests {
         cube.vertex_groups.push(vg_bone1);
         cube.vertex_groups.push(vg_bone2);
 
-        let b1 = SkinBone::new("Bone.001", Mat4::IDENTITY, Mat4::from_translation(vec3(0.0, 5.0, 0.0)));
-        let b2 = SkinBone::new("Bone.002", Mat4::IDENTITY, Mat4::from_rotation_y(std::f32::consts::PI * 0.5));
+        let b1 = SkinBone::new(
+            "Bone.001",
+            Mat4::IDENTITY,
+            Mat4::from_translation(vec3(0.0, 5.0, 0.0)),
+        );
+        let b2 = SkinBone::new(
+            "Bone.002",
+            Mat4::IDENTITY,
+            Mat4::from_rotation_y(std::f32::consts::PI * 0.5),
+        );
 
         // Test LBS
         let lbs_mod = SkinModifier::new(vec![b1.clone(), b2.clone()]);

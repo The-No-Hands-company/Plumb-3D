@@ -26,7 +26,9 @@ pub fn handle_mouse_left_down(state: &mut AppState) {
                 state.extrude_modal_faces = vec![fk];
                 state.extrude_modal_axis_constraint = None;
                 state.extrude_modal_start_mouse = (mx, my);
-                state.set_status_message("Direct Push-Pull: Drag along normal | LMB: Commit | Esc: Cancel");
+                state.set_status_message(
+                    "Direct Push-Pull: Drag along normal | LMB: Commit | Esc: Cancel",
+                );
                 state.window.request_redraw();
                 return;
             }
@@ -164,7 +166,9 @@ pub fn handle_mouse_left_up(state: &mut AppState) {
     }
     if state.is_sculpting {
         state.is_sculpting = false;
-        if let (Some(old_m), Some(sel_id)) = (state.sculpt_stroke_start_mesh.take(), state.selected_node) {
+        if let (Some(old_m), Some(sel_id)) =
+            (state.sculpt_stroke_start_mesh.take(), state.selected_node)
+        {
             if let Some(node) = state.scene.nodes.get(sel_id) {
                 if let NodeData::Mesh { base_mesh, .. } = &node.data {
                     let brush_name = format!("Sculpt {:?}", state.sculpt_settings.brush);
@@ -180,9 +184,14 @@ pub fn handle_mouse_left_up(state: &mut AppState) {
         }
     } else if state.interaction_mode == InteractionMode::WeightPaint {
         if state.weight_paint_tool == WeightPaintTool::LinearGradient {
-            if let (Some(start), Some(end)) = (state.weight_gradient_start.take(), state.weight_gradient_end.take()) {
+            if let (Some(start), Some(end)) = (
+                state.weight_gradient_start.take(),
+                state.weight_gradient_end.take(),
+            ) {
                 if (end - start).length_squared() > 1e-4 {
-                    if let (Some(sel_id), Some(group)) = (state.selected_node, state.active_vertex_group.clone()) {
+                    if let (Some(sel_id), Some(group)) =
+                        (state.selected_node, state.active_vertex_group.clone())
+                    {
                         let cmd = Box::new(ApplyWeightGradientCommand {
                             node_id: sel_id,
                             group_name: group,
@@ -198,7 +207,10 @@ pub fn handle_mouse_left_up(state: &mut AppState) {
             }
         } else if state.is_weight_painting {
             state.is_weight_painting = false;
-            if let (Some(old_m), Some(sel_id)) = (state.weight_paint_stroke_start_mesh.take(), state.selected_node) {
+            if let (Some(old_m), Some(sel_id)) = (
+                state.weight_paint_stroke_start_mesh.take(),
+                state.selected_node,
+            ) {
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     if let NodeData::Mesh { base_mesh, .. } = &node.data {
                         let cmd = Box::new(WeightPaintStrokeCommand {
@@ -213,7 +225,9 @@ pub fn handle_mouse_left_up(state: &mut AppState) {
         }
     } else if state.interaction_mode == InteractionMode::VertexPaint {
         state.is_vertex_painting = false;
-        if let (Some(old_m), Some(sel_id)) = (state.sculpt_stroke_start_mesh.take(), state.selected_node) {
+        if let (Some(old_m), Some(sel_id)) =
+            (state.sculpt_stroke_start_mesh.take(), state.selected_node)
+        {
             if let Some(node) = state.scene.nodes.get(sel_id) {
                 if let NodeData::Mesh { base_mesh, .. } = &node.data {
                     let cmd = Box::new(VertexPaintStrokeCommand {
@@ -230,7 +244,10 @@ pub fn handle_mouse_left_up(state: &mut AppState) {
     } else if state.is_box_selecting {
         match state.selection_tool_mode {
             SelectionToolMode::Box => {
-                if let (Some(start), Some(curr)) = (state.box_select_start.take(), state.box_select_current.take()) {
+                if let (Some(start), Some(curr)) = (
+                    state.box_select_start.take(),
+                    state.box_select_current.take(),
+                ) {
                     if (start.0 - curr.0).abs() > 3.0 || (start.1 - curr.1).abs() > 3.0 {
                         state.select_in_marquee_box(start, curr);
                     }

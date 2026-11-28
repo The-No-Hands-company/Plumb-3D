@@ -33,8 +33,16 @@ impl Mesh {
         }
 
         let size = max_coord - min_coord;
-        let scale_x = if size.x.abs() > 1e-6 { 1.0 / size.x } else { 1.0 };
-        let scale_y = if size.y.abs() > 1e-6 { 1.0 / size.y } else { 1.0 };
+        let scale_x = if size.x.abs() > 1e-6 {
+            1.0 / size.x
+        } else {
+            1.0
+        };
+        let scale_y = if size.y.abs() > 1e-6 {
+            1.0 / size.y
+        } else {
+            1.0
+        };
 
         // Pass 2: assign normalized UV coordinates
         for (_, v) in &mut self.vertices {
@@ -43,7 +51,10 @@ impl Mesh {
                 ProjectionAxis::Y => (v.position.x, v.position.z),
                 ProjectionAxis::Z => (v.position.x, v.position.y),
             };
-            v.uv = vec2((u_raw - min_coord.x) * scale_x, (v_raw - min_coord.y) * scale_y);
+            v.uv = vec2(
+                (u_raw - min_coord.x) * scale_x,
+                (v_raw - min_coord.y) * scale_y,
+            );
         }
     }
 

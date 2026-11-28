@@ -49,7 +49,10 @@ impl Modifier for GeometryNodesModifier {
         match graph_copy.evaluate() {
             Ok(Some(mesh)) => Ok(mesh),
             Ok(None) => Ok(input.clone()),
-            Err(e) => Err(MeshError::InvariantFailed(format!("GeoNodes evaluation failed: {:?}", e))),
+            Err(e) => Err(MeshError::InvariantFailed(format!(
+                "GeoNodes evaluation failed: {:?}",
+                e
+            ))),
         }
     }
 }

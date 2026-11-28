@@ -4,9 +4,9 @@
 //! allowing native C, C++, and Rust dynamic libraries (`.so`, `.dll`, `.dylib`) as well
 //! as WebAssembly runtimes to execute bare-metal geometry generation and modifiers.
 
-use std::ffi::CStr;
-use core_math::{vec2, vec3};
 use crate::mesh::Mesh;
+use core_math::{vec2, vec3};
+use std::ffi::CStr;
 
 /// Magic signature bytes for Plumb 3D native plugins (`b"PLUG"`).
 pub const PLUMB_PLUGIN_MAGIC: [u8; 4] = *b"PLUG";
@@ -88,10 +88,16 @@ impl std::fmt::Display for PluginError {
             Self::NullBufferPointer => write!(f, "Mesh buffer contains a null pointer"),
             Self::InvalidMagic => write!(f, "Invalid plugin magic signature"),
             Self::VersionMismatch { expected, actual } => {
-                write!(f, "Plugin API version mismatch: expected {}, found {}", expected, actual)
+                write!(
+                    f,
+                    "Plugin API version mismatch: expected {}, found {}",
+                    expected, actual
+                )
             }
             Self::InvalidFaceIndices => write!(f, "Face indices exceed vertex buffer bounds"),
-            Self::ExecutionFailed(code) => write!(f, "Plugin execution returned error code: {}", code),
+            Self::ExecutionFailed(code) => {
+                write!(f, "Plugin execution returned error code: {}", code)
+            }
         }
     }
 }
@@ -162,7 +168,10 @@ impl PlumbMeshBuffer {
     /// # Safety
     /// Pointers in `self` must be valid, properly aligned, and match specified lengths.
     pub unsafe fn to_mesh(&self) -> Result<Mesh, PluginError> {
-        if self.positions.is_null() || self.face_vertex_counts.is_null() || self.face_vertex_indices.is_null() {
+        if self.positions.is_null()
+            || self.face_vertex_counts.is_null()
+            || self.face_vertex_indices.is_null()
+        {
             return Err(PluginError::NullBufferPointer);
         }
 
@@ -224,19 +233,34 @@ impl PlumbMeshBuffer {
     /// Must only be called once on buffers created by [`PlumbMeshBuffer::from_mesh`].
     pub unsafe fn free_buffer(self) {
         if !self.positions.is_null() {
-            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(self.positions, self.vertex_count as usize * 3));
+            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
+                self.positions,
+                self.vertex_count as usize * 3,
+            ));
         }
         if !self.normals.is_null() {
-            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(self.normals, self.vertex_count as usize * 3));
+            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
+                self.normals,
+                self.vertex_count as usize * 3,
+            ));
         }
         if !self.uvs.is_null() {
-            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(self.uvs, self.vertex_count as usize * 2));
+            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
+                self.uvs,
+                self.vertex_count as usize * 2,
+            ));
         }
         if !self.face_vertex_counts.is_null() {
-            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(self.face_vertex_counts, self.face_count as usize));
+            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
+                self.face_vertex_counts,
+                self.face_count as usize,
+            ));
         }
         if !self.face_vertex_indices.is_null() {
-            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(self.face_vertex_indices, self.total_indices as usize));
+            let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
+                self.face_vertex_indices,
+                self.total_indices as usize,
+            ));
         }
     }
 }
@@ -261,7 +285,12 @@ pub struct PlumbPluginDescriptor {
 
 impl PlumbPluginDescriptor {
     /// Creates a new plugin descriptor with UTF-8 strings truncated and null-terminated safely.
-    pub fn new(name: &str, author: &str, version: &str, process_mesh: Option<PlumbProcessMeshFn>) -> Self {
+    pub fn new(
+        name: &str,
+        author: &str,
+        version: &str,
+        process_mesh: Option<PlumbProcessMeshFn>,
+    ) -> Self {
         let mut d = Self {
             header: PlumbPluginHeader::default(),
             name: [0; 64],
@@ -277,17 +306,26 @@ impl PlumbPluginDescriptor {
 
     /// Returns the UTF-8 plugin name.
     pub fn name_str(&self) -> &str {
-        CStr::from_bytes_until_nul(&self.name).ok().and_then(|c| c.to_str().ok()).unwrap_or("Unknown")
+        CStr::from_bytes_until_nul(&self.name)
+            .ok()
+            .and_then(|c| c.to_str().ok())
+            .unwrap_or("Unknown")
     }
 
     /// Returns the author string.
     pub fn author_str(&self) -> &str {
-        CStr::from_bytes_until_nul(&self.author).ok().and_then(|c| c.to_str().ok()).unwrap_or("Unknown")
+        CStr::from_bytes_until_nul(&self.author)
+            .ok()
+            .and_then(|c| c.to_str().ok())
+            .unwrap_or("Unknown")
     }
 
     /// Returns the version string.
     pub fn version_str(&self) -> &str {
-        CStr::from_bytes_until_nul(&self.version).ok().and_then(|c| c.to_str().ok()).unwrap_or("0.0.0")
+        CStr::from_bytes_until_nul(&self.version)
+            .ok()
+            .and_then(|c| c.to_str().ok())
+            .unwrap_or("0.0.0")
     }
 
     /// Validates the plugin header and compatibility.
@@ -312,12 +350,16 @@ impl PlumbPluginDescriptor {
         let mut buffer = PlumbMeshBuffer::from_mesh(mesh);
         let ret = unsafe { process_fn(&mut buffer as *mut PlumbMeshBuffer) };
         if ret != 0 {
-            unsafe { buffer.free_buffer(); }
+            unsafe {
+                buffer.free_buffer();
+            }
             return Err(PluginError::ExecutionFailed(ret));
         }
 
         let new_mesh = unsafe { buffer.to_mesh() };
-        unsafe { buffer.free_buffer(); }
+        unsafe {
+            buffer.free_buffer();
+        }
         new_mesh
     }
 }
@@ -337,11 +379,17 @@ pub trait PlumbPlugin: Send + Sync {
     /// Human-readable display name of the plugin.
     fn name(&self) -> &str;
     /// Author or organization.
-    fn author(&self) -> &str { "Community" }
+    fn author(&self) -> &str {
+        "Community"
+    }
     /// SemVer version string.
-    fn version(&self) -> &str { "1.0.0" }
+    fn version(&self) -> &str {
+        "1.0.0"
+    }
     /// Classification of this plugin.
-    fn plugin_type(&self) -> PlumbPluginType { PlumbPluginType::Modifier }
+    fn plugin_type(&self) -> PlumbPluginType {
+        PlumbPluginType::Modifier
+    }
     /// Executes the plugin operation directly on a [`Mesh`] using 100% safe Rust.
     fn execute(&self, mesh: &mut Mesh) -> Result<(), PluginError>;
 }
@@ -375,7 +423,10 @@ impl PluginRegistry {
     }
 
     pub fn find_by_name(&self, name: &str) -> Option<&dyn PlumbPlugin> {
-        self.plugins.iter().find(|p| p.name() == name).map(|p| p.as_ref())
+        self.plugins
+            .iter()
+            .find(|p| p.name() == name)
+            .map(|p| p.as_ref())
     }
 }
 
@@ -413,7 +464,9 @@ mod tests {
         assert_eq!(restored.vertices.len(), 8);
         assert_eq!(restored.faces.len(), 6);
 
-        unsafe { buffer.free_buffer(); }
+        unsafe {
+            buffer.free_buffer();
+        }
     }
 
     #[test]
@@ -430,7 +483,9 @@ mod tests {
         assert_eq!(descriptor.author_str(), "Plumb Core Team");
         assert_eq!(descriptor.version_str(), "1.0.0");
 
-        let scaled = descriptor.execute(&cube).expect("Plugin execution succeeds");
+        let scaled = descriptor
+            .execute(&cube)
+            .expect("Plugin execution succeeds");
         assert_eq!(scaled.vertices.len(), 8);
         assert_eq!(scaled.faces.len(), 6);
 
@@ -458,8 +513,12 @@ mod tests {
 
     struct PureRustInvertPlugin;
     impl PlumbPlugin for PureRustInvertPlugin {
-        fn name(&self) -> &str { "PureRustInvert" }
-        fn author(&self) -> &str { "Rustaceans" }
+        fn name(&self) -> &str {
+            "PureRustInvert"
+        }
+        fn author(&self) -> &str {
+            "Rustaceans"
+        }
         fn execute(&self, mesh: &mut Mesh) -> Result<(), PluginError> {
             for (_, v) in &mut mesh.vertices {
                 v.position = -v.position;
@@ -474,12 +533,16 @@ mod tests {
         registry.register(Box::new(PureRustInvertPlugin));
 
         assert_eq!(registry.len(), 1);
-        let plugin = registry.find_by_name("PureRustInvert").expect("Plugin found");
+        let plugin = registry
+            .find_by_name("PureRustInvert")
+            .expect("Plugin found");
         assert_eq!(plugin.author(), "Rustaceans");
 
         let mut cube = Primitives::create_cube(2.0);
         let orig_first = cube.vertices.values().next().unwrap().position;
-        plugin.execute(&mut cube).expect("Pure Rust plugin execution");
+        plugin
+            .execute(&mut cube)
+            .expect("Pure Rust plugin execution");
         let inverted_first = cube.vertices.values().next().unwrap().position;
 
         assert_eq!(inverted_first, -orig_first);

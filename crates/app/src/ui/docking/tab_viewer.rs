@@ -1,6 +1,6 @@
-use egui_dock::TabViewer;
 use crate::state::AppState;
 use crate::ui::actions::UiActions;
+use egui_dock::TabViewer;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum DockTab {

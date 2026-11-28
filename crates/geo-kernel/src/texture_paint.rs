@@ -55,7 +55,14 @@ impl PaintTexture {
         }
     }
 
-    pub fn blend_pixel(&mut self, x: usize, y: usize, src_color: [u8; 4], opacity: f32, mode: PaintBlendMode) {
+    pub fn blend_pixel(
+        &mut self,
+        x: usize,
+        y: usize,
+        src_color: [u8; 4],
+        opacity: f32,
+        mode: PaintBlendMode,
+    ) {
         if x >= self.width || y >= self.height {
             return;
         }
@@ -100,11 +107,7 @@ impl PaintTexture {
                     d_b + (sc_b - d_b) * alpha,
                 )
             }
-            PaintBlendMode::Erase => (
-                d_r,
-                d_g,
-                d_b,
-            ),
+            PaintBlendMode::Erase => (d_r, d_g, d_b),
         };
 
         let res_a = if mode == PaintBlendMode::Erase {
@@ -331,7 +334,10 @@ impl Mesh {
 
                 // Early sphere-triangle distance test
                 let tri_center = (p0 + p1 + p2) / 3.0;
-                let max_edge = (p0 - tri_center).length().max((p1 - tri_center).length()).max((p2 - tri_center).length());
+                let max_edge = (p0 - tri_center)
+                    .length()
+                    .max((p1 - tri_center).length())
+                    .max((p2 - tri_center).length());
                 if (tri_center - center).length() > r + max_edge {
                     continue;
                 }
@@ -362,7 +368,13 @@ impl Mesh {
                                     let dist = d_sq.sqrt();
                                     let falloff = brush.falloff.evaluate(dist / r);
                                     let opacity = falloff * brush.strength;
-                                    texture.blend_pixel(px, py, brush_rgba, opacity, brush.blend_mode);
+                                    texture.blend_pixel(
+                                        px,
+                                        py,
+                                        brush_rgba,
+                                        opacity,
+                                        brush.blend_mode,
+                                    );
                                     pixels_modified += 1;
                                 }
                             }

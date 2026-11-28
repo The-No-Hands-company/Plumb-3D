@@ -9,7 +9,6 @@ pub struct VertexPaintStrokeCommand {
     pub new_mesh: Mesh,
 }
 
-
 impl Command for VertexPaintStrokeCommand {
     fn name(&self) -> &str {
         "Vertex Paint Stroke"
@@ -18,7 +17,11 @@ impl Command for VertexPaintStrokeCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 *base_mesh = self.new_mesh.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -31,7 +34,11 @@ impl Command for VertexPaintStrokeCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 *base_mesh = self.old_mesh.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -42,14 +49,12 @@ impl Command for VertexPaintStrokeCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct FillVertexColorsCommand {
     pub node_id: NodeId,
     pub color: [f32; 4],
     pub old_mesh: Option<Mesh>,
 }
-
 
 impl Command for FillVertexColorsCommand {
     fn name(&self) -> &str {
@@ -59,7 +64,11 @@ impl Command for FillVertexColorsCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -76,7 +85,11 @@ impl Command for FillVertexColorsCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -90,7 +103,6 @@ impl Command for FillVertexColorsCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct MirrorVertexGroupCommand {
     pub node_id: NodeId,
@@ -101,7 +113,6 @@ pub struct MirrorVertexGroupCommand {
     pub old_mesh: Option<Mesh>,
 }
 
-
 impl Command for MirrorVertexGroupCommand {
     fn name(&self) -> &str {
         "Mirror Vertex Group"
@@ -110,12 +121,21 @@ impl Command for MirrorVertexGroupCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
                 base_mesh
-                    .mirror_vertex_group(&self.source_group, &self.target_group, self.axis, self.tolerance)
+                    .mirror_vertex_group(
+                        &self.source_group,
+                        &self.target_group,
+                        self.axis,
+                        self.tolerance,
+                    )
                     .map_err(|e| format!("Mirror vertex group failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -129,7 +149,11 @@ impl Command for MirrorVertexGroupCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -143,14 +167,12 @@ impl Command for MirrorVertexGroupCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct NormalizeVertexGroupsCommand {
     pub node_id: NodeId,
     pub group_names: Vec<String>,
     pub old_mesh: Option<Mesh>,
 }
-
 
 impl Command for NormalizeVertexGroupsCommand {
     fn name(&self) -> &str {
@@ -160,7 +182,11 @@ impl Command for NormalizeVertexGroupsCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -177,7 +203,11 @@ impl Command for NormalizeVertexGroupsCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -191,7 +221,6 @@ impl Command for NormalizeVertexGroupsCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct ApplyWeightGradientCommand {
     pub node_id: NodeId,
@@ -203,7 +232,6 @@ pub struct ApplyWeightGradientCommand {
     pub old_mesh: Option<Mesh>,
 }
 
-
 impl Command for ApplyWeightGradientCommand {
     fn name(&self) -> &str {
         "Apply Weight Gradient"
@@ -212,7 +240,11 @@ impl Command for ApplyWeightGradientCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -235,7 +267,11 @@ impl Command for ApplyWeightGradientCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -249,14 +285,12 @@ impl Command for ApplyWeightGradientCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct WeightPaintStrokeCommand {
     pub node_id: NodeId,
     pub old_mesh: Mesh,
     pub new_mesh: Mesh,
 }
-
 
 impl Command for WeightPaintStrokeCommand {
     fn name(&self) -> &str {
@@ -266,7 +300,11 @@ impl Command for WeightPaintStrokeCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 *base_mesh = self.new_mesh.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -279,7 +317,11 @@ impl Command for WeightPaintStrokeCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 *base_mesh = self.old_mesh.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -289,4 +331,3 @@ impl Command for WeightPaintStrokeCommand {
         }
     }
 }
-

@@ -195,12 +195,16 @@ impl Modifier for SmoothModifier {
     }
 
     fn apply(&self, input: &Mesh) -> Result<Mesh, MeshError> {
-        if !self.enabled || self.factor <= 0.0 || self.iterations == 0 || input.vertices.is_empty() {
+        if !self.enabled || self.factor <= 0.0 || self.iterations == 0 || input.vertices.is_empty()
+        {
             return Ok(input.clone());
         }
 
         let mut output = input.clone();
-        let vg = self.vertex_group.as_ref().and_then(|g| input.get_vertex_group(g));
+        let vg = self
+            .vertex_group
+            .as_ref()
+            .and_then(|g| input.get_vertex_group(g));
 
         for _ in 0..self.iterations {
             let mut new_positions = HashMap::with_capacity(output.vertices.len());

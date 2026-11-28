@@ -11,7 +11,12 @@ pub struct MacroEntry {
 }
 
 impl MacroEntry {
-    pub fn new(command_name: impl Into<String>, rhai: impl Into<String>, python: impl Into<String>, lua: impl Into<String>) -> Self {
+    pub fn new(
+        command_name: impl Into<String>,
+        rhai: impl Into<String>,
+        python: impl Into<String>,
+        lua: impl Into<String>,
+    ) -> Self {
         Self {
             command_name: command_name.into(),
             script_rhai: rhai.into(),
@@ -75,14 +80,18 @@ impl MacroRecorder {
         } else if command_name.contains("Sphere") {
             (
                 "let m = create_uv_sphere(1.0, 16, 16);\nadd_mesh(\"Sphere\", m);".to_string(),
-                "m = plumb.create_uv_sphere(1.0, 16, 16)\nplumb.add_mesh(\"Sphere\", m)".to_string(),
-                "local m = plumb.create_uv_sphere(1.0, 16, 16)\nplumb.add_mesh(\"Sphere\", m)".to_string(),
+                "m = plumb.create_uv_sphere(1.0, 16, 16)\nplumb.add_mesh(\"Sphere\", m)"
+                    .to_string(),
+                "local m = plumb.create_uv_sphere(1.0, 16, 16)\nplumb.add_mesh(\"Sphere\", m)"
+                    .to_string(),
             )
         } else if command_name.contains("Cylinder") {
             (
                 "let m = create_cylinder(1.0, 2.0, 16);\nadd_mesh(\"Cylinder\", m);".to_string(),
-                "m = plumb.create_cylinder(1.0, 2.0, 16)\nplumb.add_mesh(\"Cylinder\", m)".to_string(),
-                "local m = plumb.create_cylinder(1.0, 2.0, 16)\nplumb.add_mesh(\"Cylinder\", m)".to_string(),
+                "m = plumb.create_cylinder(1.0, 2.0, 16)\nplumb.add_mesh(\"Cylinder\", m)"
+                    .to_string(),
+                "local m = plumb.create_cylinder(1.0, 2.0, 16)\nplumb.add_mesh(\"Cylinder\", m)"
+                    .to_string(),
             )
         } else if command_name.contains("Extrude") {
             (
@@ -104,9 +113,18 @@ impl MacroRecorder {
             )
         } else {
             (
-                format!("// Operator: {}\nprint(\"Action: {}\");", command_name, command_name),
-                format!("# Operator: {}\nprint(\"Action: {}\")", command_name, command_name),
-                format!("-- Operator: {}\nprint(\"Action: {}\")", command_name, command_name),
+                format!(
+                    "// Operator: {}\nprint(\"Action: {}\");",
+                    command_name, command_name
+                ),
+                format!(
+                    "# Operator: {}\nprint(\"Action: {}\")",
+                    command_name, command_name
+                ),
+                format!(
+                    "-- Operator: {}\nprint(\"Action: {}\")",
+                    command_name, command_name
+                ),
             )
         }
     }
@@ -152,9 +170,15 @@ mod tests {
         }
     }
     impl Command for DummyCmd {
-        fn name(&self) -> &str { self.0 }
-        fn execute(&mut self, _scene: &mut graph_engine::SceneGraph) -> Result<(), String> { Ok(()) }
-        fn undo(&mut self, _scene: &mut graph_engine::SceneGraph) -> Result<(), String> { Ok(()) }
+        fn name(&self) -> &str {
+            self.0
+        }
+        fn execute(&mut self, _scene: &mut graph_engine::SceneGraph) -> Result<(), String> {
+            Ok(())
+        }
+        fn undo(&mut self, _scene: &mut graph_engine::SceneGraph) -> Result<(), String> {
+            Ok(())
+        }
     }
 
     #[test]

@@ -9,7 +9,6 @@ pub struct SculptStrokeCommand {
     pub new_mesh: Mesh,
 }
 
-
 impl Command for SculptStrokeCommand {
     fn name(&self) -> &str {
         &self.brush_name
@@ -44,7 +43,6 @@ impl Command for SculptStrokeCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct ShrinkFattenCommand {
     pub node_id: NodeId,
@@ -52,7 +50,6 @@ pub struct ShrinkFattenCommand {
     pub offset: f32,
     pub old_mesh: Option<Mesh>,
 }
-
 
 impl Command for ShrinkFattenCommand {
     fn name(&self) -> &str {
@@ -62,11 +59,16 @@ impl Command for ShrinkFattenCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.shrink_fatten(&self.vertices, self.offset)
+                base_mesh
+                    .shrink_fatten(&self.vertices, self.offset)
                     .map_err(|e| format!("Shrink/fatten failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -80,7 +82,11 @@ impl Command for ShrinkFattenCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -94,8 +100,6 @@ impl Command for ShrinkFattenCommand {
     }
 }
 
-
-
 #[derive(Debug)]
 pub struct RelaxVerticesCommand {
     pub node_id: NodeId,
@@ -105,7 +109,6 @@ pub struct RelaxVerticesCommand {
     pub old_mesh: Option<Mesh>,
 }
 
-
 impl Command for RelaxVerticesCommand {
     fn name(&self) -> &str {
         "Relax Vertices"
@@ -114,11 +117,16 @@ impl Command for RelaxVerticesCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.relax_vertices(&self.vertices, self.iterations, self.factor)
+                base_mesh
+                    .relax_vertices(&self.vertices, self.iterations, self.factor)
                     .map_err(|e| format!("Relax vertices failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -132,7 +140,11 @@ impl Command for RelaxVerticesCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -146,8 +158,6 @@ impl Command for RelaxVerticesCommand {
     }
 }
 
-
-
 #[derive(Debug)]
 pub struct SlideEdgesCommand {
     pub node_id: NodeId,
@@ -157,7 +167,6 @@ pub struct SlideEdgesCommand {
     pub old_mesh: Option<Mesh>,
 }
 
-
 impl Command for SlideEdgesCommand {
     fn name(&self) -> &str {
         "Slide Edges/Vertices (G, G)"
@@ -166,15 +175,21 @@ impl Command for SlideEdgesCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
                 if !self.edges.is_empty() {
-                    base_mesh.slide_edges(&self.edges, self.factor)
+                    base_mesh
+                        .slide_edges(&self.edges, self.factor)
                         .map_err(|e| format!("Slide edges failed: {:?}", e))?;
                 } else if !self.vertices.is_empty() {
-                    base_mesh.slide_vertices(&self.vertices, self.factor)
+                    base_mesh
+                        .slide_vertices(&self.vertices, self.factor)
                         .map_err(|e| format!("Slide vertices failed: {:?}", e))?;
                 }
                 *cached_render_mesh = None;
@@ -189,7 +204,11 @@ impl Command for SlideEdgesCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -202,6 +221,3 @@ impl Command for SlideEdgesCommand {
         }
     }
 }
-
-
-

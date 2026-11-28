@@ -1,8 +1,8 @@
 use crate::mesh::{Mesh, MeshError};
 use crate::modifiers::Modifier;
 use core_math::{Vec2, Vec3};
-use std::collections::BinaryHeap;
 use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 
 /// Symmetric 4x4 matrix for Garland-Heckbert Quadric Error Metrics
 #[derive(Debug, Clone, Copy, Default)]
@@ -23,9 +23,15 @@ impl SymmQuadric {
     pub fn from_plane(a: f32, b: f32, c: f32, d: f32) -> Self {
         Self {
             data: [
-                a * a, a * b, a * c, a * d,
-                b * b, b * c, b * d,
-                c * c, c * d,
+                a * a,
+                a * b,
+                a * c,
+                a * d,
+                b * b,
+                b * c,
+                b * d,
+                c * c,
+                c * d,
                 d * d,
             ],
         }
@@ -46,10 +52,17 @@ impl SymmQuadric {
         let z = p.z;
         let d = &self.data;
 
-        (d[0] * x * x + 2.0 * d[1] * x * y + 2.0 * d[2] * x * z + 2.0 * d[3] * x
-            + d[4] * y * y + 2.0 * d[5] * y * z + 2.0 * d[6] * y
-            + d[7] * z * z + 2.0 * d[8] * z
-            + d[9]).max(0.0)
+        (d[0] * x * x
+            + 2.0 * d[1] * x * y
+            + 2.0 * d[2] * x * z
+            + 2.0 * d[3] * x
+            + d[4] * y * y
+            + 2.0 * d[5] * y * z
+            + 2.0 * d[6] * y
+            + d[7] * z * z
+            + 2.0 * d[8] * z
+            + d[9])
+            .max(0.0)
     }
 }
 
@@ -154,7 +167,12 @@ pub fn decimate_mesh(input: &Mesh, ratio: f32) -> Result<Mesh, MeshError> {
     }
 
     // Helper: evaluate collapse candidate between two vertices
-    let eval_edge = |u: usize, v: usize, quadrics: &[SymmQuadric], positions: &[Vec3], uvs: &[Vec2]| -> CandidateCollapse {
+    let eval_edge = |u: usize,
+                     v: usize,
+                     quadrics: &[SymmQuadric],
+                     positions: &[Vec3],
+                     uvs: &[Vec2]|
+     -> CandidateCollapse {
         let q = quadrics[u].add(&quadrics[v]);
         let p0 = positions[u];
         let p1 = positions[v];
@@ -237,16 +255,28 @@ pub fn decimate_mesh(input: &Mesh, ratio: f32) -> Result<Mesh, MeshError> {
             let p2 = positions[t2];
             let old_norm = (p1 - p0).cross(p2 - p0);
 
-            let np0 = if t0 == root0 || t0 == root1 { cand.target_pos } else { positions[t0] };
-            let np1 = if t1 == root0 || t1 == root1 { cand.target_pos } else { positions[t1] };
-            let np2 = if t2 == root0 || t2 == root1 { cand.target_pos } else { positions[t2] };
+            let np0 = if t0 == root0 || t0 == root1 {
+                cand.target_pos
+            } else {
+                positions[t0]
+            };
+            let np1 = if t1 == root0 || t1 == root1 {
+                cand.target_pos
+            } else {
+                positions[t1]
+            };
+            let np2 = if t2 == root0 || t2 == root1 {
+                cand.target_pos
+            } else {
+                positions[t2]
+            };
             let new_norm = (np1 - np0).cross(np2 - np0);
 
-            if old_norm.length() > 1e-6 && new_norm.length() > 1e-6
-                && old_norm.dot(new_norm) <= 0.0 {
-                    causes_flip = true;
-                    break;
-                }
+            if old_norm.length() > 1e-6 && new_norm.length() > 1e-6 && old_norm.dot(new_norm) <= 0.0
+            {
+                causes_flip = true;
+                break;
+            }
         }
 
         if causes_flip {
@@ -297,15 +327,15 @@ pub fn decimate_mesh(input: &Mesh, ratio: f32) -> Result<Mesh, MeshError> {
         let mut sorted = tri;
         sorted.sort_unstable();
         if face_set.insert(sorted) {
-            let vk0 = *old_to_new.entry(tri[0]).or_insert_with(|| {
-                out_mesh.add_vertex_with_uv(positions[tri[0]], uvs[tri[0]])
-            });
-            let vk1 = *old_to_new.entry(tri[1]).or_insert_with(|| {
-                out_mesh.add_vertex_with_uv(positions[tri[1]], uvs[tri[1]])
-            });
-            let vk2 = *old_to_new.entry(tri[2]).or_insert_with(|| {
-                out_mesh.add_vertex_with_uv(positions[tri[2]], uvs[tri[2]])
-            });
+            let vk0 = *old_to_new
+                .entry(tri[0])
+                .or_insert_with(|| out_mesh.add_vertex_with_uv(positions[tri[0]], uvs[tri[0]]));
+            let vk1 = *old_to_new
+                .entry(tri[1])
+                .or_insert_with(|| out_mesh.add_vertex_with_uv(positions[tri[1]], uvs[tri[1]]));
+            let vk2 = *old_to_new
+                .entry(tri[2])
+                .or_insert_with(|| out_mesh.add_vertex_with_uv(positions[tri[2]], uvs[tri[2]]));
 
             let _ = out_mesh.add_face(&[vk0, vk1, vk2]);
         }

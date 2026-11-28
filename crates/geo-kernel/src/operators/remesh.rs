@@ -37,7 +37,12 @@ impl Mesh {
                 let v0 = self.vertices[verts[0]].position;
                 let v1 = self.vertices[verts[i]].position;
                 let v2 = self.vertices[verts[i + 1]].position;
-                triangles.push(SimpTri { v0, v1, v2, normal: n });
+                triangles.push(SimpTri {
+                    v0,
+                    v1,
+                    v2,
+                    normal: n,
+                });
             }
         }
 
@@ -69,9 +74,7 @@ impl Mesh {
         let grid_size = nx * ny * nz;
         let mut sdf: Vec<f32> = vec![0.0; grid_size];
 
-        let index_fn = |x: usize, y: usize, z: usize| -> usize {
-            x + y * nx + z * (nx * ny)
-        };
+        let index_fn = |x: usize, y: usize, z: usize| -> usize { x + y * nx + z * (nx * ny) };
 
         let slices: Vec<usize> = (0..nz).collect();
         let sdf_slices: Vec<Vec<f32>> = slices
@@ -96,7 +99,11 @@ impl Mesh {
                             let d2 = diff.length_squared();
                             if d2 < min_dist_sq {
                                 min_dist_sq = d2;
-                                let sign = if diff.dot(tri.normal) >= 0.0 { 1.0 } else { -1.0 };
+                                let sign = if diff.dot(tri.normal) >= 0.0 {
+                                    1.0
+                                } else {
+                                    -1.0
+                                };
                                 best_sign = sign;
                             }
                         }
@@ -178,7 +185,9 @@ impl Mesh {
                         let e1 = tri_edges[i + 1] as usize;
                         let e2 = tri_edges[i + 2] as usize;
 
-                        if let (Some(v0), Some(v1), Some(v2)) = (vert_indices[e0], vert_indices[e1], vert_indices[e2]) {
+                        if let (Some(v0), Some(v1), Some(v2)) =
+                            (vert_indices[e0], vert_indices[e1], vert_indices[e2])
+                        {
                             if v0 != v1 && v1 != v2 && v2 != v0 {
                                 let _ = out_mesh.add_face(&[v0, v1, v2]);
                             }
@@ -195,7 +204,9 @@ impl Mesh {
 
         // 5. Weld vertices to ensure clean manifold connectivity
         let weld_threshold = vs * 0.15;
-        let mut final_mesh = out_mesh.weld_vertices_by_distance(weld_threshold).unwrap_or(out_mesh);
+        let mut final_mesh = out_mesh
+            .weld_vertices_by_distance(weld_threshold)
+            .unwrap_or(out_mesh);
         final_mesh.update_normals();
 
         Ok(final_mesh)

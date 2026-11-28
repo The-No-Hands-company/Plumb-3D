@@ -112,7 +112,9 @@ impl SphFluidSimulator {
 
             self.particles[i].density = density.max(self.settings.rest_density * 0.1);
             // Equation of state (clamped to prevent tensile instability)
-            self.particles[i].pressure = (self.settings.stiffness * (self.particles[i].density - self.settings.rest_density)).max(0.0);
+            self.particles[i].pressure = (self.settings.stiffness
+                * (self.particles[i].density - self.settings.rest_density))
+                .max(0.0);
         }
 
         // 2. Pressure and Viscosity Forces
@@ -142,7 +144,8 @@ impl SphFluidSimulator {
 
                     // Viscosity laplacian force
                     let v_diff = self.particles[j].velocity - vi;
-                    f_viscosity += v_diff * (mass * (self.settings.viscosity / dens_j) * visc_lap * (h - r));
+                    f_viscosity +=
+                        v_diff * (mass * (self.settings.viscosity / dens_j) * visc_lap * (h - r));
                 }
             }
 
@@ -233,12 +236,14 @@ mod tests {
         sim.spawn_block(vec3(-0.2, 0.5, -0.2), vec3(0.4, 0.4, 0.4), 0.15);
 
         assert!(!sim.particles.is_empty());
-        let initial_avg_y: f32 = sim.particles.iter().map(|p| p.position.y).sum::<f32>() / sim.particles.len() as f32;
+        let initial_avg_y: f32 =
+            sim.particles.iter().map(|p| p.position.y).sum::<f32>() / sim.particles.len() as f32;
 
         sim.step(1.0 / 60.0);
 
         // Center of mass must accelerate downward due to gravity
-        let final_avg_y: f32 = sim.particles.iter().map(|p| p.position.y).sum::<f32>() / sim.particles.len() as f32;
+        let final_avg_y: f32 =
+            sim.particles.iter().map(|p| p.position.y).sum::<f32>() / sim.particles.len() as f32;
         assert!(final_avg_y < initial_avg_y);
     }
 

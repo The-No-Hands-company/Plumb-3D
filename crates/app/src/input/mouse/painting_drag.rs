@@ -38,7 +38,9 @@ pub fn handle_painting_cursor_moved(state: &mut AppState, position: PhysicalPosi
         };
         state.sculpt_step(position.x, position.y, motion_delta);
     } else if state.interaction_mode == InteractionMode::WeightPaint {
-        if state.weight_paint_tool == WeightPaintTool::LinearGradient && state.weight_gradient_start.is_some() {
+        if state.weight_paint_tool == WeightPaintTool::LinearGradient
+            && state.weight_gradient_start.is_some()
+        {
             let ray = state.get_screen_ray(position.x, position.y);
             let mut hit_found = false;
             if let Some(sel_id) = state.selected_node {
@@ -53,7 +55,8 @@ pub fn handle_painting_cursor_moved(state: &mut AppState, position: PhysicalPosi
             }
             if !hit_found {
                 if let Some(start) = state.weight_gradient_start {
-                    let cam_fwd = (state.camera.target - state.camera.eye_position()).normalize_or_zero();
+                    let cam_fwd =
+                        (state.camera.target - state.camera.eye_position()).normalize_or_zero();
                     let denom = ray.direction.dot(cam_fwd);
                     if denom.abs() > 1e-4 {
                         let t = (start - ray.origin).dot(cam_fwd) / denom;
@@ -109,33 +112,81 @@ impl AppState {
                         }
 
                         if self.sculpt_symmetry_x {
-                            let sym_hit = Vec3::new(-local_hit_point.x, local_hit_point.y, local_hit_point.z);
-                            let sym_norm = Vec3::new(-local_hit_normal.x, local_hit_normal.y, local_hit_normal.z);
+                            let sym_hit =
+                                Vec3::new(-local_hit_point.x, local_hit_point.y, local_hit_point.z);
+                            let sym_norm = Vec3::new(
+                                -local_hit_normal.x,
+                                local_hit_normal.y,
+                                local_hit_normal.z,
+                            );
                             let sym_motion = local_motion_delta.map(|m| Vec3::new(-m.x, m.y, m.z));
                             if self.dyntopo.enabled {
-                                let _ = base_mesh.apply_dyntopo_sculpt(sym_hit, sym_norm, &self.sculpt_settings, &self.dyntopo, sym_motion);
+                                let _ = base_mesh.apply_dyntopo_sculpt(
+                                    sym_hit,
+                                    sym_norm,
+                                    &self.sculpt_settings,
+                                    &self.dyntopo,
+                                    sym_motion,
+                                );
                             } else {
-                                base_mesh.apply_sculpt_brush(sym_hit, sym_norm, &self.sculpt_settings, sym_motion);
+                                base_mesh.apply_sculpt_brush(
+                                    sym_hit,
+                                    sym_norm,
+                                    &self.sculpt_settings,
+                                    sym_motion,
+                                );
                             }
                         }
                         if self.sculpt_symmetry_y {
-                            let sym_hit = Vec3::new(local_hit_point.x, -local_hit_point.y, local_hit_point.z);
-                            let sym_norm = Vec3::new(local_hit_normal.x, -local_hit_normal.y, local_hit_normal.z);
+                            let sym_hit =
+                                Vec3::new(local_hit_point.x, -local_hit_point.y, local_hit_point.z);
+                            let sym_norm = Vec3::new(
+                                local_hit_normal.x,
+                                -local_hit_normal.y,
+                                local_hit_normal.z,
+                            );
                             let sym_motion = local_motion_delta.map(|m| Vec3::new(m.x, -m.y, m.z));
                             if self.dyntopo.enabled {
-                                let _ = base_mesh.apply_dyntopo_sculpt(sym_hit, sym_norm, &self.sculpt_settings, &self.dyntopo, sym_motion);
+                                let _ = base_mesh.apply_dyntopo_sculpt(
+                                    sym_hit,
+                                    sym_norm,
+                                    &self.sculpt_settings,
+                                    &self.dyntopo,
+                                    sym_motion,
+                                );
                             } else {
-                                base_mesh.apply_sculpt_brush(sym_hit, sym_norm, &self.sculpt_settings, sym_motion);
+                                base_mesh.apply_sculpt_brush(
+                                    sym_hit,
+                                    sym_norm,
+                                    &self.sculpt_settings,
+                                    sym_motion,
+                                );
                             }
                         }
                         if self.sculpt_symmetry_z {
-                            let sym_hit = Vec3::new(local_hit_point.x, local_hit_point.y, -local_hit_point.z);
-                            let sym_norm = Vec3::new(local_hit_normal.x, local_hit_normal.y, -local_hit_normal.z);
+                            let sym_hit =
+                                Vec3::new(local_hit_point.x, local_hit_point.y, -local_hit_point.z);
+                            let sym_norm = Vec3::new(
+                                local_hit_normal.x,
+                                local_hit_normal.y,
+                                -local_hit_normal.z,
+                            );
                             let sym_motion = local_motion_delta.map(|m| Vec3::new(m.x, m.y, -m.z));
                             if self.dyntopo.enabled {
-                                let _ = base_mesh.apply_dyntopo_sculpt(sym_hit, sym_norm, &self.sculpt_settings, &self.dyntopo, sym_motion);
+                                let _ = base_mesh.apply_dyntopo_sculpt(
+                                    sym_hit,
+                                    sym_norm,
+                                    &self.sculpt_settings,
+                                    &self.dyntopo,
+                                    sym_motion,
+                                );
                             } else {
-                                base_mesh.apply_sculpt_brush(sym_hit, sym_norm, &self.sculpt_settings, sym_motion);
+                                base_mesh.apply_sculpt_brush(
+                                    sym_hit,
+                                    sym_norm,
+                                    &self.sculpt_settings,
+                                    sym_motion,
+                                );
                             }
                         }
                         self.scene.mark_dirty(sel_id);
@@ -161,7 +212,8 @@ impl AppState {
                                 self.active_vertex_group = Some(first_vg.name.clone());
                             } else {
                                 let idx = base_mesh.add_vertex_group("Group.001");
-                                self.active_vertex_group = Some(base_mesh.vertex_groups[idx].name.clone());
+                                self.active_vertex_group =
+                                    Some(base_mesh.vertex_groups[idx].name.clone());
                             }
                         }
 
@@ -196,7 +248,12 @@ impl AppState {
             if let Some(node) = self.scene.nodes.get_mut(sel_id) {
                 let world_mat = node.world_matrix;
                 let inv_mat = world_mat.inverse();
-                if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     if let Some(hit) = base_mesh.raycast(&ray, &world_mat) {
                         self.last_sculpt_hit = Some((hit.point, hit.normal));
                         let local_hit_point = inv_mat.transform_point3(hit.point);

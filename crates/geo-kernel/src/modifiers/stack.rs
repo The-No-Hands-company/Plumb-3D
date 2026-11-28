@@ -96,9 +96,6 @@ pub trait Modifier: std::fmt::Debug + Send + Sync {
     }
 }
 
-
-
-
 /// 3ds Max style Modifier Stack evaluation manager
 #[derive(Debug, Default)]
 pub struct ModifierStack {

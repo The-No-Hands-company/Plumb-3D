@@ -26,7 +26,9 @@ pub fn commit(state: &mut AppState) {
                             CutPoint::Vertex(vk) => base_mesh.vertex_faces(vk),
                             CutPoint::Edge(ek, _) => base_mesh.edge_faces(ek),
                         };
-                        p_start_faces.into_iter().find(|fk| p_end_faces.contains(fk))
+                        p_start_faces
+                            .into_iter()
+                            .find(|fk| p_end_faces.contains(fk))
                     } else {
                         None
                     }
@@ -105,8 +107,11 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
                     }
 
                     if let (true, Some(vk)) = (min_v_dist < 0.15, closest_vert) {
-                        let world_v = node.world_matrix.transform_point3(base_mesh.vertices[vk].position);
-                        state.knife_hovered_hit = Some((CutPoint::Vertex(vk), world_v, hit.face_key));
+                        let world_v = node
+                            .world_matrix
+                            .transform_point3(base_mesh.vertices[vk].position);
+                        state.knife_hovered_hit =
+                            Some((CutPoint::Vertex(vk), world_v, hit.face_key));
                     } else {
                         let f_hes = base_mesh.face_half_edges(hit.face_key);
                         let mut closest_edge = None;
@@ -116,7 +121,10 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
 
                         for &he_key in &f_hes {
                             let he = &base_mesh.half_edges[he_key];
-                            if let (Some(v0), Some(v1)) = (base_mesh.vertices.get(he.origin), base_mesh.vertices.get(he.target)) {
+                            if let (Some(v0), Some(v1)) = (
+                                base_mesh.vertices.get(he.origin),
+                                base_mesh.vertices.get(he.target),
+                            ) {
                                 let p0 = v0.position;
                                 let p1 = v1.position;
                                 let seg = p1 - p0;
@@ -139,7 +147,8 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
 
                         if let Some(ek) = closest_edge {
                             let world_e = node.world_matrix.transform_point3(best_pos);
-                            state.knife_hovered_hit = Some((CutPoint::Edge(ek, best_t), world_e, hit.face_key));
+                            state.knife_hovered_hit =
+                                Some((CutPoint::Edge(ek, best_t), world_e, hit.face_key));
                         } else {
                             state.knife_hovered_hit = None;
                         }

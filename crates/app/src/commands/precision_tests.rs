@@ -12,7 +12,12 @@ fn test_inset_exact_thickness_cad_calculation() {
     let top_face = {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
-            base_mesh.faces.iter().find(|(_, f)| f.normal.y > 0.9).map(|(k, _)| k).unwrap()
+            base_mesh
+                .faces
+                .iter()
+                .find(|(_, f)| f.normal.y > 0.9)
+                .map(|(k, _)| k)
+                .unwrap()
         } else {
             panic!("Expected mesh");
         }
@@ -81,7 +86,12 @@ fn test_operator_panel_adjustment_pipeline() {
     let top_face = {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
-            base_mesh.faces.iter().find(|(_, f)| f.normal.y > 0.9).map(|(k, _)| k).unwrap()
+            base_mesh
+                .faces
+                .iter()
+                .find(|(_, f)| f.normal.y > 0.9)
+                .map(|(k, _)| k)
+                .unwrap()
         } else {
             panic!("Expected mesh");
         }
@@ -144,7 +154,12 @@ fn test_extrude_distance_numeric_and_undo() {
     let top_face = {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
-            base_mesh.faces.iter().find(|(_, f)| f.normal.y > 0.9).map(|(k, _)| k).unwrap()
+            base_mesh
+                .faces
+                .iter()
+                .find(|(_, f)| f.normal.y > 0.9)
+                .map(|(k, _)| k)
+                .unwrap()
         } else {
             panic!("Expected mesh");
         }
@@ -178,7 +193,12 @@ fn test_castle_tower_double_inset_and_walkway_extrusion() {
     let top_cap = {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
-            base_mesh.faces.iter().find(|(_, f)| f.normal.y > 0.9).map(|(k, _)| k).unwrap()
+            base_mesh
+                .faces
+                .iter()
+                .find(|(_, f)| f.normal.y > 0.9)
+                .map(|(k, _)| k)
+                .unwrap()
         } else {
             panic!("Expected mesh");
         }
@@ -224,15 +244,22 @@ fn test_castle_tower_double_inset_and_walkway_extrusion() {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
             // Find a quad whose vertices are between 0.85m and 1.75m from center
-            let sample_quad = base_mesh.faces.iter().find(|(fk, f)| {
-                let v = base_mesh.face_vertices(*fk);
-                if v.len() == 4 && f.normal.y > 0.9 {
-                    let r = (base_mesh.vertices[v[0]].position.x.powi(2) + base_mesh.vertices[v[0]].position.z.powi(2)).sqrt();
-                    r > 0.85 && r < 1.75
-                } else {
-                    false
-                }
-            }).map(|(k, _)| k).unwrap();
+            let sample_quad = base_mesh
+                .faces
+                .iter()
+                .find(|(fk, f)| {
+                    let v = base_mesh.face_vertices(*fk);
+                    if v.len() == 4 && f.normal.y > 0.9 {
+                        let r = (base_mesh.vertices[v[0]].position.x.powi(2)
+                            + base_mesh.vertices[v[0]].position.z.powi(2))
+                        .sqrt();
+                        r > 0.85 && r < 1.75
+                    } else {
+                        false
+                    }
+                })
+                .map(|(k, _)| k)
+                .unwrap();
 
             let loop_faces = base_mesh.select_face_loop(sample_quad);
             assert_eq!(loop_faces.len(), 16); // 16 quads in the cylinder ring
@@ -255,11 +282,18 @@ fn test_castle_tower_double_inset_and_walkway_extrusion() {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
             // Check that outer parapet wall vertices remain at y = 3.0
-            let max_y = base_mesh.vertices.values().map(|v| v.position.y).fold(f32::NEG_INFINITY, f32::max);
+            let max_y = base_mesh
+                .vertices
+                .values()
+                .map(|v| v.position.y)
+                .fold(f32::NEG_INFINITY, f32::max);
             assert!((max_y - 3.0).abs() < 1e-4);
 
             // Check that the walkway floor vertices are sunken to y = 2.2
-            let sunken_found = base_mesh.vertices.values().any(|v| (v.position.y - 2.2).abs() < 1e-3);
+            let sunken_found = base_mesh
+                .vertices
+                .values()
+                .any(|v| (v.position.y - 2.2).abs() < 1e-3);
             assert!(sunken_found);
         }
     }
@@ -289,8 +323,16 @@ fn test_curve_loft_command_execution_and_undo() {
     let spline_bottom = geo_kernel::Spline::circle(1.0, core_math::Vec3::ZERO);
     let spline_top = geo_kernel::Spline::circle(0.5, core_math::Vec3::new(0.0, 2.0, 0.0));
 
-    let node_c1 = scene.add_node(SceneNode::new_curve("Circle_Bottom", Transform::IDENTITY, spline_bottom));
-    let node_c2 = scene.add_node(SceneNode::new_curve("Circle_Top", Transform::IDENTITY, spline_top));
+    let node_c1 = scene.add_node(SceneNode::new_curve(
+        "Circle_Bottom",
+        Transform::IDENTITY,
+        spline_bottom,
+    ));
+    let node_c2 = scene.add_node(SceneNode::new_curve(
+        "Circle_Top",
+        Transform::IDENTITY,
+        spline_top,
+    ));
 
     let loft_cmd = Box::new(crate::commands::modeling::curves::LoftCurvesCommand {
         curve_node_ids: vec![node_c1, node_c2],
@@ -300,11 +342,17 @@ fn test_curve_loft_command_execution_and_undo() {
         created_node_id: None,
     });
 
-    history.execute(loft_cmd, &mut scene).expect("Loft execution should succeed");
+    history
+        .execute(loft_cmd, &mut scene)
+        .expect("Loft execution should succeed");
 
     // Verify lofted mesh node was created in scene
     assert_eq!(scene.nodes.len(), 3);
-    let loft_id = scene.nodes.keys().find(|&id| id != node_c1 && id != node_c2).unwrap();
+    let loft_id = scene
+        .nodes
+        .keys()
+        .find(|&id| id != node_c1 && id != node_c2)
+        .unwrap();
     {
         let node = scene.nodes.get(loft_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -334,14 +382,18 @@ fn test_skin_envelope_generation_and_modifier() {
     wireframe.add_edge(v1, v2).unwrap();
 
     // Generate skin envelope directly
-    let skinned = wireframe.generate_skin_envelope(0.2, 1).expect("Skin envelope generation should succeed");
+    let skinned = wireframe
+        .generate_skin_envelope(0.2, 1)
+        .expect("Skin envelope generation should succeed");
     assert!(!skinned.vertices.is_empty());
     assert!(skinned.faces.len() >= 8); // At least 2 edge sleeves (4 faces each)
 
     // Verify SkinEnvelopeModifier
     let mut modifier = SkinEnvelopeModifier::new(0.15);
     modifier.smooth_iterations = 2;
-    let mod_result = modifier.apply(&wireframe).expect("SkinEnvelopeModifier should succeed");
+    let mod_result = modifier
+        .apply(&wireframe)
+        .expect("SkinEnvelopeModifier should succeed");
     assert!(mod_result.faces.len() >= 8);
 }
 
@@ -360,7 +412,9 @@ fn test_voxel_remesh_command_execution_and_undo() {
         old_mesh: None,
     });
 
-    history.execute(cmd, &mut scene).expect("VoxelRemeshCommand execute should succeed");
+    history
+        .execute(cmd, &mut scene)
+        .expect("VoxelRemeshCommand execute should succeed");
 
     {
         let node = scene.nodes.get(node_id).unwrap();
@@ -391,7 +445,10 @@ fn test_curve_pen_command_execution_and_undo() {
     let mut history = HistoryManager::new();
 
     let p0 = BezierPoint::sharp(core_math::Vec3::new(0.0, 0.0, 0.0));
-    let p1 = BezierPoint::smooth(core_math::Vec3::new(1.0, 2.0, 0.0), core_math::Vec3::new(0.5, 0.0, 0.0));
+    let p1 = BezierPoint::smooth(
+        core_math::Vec3::new(1.0, 2.0, 0.0),
+        core_math::Vec3::new(0.5, 0.0, 0.0),
+    );
     let p2 = BezierPoint::sharp(core_math::Vec3::new(2.0, 0.0, 0.0));
 
     let spline = Spline::with_points(vec![p0, p1, p2], true);
@@ -401,7 +458,9 @@ fn test_curve_pen_command_execution_and_undo() {
         created_node_id: None,
     });
 
-    history.execute(cmd, &mut scene).expect("CreateCurveNodeCommand should succeed");
+    history
+        .execute(cmd, &mut scene)
+        .expect("CreateCurveNodeCommand should succeed");
 
     assert_eq!(scene.nodes.len(), 1);
     let curve_id = scene.nodes.keys().next().unwrap();
@@ -441,7 +500,9 @@ fn test_curve_fillet_corners_command_execution_and_undo() {
     // Apply Fillet corners
     let fillet_cmd = Box::new(crate::commands::FilletCurveCommand::all(curve_id, 0.3));
 
-    history.execute(fillet_cmd, &mut scene).expect("FilletCurveCommand should succeed");
+    history
+        .execute(fillet_cmd, &mut scene)
+        .expect("FilletCurveCommand should succeed");
 
     {
         let node = scene.nodes.get(curve_id).unwrap();
@@ -498,7 +559,9 @@ fn test_lathe_curve_command_execution_and_undo() {
         created_node_id: None,
     });
 
-    history.execute(lathe_cmd, &mut scene).expect("LatheCurveCommand should succeed");
+    history
+        .execute(lathe_cmd, &mut scene)
+        .expect("LatheCurveCommand should succeed");
 
     assert_eq!(scene.nodes.len(), 2);
     let mesh_id = scene.nodes.keys().find(|&k| k != curve_id).unwrap();
@@ -531,7 +594,11 @@ fn test_duplicate_node_command_execution_and_undo() {
 
     // Create base tower node
     let tower_mesh = Primitives::create_cylinder(2.0, 6.0, 16);
-    let tower_node = SceneNode::new_mesh("CastleTower_NW", core_math::Transform::from_translation(core_math::vec3(0.0, 3.0, 0.0)), tower_mesh);
+    let tower_node = SceneNode::new_mesh(
+        "CastleTower_NW",
+        core_math::Transform::from_translation(core_math::vec3(0.0, 3.0, 0.0)),
+        tower_mesh,
+    );
     let nw_tower_id = scene.add_node(tower_node);
 
     // Duplicate to NE tower with offset X = +15m
@@ -540,14 +607,19 @@ fn test_duplicate_node_command_execution_and_undo() {
         core_math::vec3(15.0, 0.0, 0.0),
     ));
 
-    history.execute(dup_cmd, &mut scene).expect("DuplicateNodeCommand should succeed");
+    history
+        .execute(dup_cmd, &mut scene)
+        .expect("DuplicateNodeCommand should succeed");
 
     assert_eq!(scene.nodes.len(), 2);
     let ne_tower_id = scene.nodes.keys().find(|&k| k != nw_tower_id).unwrap();
     {
         let ne_tower = scene.nodes.get(ne_tower_id).unwrap();
         assert_eq!(ne_tower.name, "CastleTower_NW_copy");
-        assert_eq!(ne_tower.local_transform.translation, core_math::vec3(15.0, 3.0, 0.0));
+        assert_eq!(
+            ne_tower.local_transform.translation,
+            core_math::vec3(15.0, 3.0, 0.0)
+        );
         if let NodeData::Mesh { base_mesh, .. } = &ne_tower.data {
             assert_eq!(base_mesh.faces.len(), 18);
             assert!(base_mesh.validate().is_ok());
@@ -585,7 +657,9 @@ fn test_variable_radius_fillet_and_weld_commands() {
         continuity: geo_kernel::FilletContinuity::G2Curvature,
         old_mesh: None,
     });
-    history.execute(vf_cmd, &mut scene).expect("variable fillet execute");
+    history
+        .execute(vf_cmd, &mut scene)
+        .expect("variable fillet execute");
 
     // 2. Undo & Redo
     history.undo(&mut scene).expect("variable fillet undo");
@@ -599,8 +673,8 @@ fn test_variable_radius_fillet_and_weld_commands() {
         style: geo_kernel::WeldStyle::TigWeld,
         old_mesh: None,
     });
-    history.execute(weld_cmd, &mut scene).expect("weld bead execute");
+    history
+        .execute(weld_cmd, &mut scene)
+        .expect("weld bead execute");
     history.undo(&mut scene).expect("weld bead undo");
 }
-
-

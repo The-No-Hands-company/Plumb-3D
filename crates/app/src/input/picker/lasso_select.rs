@@ -13,8 +13,7 @@ pub fn point_in_polygon(px: f32, py: f32, poly: &[(f32, f32)]) -> bool {
     for i in 0..poly.len() {
         let (xi, yi) = poly[i];
         let (xj, yj) = poly[j];
-        let intersect = ((yi > py) != (yj > py))
-            && (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
+        let intersect = ((yi > py) != (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
         if intersect {
             inside = !inside;
         }
@@ -49,16 +48,22 @@ impl AppState {
                                     let p_world = node.world_matrix.transform_point3(v.position);
                                     if !self.show_wireframe {
                                         let view_dir = p_world - self.camera.eye_position();
-                                        let has_front = base_mesh.vertex_faces(vk).iter().any(|&fk| {
-                                            base_mesh.faces.get(fk).is_some_and(|f| {
-                                                node.world_matrix.transform_vector3(f.normal).dot(view_dir) < 0.0
-                                            })
-                                        });
+                                        let has_front =
+                                            base_mesh.vertex_faces(vk).iter().any(|&fk| {
+                                                base_mesh.faces.get(fk).is_some_and(|f| {
+                                                    node.world_matrix
+                                                        .transform_vector3(f.normal)
+                                                        .dot(view_dir)
+                                                        < 0.0
+                                                })
+                                            });
                                         if !has_front {
                                             continue;
                                         }
                                     }
-                                    if let Some(sp) = self.camera.world_to_screen(p_world, width, height) {
+                                    if let Some(sp) =
+                                        self.camera.world_to_screen(p_world, width, height)
+                                    {
                                         if point_in_polygon(sp.x, sp.y, polygon) {
                                             if subtract {
                                                 self.selected_vertices.remove(&vk);
@@ -79,18 +84,33 @@ impl AppState {
                                     if !self.show_wireframe {
                                         let view_dir = p_world - self.camera.eye_position();
                                         let f_left = he.face;
-                                        let f_right = base_mesh.half_edges.get(he.twin).and_then(|th| th.face);
-                                        let left_front = f_left.and_then(|fk| base_mesh.faces.get(fk)).is_some_and(|f| {
-                                            node.world_matrix.transform_vector3(f.normal).dot(view_dir) < 0.0
-                                        });
-                                        let right_front = f_right.and_then(|fk| base_mesh.faces.get(fk)).is_some_and(|f| {
-                                            node.world_matrix.transform_vector3(f.normal).dot(view_dir) < 0.0
-                                        });
+                                        let f_right = base_mesh
+                                            .half_edges
+                                            .get(he.twin)
+                                            .and_then(|th| th.face);
+                                        let left_front = f_left
+                                            .and_then(|fk| base_mesh.faces.get(fk))
+                                            .is_some_and(|f| {
+                                                node.world_matrix
+                                                    .transform_vector3(f.normal)
+                                                    .dot(view_dir)
+                                                    < 0.0
+                                            });
+                                        let right_front = f_right
+                                            .and_then(|fk| base_mesh.faces.get(fk))
+                                            .is_some_and(|f| {
+                                                node.world_matrix
+                                                    .transform_vector3(f.normal)
+                                                    .dot(view_dir)
+                                                    < 0.0
+                                            });
                                         if !left_front && !right_front {
                                             continue;
                                         }
                                     }
-                                    if let Some(sp) = self.camera.world_to_screen(p_world, width, height) {
+                                    if let Some(sp) =
+                                        self.camera.world_to_screen(p_world, width, height)
+                                    {
                                         if point_in_polygon(sp.x, sp.y, polygon) {
                                             if subtract {
                                                 self.selected_edges.remove(&ek);
@@ -112,13 +132,16 @@ impl AppState {
                                         let centroid = sum / vks.len() as f32;
                                         let p_world = node.world_matrix.transform_point3(centroid);
                                         if !self.show_wireframe {
-                                            let world_normal = node.world_matrix.transform_vector3(face.normal);
+                                            let world_normal =
+                                                node.world_matrix.transform_vector3(face.normal);
                                             let view_dir = p_world - self.camera.eye_position();
                                             if world_normal.dot(view_dir) >= 0.0 {
                                                 continue;
                                             }
                                         }
-                                        if let Some(sp) = self.camera.world_to_screen(p_world, width, height) {
+                                        if let Some(sp) =
+                                            self.camera.world_to_screen(p_world, width, height)
+                                        {
                                             if point_in_polygon(sp.x, sp.y, polygon) {
                                                 if subtract {
                                                     self.selected_faces.remove(&fk);

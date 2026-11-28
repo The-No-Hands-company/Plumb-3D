@@ -77,12 +77,18 @@ pub fn create_scripting_engine(output: Arc<Mutex<ScriptExecutionOutput>>) -> Eng
     engine.register_fn("create_plane", |w: f64, l: f64, sub_x: i64, sub_z: i64| {
         Primitives::create_plane(w as f32, l as f32, sub_x.max(1) as u32, sub_z.max(1) as u32)
     });
-    engine.register_fn("create_torus", |maj: f64, min: f64, maj_s: i64, min_s: i64| {
-        Primitives::create_torus(maj as f32, min as f32, maj_s.max(3) as u32, min_s.max(3) as u32)
-    });
-    engine.register_fn("create_plumb_bob", || {
-        Primitives::create_plumb_bob()
-    });
+    engine.register_fn(
+        "create_torus",
+        |maj: f64, min: f64, maj_s: i64, min_s: i64| {
+            Primitives::create_torus(
+                maj as f32,
+                min as f32,
+                maj_s.max(3) as u32,
+                min_s.max(3) as u32,
+            )
+        },
+    );
+    engine.register_fn("create_plumb_bob", Primitives::create_plumb_bob);
 
     // 4. Mesh Geometry Operators
     engine.register_fn("subdivide", |mesh: &mut Mesh, levels: i64| -> Mesh {
@@ -112,15 +118,18 @@ pub fn create_scripting_engine(output: Arc<Mutex<ScriptExecutionOutput>>) -> Eng
     });
 
     engine.register_fn("boolean_union", |a: &mut Mesh, b: Mesh| -> Mesh {
-        a.boolean(&b, BooleanOp::Union).unwrap_or_else(|_| a.clone())
+        a.boolean(&b, BooleanOp::Union)
+            .unwrap_or_else(|_| a.clone())
     });
 
     engine.register_fn("boolean_difference", |a: &mut Mesh, b: Mesh| -> Mesh {
-        a.boolean(&b, BooleanOp::Difference).unwrap_or_else(|_| a.clone())
+        a.boolean(&b, BooleanOp::Difference)
+            .unwrap_or_else(|_| a.clone())
     });
 
     engine.register_fn("boolean_intersection", |a: &mut Mesh, b: Mesh| -> Mesh {
-        a.boolean(&b, BooleanOp::Intersection).unwrap_or_else(|_| a.clone())
+        a.boolean(&b, BooleanOp::Intersection)
+            .unwrap_or_else(|_| a.clone())
     });
 
     // 5. Procedural Points & Scattering
@@ -130,43 +139,54 @@ pub fn create_scripting_engine(output: Arc<Mutex<ScriptExecutionOutput>>) -> Eng
     engine.register_type_with_name::<ScriptPoints>("Points");
     engine.register_fn("count", |pts: &mut ScriptPoints| pts.0.len() as i64);
 
-    engine.register_fn("distribute_points", |mesh: &mut Mesh, density: f64, seed: i64| -> ScriptPoints {
-        use geo_nodes::GeoNodeOp;
-        let op = geo_nodes::DistributePointsOnFacesNode;
-        let inputs = vec![
-            geo_nodes::SocketValue::Geometry(Some(mesh.clone())),
-            geo_nodes::SocketValue::Float(density as f32),
-            geo_nodes::SocketValue::Int(seed),
-        ];
-        if let Ok(outputs) = op.execute(&inputs) {
-            if let Some(pts) = outputs.first().and_then(|v| v.as_points()) {
-                return ScriptPoints(pts.to_vec());
+    engine.register_fn(
+        "distribute_points",
+        |mesh: &mut Mesh, density: f64, seed: i64| -> ScriptPoints {
+            use geo_nodes::GeoNodeOp;
+            let op = geo_nodes::DistributePointsOnFacesNode;
+            let inputs = vec![
+                geo_nodes::SocketValue::Geometry(Some(mesh.clone())),
+                geo_nodes::SocketValue::Float(density as f32),
+                geo_nodes::SocketValue::Int(seed),
+            ];
+            if let Ok(outputs) = op.execute(&inputs) {
+                if let Some(pts) = outputs.first().and_then(|v| v.as_points()) {
+                    return ScriptPoints(pts.to_vec());
+                }
             }
-        }
-        ScriptPoints(Vec::new())
-    });
+            ScriptPoints(Vec::new())
+        },
+    );
 
-    engine.register_fn("instance_on_points", |pts: &mut ScriptPoints, instance: Mesh| -> Mesh {
-        use geo_nodes::GeoNodeOp;
-        let op = geo_nodes::InstanceOnPointsNode;
-        let inputs = vec![
-            geo_nodes::SocketValue::Points(pts.0.clone()),
-            geo_nodes::SocketValue::Geometry(Some(instance)),
-            geo_nodes::SocketValue::Vector3(Vec3::ONE),
-        ];
-        if let Ok(outputs) = op.execute(&inputs) {
-            if let Some(mesh) = outputs.first().and_then(|v| v.as_geometry()) {
-                return mesh.clone();
+    engine.register_fn(
+        "instance_on_points",
+        |pts: &mut ScriptPoints, instance: Mesh| -> Mesh {
+            use geo_nodes::GeoNodeOp;
+            let op = geo_nodes::InstanceOnPointsNode;
+            let inputs = vec![
+                geo_nodes::SocketValue::Points(pts.0.clone()),
+                geo_nodes::SocketValue::Geometry(Some(instance)),
+                geo_nodes::SocketValue::Vector3(Vec3::ONE),
+            ];
+            if let Ok(outputs) = op.execute(&inputs) {
+                if let Some(mesh) = outputs.first().and_then(|v| v.as_geometry()) {
+                    return mesh.clone();
+                }
             }
-        }
-        Mesh::new()
-    });
+            Mesh::new()
+        },
+    );
 
     // 6. Scene Output Function: scene.add_mesh("Name", mesh)
     let out_clone = output.clone();
     engine.register_fn("add_mesh", move |name: &str, mesh: Mesh| {
         if let Ok(mut out) = out_clone.lock() {
-            out.logs.push(format!("Added mesh '{}' ({} verts, {} faces)", name, mesh.vertex_count(), mesh.face_count()));
+            out.logs.push(format!(
+                "Added mesh '{}' ({} verts, {} faces)",
+                name,
+                mesh.vertex_count(),
+                mesh.face_count()
+            ));
             out.meshes_to_add.push((name.to_string(), mesh));
         }
     });

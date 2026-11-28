@@ -95,7 +95,13 @@ impl TransformGizmo {
     }
 
     /// Test if a screen ray hovers/hits gizmo with adaptive screen-space scaling
-    pub fn hit_test_scaled(&self, ray: &Ray, origin: Vec3, orientation: Quat, scale: f32) -> Option<GizmoAxis> {
+    pub fn hit_test_scaled(
+        &self,
+        ray: &Ray,
+        origin: Vec3,
+        orientation: Quat,
+        scale: f32,
+    ) -> Option<GizmoAxis> {
         let len = self.length * scale;
         let hit_r = self.hit_radius * scale;
 
@@ -215,12 +221,7 @@ impl TransformGizmo {
     }
 
     /// Calculate rotation delta quaternion from mouse drag around the oriented axis.
-    pub fn calculate_rotation_delta(
-        axis: GizmoAxis,
-        orientation: Quat,
-        dx: f32,
-        dy: f32,
-    ) -> Quat {
+    pub fn calculate_rotation_delta(axis: GizmoAxis, orientation: Quat, dx: f32, dy: f32) -> Quat {
         let angle = (dx + dy) * 0.015;
         let local_axis = match axis {
             GizmoAxis::X | GizmoAxis::YZ => Vec3::X,
@@ -284,11 +285,13 @@ mod tests {
 
     #[test]
     fn test_gizmo_rotation_delta_oriented() {
-        let rot_id = TransformGizmo::calculate_rotation_delta(GizmoAxis::X, Quat::IDENTITY, 1.0, 1.0);
+        let rot_id =
+            TransformGizmo::calculate_rotation_delta(GizmoAxis::X, Quat::IDENTITY, 1.0, 1.0);
         assert!((rot_id.x.abs() - 0.0149).abs() < 1e-3);
 
         let rot_y_90 = Quat::from_rotation_y(std::f32::consts::FRAC_PI_2);
-        let rot_oriented = TransformGizmo::calculate_rotation_delta(GizmoAxis::X, rot_y_90, 1.0, 1.0);
+        let rot_oriented =
+            TransformGizmo::calculate_rotation_delta(GizmoAxis::X, rot_y_90, 1.0, 1.0);
         assert!(rot_oriented.z.abs() > 0.0);
     }
 
@@ -297,10 +300,16 @@ mod tests {
         let gizmo = TransformGizmo::new();
         let origin = Vec3::ZERO;
         let ray_x = Ray::new(Vec3::new(0.5, 0.05, 0.05), Vec3::new(0.0, 0.0, -1.0));
-        assert_eq!(gizmo.hit_test(&ray_x, origin, Quat::IDENTITY), Some(GizmoAxis::X));
+        assert_eq!(
+            gizmo.hit_test(&ray_x, origin, Quat::IDENTITY),
+            Some(GizmoAxis::X)
+        );
 
         let rot_y_90 = Quat::from_rotation_y(std::f32::consts::FRAC_PI_2);
         let ray_rot = Ray::new(Vec3::new(0.05, 0.05, -0.5), Vec3::new(1.0, 0.0, 0.0));
-        assert_eq!(gizmo.hit_test(&ray_rot, origin, rot_y_90), Some(GizmoAxis::X));
+        assert_eq!(
+            gizmo.hit_test(&ray_rot, origin, rot_y_90),
+            Some(GizmoAxis::X)
+        );
     }
 }

@@ -11,7 +11,10 @@ pub fn handle_animation_key(state: &mut AppState, key_code: KeyCode) -> bool {
             state.window.request_redraw();
             true
         }
-        KeyCode::KeyI if state.interaction_mode == InteractionMode::Object || state.interaction_mode == InteractionMode::Pose => {
+        KeyCode::KeyI
+            if state.interaction_mode == InteractionMode::Object
+                || state.interaction_mode == InteractionMode::Pose =>
+        {
             let frame = state.animation.current_frame.round();
             let targets: Vec<_> = if !state.selected_nodes.is_empty() {
                 state.selected_nodes.iter().copied().collect()
@@ -36,7 +39,9 @@ pub fn handle_animation_key(state: &mut AppState, key_code: KeyCode) -> bool {
         }
         KeyCode::ArrowLeft => {
             if state.shift_pressed {
-                state.animation.scrub_to_frame(state.animation.start_frame, &mut state.scene);
+                state
+                    .animation
+                    .scrub_to_frame(state.animation.start_frame, &mut state.scene);
             } else {
                 let prev = (state.animation.current_frame - 1.0).max(state.animation.start_frame);
                 state.animation.scrub_to_frame(prev, &mut state.scene);
@@ -46,7 +51,9 @@ pub fn handle_animation_key(state: &mut AppState, key_code: KeyCode) -> bool {
         }
         KeyCode::ArrowRight => {
             if state.shift_pressed {
-                state.animation.scrub_to_frame(state.animation.end_frame, &mut state.scene);
+                state
+                    .animation
+                    .scrub_to_frame(state.animation.end_frame, &mut state.scene);
             } else {
                 let next = (state.animation.current_frame + 1.0).min(state.animation.end_frame);
                 state.animation.scrub_to_frame(next, &mut state.scene);
@@ -60,10 +67,9 @@ pub fn handle_animation_key(state: &mut AppState, key_code: KeyCode) -> bool {
             let mut next_k: Option<f32> = None;
             for track in state.animation.tracks.values() {
                 for f in track.keyframe_frames() {
-                    if f > cur + 0.05
-                        && (next_k.is_none() || f < next_k.unwrap()) {
-                            next_k = Some(f);
-                        }
+                    if f > cur + 0.05 && (next_k.is_none() || f < next_k.unwrap()) {
+                        next_k = Some(f);
+                    }
                 }
             }
             if let Some(target_f) = next_k {
@@ -80,10 +86,9 @@ pub fn handle_animation_key(state: &mut AppState, key_code: KeyCode) -> bool {
             let mut prev_k: Option<f32> = None;
             for track in state.animation.tracks.values() {
                 for f in track.keyframe_frames() {
-                    if f < cur - 0.05
-                        && (prev_k.is_none() || f > prev_k.unwrap()) {
-                            prev_k = Some(f);
-                        }
+                    if f < cur - 0.05 && (prev_k.is_none() || f > prev_k.unwrap()) {
+                        prev_k = Some(f);
+                    }
                 }
             }
             if let Some(target_f) = prev_k {

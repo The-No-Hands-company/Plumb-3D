@@ -3,8 +3,8 @@ use graph_engine::NodeData;
 
 use super::UiActions;
 use crate::commands::{
-    FlipUvsCommand, MarkSeamCommand, PackUvIslandsCommand, RelaxUvsCommand, RotateUvsCommand, ScaleUvsCommand,
-    SmartUvProjectCommand, UVProjectionCommand, UnwrapSeamsCommand,
+    FlipUvsCommand, MarkSeamCommand, PackUvIslandsCommand, RelaxUvsCommand, RotateUvsCommand,
+    ScaleUvsCommand, SmartUvProjectCommand, UVProjectionCommand, UnwrapSeamsCommand,
 };
 use crate::state::AppState;
 use crate::types::UVProjectionType;

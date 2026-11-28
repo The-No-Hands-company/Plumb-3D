@@ -15,9 +15,11 @@ pub fn draw_topology_cad_panel(
 ) {
     ui.heading("Topology & SubD-to-NURBS CAD");
     ui.label(
-        egui::RichText::new("Production quad retopology and mathematical CAD limit-surface export.")
-            .small()
-            .weak(),
+        egui::RichText::new(
+            "Production quad retopology and mathematical CAD limit-surface export.",
+        )
+        .small()
+        .weak(),
     );
     ui.separator();
 
@@ -40,33 +42,50 @@ pub fn draw_topology_cad_panel(
             ui.label(egui::RichText::new("QuadriFlow 4-RoSy Auto-Retopology").strong());
         });
         ui.label(
-            egui::RichText::new("Aligns smooth 4-rotational symmetry cross-fields to geometric creases.")
-                .small()
-                .weak(),
+            egui::RichText::new(
+                "Aligns smooth 4-rotational symmetry cross-fields to geometric creases.",
+            )
+            .small()
+            .weak(),
         );
 
         ui.horizontal(|ui| {
             ui.label("Target Quads:");
-            ui.add(egui::Slider::new(&mut state.quadriflow_target_quads, 100..=10000).logarithmic(true));
+            ui.add(
+                egui::Slider::new(&mut state.quadriflow_target_quads, 100..=10000)
+                    .logarithmic(true),
+            );
         });
 
-        ui.checkbox(&mut state.quadriflow_sharp, "Preserve Sharp Creases / Flow Singularities");
+        ui.checkbox(
+            &mut state.quadriflow_sharp,
+            "Preserve Sharp Creases / Flow Singularities",
+        );
         if state.quadriflow_sharp {
             ui.horizontal(|ui| {
                 ui.label("Crease Angle:");
-                ui.add(egui::Slider::new(&mut state.quadriflow_crease_deg, 15.0..=80.0).text("deg"));
+                ui.add(
+                    egui::Slider::new(&mut state.quadriflow_crease_deg, 15.0..=80.0).text("deg"),
+                );
             });
         }
 
         ui.add_space(4.0);
-        if ui.button("Run QuadriFlow Retopology")
-            .on_hover_text("Calculates smooth 4-RoSy tangent cross field and extracts clean quad manifold")
+        if ui
+            .button("Run QuadriFlow Retopology")
+            .on_hover_text(
+                "Calculates smooth 4-RoSy tangent cross field and extracts clean quad manifold",
+            )
             .clicked()
         {
             let settings = QuadriflowSettings {
                 target_quads: state.quadriflow_target_quads,
                 relaxation_passes: 10,
-                sharp_angle_deg: if state.quadriflow_sharp { state.quadriflow_crease_deg } else { 85.0 },
+                sharp_angle_deg: if state.quadriflow_sharp {
+                    state.quadriflow_crease_deg
+                } else {
+                    85.0
+                },
                 enforce_all_quads: true,
             };
 
@@ -79,7 +98,10 @@ pub fn draw_topology_cad_panel(
                         }
                     }
                     state.sync_gpu_meshes();
-                    state.set_status_message(format!("QuadriFlow remeshed to {} clean production quads.", quad_count));
+                    state.set_status_message(format!(
+                        "QuadriFlow remeshed to {} clean production quads.",
+                        quad_count
+                    ));
                 }
                 Err(err) => {
                     state.set_status_message(format!("QuadriFlow retopology failed: {:?}", err));
@@ -136,7 +158,11 @@ pub fn draw_topology_cad_panel(
         });
 
         ui.horizontal(|ui| {
-            if ui.button("Voxel Remesh (0.1m)").on_hover_text("Rebuilds watertight manifold volume via Signed Distance Field").clicked() {
+            if ui
+                .button("Voxel Remesh (0.1m)")
+                .on_hover_text("Rebuilds watertight manifold volume via Signed Distance Field")
+                .clicked()
+            {
                 if let Ok(remeshed) = base_mesh.voxel_remesh(0.1) {
                     if let Some(node_mut) = state.scene.nodes.get_mut(sel_id) {
                         if let NodeData::Mesh { base_mesh: bm, .. } = &mut node_mut.data {
@@ -148,7 +174,11 @@ pub fn draw_topology_cad_panel(
                 }
             }
 
-            if ui.button("QEM Decimate (50%)").on_hover_text("Quadric Error Metric edge collapse").clicked() {
+            if ui
+                .button("QEM Decimate (50%)")
+                .on_hover_text("Quadric Error Metric edge collapse")
+                .clicked()
+            {
                 if let Ok(decimated) = base_mesh.decimate(0.5) {
                     if let Some(node_mut) = state.scene.nodes.get_mut(sel_id) {
                         if let NodeData::Mesh { base_mesh: bm, .. } = &mut node_mut.data {

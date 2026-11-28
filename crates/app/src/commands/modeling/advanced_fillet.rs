@@ -2,9 +2,7 @@
 //! Floating Mesh Decals, and Flow Guide Topology Alignment.
 
 use core_math::Vec3;
-use geo_kernel::{
-    operators::bevel::BevelProfile, EdgeKey, FilletContinuity, Mesh, WeldStyle,
-};
+use geo_kernel::{operators::bevel::BevelProfile, EdgeKey, FilletContinuity, Mesh, WeldStyle};
 use graph_engine::{Command, NodeData, NodeId, SceneGraph};
 
 /// Non-destructive command to apply variable radius filleting ($R_1 \to R_2$) along an edge chain.
@@ -27,7 +25,11 @@ impl Command for VariableRadiusFilletCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -53,7 +55,11 @@ impl Command for VariableRadiusFilletCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -85,7 +91,11 @@ impl Command for GenerateWeldBeadCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -104,7 +114,11 @@ impl Command for GenerateWeldBeadCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -134,18 +148,28 @@ impl Command for ProjectDecalCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let (hull_mesh, hull_mat) = {
-            let hull_node = scene.nodes.get(self.hull_id).ok_or("Target hull node not found")?;
+            let hull_node = scene
+                .nodes
+                .get(self.hull_id)
+                .ok_or("Target hull node not found")?;
             match &hull_node.data {
                 NodeData::Mesh { base_mesh, .. } => (base_mesh.clone(), hull_node.world_matrix),
                 _ => return Err("Target node is not a mesh".into()),
             }
         };
 
-        let decal_node = scene.nodes.get_mut(self.decal_id).ok_or("Decal node not found")?;
+        let decal_node = scene
+            .nodes
+            .get_mut(self.decal_id)
+            .ok_or("Decal node not found")?;
         let decal_mat = decal_node.world_matrix;
 
         match &mut decal_node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -164,7 +188,11 @@ impl Command for ProjectDecalCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.decal_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.decal_id);
@@ -196,12 +224,20 @@ impl Command for AlignFlowGuideCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
                 base_mesh
-                    .align_topology_to_flow_guide(&self.guide_points, self.iterations, self.influence_radius)
+                    .align_topology_to_flow_guide(
+                        &self.guide_points,
+                        self.iterations,
+                        self.influence_radius,
+                    )
                     .map_err(|e| format!("Flow guide alignment failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -215,7 +251,11 @@ impl Command for AlignFlowGuideCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);

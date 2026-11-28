@@ -50,45 +50,76 @@ pub fn create_box_parametric(
 
     // Subdivided box: generate 6 face grids and weld boundary vertices
     let mut mesh = Mesh::new();
-    let mut add_quad_face = |origin: [f32; 3], u_axis: [f32; 3], v_axis: [f32; 3], u_segs: u32, v_segs: u32| {
-        let mut grid = Vec::with_capacity(((u_segs + 1) * (v_segs + 1)) as usize);
+    let mut add_quad_face =
+        |origin: [f32; 3], u_axis: [f32; 3], v_axis: [f32; 3], u_segs: u32, v_segs: u32| {
+            let mut grid = Vec::with_capacity(((u_segs + 1) * (v_segs + 1)) as usize);
 
-        for vi in 0..=v_segs {
-            for ui in 0..=u_segs {
-                let u_frac = (ui as f32) / (u_segs as f32);
-                let v_frac = (vi as f32) / (v_segs as f32);
+            for vi in 0..=v_segs {
+                for ui in 0..=u_segs {
+                    let u_frac = (ui as f32) / (u_segs as f32);
+                    let v_frac = (vi as f32) / (v_segs as f32);
 
-                let pos = vec3(
-                    origin[0] + u_axis[0] * u_frac + v_axis[0] * v_frac,
-                    origin[1] + u_axis[1] * u_frac + v_axis[1] * v_frac,
-                    origin[2] + u_axis[2] * u_frac + v_axis[2] * v_frac,
-                );
-                let uv = vec2(u_frac, v_frac);
-                let vk = mesh.add_vertex_with_uv(pos, uv);
-                grid.push(vk);
+                    let pos = vec3(
+                        origin[0] + u_axis[0] * u_frac + v_axis[0] * v_frac,
+                        origin[1] + u_axis[1] * u_frac + v_axis[1] * v_frac,
+                        origin[2] + u_axis[2] * u_frac + v_axis[2] * v_frac,
+                    );
+                    let uv = vec2(u_frac, v_frac);
+                    let vk = mesh.add_vertex_with_uv(pos, uv);
+                    grid.push(vk);
+                }
             }
-        }
 
-        for vi in 0..v_segs {
-            for ui in 0..u_segs {
-                let row_width = (u_segs + 1) as usize;
-                let v00 = grid[vi as usize * row_width + ui as usize];
-                let v10 = grid[vi as usize * row_width + (ui + 1) as usize];
-                let v11 = grid[(vi + 1) as usize * row_width + (ui + 1) as usize];
-                let v01 = grid[(vi + 1) as usize * row_width + ui as usize];
+            for vi in 0..v_segs {
+                for ui in 0..u_segs {
+                    let row_width = (u_segs + 1) as usize;
+                    let v00 = grid[vi as usize * row_width + ui as usize];
+                    let v10 = grid[vi as usize * row_width + (ui + 1) as usize];
+                    let v11 = grid[(vi + 1) as usize * row_width + (ui + 1) as usize];
+                    let v01 = grid[(vi + 1) as usize * row_width + ui as usize];
 
-                let _ = mesh.add_face(&[v00, v10, v11, v01]);
+                    let _ = mesh.add_face(&[v00, v10, v11, v01]);
+                }
             }
-        }
-    };
+        };
 
     // 1. Front (Z+), 2. Back (Z-), 3. Top (Y+), 4. Bottom (Y-), 5. Right (X+), 6. Left (X-)
-    add_quad_face([-hw, -hh, hd], [width, 0.0, 0.0], [0.0, height, 0.0], sx, sy);
-    add_quad_face([hw, -hh, -hd], [-width, 0.0, 0.0], [0.0, height, 0.0], sx, sy);
+    add_quad_face(
+        [-hw, -hh, hd],
+        [width, 0.0, 0.0],
+        [0.0, height, 0.0],
+        sx,
+        sy,
+    );
+    add_quad_face(
+        [hw, -hh, -hd],
+        [-width, 0.0, 0.0],
+        [0.0, height, 0.0],
+        sx,
+        sy,
+    );
     add_quad_face([-hw, hh, hd], [width, 0.0, 0.0], [0.0, 0.0, -depth], sx, sz);
-    add_quad_face([-hw, -hh, -hd], [width, 0.0, 0.0], [0.0, 0.0, depth], sx, sz);
-    add_quad_face([hw, -hh, hd], [0.0, 0.0, -depth], [0.0, height, 0.0], sz, sy);
-    add_quad_face([-hw, -hh, -hd], [0.0, 0.0, depth], [0.0, height, 0.0], sz, sy);
+    add_quad_face(
+        [-hw, -hh, -hd],
+        [width, 0.0, 0.0],
+        [0.0, 0.0, depth],
+        sx,
+        sz,
+    );
+    add_quad_face(
+        [hw, -hh, hd],
+        [0.0, 0.0, -depth],
+        [0.0, height, 0.0],
+        sz,
+        sy,
+    );
+    add_quad_face(
+        [-hw, -hh, -hd],
+        [0.0, 0.0, depth],
+        [0.0, height, 0.0],
+        sz,
+        sy,
+    );
 
     if let Ok(welded) = mesh.weld_vertices_by_distance(1e-4) {
         mesh = welded;

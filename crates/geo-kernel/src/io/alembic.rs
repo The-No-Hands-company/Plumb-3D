@@ -206,7 +206,8 @@ impl AlembicCache {
 
     /// Reconstructs a topological half-edge Mesh instance at the specified frame time.
     pub fn to_mesh_at_frame(&self, frame: f32) -> Result<Mesh, String> {
-        let positions = self.evaluate_at_time(frame)
+        let positions = self
+            .evaluate_at_time(frame)
             .ok_or_else(|| "No animation samples available".to_string())?;
 
         let mut mesh = Mesh::new();
@@ -263,8 +264,16 @@ mod tests {
         let _ = base_mesh.add_face(&[v0, v1, v2]);
 
         // 2 frames of animation: frame 0 at y=0, frame 1 at y=10
-        let frame0 = vec![vec3(0.0, 0.0, 0.0), vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0)];
-        let frame1 = vec![vec3(0.0, 10.0, 0.0), vec3(1.0, 10.0, 0.0), vec3(0.0, 11.0, 0.0)];
+        let frame0 = vec![
+            vec3(0.0, 0.0, 0.0),
+            vec3(1.0, 0.0, 0.0),
+            vec3(0.0, 1.0, 0.0),
+        ];
+        let frame1 = vec![
+            vec3(0.0, 10.0, 0.0),
+            vec3(1.0, 10.0, 0.0),
+            vec3(0.0, 11.0, 0.0),
+        ];
 
         let cache = AlembicCache::new(&base_mesh, "TriangleDeform", 24.0, vec![frame0, frame1]);
         assert_eq!(cache.end_frame, 1);
@@ -279,7 +288,9 @@ mod tests {
         assert_eq!(loaded.object_name, "TriangleDeform");
         assert_eq!(loaded.samples.len(), 2);
 
-        let mesh_at_mid = loaded.to_mesh_at_frame(0.5).expect("Should construct mesh at frame 0.5");
+        let mesh_at_mid = loaded
+            .to_mesh_at_frame(0.5)
+            .expect("Should construct mesh at frame 0.5");
         assert_eq!(mesh_at_mid.vertices.len(), 3);
         assert_eq!(mesh_at_mid.faces.len(), 1);
     }

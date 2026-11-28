@@ -33,9 +33,17 @@ impl GeoNodeOp for NoiseTextureNode {
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
         let pos = inputs.first().map(|v| v.as_vec3()).unwrap_or(Vec3::ZERO);
-        let scale = inputs.get(1).map(|v| v.as_float()).unwrap_or(5.0).max(0.001);
+        let scale = inputs
+            .get(1)
+            .map(|v| v.as_float())
+            .unwrap_or(5.0)
+            .max(0.001);
         let detail = inputs.get(2).map(|v| v.as_int()).unwrap_or(2).clamp(1, 6) as usize;
-        let roughness = inputs.get(3).map(|v| v.as_float()).unwrap_or(0.5).clamp(0.0, 1.0);
+        let roughness = inputs
+            .get(3)
+            .map(|v| v.as_float())
+            .unwrap_or(0.5)
+            .clamp(0.0, 1.0);
 
         let noise_val = fbm_noise_3d(pos * scale, detail, roughness);
         let col = Vec3::new(
@@ -106,12 +114,10 @@ impl GeoNodeOp for DisplaceGeometryNode {
 }
 
 /// Entry socket node representing the base geometry fed into a procedural modifier graph.
-#[derive(Debug, Clone)]
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 pub struct GroupInputNode {
     pub input_mesh: Option<geo_kernel::Mesh>,
 }
-
 
 impl GeoNodeOp for GroupInputNode {
     fn name(&self) -> &str {

@@ -1,11 +1,7 @@
 use core_math::{vec3, Transform};
 use geo_kernel::Primitives;
 use graph_engine::{Material, NodeData, SceneGraph, SceneNode};
-use render_pathtracer::{
-    camera::PathtracerCamera,
-    renderer::RenderBuffer,
-    scene::PathTracerScene,
-};
+use render_pathtracer::{camera::PathtracerCamera, renderer::RenderBuffer, scene::PathTracerScene};
 use std::time::Instant;
 
 fn main() {
@@ -21,7 +17,10 @@ fn main() {
         Transform::from_translation(vec3(0.0, 0.0, 0.0)),
         plumb_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = plumb_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = plumb_node.data
+    {
         // Rich architectural imperial brass / gold with 88% metallic and 0.20 roughness for silky, luxurious highlights
         materials[0] = Material::new("PlumbGold", [1.0, 0.78, 0.28, 1.0], 0.88, 0.20, 0.0, 0);
     }
@@ -34,7 +33,10 @@ fn main() {
         Transform::from_translation(vec3(0.0, 4.25, 0.0)),
         cord_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = cord_node.data {
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = cord_node.data
+    {
         materials[0] = Material::new("AnthraciteCord", [0.15, 0.16, 0.18, 1.0], 0.1, 0.7, 0.0, 0);
     }
     scene.add_node(cord_node);
@@ -46,8 +48,18 @@ fn main() {
         Transform::from_translation(vec3(0.0, -2.45, 0.0)),
         floor_mesh,
     );
-    if let NodeData::Mesh { ref mut materials, .. } = floor_node.data {
-        materials[0] = Material::new("StudioFloorMat", [0.05, 0.06, 0.08, 1.0], 0.80, 0.18, 0.0, 2);
+    if let NodeData::Mesh {
+        ref mut materials, ..
+    } = floor_node.data
+    {
+        materials[0] = Material::new(
+            "StudioFloorMat",
+            [0.05, 0.06, 0.08, 1.0],
+            0.80,
+            0.18,
+            0.0,
+            2,
+        );
     }
     scene.add_node(floor_node);
 
@@ -55,7 +67,12 @@ fn main() {
     // Directional Sun Light (Smooth, noise-free studio key illumination without mesh markers)
     let sun = SceneNode::new_directional_light(
         "StudioSun",
-        Transform::from_rotation(core_math::Quat::from_euler(core_math::EulerRot::XYZ, -0.65, 0.85, 0.0)),
+        Transform::from_rotation(core_math::Quat::from_euler(
+            core_math::EulerRot::XYZ,
+            -0.65,
+            0.85,
+            0.0,
+        )),
         vec3(1.0, 0.94, 0.82),
         4.5,
     );
@@ -92,13 +109,15 @@ fn main() {
     scene.add_node(rim_light);
 
     // Build ray tracing scene & configure dark moody DCC studio environment
-    let pt_scene = PathTracerScene::from_scene_graph(&scene)
-        .with_background(
-            vec3(0.040, 0.048, 0.072),
-            vec3(0.024, 0.028, 0.040),
-            vec3(0.012, 0.014, 0.020),
-        );
-    println!("✓ BVH constructed successfully (emissive triangles: {})", pt_scene.emissive_triangles.len());
+    let pt_scene = PathTracerScene::from_scene_graph(&scene).with_background(
+        vec3(0.040, 0.048, 0.072),
+        vec3(0.024, 0.028, 0.040),
+        vec3(0.012, 0.014, 0.020),
+    );
+    println!(
+        "✓ BVH constructed successfully (emissive triangles: {})",
+        pt_scene.emissive_triangles.len()
+    );
 
     // 5. Camera: 1280x720 16:9 Cinematic Widescreen Framing
     let width = 1280;
@@ -112,13 +131,7 @@ fn main() {
     let aperture = 0.005; // Sharp focal plane with creamy background bokeh
 
     let camera = PathtracerCamera::new_thin_lens(
-        look_from,
-        look_at,
-        vup,
-        vfov,
-        aspect,
-        aperture,
-        focus_dist,
+        look_from, look_at, vup, vfov, aspect, aperture, focus_dist,
     );
 
     let mut buffer = RenderBuffer::new(width, height);

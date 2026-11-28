@@ -145,7 +145,11 @@ impl Mesh {
                 let alpha_val = settings.alpha.evaluate(u, v_coord);
                 let raw_weight = settings.falloff.evaluate(norm_dist) * alpha_val;
                 let unmasked = (1.0 - v.sculpt_mask).clamp(0.0, 1.0);
-                let weight = if settings.brush == SculptBrush::Mask { raw_weight } else { raw_weight * unmasked };
+                let weight = if settings.brush == SculptBrush::Mask {
+                    raw_weight
+                } else {
+                    raw_weight * unmasked
+                };
                 if weight > 1e-5 {
                     affected.push((vk, dist, weight));
                 }
@@ -265,7 +269,9 @@ impl Mesh {
                 for &(vk, _, weight) in &affected {
                     if let Some(v) = self.vertices.get_mut(vk) {
                         let dist_to_plane = (plane_point - v.position).dot(hit_normal);
-                        if (sign >= 0.0 && dist_to_plane > 0.0) || (sign < 0.0 && dist_to_plane < 0.0) {
+                        if (sign >= 0.0 && dist_to_plane > 0.0)
+                            || (sign < 0.0 && dist_to_plane < 0.0)
+                        {
                             let alpha = (str_mag * weight).clamp(0.0, 1.0);
                             v.position += hit_normal * (dist_to_plane * alpha);
                         }

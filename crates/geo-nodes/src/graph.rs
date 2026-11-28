@@ -81,7 +81,8 @@ impl GeoNodeGraph {
 
     pub fn remove_node(&mut self, key: NodeKey) -> Option<GeoNode> {
         self.dirty = true;
-        self.links.retain(|l| l.from_node != key && l.to_node != key);
+        self.links
+            .retain(|l| l.from_node != key && l.to_node != key);
         if self.output_node == Some(key) {
             self.output_node = None;
         }
@@ -112,7 +113,9 @@ impl GeoNodeGraph {
         }
 
         let Some(to_n) = self.nodes.get(to_node) else {
-            return Err(NodeGraphError::ExecutionError("Destination node missing".into()));
+            return Err(NodeGraphError::ExecutionError(
+                "Destination node missing".into(),
+            ));
         };
         if to_socket >= to_n.input_sockets.len() {
             return Err(NodeGraphError::InvalidSocket {
@@ -122,7 +125,8 @@ impl GeoNodeGraph {
         }
 
         // Disconnect existing link into target input socket (single input connection rule)
-        self.links.retain(|l| !(l.to_node == to_node && l.to_socket == to_socket));
+        self.links
+            .retain(|l| !(l.to_node == to_node && l.to_socket == to_socket));
 
         let link = NodeLink {
             from_node,
@@ -145,7 +149,8 @@ impl GeoNodeGraph {
     /// Unlink all connections going into `(to_node, to_socket)`
     pub fn unlink(&mut self, to_node: NodeKey, to_socket: usize) {
         let prev_len = self.links.len();
-        self.links.retain(|l| !(l.to_node == to_node && l.to_socket == to_socket));
+        self.links
+            .retain(|l| !(l.to_node == to_node && l.to_socket == to_socket));
         if self.links.len() != prev_len {
             self.dirty = true;
         }
@@ -218,7 +223,10 @@ impl GeoNodeGraph {
             let mut inputs = Vec::with_capacity(node.input_sockets.len());
             for (idx, socket) in node.input_sockets.iter().enumerate() {
                 // Check if an incoming link feeds this input socket
-                let incoming = self.links.iter().find(|l| l.to_node == node_key && l.to_socket == idx);
+                let incoming = self
+                    .links
+                    .iter()
+                    .find(|l| l.to_node == node_key && l.to_socket == idx);
                 let val = if let Some(link) = incoming {
                     socket_values
                         .get(&(link.from_node, link.from_socket))

@@ -47,10 +47,8 @@ impl Mesh {
                         (p2 - p0).length_squared() <= (p3 - p1).length_squared()
                     }
                     QuadMethod::Beauty => {
-                        let a0 =
-                            triangle_min_angle(p0, p1, p2).min(triangle_min_angle(p0, p2, p3));
-                        let a1 =
-                            triangle_min_angle(p0, p1, p3).min(triangle_min_angle(p1, p2, p3));
+                        let a0 = triangle_min_angle(p0, p1, p2).min(triangle_min_angle(p0, p2, p3));
+                        let a1 = triangle_min_angle(p0, p1, p3).min(triangle_min_angle(p1, p2, p3));
                         a0 >= a1
                     }
                 };

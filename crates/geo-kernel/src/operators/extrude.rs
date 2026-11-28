@@ -77,7 +77,11 @@ impl Mesh {
         }
 
         // Region / Shared Perimeter Unified Extrude
-        let face_set: HashSet<FaceKey> = face_keys.iter().copied().filter(|fk| self.faces.contains_key(*fk)).collect();
+        let face_set: HashSet<FaceKey> = face_keys
+            .iter()
+            .copied()
+            .filter(|fk| self.faces.contains_key(*fk))
+            .collect();
         if face_set.is_empty() {
             return Ok(Vec::new());
         }
@@ -96,7 +100,11 @@ impl Mesh {
 
         let eff_dir = direction.unwrap_or_else(|| {
             let len = avg_normal.length();
-            if len > 1e-5 { avg_normal / len } else { Vec3::Y }
+            if len > 1e-5 {
+                avg_normal / len
+            } else {
+                Vec3::Y
+            }
         });
         let offset = eff_dir * distance;
 
@@ -175,7 +183,10 @@ impl Mesh {
     /// Scale a single face inward or outward relative to its center (Inset Face operator).
     pub fn inset_face(&mut self, face_key: FaceKey, factor: f32) -> Result<FaceKey, MeshError> {
         let faces = self.inset_faces(&[face_key], factor, false)?;
-        faces.first().copied().ok_or(MeshError::InvalidFace(face_key))
+        faces
+            .first()
+            .copied()
+            .ok_or(MeshError::InvalidFace(face_key))
     }
 
     /// Inset multiple faces with support for individual faces or contiguous shared perimeter boundaries (Blender 'I' operator).

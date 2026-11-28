@@ -34,17 +34,24 @@ impl Command for ExtrudeCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
                 self.created_faces.clear();
-                let valid_faces: Vec<FaceKey> = self.faces.iter()
+                let valid_faces: Vec<FaceKey> = self
+                    .faces
+                    .iter()
                     .copied()
                     .filter(|fk| base_mesh.faces.contains_key(*fk))
                     .collect();
 
-                self.created_faces = base_mesh.extrude_faces(&valid_faces, self.distance, self.individual, self.axis)
+                self.created_faces = base_mesh
+                    .extrude_faces(&valid_faces, self.distance, self.individual, self.axis)
                     .map_err(|e| format!("Extrude failed: {:?}", e))?;
 
                 base_mesh.update_normals();
@@ -93,17 +100,24 @@ impl Command for InsetCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
                 self.created_faces.clear();
-                let valid_faces: Vec<FaceKey> = self.faces.iter()
+                let valid_faces: Vec<FaceKey> = self
+                    .faces
+                    .iter()
                     .copied()
                     .filter(|fk| base_mesh.faces.contains_key(*fk))
                     .collect();
 
-                self.created_faces = base_mesh.inset_faces(&valid_faces, self.factor, self.individual)
+                self.created_faces = base_mesh
+                    .inset_faces(&valid_faces, self.factor, self.individual)
                     .map_err(|e| format!("Inset failed: {:?}", e))?;
 
                 base_mesh.update_normals();
@@ -119,7 +133,11 @@ impl Command for InsetCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -208,7 +226,12 @@ impl Command for BevelEdgeCommand {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                let _ = base_mesh.bevel_edges_miter_profile(&self.edges, self.width, self.segments, self.profile);
+                let _ = base_mesh.bevel_edges_miter_profile(
+                    &self.edges,
+                    self.width,
+                    self.segments,
+                    self.profile,
+                );
                 scene.mark_dirty(self.node_id);
                 Ok(())
             } else {
@@ -254,11 +277,16 @@ impl Command for BevelVertexCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.bevel_vertices(&self.vertices, self.offset)
+                base_mesh
+                    .bevel_vertices(&self.vertices, self.offset)
                     .map_err(|e| format!("Bevel vertex failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -272,7 +300,11 @@ impl Command for BevelVertexCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);

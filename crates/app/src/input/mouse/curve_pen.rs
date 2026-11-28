@@ -44,7 +44,10 @@ impl AppState {
             for node in self.scene.nodes.values() {
                 if let graph_engine::NodeData::Mesh { base_mesh, .. } = &node.data {
                     if let Some(hit) = base_mesh.raycast(&ray, &node.world_matrix) {
-                        if best_hit.as_ref().is_none_or(|b: &geo_kernel::RaycastHit| hit.distance < b.distance) {
+                        if best_hit
+                            .as_ref()
+                            .is_none_or(|b: &geo_kernel::RaycastHit| hit.distance < b.distance)
+                        {
                             best_hit = Some(hit);
                         }
                     }
@@ -54,7 +57,11 @@ impl AppState {
                 hit.point + hit.normal * self.live_surface_offset
             } else if ray.direction.y.abs() > 1e-4 {
                 let t = -ray.origin.y / ray.direction.y;
-                if t > 0.0 { ray.origin + ray.direction * t } else { ray.origin + ray.direction * 5.0 }
+                if t > 0.0 {
+                    ray.origin + ray.direction * t
+                } else {
+                    ray.origin + ray.direction * 5.0
+                }
             } else {
                 ray.origin + ray.direction * 5.0
             }

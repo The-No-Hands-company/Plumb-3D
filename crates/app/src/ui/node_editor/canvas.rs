@@ -29,12 +29,9 @@ impl Default for NodeCanvasState {
 }
 
 /// Renders the complete 2D interactive node canvas.
-pub fn draw_canvas(
-    ui: &mut Ui,
-    canvas_state: &mut NodeCanvasState,
-    graph: &mut GeoNodeGraph,
-) {
-    let (canvas_rect, response) = ui.allocate_exact_size(ui.available_size(), Sense::click_and_drag());
+pub fn draw_canvas(ui: &mut Ui, canvas_state: &mut NodeCanvasState, graph: &mut GeoNodeGraph) {
+    let (canvas_rect, response) =
+        ui.allocate_exact_size(ui.available_size(), Sense::click_and_drag());
     let painter = ui.painter_at(canvas_rect);
 
     // 1. Background Fill & Grid Pattern
@@ -43,7 +40,9 @@ pub fn draw_canvas(
     draw_canvas_grid(&painter, canvas_rect, canvas_state.pan, canvas_state.zoom);
 
     // 2. Pan and Zoom Handling
-    if response.dragged_by(egui::PointerButton::Middle) || response.dragged_by(egui::PointerButton::Secondary) {
+    if response.dragged_by(egui::PointerButton::Middle)
+        || response.dragged_by(egui::PointerButton::Secondary)
+    {
         canvas_state.pan += response.drag_delta();
     }
     let scroll_delta = ui.input(|i| i.raw_scroll_delta.y);
@@ -55,7 +54,8 @@ pub fn draw_canvas(
 
             // Zoom centered at mouse position
             let mouse_in_canvas = mouse_pos - canvas_rect.min;
-            canvas_state.pan = mouse_in_canvas - (mouse_in_canvas - canvas_state.pan) * (new_zoom / old_zoom);
+            canvas_state.pan =
+                mouse_in_canvas - (mouse_in_canvas - canvas_state.pan) * (new_zoom / old_zoom);
             canvas_state.zoom = new_zoom;
         }
     }
@@ -82,7 +82,10 @@ pub fn draw_canvas(
 
     for (key, node) in &mut graph.nodes {
         let conn_inputs = node_connected_inputs.get(&key).cloned().unwrap_or_default();
-        let conn_outputs = node_connected_outputs.get(&key).cloned().unwrap_or_default();
+        let conn_outputs = node_connected_outputs
+            .get(&key)
+            .cloned()
+            .unwrap_or_default();
         let is_sel = canvas_state.selected_node == Some(key);
 
         draw_node_card(
@@ -110,12 +113,12 @@ pub fn draw_canvas(
 
     // 6. Draw Cables between Sockets
     for link in &graph.links {
-        let from_hit = socket_hits
-            .iter()
-            .find(|h| h.node_key == link.from_node && h.is_output && h.socket_index == link.from_socket);
-        let to_hit = socket_hits
-            .iter()
-            .find(|h| h.node_key == link.to_node && !h.is_output && h.socket_index == link.to_socket);
+        let from_hit = socket_hits.iter().find(|h| {
+            h.node_key == link.from_node && h.is_output && h.socket_index == link.from_socket
+        });
+        let to_hit = socket_hits.iter().find(|h| {
+            h.node_key == link.to_node && !h.is_output && h.socket_index == link.to_socket
+        });
 
         if let (Some(f), Some(t)) = (from_hit, to_hit) {
             let color = graph
@@ -125,7 +128,13 @@ pub fn draw_canvas(
                 .map(|s| socket_color(&s.socket_type))
                 .unwrap_or(Color32::from_rgb(180, 180, 180));
 
-            draw_bezier_cable(&painter, f.screen_pos, t.screen_pos, color, 2.5 * zoom.max(0.5));
+            draw_bezier_cable(
+                &painter,
+                f.screen_pos,
+                t.screen_pos,
+                color,
+                2.5 * zoom.max(0.5),
+            );
         }
     }
 
@@ -144,7 +153,13 @@ pub fn draw_canvas(
                     .map(|s| socket_color(&s.socket_type))
                     .unwrap_or(Color32::from_rgb(255, 200, 60));
 
-                draw_bezier_cable(&painter, f.screen_pos, mouse_pos, color, 2.0 * zoom.max(0.5));
+                draw_bezier_cable(
+                    &painter,
+                    f.screen_pos,
+                    mouse_pos,
+                    color,
+                    2.0 * zoom.max(0.5),
+                );
             }
         }
     }
@@ -171,7 +186,9 @@ pub fn draw_canvas(
                     } else if let Some((from_node, from_socket)) = canvas_state.connecting_from {
                         // Target is an input socket: complete connection!
                         if from_node != hit.node_key {
-                            if let Err(e) = graph.link(from_node, from_socket, hit.node_key, hit.socket_index) {
+                            if let Err(e) =
+                                graph.link(from_node, from_socket, hit.node_key, hit.socket_index)
+                            {
                                 canvas_state.eval_error = Some(format!("Link error: {:?}", e));
                             } else {
                                 canvas_state.eval_error = None;
@@ -180,7 +197,9 @@ pub fn draw_canvas(
                         canvas_state.connecting_from = None;
                     } else {
                         // Clicking an existing input socket disconnects its link
-                        graph.links.retain(|l| !(l.to_node == hit.node_key && l.to_socket == hit.socket_index));
+                        graph.links.retain(|l| {
+                            !(l.to_node == hit.node_key && l.to_socket == hit.socket_index)
+                        });
                     }
                 }
             }
@@ -190,7 +209,9 @@ pub fn draw_canvas(
     // Cancel cable connection if clicking empty space
     if pointer_clicked && canvas_state.connecting_from.is_some() {
         let is_over_socket = pointer_pos.is_some_and(|pos| {
-            socket_hits.iter().any(|h| (h.screen_pos - pos).length() < 12.0)
+            socket_hits
+                .iter()
+                .any(|h| (h.screen_pos - pos).length() < 12.0)
         });
         if !is_over_socket {
             canvas_state.connecting_from = None;

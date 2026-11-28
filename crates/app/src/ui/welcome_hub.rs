@@ -6,7 +6,9 @@ use render_viewport::{CameraProjection, ViewportShadingMode};
 use crate::state::AppState;
 use crate::types::*;
 use crate::ui::actions::UiActions;
-use crate::ui::workspaces::{apply_studio_domain, apply_workspace, StudioDomain, WorkspaceTemplate};
+use crate::ui::workspaces::{
+    apply_studio_domain, apply_workspace, StudioDomain, WorkspaceTemplate,
+};
 
 /// Runtime state for the Interactive Welcome & Quick-Start Hub.
 #[derive(Clone)]

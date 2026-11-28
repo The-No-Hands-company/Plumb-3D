@@ -71,7 +71,10 @@ pub fn handle_modifiers(state: &mut AppState, actions: &mut UiActions) {
                 if let NodeData::Mesh { modifier_stack, .. } = &mut node.data {
                     // CSG Boolean difference with a nested cylindrical hole
                     let cutter = Primitives::create_cylinder(0.7, 3.0, 12);
-                    modifier_stack.add_modifier(Box::new(BooleanModifier::new(cutter, BooleanOp::Difference)));
+                    modifier_stack.add_modifier(Box::new(BooleanModifier::new(
+                        cutter,
+                        BooleanOp::Difference,
+                    )));
                 }
             }
             state.scene.mark_dirty(sel_id);
@@ -125,7 +128,12 @@ pub fn handle_modifiers(state: &mut AppState, actions: &mut UiActions) {
     if actions.add_lattice_to_selected {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                if let NodeData::Mesh { base_mesh, modifier_stack, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    modifier_stack,
+                    ..
+                } = &mut node.data
+                {
                     let mut lattice = LatticeModifier::from_mesh_bounds(base_mesh, (3, 3, 3));
                     lattice.squash_and_stretch(1.15);
                     modifier_stack.add_modifier(Box::new(lattice));
@@ -195,7 +203,10 @@ pub fn handle_modifiers(state: &mut AppState, actions: &mut UiActions) {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
                 if let NodeData::Mesh { modifier_stack, .. } = &mut node.data {
-                    modifier_stack.add_modifier(Box::new(SimpleDeformModifier::new(SimpleDeformMethod::Twist, 0.5)));
+                    modifier_stack.add_modifier(Box::new(SimpleDeformModifier::new(
+                        SimpleDeformMethod::Twist,
+                        0.5,
+                    )));
                 }
             }
             state.scene.mark_dirty(sel_id);
@@ -227,7 +238,12 @@ pub fn handle_modifiers(state: &mut AppState, actions: &mut UiActions) {
     if actions.add_cloth_to_selected {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                if let NodeData::Mesh { modifier_stack, base_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    modifier_stack,
+                    base_mesh,
+                    ..
+                } = &mut node.data
+                {
                     let mut cloth = ClothModifier::new();
                     cloth.initialize(base_mesh);
                     modifier_stack.add_modifier(Box::new(cloth));
@@ -254,7 +270,8 @@ pub fn handle_modifiers(state: &mut AppState, actions: &mut UiActions) {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
                 if let NodeData::Mesh { modifier_stack, .. } = &mut node.data {
-                    modifier_stack.add_modifier(Box::new(WireframeModifier::new(state.wireframe_thickness)));
+                    modifier_stack
+                        .add_modifier(Box::new(WireframeModifier::new(state.wireframe_thickness)));
                 }
             }
             state.scene.mark_dirty(sel_id);
@@ -265,7 +282,8 @@ pub fn handle_modifiers(state: &mut AppState, actions: &mut UiActions) {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
                 if let NodeData::Mesh { modifier_stack, .. } = &mut node.data {
-                    modifier_stack.add_modifier(Box::new(geo_kernel::SkinEnvelopeModifier::default()));
+                    modifier_stack
+                        .add_modifier(Box::new(geo_kernel::SkinEnvelopeModifier::default()));
                 }
             }
             state.scene.mark_dirty(sel_id);
@@ -319,10 +337,19 @@ pub fn handle_modifiers(state: &mut AppState, actions: &mut UiActions) {
 
             if let Some((target_name, t_mesh)) = target_mesh {
                 if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                    if let NodeData::Mesh { base_mesh, modifier_stack, .. } = &mut node.data {
+                    if let NodeData::Mesh {
+                        base_mesh,
+                        modifier_stack,
+                        ..
+                    } = &mut node.data
+                    {
                         for m in modifier_stack.modifiers_mut() {
                             if let Some(morpher) = m.as_morpher_mut() {
-                                let _ = morpher.add_target_from_mesh(target_name.clone(), base_mesh, &t_mesh);
+                                let _ = morpher.add_target_from_mesh(
+                                    target_name.clone(),
+                                    base_mesh,
+                                    &t_mesh,
+                                );
                             }
                         }
                     }
@@ -351,7 +378,12 @@ pub fn handle_modifiers(state: &mut AppState, actions: &mut UiActions) {
     if let Some(idx) = actions.remove_modifier_idx.take() {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                if let NodeData::Mesh { modifier_stack, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    modifier_stack,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     if idx < modifier_stack.modifiers().len() {
                         modifier_stack.remove_modifier(idx);
                         *cached_render_mesh = None;
@@ -366,7 +398,12 @@ pub fn handle_modifiers(state: &mut AppState, actions: &mut UiActions) {
     if let Some((from, to)) = actions.reorder_modifier.take() {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                if let NodeData::Mesh { modifier_stack, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    modifier_stack,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     modifier_stack.move_modifier(from, to);
                     *cached_render_mesh = None;
                     node.is_dirty = true;

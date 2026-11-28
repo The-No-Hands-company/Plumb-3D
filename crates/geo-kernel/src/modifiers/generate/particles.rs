@@ -93,7 +93,10 @@ impl ParticleSystemModifier {
 
     /// Fast, deterministic linear congruential PRNG
     fn next_random_f32(&mut self) -> f32 {
-        self.rng_state = self.rng_state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        self.rng_state = self
+            .rng_state
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         ((self.rng_state >> 32) as u32 as f32) / (u32::MAX as f32)
     }
 
@@ -159,7 +162,8 @@ impl ParticleSystemModifier {
         // 2. Spawn new particles from emitter mesh geometry
         if !emitter_mesh.vertices.is_empty() {
             self.spawn_accumulator += self.emission_rate * dt;
-            let spawn_count = (self.spawn_accumulator as usize).min(self.max_particles.saturating_sub(self.particles.len()));
+            let spawn_count = (self.spawn_accumulator as usize)
+                .min(self.max_particles.saturating_sub(self.particles.len()));
             self.spawn_accumulator -= spawn_count as f32;
 
             let verts: Vec<_> = emitter_mesh.vertices.values().collect();

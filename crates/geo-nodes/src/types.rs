@@ -41,13 +41,13 @@ impl SocketType {
     /// Color representing the socket data type in the visual canvas
     pub fn color_rgba(&self) -> [u8; 4] {
         match self {
-            SocketType::Geometry => [34, 197, 94, 255],   // Emerald Green
-            SocketType::Points => [217, 70, 239, 255],   // Vibrant Magenta
-            SocketType::Float => [234, 179, 8, 255],     // Golden Yellow
+            SocketType::Geometry => [34, 197, 94, 255], // Emerald Green
+            SocketType::Points => [217, 70, 239, 255],  // Vibrant Magenta
+            SocketType::Float => [234, 179, 8, 255],    // Golden Yellow
             SocketType::Int => [168, 85, 247, 255],     // Purple
             SocketType::Vector3 => [59, 130, 246, 255], // Sky Blue
-            SocketType::Boolean => [239, 68, 68, 255],   // Crimson Red
-            SocketType::Transform => [249, 115, 22, 255],// Orange
+            SocketType::Boolean => [239, 68, 68, 255],  // Crimson Red
+            SocketType::Transform => [249, 115, 22, 255], // Orange
             SocketType::String => [156, 163, 175, 255], // Gray
             SocketType::Field => [14, 165, 233, 255],   // Cyan Field
         }
@@ -218,7 +218,13 @@ impl SocketValue {
         match self {
             SocketValue::Float(f) => *f,
             SocketValue::Int(i) => *i as f32,
-            SocketValue::Boolean(b) => if *b { 1.0 } else { 0.0 },
+            SocketValue::Boolean(b) => {
+                if *b {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
             SocketValue::Vector3(v) => v.length(),
             _ => 0.0,
         }
@@ -228,7 +234,7 @@ impl SocketValue {
         match self {
             SocketValue::Int(i) => *i,
             SocketValue::Float(f) => *f as i64,
-            SocketValue::Boolean(b) if *b => { 1 },
+            SocketValue::Boolean(b) if *b => 1,
             _ => 0,
         }
     }
@@ -313,11 +319,19 @@ impl NodeSocket {
     }
 
     pub fn transform(name: impl Into<String>) -> Self {
-        Self::new(name, SocketType::Transform, SocketValue::Transform(Transform::IDENTITY))
+        Self::new(
+            name,
+            SocketType::Transform,
+            SocketValue::Transform(Transform::IDENTITY),
+        )
     }
 
     pub fn field(name: impl Into<String>) -> Self {
-        Self::new(name, SocketType::Field, SocketValue::Field(AttributeContainer::default()))
+        Self::new(
+            name,
+            SocketType::Field,
+            SocketValue::Field(AttributeContainer::default()),
+        )
     }
 }
 

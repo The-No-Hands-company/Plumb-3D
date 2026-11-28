@@ -48,10 +48,7 @@ impl GeoNodeOp for MathNode {
     }
 
     fn inputs(&self) -> Vec<NodeSocket> {
-        vec![
-            NodeSocket::float("A", 0.0),
-            NodeSocket::float("B", 0.0),
-        ]
+        vec![NodeSocket::float("A", 0.0), NodeSocket::float("B", 0.0)]
     }
 
     fn outputs(&self) -> Vec<NodeSocket> {
@@ -66,7 +63,13 @@ impl GeoNodeOp for MathNode {
             MathOp::Add => a + b,
             MathOp::Subtract => a - b,
             MathOp::Multiply => a * b,
-            MathOp::Divide => if b.abs() > 1e-6 { a / b } else { 0.0 },
+            MathOp::Divide => {
+                if b.abs() > 1e-6 {
+                    a / b
+                } else {
+                    0.0
+                }
+            }
             MathOp::Power => a.powf(b),
             MathOp::Min => a.min(b),
             MathOp::Max => a.max(b),
@@ -151,7 +154,10 @@ impl GeoNodeOp for VectorMathNode {
             VectorMathOp::Length => (Vec3::ZERO, a.length()),
         };
 
-        Ok(vec![SocketValue::Vector3(vec_res), SocketValue::Float(val_res)])
+        Ok(vec![
+            SocketValue::Vector3(vec_res),
+            SocketValue::Float(val_res),
+        ])
     }
 
     fn clone_box(&self) -> Box<dyn GeoNodeOp> {
@@ -220,7 +226,10 @@ impl GeoNodeOp for SeparateXyzNode {
     }
 
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
-        let v = inputs.first().map(|val| val.as_vec3()).unwrap_or(Vec3::ZERO);
+        let v = inputs
+            .first()
+            .map(|val| val.as_vec3())
+            .unwrap_or(Vec3::ZERO);
         Ok(vec![
             SocketValue::Float(v.x),
             SocketValue::Float(v.y),

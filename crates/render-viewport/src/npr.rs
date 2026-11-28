@@ -57,7 +57,8 @@ impl NprPipeline {
         for fk in mesh.faces.keys() {
             let fverts = mesh.face_vertices(fk);
             if fverts.len() >= 3 {
-                let reversed_vks: Vec<geo_kernel::VertexKey> = fverts.iter().rev().map(|k| v_map[k]).collect();
+                let reversed_vks: Vec<geo_kernel::VertexKey> =
+                    fverts.iter().rev().map(|k| v_map[k]).collect();
                 let _ = outline.add_face(&reversed_vks);
             }
         }

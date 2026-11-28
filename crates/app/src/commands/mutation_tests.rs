@@ -10,7 +10,11 @@ fn test_delete_vertices_command_and_undo() {
     assert_eq!(cube.vertices.len(), 8);
     assert_eq!(cube.faces.len(), 6);
 
-    let node_id = scene.add_node(SceneNode::new_mesh("TestCube", core_math::Transform::IDENTITY, cube));
+    let node_id = scene.add_node(SceneNode::new_mesh(
+        "TestCube",
+        core_math::Transform::IDENTITY,
+        cube,
+    ));
     let vert_to_delete = {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -70,16 +74,25 @@ fn test_dissolve_edge_command_undo_redo() {
     let plane = Primitives::create_plane(2.0, 2.0, 2, 2);
     let edge_count_orig = plane.edges.len();
 
-    let node_id = scene.add_node(SceneNode::new_mesh("TestPlane", core_math::Transform::IDENTITY, plane));
+    let node_id = scene.add_node(SceneNode::new_mesh(
+        "TestPlane",
+        core_math::Transform::IDENTITY,
+        plane,
+    ));
     let edge_to_dissolve = {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
             // Find an internal edge with 2 incident faces
-            base_mesh.edges.iter().find(|(_, e)| {
-                let he = &base_mesh.half_edges[e.half_edge];
-                let twin = &base_mesh.half_edges[he.twin];
-                he.face.is_some() && twin.face.is_some()
-            }).map(|(k, _)| k).unwrap()
+            base_mesh
+                .edges
+                .iter()
+                .find(|(_, e)| {
+                    let he = &base_mesh.half_edges[e.half_edge];
+                    let twin = &base_mesh.half_edges[he.twin];
+                    he.face.is_some() && twin.face.is_some()
+                })
+                .map(|(k, _)| k)
+                .unwrap()
         } else {
             panic!("Expected mesh");
         }
@@ -117,9 +130,9 @@ fn test_dissolve_edge_command_undo_redo() {
 
 #[test]
 fn test_chamfer_curve_command_execution_and_undo() {
+    use crate::commands::ChamferCurveCommand;
     use core_math::Vec3;
     use geo_kernel::{BezierPoint, Spline};
-    use crate::commands::ChamferCurveCommand;
 
     let mut scene = SceneGraph::new();
     let p0 = BezierPoint::sharp(Vec3::new(0.0, 0.0, 0.0));
@@ -127,7 +140,11 @@ fn test_chamfer_curve_command_execution_and_undo() {
     let p2 = BezierPoint::sharp(Vec3::new(2.0, 2.0, 0.0));
     let spline = Spline::with_points(vec![p0, p1, p2], false);
 
-    let node_id = scene.add_node(SceneNode::new_curve("TestCurve", core_math::Transform::IDENTITY, spline));
+    let node_id = scene.add_node(SceneNode::new_curve(
+        "TestCurve",
+        core_math::Transform::IDENTITY,
+        spline,
+    ));
 
     let mut history = graph_engine::HistoryManager::new();
     let cmd = Box::new(ChamferCurveCommand::new(node_id, 0.5, vec![1]));
@@ -164,10 +181,16 @@ fn test_un_bevel_faces_command_and_undo() {
     let mut scene = SceneGraph::new();
     let mut cube = Primitives::create_cube(2.0);
     let edge = cube.edges.keys().next().unwrap();
-    let bevel_faces = cube.bevel_edge_with_segments(edge, 0.2, 1).expect("bevel edge");
+    let bevel_faces = cube
+        .bevel_edge_with_segments(edge, 0.2, 1)
+        .expect("bevel edge");
     assert_eq!(bevel_faces.len(), 1);
 
-    let node_id = scene.add_node(SceneNode::new_mesh("BeveledCube", core_math::Transform::IDENTITY, cube));
+    let node_id = scene.add_node(SceneNode::new_mesh(
+        "BeveledCube",
+        core_math::Transform::IDENTITY,
+        cube,
+    ));
 
     let mut history = graph_engine::HistoryManager::new();
     let cmd = Box::new(UnBevelFacesCommand {
@@ -225,7 +248,11 @@ fn test_dissolve_faces_command_and_undo() {
     assert_eq!(plane.vertices.len(), 9);
 
     let all_faces: Vec<FaceKey> = plane.faces.keys().collect();
-    let node_id = scene.add_node(SceneNode::new_mesh("GridPlane", core_math::Transform::IDENTITY, plane));
+    let node_id = scene.add_node(SceneNode::new_mesh(
+        "GridPlane",
+        core_math::Transform::IDENTITY,
+        plane,
+    ));
 
     let mut history = graph_engine::HistoryManager::new();
     let cmd = Box::new(DissolveFacesCommand {
@@ -281,11 +308,22 @@ fn test_trim_curve_command_execution_and_undo() {
     use geo_kernel::Spline;
 
     let mut scene = SceneGraph::new();
-    let target = Spline::polyline(&[Vec3::new(-3.0, 0.0, 0.0), Vec3::new(3.0, 0.0, 0.0)], false);
+    let target = Spline::polyline(
+        &[Vec3::new(-3.0, 0.0, 0.0), Vec3::new(3.0, 0.0, 0.0)],
+        false,
+    );
     let cutter = Spline::circle(1.0, Vec3::ZERO);
 
-    let target_id = scene.add_node(SceneNode::new_curve("TargetLine", core_math::Transform::IDENTITY, target));
-    let cutter_id = scene.add_node(SceneNode::new_curve("CutterCircle", core_math::Transform::IDENTITY, cutter));
+    let target_id = scene.add_node(SceneNode::new_curve(
+        "TargetLine",
+        core_math::Transform::IDENTITY,
+        target,
+    ));
+    let cutter_id = scene.add_node(SceneNode::new_curve(
+        "CutterCircle",
+        core_math::Transform::IDENTITY,
+        cutter,
+    ));
 
     let mut history = graph_engine::HistoryManager::new();
     let cmd = Box::new(TrimCurveCommand::new(target_id, cutter_id, true, 0.1));
@@ -322,11 +360,22 @@ fn test_connect_tangent_arc_command_and_undo() {
     use geo_kernel::Spline;
 
     let mut scene = SceneGraph::new();
-    let c1 = Spline::polyline(&[Vec3::new(-2.0, 0.0, 0.0), Vec3::new(-1.0, 0.0, 0.0)], false);
+    let c1 = Spline::polyline(
+        &[Vec3::new(-2.0, 0.0, 0.0), Vec3::new(-1.0, 0.0, 0.0)],
+        false,
+    );
     let c2 = Spline::polyline(&[Vec3::new(0.0, 0.0, 1.0), Vec3::new(0.0, 0.0, 2.0)], false);
 
-    let id1 = scene.add_node(SceneNode::new_curve("Curve1", core_math::Transform::IDENTITY, c1));
-    let id2 = scene.add_node(SceneNode::new_curve("Curve2", core_math::Transform::IDENTITY, c2));
+    let id1 = scene.add_node(SceneNode::new_curve(
+        "Curve1",
+        core_math::Transform::IDENTITY,
+        c1,
+    ));
+    let id2 = scene.add_node(SceneNode::new_curve(
+        "Curve2",
+        core_math::Transform::IDENTITY,
+        c2,
+    ));
 
     let mut history = graph_engine::HistoryManager::new();
     let cmd = Box::new(ConnectTangentArcCommand::new(id1, 1, id2, 0));
@@ -346,20 +395,28 @@ fn test_bevel_edge_command_multi_segment_profile_and_undo() {
 
     let mut scene = SceneGraph::new();
     let mesh = Primitives::create_cube(2.0);
-    let id = scene.add_node(SceneNode::new_mesh("Cube", core_math::Transform::IDENTITY, mesh));
+    let id = scene.add_node(SceneNode::new_mesh(
+        "Cube",
+        core_math::Transform::IDENTITY,
+        mesh,
+    ));
 
     let initial_face_count = {
         let node = scene.nodes.get(id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
             base_mesh.faces.len()
-        } else { 0 }
+        } else {
+            0
+        }
     };
 
     let edge = {
         let node = scene.nodes.get(id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
             base_mesh.edges.keys().next().unwrap()
-        } else { panic!("Expected mesh") }
+        } else {
+            panic!("Expected mesh")
+        }
     };
 
     let mut history = graph_engine::HistoryManager::new();
@@ -377,7 +434,9 @@ fn test_bevel_edge_command_multi_segment_profile_and_undo() {
         let node = scene.nodes.get(id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
             base_mesh.faces.len()
-        } else { 0 }
+        } else {
+            0
+        }
     };
     // 3 segments creates 3 bevel facet strips replacing the original edge seam
     assert!(beveled_face_count > initial_face_count);
@@ -387,7 +446,9 @@ fn test_bevel_edge_command_multi_segment_profile_and_undo() {
         let node = scene.nodes.get(id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
             base_mesh.faces.len()
-        } else { 0 }
+        } else {
+            0
+        }
     };
     assert_eq!(restored_face_count, initial_face_count);
 }
@@ -399,14 +460,21 @@ fn test_curve_fillet_g2_continuity_and_undo() {
     use geo_kernel::{FilletContinuity, Spline};
 
     let mut scene = SceneGraph::new();
-    let rect = Spline::polyline(&[
-        Vec3::new(0.0, 0.0, 0.0),
-        Vec3::new(2.0, 0.0, 0.0),
-        Vec3::new(2.0, 0.0, 2.0),
-        Vec3::new(0.0, 0.0, 2.0),
-    ], true);
+    let rect = Spline::polyline(
+        &[
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(2.0, 0.0, 0.0),
+            Vec3::new(2.0, 0.0, 2.0),
+            Vec3::new(0.0, 0.0, 2.0),
+        ],
+        true,
+    );
 
-    let id = scene.add_node(SceneNode::new_curve("Rect", core_math::Transform::IDENTITY, rect));
+    let id = scene.add_node(SceneNode::new_curve(
+        "Rect",
+        core_math::Transform::IDENTITY,
+        rect,
+    ));
 
     let mut history = graph_engine::HistoryManager::new();
     // G2 continuity inserts smooth apex knot at each corner (3 knots per corner instead of 2 in G1)
@@ -422,7 +490,9 @@ fn test_curve_fillet_g2_continuity_and_undo() {
         let node = scene.nodes.get(id).unwrap();
         if let NodeData::Curve { spline, .. } = &node.data {
             spline.points.len()
-        } else { 0 }
+        } else {
+            0
+        }
     };
     // 4 corners * 3 knots = 12 knots for G2 fillet
     assert_eq!(pt_count, 12);
@@ -432,7 +502,9 @@ fn test_curve_fillet_g2_continuity_and_undo() {
         let node = scene.nodes.get(id).unwrap();
         if let NodeData::Curve { spline, .. } = &node.data {
             spline.points.len()
-        } else { 0 }
+        } else {
+            0
+        }
     };
     assert_eq!(restored_count, 4);
 }
@@ -444,7 +516,11 @@ fn test_uv_pinning_and_pinned_relaxation_command() {
 
     let mut scene = SceneGraph::new();
     let plane = Primitives::create_plane(2.0, 2.0, 3, 3);
-    let id = scene.add_node(SceneNode::new_mesh("Plane", core_math::Transform::IDENTITY, plane));
+    let id = scene.add_node(SceneNode::new_mesh(
+        "Plane",
+        core_math::Transform::IDENTITY,
+        plane,
+    ));
 
     let mut history = graph_engine::HistoryManager::new();
 
@@ -515,7 +591,9 @@ fn test_interactive_bone_weight_normalization_brush() {
 
     let center_hit = core_math::vec3(1.0, 1.0, 1.0);
     // Find closest vertex to center_hit
-    let (target_vk, _) = mesh.vertices.iter()
+    let (target_vk, _) = mesh
+        .vertices
+        .iter()
         .min_by(|(_, a), (_, b)| {
             let da = (a.position - center_hit).length_squared();
             let db = (b.position - center_hit).length_squared();
@@ -527,16 +605,12 @@ fn test_interactive_bone_weight_normalization_brush() {
     mesh.vertex_groups[g0].set_weight(target_vk, 0.8);
     mesh.vertex_groups[g1].set_weight(target_vk, 0.6);
 
-    let initial_sum = mesh.vertex_groups[g0].get_weight(target_vk) + mesh.vertex_groups[g1].get_weight(target_vk);
+    let initial_sum =
+        mesh.vertex_groups[g0].get_weight(target_vk) + mesh.vertex_groups[g1].get_weight(target_vk);
     assert!((initial_sum - 1.4).abs() < 1e-4);
 
     // Apply interactive normalize brush with strength = 1.0
-    let affected = mesh.apply_normalize_weight_brush(
-        center_hit,
-        1.5,
-        1.0,
-        BrushFalloff::Linear,
-    );
+    let affected = mesh.apply_normalize_weight_brush(center_hit, 1.5, 1.0, BrushFalloff::Linear);
     assert!(affected > 0);
 
     // Verify weights now sum to exactly 1.0

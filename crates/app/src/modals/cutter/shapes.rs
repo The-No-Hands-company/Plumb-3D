@@ -159,11 +159,7 @@ pub fn build_compound_cutter(
                 let mut pts = polygon_points.to_vec();
                 if pts.len() < 3 {
                     // Fallback to triangle
-                    pts = vec![
-                        start_uv,
-                        Vec2::new(current_uv.x, start_uv.y),
-                        current_uv,
-                    ];
+                    pts = vec![start_uv, Vec2::new(current_uv.x, start_uv.y), current_uv];
                 }
                 build_ngon_cutter(wp, &pts, depth)?
             }

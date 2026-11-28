@@ -12,14 +12,20 @@ pub struct MarkSeamCommand {
 
 impl Command for MarkSeamCommand {
     fn name(&self) -> &str {
-        if self.is_seam { "Mark UV Seam(s)" } else { "Clear UV Seam(s)" }
+        if self.is_seam {
+            "Mark UV Seam(s)"
+        } else {
+            "Clear UV Seam(s)"
+        }
     }
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         if let NodeData::Mesh { base_mesh, .. } = &mut node.data {
             if self.old_seam_states.is_empty() {
-                self.old_seam_states = self.edges.iter()
+                self.old_seam_states = self
+                    .edges
+                    .iter()
                     .filter_map(|&ek| base_mesh.edges.get(ek).map(|e| (ek, e.is_seam)))
                     .collect();
             }
@@ -60,7 +66,12 @@ impl Command for SmartUvProjectCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             if self.old_mesh.is_none() {
                 self.old_mesh = Some(base_mesh.clone());
             }
@@ -76,7 +87,12 @@ impl Command for SmartUvProjectCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-            if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 *base_mesh = old.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -104,7 +120,12 @@ impl Command for UnwrapSeamsCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             if self.old_mesh.is_none() {
                 self.old_mesh = Some(base_mesh.clone());
             }
@@ -120,7 +141,12 @@ impl Command for UnwrapSeamsCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-            if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 *base_mesh = old.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -148,7 +174,12 @@ impl Command for UVProjectionCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(node) = scene.nodes.get_mut(self.node_id) {
-            if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -172,7 +203,12 @@ impl Command for UVProjectionCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = &self.old_mesh {
             if let Some(node) = scene.nodes.get_mut(self.node_id) {
-                if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -203,7 +239,12 @@ impl Command for PackUvIslandsCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             if self.old_mesh.is_none() {
                 self.old_mesh = Some(base_mesh.clone());
             }
@@ -219,7 +260,12 @@ impl Command for PackUvIslandsCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-            if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 *base_mesh = old.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -242,12 +288,21 @@ pub struct RotateUvsCommand {
 
 impl Command for RotateUvsCommand {
     fn name(&self) -> &str {
-        if self.clockwise { "Rotate UVs CW" } else { "Rotate UVs CCW" }
+        if self.clockwise {
+            "Rotate UVs CW"
+        } else {
+            "Rotate UVs CCW"
+        }
     }
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             if self.old_mesh.is_none() {
                 self.old_mesh = Some(base_mesh.clone());
             }
@@ -263,7 +318,12 @@ impl Command for RotateUvsCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-            if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 *base_mesh = old.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -286,12 +346,21 @@ pub struct FlipUvsCommand {
 
 impl Command for FlipUvsCommand {
     fn name(&self) -> &str {
-        if self.horizontal { "Flip UVs Horizontally" } else { "Flip UVs Vertically" }
+        if self.horizontal {
+            "Flip UVs Horizontally"
+        } else {
+            "Flip UVs Vertically"
+        }
     }
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             if self.old_mesh.is_none() {
                 self.old_mesh = Some(base_mesh.clone());
             }
@@ -307,7 +376,12 @@ impl Command for FlipUvsCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-            if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 *base_mesh = old.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -335,7 +409,12 @@ impl Command for ScaleUvsCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             if self.old_mesh.is_none() {
                 self.old_mesh = Some(base_mesh.clone());
             }
@@ -351,7 +430,12 @@ impl Command for ScaleUvsCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-            if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 *base_mesh = old.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -381,7 +465,12 @@ impl Command for RelaxUvsCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             if self.old_mesh.is_none() {
                 self.old_mesh = Some(base_mesh.clone());
             }
@@ -397,7 +486,12 @@ impl Command for RelaxUvsCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-            if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+            if let NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } = &mut node.data
+            {
                 *base_mesh = old.clone();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -422,14 +516,20 @@ pub struct PinUvsCommand {
 
 impl Command for PinUvsCommand {
     fn name(&self) -> &str {
-        if self.pin { "Pin UV Vertices" } else { "Unpin UV Vertices" }
+        if self.pin {
+            "Pin UV Vertices"
+        } else {
+            "Unpin UV Vertices"
+        }
     }
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         if let NodeData::Mesh { base_mesh, .. } = &mut node.data {
             if self.old_pinned_states.is_empty() {
-                self.old_pinned_states = self.vertices.iter()
+                self.old_pinned_states = self
+                    .vertices
+                    .iter()
                     .filter_map(|&vk| base_mesh.vertices.get(vk).map(|v| (vk, v.uv_pinned)))
                     .collect();
             }
@@ -477,7 +577,12 @@ impl Command for MoveUvVertexCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             if let Some(v) = base_mesh.vertices.get_mut(self.vertex) {
                 v.uv = self.new_uv;
             }
@@ -491,7 +596,12 @@ impl Command for MoveUvVertexCommand {
 
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             if let Some(v) = base_mesh.vertices.get_mut(self.vertex) {
                 v.uv = self.old_uv;
             }
@@ -503,4 +613,3 @@ impl Command for MoveUvVertexCommand {
         }
     }
 }
-

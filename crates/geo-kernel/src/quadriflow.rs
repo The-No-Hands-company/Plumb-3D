@@ -38,7 +38,10 @@ impl Mesh {
     ///
     /// Computes a smooth 4-rotational symmetry tangent cross-field across the mesh,
     /// aligns flow lines with geometric crease singularities, and extracts clean production quads.
-    pub fn retopologize_quadriflow(&self, settings: &QuadriflowSettings) -> Result<Mesh, MeshError> {
+    pub fn retopologize_quadriflow(
+        &self,
+        settings: &QuadriflowSettings,
+    ) -> Result<Mesh, MeshError> {
         if self.faces.is_empty() {
             return Ok(Mesh::new());
         }
@@ -49,26 +52,40 @@ impl Mesh {
             let n = f.normal.normalize();
             let verts = self.face_vertices(fk);
             let init_dir = if verts.len() >= 2 {
-                let e = (self.vertices[verts[1]].position - self.vertices[verts[0]].position).normalize();
+                let e = (self.vertices[verts[1]].position - self.vertices[verts[0]].position)
+                    .normalize();
                 (e - n * e.dot(n)).normalize()
             } else {
-                let arbitrary = if n.y.abs() < 0.9 { vec3(0.0, 1.0, 0.0) } else { vec3(1.0, 0.0, 0.0) };
+                let arbitrary = if n.y.abs() < 0.9 {
+                    vec3(0.0, 1.0, 0.0)
+                } else {
+                    vec3(1.0, 0.0, 0.0)
+                };
                 n.cross(arbitrary).normalize()
             };
 
-            field.insert(fk, CrossField4RoSy { direction: init_dir });
+            field.insert(
+                fk,
+                CrossField4RoSy {
+                    direction: init_dir,
+                },
+            );
         }
 
         // 2. Lock 4-RoSy field on sharp crease edges (boundary conditions)
         let rad_thresh = settings.sharp_angle_deg * (PI / 180.0);
         for edge in self.edges.values() {
             if let Some(he) = self.half_edges.get(edge.half_edge) {
-                if let (Some(fa), Some(fb)) = (he.face, self.half_edges.get(he.twin).and_then(|t| t.face)) {
+                if let (Some(fa), Some(fb)) =
+                    (he.face, self.half_edges.get(he.twin).and_then(|t| t.face))
+                {
                     let na = self.faces[fa].normal;
                     let nb = self.faces[fb].normal;
                     let angle = na.dot(nb).clamp(-1.0, 1.0).acos();
                     if angle > rad_thresh {
-                        let edge_dir = (self.vertices[he.target].position - self.vertices[he.origin].position).normalize();
+                        let edge_dir = (self.vertices[he.target].position
+                            - self.vertices[he.origin].position)
+                            .normalize();
                         if let Some(cf) = field.get_mut(&fa) {
                             cf.direction = edge_dir;
                         }
@@ -116,7 +133,11 @@ impl Mesh {
             if verts.is_empty() {
                 continue;
             }
-            let centroid: Vec3 = verts.iter().map(|&vk| self.vertices[vk].position).sum::<Vec3>() / verts.len() as f32;
+            let centroid: Vec3 = verts
+                .iter()
+                .map(|&vk| self.vertices[vk].position)
+                .sum::<Vec3>()
+                / verts.len() as f32;
             let n = self.faces[*fk].normal;
             let u_dir = cf.direction;
             let v_dir = n.cross(u_dir).normalize();
@@ -135,11 +156,16 @@ impl Mesh {
                     (p.y / (quad_size * 0.8)).round() as i32,
                     (p.z / (quad_size * 0.8)).round() as i32,
                 ];
-                let vk = *vertex_lut.entry(key).or_insert_with(|| out_mesh.add_vertex(p));
+                let vk = *vertex_lut
+                    .entry(key)
+                    .or_insert_with(|| out_mesh.add_vertex(p));
                 patch_vks.push(vk);
             }
 
-            if patch_vks[0] != patch_vks[1] && patch_vks[1] != patch_vks[2] && patch_vks[2] != patch_vks[3] {
+            if patch_vks[0] != patch_vks[1]
+                && patch_vks[1] != patch_vks[2]
+                && patch_vks[2] != patch_vks[3]
+            {
                 let _ = out_mesh.add_face(&patch_vks);
             }
         }
@@ -205,12 +231,18 @@ mod tests {
             enforce_all_quads: true,
         };
 
-        let retopo = cube.retopologize_quadriflow(&settings).expect("Quadriflow retopology");
+        let retopo = cube
+            .retopologize_quadriflow(&settings)
+            .expect("Quadriflow retopology");
 
         assert!(!retopo.vertices.is_empty());
         assert!(!retopo.faces.is_empty());
         // Verify output consists primarily of quads
-        let quad_count = retopo.faces.keys().filter(|&fk| retopo.face_vertices(fk).len() == 4).count();
+        let quad_count = retopo
+            .faces
+            .keys()
+            .filter(|&fk| retopo.face_vertices(fk).len() == 4)
+            .count();
         assert!(quad_count > 0);
     }
 

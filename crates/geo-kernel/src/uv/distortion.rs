@@ -43,7 +43,8 @@ impl Mesh {
             let uv0 = self.vertices[verts[0]].uv;
             let uv1 = self.vertices[verts[1]].uv;
             let uv2 = self.vertices[verts[2]].uv;
-            let a2d = ((uv1.x - uv0.x) * (uv2.y - uv0.y) - (uv2.x - uv0.x) * (uv1.y - uv0.y)).abs() * 0.5;
+            let a2d =
+                ((uv1.x - uv0.x) * (uv2.y - uv0.y) - (uv2.x - uv0.x) * (uv1.y - uv0.y)).abs() * 0.5;
 
             total_3d_area += a3d;
             total_2d_area += a2d;
@@ -81,7 +82,11 @@ impl Mesh {
             // Area stretch ratio error
             let norm_3d = a3d / total_3d_safe;
             let norm_2d = a2d / total_2d_safe;
-            let area_ratio = if norm_3d > 1e-7 { norm_2d / norm_3d } else { 1.0 };
+            let area_ratio = if norm_3d > 1e-7 {
+                norm_2d / norm_3d
+            } else {
+                1.0
+            };
             let area_err = (area_ratio - 1.0).abs().min(2.0) * 0.5;
 
             // Weighted combination
@@ -130,7 +135,8 @@ impl Mesh {
             let uv0 = self.vertices[verts[0]].uv;
             let uv1 = self.vertices[verts[1]].uv;
             let uv2 = self.vertices[verts[2]].uv;
-            total_2d_area += ((uv1.x - uv0.x) * (uv2.y - uv0.y) - (uv2.x - uv0.x) * (uv1.y - uv0.y)).abs() * 0.5;
+            total_2d_area +=
+                ((uv1.x - uv0.x) * (uv2.y - uv0.y) - (uv2.x - uv0.x) * (uv1.y - uv0.y)).abs() * 0.5;
         }
 
         let total_3d_safe = total_3d_area.max(1e-6);
@@ -150,7 +156,8 @@ impl Mesh {
             let uv0 = self.vertices[verts[0]].uv;
             let uv1 = self.vertices[verts[1]].uv;
             let uv2 = self.vertices[verts[2]].uv;
-            let a2d = ((uv1.x - uv0.x) * (uv2.y - uv0.y) - (uv2.x - uv0.x) * (uv1.y - uv0.y)).abs() * 0.5;
+            let a2d =
+                ((uv1.x - uv0.x) * (uv2.y - uv0.y) - (uv2.x - uv0.x) * (uv1.y - uv0.y)).abs() * 0.5;
 
             let a3_0 = corner_angle_3d(p2 - p0, p1 - p0);
             let a3_1 = corner_angle_3d(p0 - p1, p2 - p1);
@@ -172,14 +179,26 @@ impl Mesh {
 
             let norm_3d = a3d / total_3d_safe;
             let norm_2d = a2d / total_2d_safe;
-            let area_ratio = if norm_3d > 1e-7 { norm_2d / norm_3d } else { 1.0 };
+            let area_ratio = if norm_3d > 1e-7 {
+                norm_2d / norm_3d
+            } else {
+                1.0
+            };
             total_area_stretch += (area_ratio - 1.0).abs();
 
             face_count += 1.0;
         }
 
-        let mean_angle = if face_count > 0.0 { total_angle_err_deg / face_count } else { 0.0 };
-        let mean_area = if face_count > 0.0 { total_area_stretch / face_count } else { 0.0 };
+        let mean_angle = if face_count > 0.0 {
+            total_angle_err_deg / face_count
+        } else {
+            0.0
+        };
+        let mean_area = if face_count > 0.0 {
+            total_area_stretch / face_count
+        } else {
+            0.0
+        };
 
         UvDistortionSummary {
             mean_angle_error_deg: mean_angle,
@@ -219,11 +238,19 @@ pub fn distortion_to_heatmap_rgba(d: f32) -> [u8; 4] {
     } else if t < 0.5 {
         // Cyan to emerald green
         let s = (t - 0.25) / 0.25;
-        (40 + (10.0 * s) as u8, 200 + (20.0 * s) as u8, 220 - (130.0 * s) as u8)
+        (
+            40 + (10.0 * s) as u8,
+            200 + (20.0 * s) as u8,
+            220 - (130.0 * s) as u8,
+        )
     } else if t < 0.75 {
         // Emerald green to amber yellow
         let s = (t - 0.50) / 0.25;
-        (50 + (190.0 * s) as u8, 220 - (30.0 * s) as u8, 90 - (50.0 * s) as u8)
+        (
+            50 + (190.0 * s) as u8,
+            220 - (30.0 * s) as u8,
+            90 - (50.0 * s) as u8,
+        )
     } else {
         // Amber yellow to bright crimson
         let s = (t - 0.75) / 0.25;

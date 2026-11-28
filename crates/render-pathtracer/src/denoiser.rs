@@ -121,7 +121,11 @@ mod tests {
             for x in 0..width {
                 let base = if x < width / 2 { 1.0_f32 } else { 0.0_f32 };
                 // Add noise spike to a specific pixel
-                let noise = if (x == 3 && y == 3) || (x == 12 && y == 12) { 0.8_f32 } else { 0.0_f32 };
+                let noise = if (x == 3 && y == 3) || (x == 12 && y == 12) {
+                    0.8_f32
+                } else {
+                    0.0_f32
+                };
                 buffer.push(Vec3::splat(base + noise));
             }
         }
@@ -141,7 +145,10 @@ mod tests {
         let noisy_val = buffer[3 * width + 3].x;
         let cleaned_val = denoised[3 * width + 3].x;
         assert!(cleaned_val < noisy_val, "Noise spike should be dampened");
-        assert!((cleaned_val - 1.0).abs() < (noisy_val - 1.0).abs(), "Should converge toward 1.0 baseline");
+        assert!(
+            (cleaned_val - 1.0).abs() < (noisy_val - 1.0).abs(),
+            "Should converge toward 1.0 baseline"
+        );
 
         // Check that the boundary edge between x=7 and x=8 is preserved (not blurred across halves)
         let left_edge = denoised[8 * width + 7].x;
@@ -153,7 +160,10 @@ mod tests {
     #[test]
     fn test_denoiser_disabled_noop() {
         let buf = vec![Vec3::new(1.0, 2.0, 3.0); 4];
-        let settings = DenoiseSettings { enabled: false, ..Default::default() };
+        let settings = DenoiseSettings {
+            enabled: false,
+            ..Default::default()
+        };
         let out = denoise_radiance(&buf, 2, 2, &settings);
         assert_eq!(out, buf);
     }

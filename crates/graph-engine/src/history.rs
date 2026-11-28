@@ -76,12 +76,18 @@ impl HistoryManager {
 
     /// Returns the names of all executed commands currently in the undo stack
     pub fn undo_stack_names(&self) -> Vec<String> {
-        self.undo_stack.iter().map(|c| c.name().to_string()).collect()
+        self.undo_stack
+            .iter()
+            .map(|c| c.name().to_string())
+            .collect()
     }
 
     /// Returns the names of all previously undone commands currently in the redo stack
     pub fn redo_stack_names(&self) -> Vec<String> {
-        self.redo_stack.iter().map(|c| c.name().to_string()).collect()
+        self.redo_stack
+            .iter()
+            .map(|c| c.name().to_string())
+            .collect()
     }
 
     /// Returns total number of undoable actions
@@ -95,7 +101,11 @@ impl HistoryManager {
     }
 
     /// Roll back to the undo step at `target_index` (0 <= target_index < undo_stack.len())
-    pub fn jump_to_undo_step(&mut self, scene: &mut SceneGraph, target_index: usize) -> Result<(), String> {
+    pub fn jump_to_undo_step(
+        &mut self,
+        scene: &mut SceneGraph,
+        target_index: usize,
+    ) -> Result<(), String> {
         if target_index >= self.undo_stack.len() {
             return Err("Target history index out of bounds".into());
         }
@@ -115,7 +125,11 @@ impl HistoryManager {
     }
 
     /// Roll forward into the redo stack by `steps`
-    pub fn jump_forward_redo(&mut self, scene: &mut SceneGraph, steps: usize) -> Result<(), String> {
+    pub fn jump_forward_redo(
+        &mut self,
+        scene: &mut SceneGraph,
+        steps: usize,
+    ) -> Result<(), String> {
         let max_steps = steps.min(self.redo_stack.len());
         for _ in 0..max_steps {
             self.redo(scene)?;
@@ -159,12 +173,25 @@ mod tests {
         let mut history = HistoryManager::new();
         let mut scene = SceneGraph::new();
 
-        history.execute(Box::new(DummyCommand("Step 1")), &mut scene).unwrap();
-        history.execute(Box::new(DummyCommand("Step 2")), &mut scene).unwrap();
-        history.execute(Box::new(DummyCommand("Step 3")), &mut scene).unwrap();
+        history
+            .execute(Box::new(DummyCommand("Step 1")), &mut scene)
+            .unwrap();
+        history
+            .execute(Box::new(DummyCommand("Step 2")), &mut scene)
+            .unwrap();
+        history
+            .execute(Box::new(DummyCommand("Step 3")), &mut scene)
+            .unwrap();
 
         assert_eq!(history.undo_count(), 3);
-        assert_eq!(history.undo_stack_names(), vec!["Step 1".to_string(), "Step 2".to_string(), "Step 3".to_string()]);
+        assert_eq!(
+            history.undo_stack_names(),
+            vec![
+                "Step 1".to_string(),
+                "Step 2".to_string(),
+                "Step 3".to_string()
+            ]
+        );
 
         // Jump back to Step 1 (index 0)
         history.jump_to_undo_step(&mut scene, 0).unwrap();
@@ -175,7 +202,10 @@ mod tests {
         // Jump forward 1 step in redo
         history.jump_forward_redo(&mut scene, 1).unwrap();
         assert_eq!(history.undo_count(), 2);
-        assert_eq!(history.undo_stack_names(), vec!["Step 1".to_string(), "Step 2".to_string()]);
+        assert_eq!(
+            history.undo_stack_names(),
+            vec!["Step 1".to_string(), "Step 2".to_string()]
+        );
 
         // Jump to initial state
         history.jump_to_initial_state(&mut scene).unwrap();

@@ -139,7 +139,11 @@ impl ThemeTokens {
 /// Applies a theme preset across the entire egui runtime context.
 pub fn apply_theme(ctx: &Context, preset: ThemePreset) {
     let tokens = ThemeTokens::from_preset(preset);
-    let mut visuals = if tokens.is_dark { Visuals::dark() } else { Visuals::light() };
+    let mut visuals = if tokens.is_dark {
+        Visuals::dark()
+    } else {
+        Visuals::light()
+    };
 
     visuals.panel_fill = tokens.bg_panel;
     visuals.window_fill = tokens.bg_window;
@@ -166,7 +170,14 @@ pub fn apply_theme(ctx: &Context, preset: ThemePreset) {
     visuals.widgets.hovered.bg_fill = tokens.widget_hovered;
     visuals.widgets.hovered.rounding = Rounding::same(tokens.rounding);
     visuals.widgets.hovered.bg_stroke = Stroke::new(1.0_f32, tokens.accent);
-    visuals.widgets.hovered.fg_stroke = Stroke::new(1.0_f32, if tokens.is_dark { Color32::WHITE } else { Color32::BLACK });
+    visuals.widgets.hovered.fg_stroke = Stroke::new(
+        1.0_f32,
+        if tokens.is_dark {
+            Color32::WHITE
+        } else {
+            Color32::BLACK
+        },
+    );
 
     // Active
     visuals.widgets.active.bg_fill = tokens.widget_active;

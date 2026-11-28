@@ -30,7 +30,10 @@ fn test_high_poly_mesh_creation_and_bmesh_invariants() {
 
     // Topological invariant for a topological sphere: Euler characteristic Chi = V - E + F = 2
     let chi = mesh.euler_characteristic();
-    assert_eq!(chi, 2, "High-poly UV sphere must satisfy Euler characteristic Chi = 2");
+    assert_eq!(
+        chi, 2,
+        "High-poly UV sphere must satisfy Euler characteristic Chi = 2"
+    );
 
     // Verify 2-manifold invariants: every edge has origin and target
     for (_ek, edge) in &mesh.edges {
@@ -107,9 +110,16 @@ fn test_high_poly_raycast_picking_performance() {
     let elapsed = t_start.elapsed();
     let avg_micros = elapsed.as_micros() as f32 / ray_count as f32;
 
-    assert_eq!(hit_count, ray_count, "All downward rays within grid bounds must hit");
+    assert_eq!(
+        hit_count, ray_count,
+        "All downward rays within grid bounds must hit"
+    );
     // Viewport hover picking test
-    assert!(avg_micros < 5000.0, "Average raycast took {:.2} µs, expected < 5000 µs", avg_micros);
+    assert!(
+        avg_micros < 5000.0,
+        "Average raycast took {:.2} µs, expected < 5000 µs",
+        avg_micros
+    );
 }
 
 #[test]

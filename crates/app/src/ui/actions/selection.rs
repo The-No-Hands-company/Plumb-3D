@@ -45,73 +45,81 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
     }
 
     // Handle Invert Selection (Ctrl+I)
-    if actions.trigger_invert_selection
-        && state.interaction_mode == InteractionMode::Edit {
-            if let Some(sel_id) = state.selected_node {
-                if let Some(node) = state.scene.nodes.get(sel_id) {
-                    if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                        match state.sub_element_level {
-                            SubElementLevel::Vertex => {
-                                let all_v: HashSet<VertexKey> = base_mesh.vertices.keys().collect();
-                                state.selected_vertices = all_v.difference(&state.selected_vertices).copied().collect();
-                            }
-                            SubElementLevel::Edge => {
-                                let all_e: HashSet<EdgeKey> = base_mesh.edges.keys().collect();
-                                state.selected_edges = all_e.difference(&state.selected_edges).copied().collect();
-                            }
-                            SubElementLevel::Face => {
-                                let all_f: HashSet<FaceKey> = base_mesh.faces.keys().collect();
-                                state.selected_faces = all_f.difference(&state.selected_faces).copied().collect();
-                            }
+    if actions.trigger_invert_selection && state.interaction_mode == InteractionMode::Edit {
+        if let Some(sel_id) = state.selected_node {
+            if let Some(node) = state.scene.nodes.get(sel_id) {
+                if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                    match state.sub_element_level {
+                        SubElementLevel::Vertex => {
+                            let all_v: HashSet<VertexKey> = base_mesh.vertices.keys().collect();
+                            state.selected_vertices = all_v
+                                .difference(&state.selected_vertices)
+                                .copied()
+                                .collect();
+                        }
+                        SubElementLevel::Edge => {
+                            let all_e: HashSet<EdgeKey> = base_mesh.edges.keys().collect();
+                            state.selected_edges =
+                                all_e.difference(&state.selected_edges).copied().collect();
+                        }
+                        SubElementLevel::Face => {
+                            let all_f: HashSet<FaceKey> = base_mesh.faces.keys().collect();
+                            state.selected_faces =
+                                all_f.difference(&state.selected_faces).copied().collect();
                         }
                     }
                 }
             }
         }
+    }
 
     // Handle Grow Selection (+)
-    if actions.trigger_grow_selection
-        && state.interaction_mode == InteractionMode::Edit {
-            if let Some(sel_id) = state.selected_node {
-                if let Some(node) = state.scene.nodes.get(sel_id) {
-                    if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                        match state.sub_element_level {
-                            SubElementLevel::Vertex => {
-                                state.selected_vertices = base_mesh.grow_vertex_selection(&state.selected_vertices);
-                            }
-                            SubElementLevel::Edge => {
-                                state.selected_edges = base_mesh.grow_edge_selection(&state.selected_edges);
-                            }
-                            SubElementLevel::Face => {
-                                state.selected_faces = base_mesh.grow_face_selection(&state.selected_faces);
-                            }
+    if actions.trigger_grow_selection && state.interaction_mode == InteractionMode::Edit {
+        if let Some(sel_id) = state.selected_node {
+            if let Some(node) = state.scene.nodes.get(sel_id) {
+                if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                    match state.sub_element_level {
+                        SubElementLevel::Vertex => {
+                            state.selected_vertices =
+                                base_mesh.grow_vertex_selection(&state.selected_vertices);
+                        }
+                        SubElementLevel::Edge => {
+                            state.selected_edges =
+                                base_mesh.grow_edge_selection(&state.selected_edges);
+                        }
+                        SubElementLevel::Face => {
+                            state.selected_faces =
+                                base_mesh.grow_face_selection(&state.selected_faces);
                         }
                     }
                 }
             }
         }
+    }
 
     // Handle Shrink Selection (-)
-    if actions.trigger_shrink_selection
-        && state.interaction_mode == InteractionMode::Edit {
-            if let Some(sel_id) = state.selected_node {
-                if let Some(node) = state.scene.nodes.get(sel_id) {
-                    if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                        match state.sub_element_level {
-                            SubElementLevel::Vertex => {
-                                state.selected_vertices = base_mesh.shrink_vertex_selection(&state.selected_vertices);
-                            }
-                            SubElementLevel::Edge => {
-                                state.selected_edges = base_mesh.shrink_edge_selection(&state.selected_edges);
-                            }
-                            SubElementLevel::Face => {
-                                state.selected_faces = base_mesh.shrink_face_selection(&state.selected_faces);
-                            }
+    if actions.trigger_shrink_selection && state.interaction_mode == InteractionMode::Edit {
+        if let Some(sel_id) = state.selected_node {
+            if let Some(node) = state.scene.nodes.get(sel_id) {
+                if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                    match state.sub_element_level {
+                        SubElementLevel::Vertex => {
+                            state.selected_vertices =
+                                base_mesh.shrink_vertex_selection(&state.selected_vertices);
+                        }
+                        SubElementLevel::Edge => {
+                            state.selected_edges =
+                                base_mesh.shrink_edge_selection(&state.selected_edges);
+                        }
+                        SubElementLevel::Face => {
+                            state.selected_faces =
+                                base_mesh.shrink_face_selection(&state.selected_faces);
                         }
                     }
                 }
             }
         }
+    }
 
     // Handle Loop Selection (Edge Loop or Face Loop)
     if actions.trigger_edge_loop && state.interaction_mode == InteractionMode::Edit {
@@ -146,21 +154,23 @@ pub fn handle_selection(state: &mut AppState, actions: &mut UiActions) {
 
     // Handle Edge Ring Selection
     if actions.trigger_edge_ring
-        && state.interaction_mode == InteractionMode::Edit && state.sub_element_level == SubElementLevel::Edge {
-            if let Some(sel_id) = state.selected_node {
-                if let Some(node) = state.scene.nodes.get(sel_id) {
-                    if let NodeData::Mesh { base_mesh, .. } = &node.data {
-                        let mut full_ring = HashSet::new();
-                        for &ek in &state.selected_edges {
-                            for edge in base_mesh.select_edge_ring(ek) {
-                                full_ring.insert(edge);
-                            }
+        && state.interaction_mode == InteractionMode::Edit
+        && state.sub_element_level == SubElementLevel::Edge
+    {
+        if let Some(sel_id) = state.selected_node {
+            if let Some(node) = state.scene.nodes.get(sel_id) {
+                if let NodeData::Mesh { base_mesh, .. } = &node.data {
+                    let mut full_ring = HashSet::new();
+                    for &ek in &state.selected_edges {
+                        for edge in base_mesh.select_edge_ring(ek) {
+                            full_ring.insert(edge);
                         }
-                        if !full_ring.is_empty() {
-                            state.selected_edges = full_ring;
-                        }
+                    }
+                    if !full_ring.is_empty() {
+                        state.selected_edges = full_ring;
                     }
                 }
             }
         }
+    }
 }

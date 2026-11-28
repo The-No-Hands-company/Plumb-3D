@@ -19,19 +19,36 @@ pub fn render_selection_overlay(state: &AppState) {
             egui::Color32::from_rgba_premultiplied(40, 130, 255, 30),
             egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(80, 170, 255)),
         );
-    } else if state.is_box_selecting && state.selection_tool_mode == SelectionToolMode::Lasso && state.lasso_points.len() >= 2 {
+    } else if state.is_box_selecting
+        && state.selection_tool_mode == SelectionToolMode::Lasso
+        && state.lasso_points.len() >= 2
+    {
         let painter = state.egui_ctx.layer_painter(egui::LayerId::new(
             egui::Order::Foreground,
             egui::Id::new("lasso_overlay"),
         ));
-        let pts: Vec<egui::Pos2> = state.lasso_points.iter().map(|&(x, y)| egui::pos2(x, y)).collect();
+        let pts: Vec<egui::Pos2> = state
+            .lasso_points
+            .iter()
+            .map(|&(x, y)| egui::pos2(x, y))
+            .collect();
         for i in 0..pts.len() - 1 {
-            painter.line_segment([pts[i], pts[i + 1]], egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(80, 170, 255)));
+            painter.line_segment(
+                [pts[i], pts[i + 1]],
+                egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(80, 170, 255)),
+            );
         }
         if pts.len() >= 3 {
-            painter.line_segment([*pts.last().unwrap(), pts[0]], egui::Stroke::new(1.0_f32, egui::Color32::from_rgba_premultiplied(80, 170, 255, 120)));
+            painter.line_segment(
+                [*pts.last().unwrap(), pts[0]],
+                egui::Stroke::new(
+                    1.0_f32,
+                    egui::Color32::from_rgba_premultiplied(80, 170, 255, 120),
+                ),
+            );
         }
-    } else if state.is_box_selecting && state.selection_tool_mode == SelectionToolMode::CirclePaint {
+    } else if state.is_box_selecting && state.selection_tool_mode == SelectionToolMode::CirclePaint
+    {
         if let Some((x, y)) = state.last_mouse_pos {
             let painter = state.egui_ctx.layer_painter(egui::LayerId::new(
                 egui::Order::Foreground,

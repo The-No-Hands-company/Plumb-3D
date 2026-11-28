@@ -223,7 +223,10 @@ pub fn render(state: &mut AppState) {
     }
 
     let ctx = state.egui_ctx.clone();
-    let current_step = state.walkthrough.current_step.min(state.walkthrough.steps.len() - 1);
+    let current_step = state
+        .walkthrough
+        .current_step
+        .min(state.walkthrough.steps.len() - 1);
     let step_count = state.walkthrough.steps.len();
     let step = state.walkthrough.steps[current_step].clone();
 
@@ -242,7 +245,10 @@ pub fn render(state: &mut AppState) {
         .frame(
             egui::Frame::window(&ctx.style())
                 .fill(egui::Color32::from_rgba_premultiplied(18, 22, 32, 245))
-                .stroke(egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(226, 179, 87)))
+                .stroke(egui::Stroke::new(
+                    1.5_f32,
+                    egui::Color32::from_rgb(226, 179, 87),
+                ))
                 .rounding(egui::Rounding::same(8.0))
                 .inner_margin(egui::Margin::same(12.0)),
         )
@@ -264,26 +270,47 @@ pub fn render(state: &mut AppState) {
             });
 
             ui.add_space(2.0);
-            ui.label(egui::RichText::new(&step.title).strong().size(14.0).color(egui::Color32::WHITE));
-            ui.label(egui::RichText::new(&step.subtitle).italics().size(11.0).color(egui::Color32::from_rgb(150, 165, 185)));
+            ui.label(
+                egui::RichText::new(&step.title)
+                    .strong()
+                    .size(14.0)
+                    .color(egui::Color32::WHITE),
+            );
+            ui.label(
+                egui::RichText::new(&step.subtitle)
+                    .italics()
+                    .size(11.0)
+                    .color(egui::Color32::from_rgb(150, 165, 185)),
+            );
 
             ui.add_space(6.0);
             ui.separator();
             ui.add_space(6.0);
 
             // Body text
-            ui.label(egui::RichText::new(&step.body).size(12.0).color(egui::Color32::from_rgb(215, 225, 235)));
+            ui.label(
+                egui::RichText::new(&step.body)
+                    .size(12.0)
+                    .color(egui::Color32::from_rgb(215, 225, 235)),
+            );
 
             // Hotkey pill
             if let Some(ref hk) = step.hotkey {
                 ui.add_space(6.0);
                 egui::Frame::none()
                     .fill(egui::Color32::from_rgb(28, 34, 48))
-                    .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(50, 65, 90)))
+                    .stroke(egui::Stroke::new(
+                        1.0_f32,
+                        egui::Color32::from_rgb(50, 65, 90),
+                    ))
                     .rounding(egui::Rounding::same(4.0))
                     .inner_margin(egui::Margin::symmetric(8.0, 4.0))
                     .show(ui, |ui| {
-                        ui.label(egui::RichText::new(format!("💡 {}", hk)).small().color(egui::Color32::from_rgb(130, 200, 255)));
+                        ui.label(
+                            egui::RichText::new(format!("💡 {}", hk))
+                                .small()
+                                .color(egui::Color32::from_rgb(130, 200, 255)),
+                        );
                     });
             }
 
@@ -296,14 +323,26 @@ pub fn render(state: &mut AppState) {
                     render_scifi_crate_step_buttons(ui, state, current_step, &mut focus_camera);
                 }
                 _ => {
-                    render_lunar_step_buttons(ui, state, current_step, &mut set_full_moon, &mut set_crescent, &mut focus_camera);
+                    render_lunar_step_buttons(
+                        ui,
+                        state,
+                        current_step,
+                        &mut set_full_moon,
+                        &mut set_crescent,
+                        &mut focus_camera,
+                    );
                 }
             }
 
             // Tip
             if let Some(ref tip) = step.tip {
                 ui.add_space(6.0);
-                ui.label(egui::RichText::new(tip).italics().size(10.5).color(egui::Color32::from_rgb(140, 150, 165)));
+                ui.label(
+                    egui::RichText::new(tip)
+                        .italics()
+                        .size(10.5)
+                        .color(egui::Color32::from_rgb(140, 150, 165)),
+                );
             }
 
             ui.add_space(8.0);
@@ -320,9 +359,14 @@ pub fn render(state: &mut AppState) {
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if current_step + 1 < step_count {
-                        if ui.button(
-                            egui::RichText::new("Next Step ▶").strong().color(egui::Color32::from_rgb(226, 179, 87)),
-                        ).clicked() {
+                        if ui
+                            .button(
+                                egui::RichText::new("Next Step ▶")
+                                    .strong()
+                                    .color(egui::Color32::from_rgb(226, 179, 87)),
+                            )
+                            .clicked()
+                        {
                             next_clicked = true;
                         }
                     } else if ui.button("Done! Close Guide").clicked() {
@@ -369,7 +413,8 @@ pub fn render(state: &mut AppState) {
     if set_full_moon {
         for (_id, node) in state.scene.nodes.iter_mut() {
             if node.name == "Sun_KeyLight" {
-                node.local_transform = Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, 0.0, 0.05, 0.0));
+                node.local_transform =
+                    Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, 0.0, 0.05, 0.0));
                 state.set_status_message("🌕 Sunlight aligned for glowing Full Moon!");
                 break;
             }
@@ -378,7 +423,8 @@ pub fn render(state: &mut AppState) {
     if set_crescent {
         for (_id, node) in state.scene.nodes.iter_mut() {
             if node.name == "Sun_KeyLight" {
-                node.local_transform = Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.15, 1.45, 0.0));
+                node.local_transform =
+                    Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.15, 1.45, 0.0));
                 state.set_status_message("🌙 Sunlight shifted for dramatic Crescent terminator!");
                 break;
             }

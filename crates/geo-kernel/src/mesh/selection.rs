@@ -40,7 +40,11 @@ impl Mesh {
             }
         }
 
-        let isolated_vertices = self.vertices.values().filter(|v| v.half_edges.is_empty()).count();
+        let isolated_vertices = self
+            .vertices
+            .values()
+            .filter(|v| v.half_edges.is_empty())
+            .count();
         let v = self.vertices.len() as i32;
         let e = self.edges.len() as i32;
         let f = self.faces.len() as i32;
@@ -85,13 +89,20 @@ impl Mesh {
         loop_edges
     }
 
-    fn trace_edge_loop_half(&self, start_he: HalfEdgeKey, visited: &mut HashSet<EdgeKey>, out_edges: &mut Vec<EdgeKey>) {
+    fn trace_edge_loop_half(
+        &self,
+        start_he: HalfEdgeKey,
+        visited: &mut HashSet<EdgeKey>,
+        out_edges: &mut Vec<EdgeKey>,
+    ) {
         let mut incoming = start_he;
 
         loop {
             let target_v = self.half_edges[incoming].target;
             let is_boundary = self.half_edges[incoming].face.is_none()
-                || self.half_edges[self.half_edges[incoming].twin].face.is_none();
+                || self.half_edges[self.half_edges[incoming].twin]
+                    .face
+                    .is_none();
 
             if is_boundary {
                 // Follow boundary edge at target_v if another boundary edge meets here
@@ -173,7 +184,12 @@ impl Mesh {
         ring_edges
     }
 
-    fn trace_edge_ring_half(&self, start_he: HalfEdgeKey, visited: &mut HashSet<EdgeKey>, out_edges: &mut Vec<EdgeKey>) {
+    fn trace_edge_ring_half(
+        &self,
+        start_he: HalfEdgeKey,
+        visited: &mut HashSet<EdgeKey>,
+        out_edges: &mut Vec<EdgeKey>,
+    ) {
         let mut curr_he = Some(start_he);
 
         while let Some(he_key) = curr_he {

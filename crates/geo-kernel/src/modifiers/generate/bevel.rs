@@ -48,7 +48,9 @@ impl Modifier for BevelModifier {
             if let Some(edge) = output.edges.get(ek) {
                 let h1 = edge.half_edge;
                 let h2 = output.half_edges[h1].twin;
-                if let (Some(f1), Some(f2)) = (output.half_edges[h1].face, output.half_edges[h2].face) {
+                if let (Some(f1), Some(f2)) =
+                    (output.half_edges[h1].face, output.half_edges[h2].face)
+                {
                     let n1 = output.faces[f1].normal;
                     let n2 = output.faces[f2].normal;
                     let angle = n1.dot(n2).clamp(-1.0, 1.0).acos();

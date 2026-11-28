@@ -470,10 +470,18 @@ pub fn draw_context_menu(state: &mut AppState, actions: &mut UiActions) {
 }
 
 fn draw_quick_add_menu(actions: &mut UiActions, close_menu: &mut bool, ui: &mut egui::Ui) {
-    ui.label(egui::RichText::new("Quick Add to Scene").strong().color(egui::Color32::from_rgb(120, 220, 160)));
+    ui.label(
+        egui::RichText::new("Quick Add to Scene")
+            .strong()
+            .color(egui::Color32::from_rgb(120, 220, 160)),
+    );
     ui.separator();
 
-    ui.label(egui::RichText::new("MESH PRIMITIVES").small().color(egui::Color32::GRAY));
+    ui.label(
+        egui::RichText::new("MESH PRIMITIVES")
+            .small()
+            .color(egui::Color32::GRAY),
+    );
     ui.horizontal(|ui| {
         if ui.button("Cube").clicked() {
             actions.spawn_mesh = Some(("Cube", Primitives::create_cube(2.0)));
@@ -514,13 +522,20 @@ fn draw_quick_add_menu(actions: &mut UiActions, close_menu: &mut bool, ui: &mut 
             *close_menu = true;
         }
         if ui.button("Pipe Thread").clicked() {
-            actions.spawn_mesh = Some(("PipeThread", Primitives::create_pipe_thread(1.2, 0.3, 2.0, 16)));
+            actions.spawn_mesh = Some((
+                "PipeThread",
+                Primitives::create_pipe_thread(1.2, 0.3, 2.0, 16),
+            ));
             *close_menu = true;
         }
     });
 
     ui.separator();
-    ui.label(egui::RichText::new("LIGHTS & CAMERAS").small().color(egui::Color32::GRAY));
+    ui.label(
+        egui::RichText::new("LIGHTS & CAMERAS")
+            .small()
+            .color(egui::Color32::GRAY),
+    );
     ui.horizontal(|ui| {
         if ui.button("Point").clicked() {
             actions.spawn_light = Some(("PointLight", LightType::Point));

@@ -47,7 +47,9 @@ impl Mesh {
 
             // Decal local -Y or vertex normal as downward projection ray
             let local_down = -Vec3::Y;
-            let world_dir = decal_world_matrix.transform_vector3(local_down).normalize_or_zero();
+            let world_dir = decal_world_matrix
+                .transform_vector3(local_down)
+                .normalize_or_zero();
 
             // Transform ray into target hull's local coordinate space
             let hull_ray_origin = hull_inv.transform_point3(world_pos - world_dir * 0.1);
@@ -57,7 +59,9 @@ impl Mesh {
             if let Some(hit) = target_hull.raycast(&hull_ray, &Mat4::IDENTITY) {
                 // World hit position and normal
                 let world_hit_pos = hull_world_matrix.transform_point3(hit.point);
-                let world_hit_normal = hull_world_matrix.transform_vector3(hit.normal).normalize_or_zero();
+                let world_hit_normal = hull_world_matrix
+                    .transform_vector3(hit.normal)
+                    .normalize_or_zero();
 
                 // Position vertex at target surface + offset along hull normal
                 let projected_world_pos = world_hit_pos + world_hit_normal * offset;
@@ -65,13 +69,16 @@ impl Mesh {
 
                 // Normal Stamping: if boundary vertex, stamp 100% hull normal; otherwise blend
                 let is_boundary = boundary_verts.contains(&vk);
-                let local_hull_normal = decal_inv.transform_vector3(world_hit_normal).normalize_or_zero();
+                let local_hull_normal = decal_inv
+                    .transform_vector3(world_hit_normal)
+                    .normalize_or_zero();
 
                 if is_boundary {
                     self.vertices[vk].normal = local_hull_normal;
                 } else {
                     let orig_norm = self.vertices[vk].normal;
-                    self.vertices[vk].normal = (orig_norm * 0.4 + local_hull_normal * 0.6).normalize_or_zero();
+                    self.vertices[vk].normal =
+                        (orig_norm * 0.4 + local_hull_normal * 0.6).normalize_or_zero();
                 }
             }
         }

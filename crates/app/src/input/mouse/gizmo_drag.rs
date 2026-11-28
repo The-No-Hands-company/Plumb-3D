@@ -6,13 +6,7 @@ use graph_engine::NodeData;
 use render_viewport::{GizmoAxis, GizmoMode, TransformGizmo};
 use std::collections::HashSet;
 
-pub fn handle_gizmo_drag(
-    state: &mut AppState,
-    axis: GizmoAxis,
-    dx: f32,
-    dy: f32,
-    move_dist: f32,
-) {
+pub fn handle_gizmo_drag(state: &mut AppState, axis: GizmoAxis, dx: f32, dy: f32, move_dist: f32) {
     state.mouse_drag_distance += move_dist;
     let Some(sel_id) = state.selected_node else {
         state.window.request_redraw();
@@ -51,19 +45,29 @@ pub fn handle_gizmo_drag(
                         hit_info = Some((snapped_pos, "Grid"));
                     }
                     SnapTarget::Vertex => {
-                        if let Some(hit) = state.find_closest_snap_vertex(proposed_pos, state.snap_distance_threshold, &state.selected_vertices) {
+                        if let Some(hit) = state.find_closest_snap_vertex(
+                            proposed_pos,
+                            state.snap_distance_threshold,
+                            &state.selected_vertices,
+                        ) {
                             snapped_pos = hit;
                             hit_info = Some((hit, "Vertex"));
                         }
                     }
                     SnapTarget::EdgeMidpoint => {
-                        if let Some(hit) = state.find_closest_snap_edge_midpoint(proposed_pos, state.snap_distance_threshold) {
+                        if let Some(hit) = state.find_closest_snap_edge_midpoint(
+                            proposed_pos,
+                            state.snap_distance_threshold,
+                        ) {
                             snapped_pos = hit;
                             hit_info = Some((hit, "Edge Midpoint"));
                         }
                     }
                     SnapTarget::FaceCenter => {
-                        if let Some(hit) = state.find_closest_snap_face_center(proposed_pos, state.snap_distance_threshold) {
+                        if let Some(hit) = state.find_closest_snap_face_center(
+                            proposed_pos,
+                            state.snap_distance_threshold,
+                        ) {
                             snapped_pos = hit;
                             hit_info = Some((hit, "Face Center"));
                         }
@@ -89,10 +93,15 @@ pub fn handle_gizmo_drag(
 
             state.set_status_message(format!(
                 "⬌ Move: X: {:+.3}m, Y: {:+.3}m, Z: {:+.3}m (Dist: {:.3}m)",
-                delta.x, delta.y, delta.z, delta.length()
+                delta.x,
+                delta.y,
+                delta.z,
+                delta.length()
             ));
 
-            if state.interaction_mode == InteractionMode::Object || state.interaction_mode == InteractionMode::Pose {
+            if state.interaction_mode == InteractionMode::Object
+                || state.interaction_mode == InteractionMode::Pose
+            {
                 if state.selected_nodes.len() > 1 {
                     for &nid in &state.selected_nodes {
                         if let Some(node) = state.scene.nodes.get_mut(nid) {
@@ -106,7 +115,12 @@ pub fn handle_gizmo_drag(
                 }
             } else if state.interaction_mode == InteractionMode::CurveEdit {
                 if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                    if let NodeData::Curve { spline, cached_render_mesh, .. } = &mut node.data {
+                    if let NodeData::Curve {
+                        spline,
+                        cached_render_mesh,
+                        ..
+                    } = &mut node.data
+                    {
                         if let Some(k_idx) = state.selected_curve_knot {
                             if let Some(pt) = spline.points.get_mut(k_idx) {
                                 let inv_mat = node.world_matrix.inverse();
@@ -193,7 +207,8 @@ pub fn handle_gizmo_drag(
                         // If X-Mirror symmetry editing is active, find counterpart vertices across X=0 plane
                         if state.x_mirror_editing {
                             let mut mirror_deltas: Vec<(VertexKey, Vec3)> = Vec::new();
-                            let moved_keys: HashSet<VertexKey> = vert_deltas.iter().map(|(vk, _)| *vk).collect();
+                            let moved_keys: HashSet<VertexKey> =
+                                vert_deltas.iter().map(|(vk, _)| *vk).collect();
                             let sym_threshold = 0.01_f32;
 
                             for &(vk, d) in &vert_deltas {
@@ -203,14 +218,16 @@ pub fn handle_gizmo_drag(
                                         // On symmetry plane: keep x delta 0 to stay centered
                                         continue;
                                     }
-                                    let target_mirror = Vec3::new(-orig_pos.x, orig_pos.y, orig_pos.z);
+                                    let target_mirror =
+                                        Vec3::new(-orig_pos.x, orig_pos.y, orig_pos.z);
                                     let mut best_key = None;
                                     let mut best_dist_sq = sym_threshold * sym_threshold;
                                     for (other_vk, other_v) in &base_mesh.vertices {
                                         if other_vk == vk || moved_keys.contains(&other_vk) {
                                             continue;
                                         }
-                                        let dist_sq = (other_v.position - target_mirror).length_squared();
+                                        let dist_sq =
+                                            (other_v.position - target_mirror).length_squared();
                                         if dist_sq < best_dist_sq {
                                             best_dist_sq = dist_sq;
                                             best_key = Some(other_vk);
@@ -241,7 +258,8 @@ pub fn handle_gizmo_drag(
         }
         GizmoMode::Rotate => {
             let gizmo_orient = state.get_gizmo_orientation();
-            let mut delta_rot = TransformGizmo::calculate_rotation_delta(axis, gizmo_orient, dx, dy);
+            let mut delta_rot =
+                TransformGizmo::calculate_rotation_delta(axis, gizmo_orient, dx, dy);
             let angle_snap_active = state.snap_angle || state.ctrl_pressed || state.shift_pressed;
             if angle_snap_active {
                 let snap_deg = if state.ctrl_pressed && state.shift_pressed {
@@ -270,7 +288,9 @@ pub fn handle_gizmo_drag(
                 rot_angle.to_degrees(),
                 axis
             ));
-            if state.interaction_mode == InteractionMode::Object || state.interaction_mode == InteractionMode::Pose {
+            if state.interaction_mode == InteractionMode::Object
+                || state.interaction_mode == InteractionMode::Pose
+            {
                 if state.selected_nodes.len() > 1 {
                     let pivot = state.get_gizmo_world_position().unwrap_or(Vec3::ZERO);
                     for &nid in &state.selected_nodes {
@@ -278,12 +298,14 @@ pub fn handle_gizmo_drag(
                             let pos = node.world_matrix.transform_point3(Vec3::ZERO);
                             let new_pos = pivot + delta_rot * (pos - pivot);
                             node.local_transform.translation += new_pos - pos;
-                            node.local_transform.rotation = (delta_rot * node.local_transform.rotation).normalize();
+                            node.local_transform.rotation =
+                                (delta_rot * node.local_transform.rotation).normalize();
                             state.scene.mark_dirty(nid);
                         }
                     }
                 } else if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                    node.local_transform.rotation = (delta_rot * node.local_transform.rotation).normalize();
+                    node.local_transform.rotation =
+                        (delta_rot * node.local_transform.rotation).normalize();
                     state.scene.mark_dirty(sel_id);
                 }
             } else if let Some(node) = state.scene.nodes.get_mut(sel_id) {
@@ -321,7 +343,8 @@ pub fn handle_gizmo_drag(
                         centroid /= direct_verts.len() as f32;
 
                         let inv_rot = node.local_transform.rotation.inverse();
-                        let local_rot = (inv_rot * delta_rot * node.local_transform.rotation).normalize();
+                        let local_rot =
+                            (inv_rot * delta_rot * node.local_transform.rotation).normalize();
                         let r_prop = state.proportional_radius;
                         let use_prop = state.proportional_editing && r_prop > 1e-4;
 
@@ -359,7 +382,9 @@ pub fn handle_gizmo_drag(
                 "⤢ Scale: [{:.3}, {:.3}, {:.3}] ({:?})",
                 total_scale.x, total_scale.y, total_scale.z, axis
             ));
-            if state.interaction_mode == InteractionMode::Object || state.interaction_mode == InteractionMode::Pose {
+            if state.interaction_mode == InteractionMode::Object
+                || state.interaction_mode == InteractionMode::Pose
+            {
                 if state.selected_nodes.len() > 1 {
                     let pivot = state.get_gizmo_world_position().unwrap_or(Vec3::ZERO);
                     let scale_factor = Vec3::ONE + delta_scale;
@@ -368,12 +393,14 @@ pub fn handle_gizmo_drag(
                             let pos = node.world_matrix.transform_point3(Vec3::ZERO);
                             let new_pos = pivot + (pos - pivot) * scale_factor;
                             node.local_transform.translation += new_pos - pos;
-                            node.local_transform.scale = (node.local_transform.scale * scale_factor).max(Vec3::splat(0.01));
+                            node.local_transform.scale =
+                                (node.local_transform.scale * scale_factor).max(Vec3::splat(0.01));
                             state.scene.mark_dirty(nid);
                         }
                     }
                 } else if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                    node.local_transform.scale = (node.local_transform.scale + delta_scale).max(Vec3::splat(0.01));
+                    node.local_transform.scale =
+                        (node.local_transform.scale + delta_scale).max(Vec3::splat(0.01));
                     state.scene.mark_dirty(sel_id);
                 }
             } else if let Some(node) = state.scene.nodes.get_mut(sel_id) {

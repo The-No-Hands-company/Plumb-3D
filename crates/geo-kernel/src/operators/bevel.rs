@@ -22,7 +22,6 @@ impl Default for BevelProfile {
     }
 }
 
-
 impl Mesh {
     pub fn bevel_face(
         &mut self,
@@ -30,7 +29,10 @@ impl Mesh {
         offset: f32,
         inset: f32,
     ) -> Result<FaceKey, MeshError> {
-        let face = self.faces.get(face_key).ok_or(MeshError::InvalidFace(face_key))?;
+        let face = self
+            .faces
+            .get(face_key)
+            .ok_or(MeshError::InvalidFace(face_key))?;
         let normal = face.normal;
         let v_keys = self.face_vertices(face_key);
         let n = v_keys.len();
@@ -89,7 +91,10 @@ impl Mesh {
 
     pub fn bevel_edge(&mut self, edge_key: EdgeKey, width: f32) -> Result<FaceKey, MeshError> {
         let faces = self.bevel_edge_with_segments(edge_key, width, 1)?;
-        faces.into_iter().next().ok_or(MeshError::InvariantFailed("No bevel face created".into()))
+        faces
+            .into_iter()
+            .next()
+            .ok_or(MeshError::InvariantFailed("No bevel face created".into()))
     }
 
     /// Bevel / Chamfer an edge with multiple round segments, creating smooth curved fillets.
@@ -120,10 +125,14 @@ impl Mesh {
 
         let f1_key = self.half_edges[h1_key]
             .face
-            .ok_or(MeshError::InvariantFailed("Edge requires two faces to bevel".into()))?;
+            .ok_or(MeshError::InvariantFailed(
+                "Edge requires two faces to bevel".into(),
+            ))?;
         let f2_key = self.half_edges[h2_key]
             .face
-            .ok_or(MeshError::InvariantFailed("Edge requires two faces to bevel".into()))?;
+            .ok_or(MeshError::InvariantFailed(
+                "Edge requires two faces to bevel".into(),
+            ))?;
 
         let v0 = self.half_edges[h1_key].origin;
         let v1 = self.half_edges[h1_key].target;
@@ -225,12 +234,8 @@ impl Mesh {
         // Add the new bevel chamfer/fillet quad faces with correct 2-manifold orientation
         let mut created_faces = Vec::with_capacity(seg_count);
         for s in 0..seg_count {
-            let fk = self.add_face(&[
-                v1_strip[s],
-                v0_strip[s],
-                v0_strip[s + 1],
-                v1_strip[s + 1],
-            ])?;
+            let fk =
+                self.add_face(&[v1_strip[s], v0_strip[s], v0_strip[s + 1], v1_strip[s + 1]])?;
             created_faces.push(fk);
         }
 
@@ -276,7 +281,11 @@ impl Mesh {
                 for &he_k in &v.half_edges {
                     let he = &self.half_edges[he_k];
                     let ek = he.edge;
-                    let target_vk = if he.origin == vk { he.target } else { he.origin };
+                    let target_vk = if he.origin == vk {
+                        he.target
+                    } else {
+                        he.origin
+                    };
                     let pos_target = self.vertices[target_vk].position;
                     let edge_dir = pos_target - pos_v;
                     let edge_len = edge_dir.length();
@@ -344,7 +353,11 @@ impl Mesh {
                     }
                     centroid /= cap_vks.len() as f32;
 
-                    let arbitrary = if v_normal.y.abs() < 0.9 { Vec3::Y } else { Vec3::X };
+                    let arbitrary = if v_normal.y.abs() < 0.9 {
+                        Vec3::Y
+                    } else {
+                        Vec3::X
+                    };
                     let u_axis = v_normal.cross(arbitrary).normalize();
                     let v_axis = v_normal.cross(u_axis).normalize();
 
@@ -353,7 +366,9 @@ impl Mesh {
                         let pos_b = new_mesh.vertices[b].position - centroid;
                         let angle_a = (pos_a.dot(v_axis)).atan2(pos_a.dot(u_axis));
                         let angle_b = (pos_b.dot(v_axis)).atan2(pos_b.dot(u_axis));
-                        angle_a.partial_cmp(&angle_b).unwrap_or(std::cmp::Ordering::Equal)
+                        angle_a
+                            .partial_cmp(&angle_b)
+                            .unwrap_or(std::cmp::Ordering::Equal)
                     });
 
                     if let Ok(cap_fk) = new_mesh.add_face(&cap_vks) {
@@ -437,7 +452,9 @@ impl Mesh {
                     let v0 = self.half_edges[h1].origin;
                     let v1 = self.half_edges[h1].target;
                     if !corner_junctions.contains(&v0) && !corner_junctions.contains(&v1) {
-                        if let Ok(faces) = self.bevel_edge_with_profile(ek, width, seg_count, profile) {
+                        if let Ok(faces) =
+                            self.bevel_edge_with_profile(ek, width, seg_count, profile)
+                        {
                             created_faces.extend(faces);
                         }
                     }

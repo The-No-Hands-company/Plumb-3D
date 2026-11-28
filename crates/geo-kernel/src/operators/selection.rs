@@ -86,7 +86,10 @@ impl Mesh {
 
         impl Ord for State {
             fn cmp(&self, other: &Self) -> Ordering {
-                other.cost.partial_cmp(&self.cost).unwrap_or(Ordering::Equal)
+                other
+                    .cost
+                    .partial_cmp(&self.cost)
+                    .unwrap_or(Ordering::Equal)
             }
         }
 
@@ -101,7 +104,10 @@ impl Mesh {
         let mut heap: BinaryHeap<State> = BinaryHeap::new();
 
         dist.insert(start, 0.0);
-        heap.push(State { cost: 0.0, vertex: start });
+        heap.push(State {
+            cost: 0.0,
+            vertex: start,
+        });
 
         while let Some(State { cost, vertex }) = heap.pop() {
             if vertex == end {
@@ -129,7 +135,11 @@ impl Mesh {
 
             for &he_key in &self.vertices[vertex].half_edges {
                 let he = &self.half_edges[he_key];
-                let neighbor = if he.origin == vertex { he.target } else { he.origin };
+                let neighbor = if he.origin == vertex {
+                    he.target
+                } else {
+                    he.origin
+                };
                 if let Some(n_vert) = self.vertices.get(neighbor) {
                     let d = (n_vert.position - curr_pos).length();
                     let next_cost = cost + d;
@@ -140,7 +150,10 @@ impl Mesh {
                     if is_better {
                         dist.insert(neighbor, next_cost);
                         prev.insert(neighbor, vertex);
-                        heap.push(State { cost: next_cost, vertex: neighbor });
+                        heap.push(State {
+                            cost: next_cost,
+                            vertex: neighbor,
+                        });
                     }
                 }
             }

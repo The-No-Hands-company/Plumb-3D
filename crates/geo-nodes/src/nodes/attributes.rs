@@ -43,7 +43,11 @@ impl GeoNodeOp for CaptureAttributeNode {
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
         let mesh = match inputs.first() {
             Some(SocketValue::Geometry(Some(m))) => m.clone(),
-            _ => return Err(NodeGraphError::ExecutionError("Capture Attribute requires valid input geometry".into())),
+            _ => {
+                return Err(NodeGraphError::ExecutionError(
+                    "Capture Attribute requires valid input geometry".into(),
+                ))
+            }
         };
 
         let val = inputs.get(1).map(|s| s.as_float()).unwrap_or(1.0);
@@ -57,7 +61,8 @@ impl GeoNodeOp for CaptureAttributeNode {
             modified_mesh.vertex_groups[g_idx].set_weight(vk, val);
         }
 
-        let container = AttributeContainer::new_float(&self.attribute_name, self.domain, field_vals);
+        let container =
+            AttributeContainer::new_float(&self.attribute_name, self.domain, field_vals);
 
         Ok(vec![
             SocketValue::Geometry(Some(modified_mesh)),
@@ -103,19 +108,29 @@ impl GeoNodeOp for TransferAttributeNode {
     fn execute(&self, inputs: &[SocketValue]) -> Result<Vec<SocketValue>, NodeGraphError> {
         let mut target_mesh = match inputs.first() {
             Some(SocketValue::Geometry(Some(m))) => m.clone(),
-            _ => return Err(NodeGraphError::ExecutionError("Target geometry required for attribute transfer".into())),
+            _ => {
+                return Err(NodeGraphError::ExecutionError(
+                    "Target geometry required for attribute transfer".into(),
+                ))
+            }
         };
 
         let source_mesh = match inputs.get(1) {
             Some(SocketValue::Geometry(Some(m))) => m,
-            _ => return Err(NodeGraphError::ExecutionError("Source geometry required for attribute transfer".into())),
+            _ => {
+                return Err(NodeGraphError::ExecutionError(
+                    "Source geometry required for attribute transfer".into(),
+                ))
+            }
         };
 
         let source_field = inputs.get(2).and_then(|s| s.as_field());
 
         // For each vertex in target mesh, find closest vertex in source mesh and transfer value
         let mut transferred_floats = Vec::with_capacity(target_mesh.vertices.len());
-        let g_name = source_field.map(|f| f.name.as_str()).unwrap_or("Transferred");
+        let g_name = source_field
+            .map(|f| f.name.as_str())
+            .unwrap_or("Transferred");
         let g_idx = target_mesh.add_vertex_group(g_name);
 
         for (tgt_vk, tgt_v) in &target_mesh.vertices {
@@ -130,12 +145,15 @@ impl GeoNodeOp for TransferAttributeNode {
                 }
             }
 
-            let val = source_field.and_then(|f| f.get_float(nearest_idx)).unwrap_or(0.0);
+            let val = source_field
+                .and_then(|f| f.get_float(nearest_idx))
+                .unwrap_or(0.0);
             target_mesh.vertex_groups[g_idx].set_weight(tgt_vk, val);
             transferred_floats.push(val);
         }
 
-        let container = AttributeContainer::new_float(g_name, AttributeDomain::Vertex, transferred_floats);
+        let container =
+            AttributeContainer::new_float(g_name, AttributeDomain::Vertex, transferred_floats);
 
         Ok(vec![
             SocketValue::Geometry(Some(target_mesh)),

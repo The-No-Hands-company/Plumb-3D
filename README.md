@@ -9,7 +9,7 @@
 [![CI/CD Build & Test](https://github.com/The-No-Hands-company/Plumb-3D/actions/workflows/ci.yml/badge.svg)](https://github.com/The-No-Hands-company/Plumb-3D/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Pure Safe Rust](https://img.shields.io/badge/Rust-100%25%20Safe-brightgreen.svg)](#architectural-compliance--quality-standards)
-[![Tests Passing](https://img.shields.io/badge/Tests-281%20Passed-success.svg)](#architectural-compliance--quality-standards)
+[![Tests Passing](https://img.shields.io/badge/Tests-330%20Passed-success.svg)](#architectural-compliance--quality-standards)
 [![Zero Clippy Warnings](https://img.shields.io/badge/Clippy-0%20Warnings-success.svg)](#architectural-compliance--quality-standards)
 
 </div>
@@ -243,6 +243,25 @@ cargo run -p app --release
 | | `F12` | Production Path Tracer window |
 | | `Ctrl + Z` / `Ctrl + Y` | Transactional Undo / Redo |
 | | `Ctrl + S` | Save `.plmb` Project |
+
+---
+
+## Product Scope & Release Roadmap
+
+Plumb 3D enforces a strict separation of concerns across major product generations. **Version 1.x is strictly The Modeler**, maintaining laser focus on pure modeling speed, CAD precision, and rock-solid geometry:
+
+- **v1.0.0 (Frozen Commercial Release)**: Best-in-class Polygonal & CAD Modeler. 2-manifold BMesh kernel, 16 live modifiers, CAD splines, UV unwrapping, native `.plmb` container, 5 semantic design-token themes, arbitrary docking (`egui_dock`), and 3 in-viewport interactive walkthroughs.
+- **v1.1.0 (Upcoming)**: *Precision CAD & Curve Drafting* — 2D constraint sketcher on workplanes, live parametric dimension callouts, and multi-rail curve lofts.
+- **v1.2.0**: *Modifier Mastery* — Lattice FFD deform, simple deform suite (bend, twist, taper, stretch), and weighted normals.
+- **v1.3.0**: *Hard-Surface Booleans 2.0* — Live interactive cutter gizmo, ghost cutters, and QuadriFlow guide curves.
+- **v1.4.0**: *UV Unwrapping & Print Prep* — LSCM conformal unwrapping, automatic island packing, and 3D print overhang heatmaps.
+- **v1.5.0**: *Plugin SDK & Ecosystem* — C-ABI and WebAssembly (WASM) dynamic plugin loaders and customizable radial pie menus.
+
+### Long-Term Generational Roadmap
+- **Plumb 3D v2.0: The Animator** — Armature skeletal hierarchies, 2-Bone/CCD IK solvers, weight painting, NLA clip mixing, dope sheet, and direct MP4/H.264 video container export.
+- **Plumb 3D v3.0: The Renderer** — Full procedural material shading DAG node network (OpenPBR standard) and hardware GPU ray tracing pipeline (Vulkan RT / DXR).
+- **Plumb 3D v4.0: The Simulator** — XPBD cloth & soft-body tearing, rigid-body fracturing, and FLIP liquid solvers.
+- **Plumb 3D v5.0: The Studio Suite** — Pixar OpenUSD Stage referencing, Alembic point cache streaming, and multi-user collaborative networking.
 
 ---
 

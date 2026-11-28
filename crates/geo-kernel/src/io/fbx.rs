@@ -47,7 +47,10 @@ impl Mesh {
         let num_vertices = ordered_positions.len();
 
         out.push_str("Objects:  {\n");
-        out.push_str(&format!("    Geometry: 1000000, \"Geometry::{}\", \"Mesh\" {{\n", clean_name));
+        out.push_str(&format!(
+            "    Geometry: 1000000, \"Geometry::{}\", \"Mesh\" {{\n",
+            clean_name
+        ));
 
         // 3. Vertices (flattened XYZ coordinates)
         out.push_str(&format!("        Vertices: *{} {{\n", num_vertices * 3));
@@ -89,7 +92,10 @@ impl Mesh {
             }
         }
 
-        out.push_str(&format!("        PolygonVertexIndex: *{} {{\n", fbx_indices.len()));
+        out.push_str(&format!(
+            "        PolygonVertexIndex: *{} {{\n",
+            fbx_indices.len()
+        ));
         out.push_str("            a: ");
         for (i, idx) in fbx_indices.iter().enumerate() {
             if i > 0 {
@@ -105,7 +111,10 @@ impl Mesh {
         out.push_str("            Name: \"\"\n");
         out.push_str("            MappingInformationType: \"ByPolygonVertex\"\n");
         out.push_str("            ReferenceInformationType: \"Direct\"\n");
-        out.push_str(&format!("            Normals: *{} {{\n", poly_normals.len() * 3));
+        out.push_str(&format!(
+            "            Normals: *{} {{\n",
+            poly_normals.len() * 3
+        ));
         out.push_str("                a: ");
         for (i, n) in poly_normals.iter().enumerate() {
             if i > 0 {
@@ -132,15 +141,22 @@ impl Mesh {
         out.push_str("\n            }\n        }\n");
 
         out.push_str("    }\n");
-        out.push_str(&format!("    Model: 2000000, \"Model::{}\", \"Mesh\" {{\n", clean_name));
+        out.push_str(&format!(
+            "    Model: 2000000, \"Model::{}\", \"Mesh\" {{\n",
+            clean_name
+        ));
         out.push_str("        Version: 232\n");
         out.push_str("    }\n");
         out.push_str("}\n\n");
 
         // 7. Connections
         out.push_str("Connections:  {\n");
-        out.push_str(&format!("    ; Model to Geometry\n    C: \"OO\",1000000,2000000\n"));
-        out.push_str(&format!("    ; Model to Scene Root\n    C: \"OO\",2000000,0\n"));
+        out.push_str(&format!(
+            "    ; Model to Geometry\n    C: \"OO\",1000000,2000000\n"
+        ));
+        out.push_str(&format!(
+            "    ; Model to Scene Root\n    C: \"OO\",2000000,0\n"
+        ));
         out.push_str("}\n");
 
         out
@@ -151,15 +167,27 @@ impl Mesh {
         let mut mesh = Mesh::new();
 
         // 1. Locate Vertices: *N { a: ... } block
-        let vertices_block = extract_fbx_array(fbx_str, "Vertices:")
-            .ok_or_else(|| "FBX Import error: missing 'Vertices:' block in FBX stream".to_string())?;
+        let vertices_block = extract_fbx_array(fbx_str, "Vertices:").ok_or_else(|| {
+            "FBX Import error: missing 'Vertices:' block in FBX stream".to_string()
+        })?;
 
         let mut positions = Vec::new();
         let mut pos_chunks = vertices_block.split(',');
-        while let (Some(x_s), Some(y_s), Some(z_s)) = (pos_chunks.next(), pos_chunks.next(), pos_chunks.next()) {
-            let x: f32 = x_s.trim().parse().map_err(|e| format!("Invalid vertex X: {}", e))?;
-            let y: f32 = y_s.trim().parse().map_err(|e| format!("Invalid vertex Y: {}", e))?;
-            let z: f32 = z_s.trim().parse().map_err(|e| format!("Invalid vertex Z: {}", e))?;
+        while let (Some(x_s), Some(y_s), Some(z_s)) =
+            (pos_chunks.next(), pos_chunks.next(), pos_chunks.next())
+        {
+            let x: f32 = x_s
+                .trim()
+                .parse()
+                .map_err(|e| format!("Invalid vertex X: {}", e))?;
+            let y: f32 = y_s
+                .trim()
+                .parse()
+                .map_err(|e| format!("Invalid vertex Y: {}", e))?;
+            let z: f32 = z_s
+                .trim()
+                .parse()
+                .map_err(|e| format!("Invalid vertex Z: {}", e))?;
             positions.push(vec3(x, y, z));
         }
 
@@ -184,7 +212,9 @@ impl Mesh {
             if trimmed.is_empty() {
                 continue;
             }
-            let raw_idx: i32 = trimmed.parse().map_err(|e| format!("Invalid polygon index '{}': {}", trimmed, e))?;
+            let raw_idx: i32 = trimmed
+                .parse()
+                .map_err(|e| format!("Invalid polygon index '{}': {}", trimmed, e))?;
 
             if raw_idx < 0 {
                 // Negative index signals end of polygon: real_index = -raw_idx - 1
@@ -256,7 +286,10 @@ mod tests {
         let fbx_text = original.export_fbx_ascii("TestQuad");
         assert!(fbx_text.contains("FBXHeaderVersion: 1003"));
         assert!(fbx_text.contains("PolygonVertexIndex: *4"));
-        assert!(fbx_text.contains("-4"), "Last index of 0..3 quad should be -(3) - 1 = -4");
+        assert!(
+            fbx_text.contains("-4"),
+            "Last index of 0..3 quad should be -(3) - 1 = -4"
+        );
 
         let imported = Mesh::import_fbx_ascii(&fbx_text).expect("FBX parsing should succeed");
         assert_eq!(imported.vertices.len(), 4);

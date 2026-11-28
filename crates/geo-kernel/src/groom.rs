@@ -166,7 +166,11 @@ impl GroomSystem {
             }
 
             let n = guide.root_normal;
-            let arbitrary = if n.y.abs() < 0.9 { vec3(0.0, 1.0, 0.0) } else { vec3(1.0, 0.0, 0.0) };
+            let arbitrary = if n.y.abs() < 0.9 {
+                vec3(0.0, 1.0, 0.0)
+            } else {
+                vec3(1.0, 0.0, 0.0)
+            };
             let t = n.cross(arbitrary).normalize();
             let b = n.cross(t).normalize();
 
@@ -185,7 +189,9 @@ impl GroomSystem {
                     // Add natural procedural curl
                     if settings.curl_radius > 1e-4 {
                         let curl_phase = progress * settings.curl_frequency * 2.0 * PI;
-                        let curl_offset = (t * curl_phase.cos() + b * curl_phase.sin()) * settings.curl_radius * progress;
+                        let curl_offset = (t * curl_phase.cos() + b * curl_phase.sin())
+                            * settings.curl_radius
+                            * progress;
                         pt += curl_offset;
                     }
 
@@ -220,7 +226,8 @@ impl GroomSystem {
             for i in 0..count {
                 let p = strand.points[i];
                 let progress = i as f32 / (count - 1) as f32;
-                let thickness = strand.base_thickness + (strand.tip_thickness - strand.base_thickness) * progress;
+                let thickness = strand.base_thickness
+                    + (strand.tip_thickness - strand.base_thickness) * progress;
 
                 // Tangent vector
                 let dir = if i + 1 < count {

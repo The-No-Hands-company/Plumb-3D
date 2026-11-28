@@ -111,7 +111,11 @@ impl ViewportRenderer {
             &queue,
             &wgpu::TextureDescriptor {
                 label: Some("Default Albedo Texture"),
-                size: wgpu::Extent3d { width: 1, height: 1, depth_or_array_layers: 1 },
+                size: wgpu::Extent3d {
+                    width: 1,
+                    height: 1,
+                    depth_or_array_layers: 1,
+                },
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
@@ -128,7 +132,11 @@ impl ViewportRenderer {
             &queue,
             &wgpu::TextureDescriptor {
                 label: Some("Default Normal Texture"),
-                size: wgpu::Extent3d { width: 1, height: 1, depth_or_array_layers: 1 },
+                size: wgpu::Extent3d {
+                    width: 1,
+                    height: 1,
+                    depth_or_array_layers: 1,
+                },
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
@@ -145,7 +153,11 @@ impl ViewportRenderer {
             &queue,
             &wgpu::TextureDescriptor {
                 label: Some("Default Roughness Metallic Texture"),
-                size: wgpu::Extent3d { width: 1, height: 1, depth_or_array_layers: 1 },
+                size: wgpu::Extent3d {
+                    width: 1,
+                    height: 1,
+                    depth_or_array_layers: 1,
+                },
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
@@ -224,24 +236,29 @@ impl ViewportRenderer {
 
     /// Upload a CPU RenderMesh into GPU buffers
     pub fn upload_mesh(&self, render_mesh: &RenderMesh) -> GpuMesh {
-        let vertex_buffer = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Mesh Vertex Buffer"),
-            contents: bytemuck::cast_slice(&render_mesh.vertices),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
+        let vertex_buffer = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Mesh Vertex Buffer"),
+                contents: bytemuck::cast_slice(&render_mesh.vertices),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
 
-        let index_buffer = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Mesh Index Buffer"),
-            contents: bytemuck::cast_slice(&render_mesh.indices),
-            usage: wgpu::BufferUsages::INDEX,
-        });
-
-        let wireframe_index_buffer =
-            self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Wireframe Index Buffer"),
-                contents: bytemuck::cast_slice(&render_mesh.wireframe_indices),
+        let index_buffer = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Mesh Index Buffer"),
+                contents: bytemuck::cast_slice(&render_mesh.indices),
                 usage: wgpu::BufferUsages::INDEX,
             });
+
+        let wireframe_index_buffer =
+            self.device
+                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("Wireframe Index Buffer"),
+                    contents: bytemuck::cast_slice(&render_mesh.wireframe_indices),
+                    usage: wgpu::BufferUsages::INDEX,
+                });
 
         GpuMesh {
             vertex_buffer,
@@ -271,7 +288,10 @@ impl ViewportRenderer {
         let sun_dir = lights
             .iter()
             .find(|l| l.position[3] == 0.0 && l.spot_params[2] > 0.0)
-            .map(|l| core_math::Vec3::new(l.direction[0], l.direction[1], l.direction[2]).normalize_or_zero())
+            .map(|l| {
+                core_math::Vec3::new(l.direction[0], l.direction[1], l.direction[2])
+                    .normalize_or_zero()
+            })
             .filter(|d| d.length_squared() > 0.1)
             .map(|d| if d.y > 0.0 { d } else { -d })
             .unwrap_or_else(|| core_math::Vec3::new(0.577, 0.707, 0.408).normalize());
@@ -298,7 +318,8 @@ impl ViewportRenderer {
             light_view_proj: light_view_proj.to_cols_array(),
             inv_view_proj: inv_vp.to_cols_array(),
         };
-        self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::bytes_of(&camera_data));
+        self.queue
+            .write_buffer(&self.camera_buffer, 0, bytemuck::bytes_of(&camera_data));
 
         // Update lights uniform
         let mut lights_data = LightsUniform::default();
@@ -307,11 +328,14 @@ impl ViewportRenderer {
         for (i, &l) in lights.iter().take(MAX_SCENE_LIGHTS).enumerate() {
             lights_data.lights[i] = l;
         }
-        self.queue.write_buffer(&self.lights_buffer, 0, bytemuck::bytes_of(&lights_data));
+        self.queue
+            .write_buffer(&self.lights_buffer, 0, bytemuck::bytes_of(&lights_data));
 
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("Viewport Render Encoder"),
-        });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Viewport Render Encoder"),
+            });
 
         // 1. Directional Shadow Pass (depth-only)
         {
@@ -339,23 +363,24 @@ impl ViewportRenderer {
                     material: item.material,
                 };
                 let model_buffer =
-                    self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                        label: Some("Shadow Model Buffer"),
-                        contents: bytemuck::bytes_of(&model_data),
-                        usage: wgpu::BufferUsages::UNIFORM,
-                    });
-                let model_bind_group =
-                    self.device.create_bind_group(&wgpu::BindGroupDescriptor {
-                        label: Some("Shadow Model Bind Group"),
-                        layout: &self.model_bind_group_layout,
-                        entries: &[wgpu::BindGroupEntry {
-                            binding: 0,
-                            resource: model_buffer.as_entire_binding(),
-                        }],
-                    });
+                    self.device
+                        .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                            label: Some("Shadow Model Buffer"),
+                            contents: bytemuck::bytes_of(&model_data),
+                            usage: wgpu::BufferUsages::UNIFORM,
+                        });
+                let model_bind_group = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                    label: Some("Shadow Model Bind Group"),
+                    layout: &self.model_bind_group_layout,
+                    entries: &[wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: model_buffer.as_entire_binding(),
+                    }],
+                });
                 shadow_pass.set_bind_group(1, &model_bind_group, &[]);
                 shadow_pass.set_vertex_buffer(0, item.mesh.vertex_buffer.slice(..));
-                shadow_pass.set_index_buffer(item.mesh.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
+                shadow_pass
+                    .set_index_buffer(item.mesh.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
                 shadow_pass.draw_indexed(0..item.mesh.index_count, 0, 0..1);
             }
         }
@@ -406,7 +431,9 @@ impl ViewportRenderer {
                 pass.set_pipeline(&self.mesh_pipeline);
                 pass.set_bind_group(0, &self.camera_bind_group, &[]);
                 pass.set_bind_group(2, &self.lights_bind_group, &[]);
-                let tex_bg = item.texture_bind_group.unwrap_or(&self.default_texture_bind_group);
+                let tex_bg = item
+                    .texture_bind_group
+                    .unwrap_or(&self.default_texture_bind_group);
                 pass.set_bind_group(3, tex_bg, &[]);
                 pass.set_vertex_buffer(0, mesh.vertex_buffer.slice(..));
                 pass.set_index_buffer(mesh.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
@@ -428,11 +455,12 @@ impl ViewportRenderer {
                             material: sm.material,
                         };
                         let model_buffer =
-                            self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                                label: Some("Temp SubMesh Model Buffer"),
-                                contents: bytemuck::bytes_of(&model_data),
-                                usage: wgpu::BufferUsages::UNIFORM,
-                            });
+                            self.device
+                                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                                    label: Some("Temp SubMesh Model Buffer"),
+                                    contents: bytemuck::bytes_of(&model_data),
+                                    usage: wgpu::BufferUsages::UNIFORM,
+                                });
                         let model_bind_group =
                             self.device.create_bind_group(&wgpu::BindGroupDescriptor {
                                 label: Some("Temp SubMesh Model Bind Group"),
@@ -456,11 +484,12 @@ impl ViewportRenderer {
                         material: item.material,
                     };
                     let model_buffer =
-                        self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                            label: Some("Temp Model Buffer"),
-                            contents: bytemuck::bytes_of(&model_data),
-                            usage: wgpu::BufferUsages::UNIFORM,
-                        });
+                        self.device
+                            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                                label: Some("Temp Model Buffer"),
+                                contents: bytemuck::bytes_of(&model_data),
+                                usage: wgpu::BufferUsages::UNIFORM,
+                            });
                     let model_bind_group =
                         self.device.create_bind_group(&wgpu::BindGroupDescriptor {
                             label: Some("Temp Model Bind Group"),
@@ -482,11 +511,12 @@ impl ViewportRenderer {
                         material: [0.0, 1.0, 0.0, 0.0],
                     };
                     let wire_buffer =
-                        self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                            label: Some("Wireframe Model Buffer"),
-                            contents: bytemuck::bytes_of(&wire_data),
-                            usage: wgpu::BufferUsages::UNIFORM,
-                        });
+                        self.device
+                            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                                label: Some("Wireframe Model Buffer"),
+                                contents: bytemuck::bytes_of(&wire_data),
+                                usage: wgpu::BufferUsages::UNIFORM,
+                            });
                     let wire_bind_group =
                         self.device.create_bind_group(&wgpu::BindGroupDescriptor {
                             label: Some("Wireframe Model Bind Group"),

@@ -56,7 +56,10 @@ impl Mesh {
         combined_buffer.extend_from_slice(&index_bytes);
 
         let total_bytes = combined_buffer.len();
-        let base64_uri = format!("data:application/octet-stream;base64,{}", base64_encode(&combined_buffer));
+        let base64_uri = format!(
+            "data:application/octet-stream;base64,{}",
+            base64_encode(&combined_buffer)
+        );
 
         format!(
             r#"{{
@@ -229,10 +232,9 @@ impl Mesh {
         }
         let prim = &primitives[0];
 
-        let pos_acc_idx = prim["attributes"]["POSITION"]
-            .as_u64()
-            .ok_or_else(|| MeshError::InvariantFailed("Missing POSITION attribute in glTF".into()))?
-            as usize;
+        let pos_acc_idx = prim["attributes"]["POSITION"].as_u64().ok_or_else(|| {
+            MeshError::InvariantFailed("Missing POSITION attribute in glTF".into())
+        })? as usize;
         let pos_acc = &accessors[pos_acc_idx];
         let pos_count = pos_acc["count"].as_u64().unwrap_or(0) as usize;
         let pos_bv_idx = pos_acc["bufferView"].as_u64().unwrap_or(0) as usize;
@@ -247,8 +249,10 @@ impl Mesh {
             let offset = pos_start + i * 12;
             if offset + 12 <= buffer_bytes.len() {
                 let x = f32::from_le_bytes(buffer_bytes[offset..offset + 4].try_into().unwrap());
-                let y = f32::from_le_bytes(buffer_bytes[offset + 4..offset + 8].try_into().unwrap());
-                let z = f32::from_le_bytes(buffer_bytes[offset + 8..offset + 12].try_into().unwrap());
+                let y =
+                    f32::from_le_bytes(buffer_bytes[offset + 4..offset + 8].try_into().unwrap());
+                let z =
+                    f32::from_le_bytes(buffer_bytes[offset + 8..offset + 12].try_into().unwrap());
                 positions.push(vec3(x, y, z));
             }
         }
@@ -265,8 +269,11 @@ impl Mesh {
             for i in 0..count.min(pos_count) {
                 let offset = uv_start + i * 8;
                 if offset + 8 <= buffer_bytes.len() {
-                    let u = f32::from_le_bytes(buffer_bytes[offset..offset + 4].try_into().unwrap());
-                    let v = f32::from_le_bytes(buffer_bytes[offset + 4..offset + 8].try_into().unwrap());
+                    let u =
+                        f32::from_le_bytes(buffer_bytes[offset..offset + 4].try_into().unwrap());
+                    let v = f32::from_le_bytes(
+                        buffer_bytes[offset + 4..offset + 8].try_into().unwrap(),
+                    );
                     uvs[i] = core_math::vec2(u, v);
                 }
             }

@@ -14,7 +14,9 @@ impl Mesh {
         out.push_str(&format!("element vertex {}\n", num_verts));
         out.push_str("property float x\nproperty float y\nproperty float z\n");
         out.push_str("property float nx\nproperty float ny\nproperty float nz\n");
-        out.push_str("property uchar red\nproperty uchar green\nproperty uchar blue\nproperty uchar alpha\n");
+        out.push_str(
+            "property uchar red\nproperty uchar green\nproperty uchar blue\nproperty uchar alpha\n",
+        );
         out.push_str(&format!("element face {}\n", num_faces));
         out.push_str("property list uchar int vertex_indices\nend_header\n");
 
@@ -28,9 +30,16 @@ impl Mesh {
 
             out.push_str(&format!(
                 "{:.6} {:.6} {:.6} {:.6} {:.6} {:.6} {} {} {} {}\n",
-                v.position.x, v.position.y, v.position.z,
-                v.normal.x, v.normal.y, v.normal.z,
-                r, g, b, a
+                v.position.x,
+                v.position.y,
+                v.position.z,
+                v.normal.x,
+                v.normal.y,
+                v.normal.z,
+                r,
+                g,
+                b,
+                a
             ));
         }
 
@@ -96,7 +105,9 @@ impl Mesh {
     /// Import a Stanford PLY file (auto-detects ASCII vs Binary Little-Endian)
     pub fn from_ply(data: &[u8]) -> Result<Self, MeshError> {
         if !data.starts_with(b"ply") {
-            return Err(MeshError::InvariantFailed("Missing 'ply' magic header".into()));
+            return Err(MeshError::InvariantFailed(
+                "Missing 'ply' magic header".into(),
+            ));
         }
 
         // Find end_header
@@ -109,15 +120,19 @@ impl Mesh {
         }
 
         if header_end == 0 {
-            return Err(MeshError::InvariantFailed("Missing 'end_header' in PLY".into()));
+            return Err(MeshError::InvariantFailed(
+                "Missing 'end_header' in PLY".into(),
+            ));
         }
 
-        let header_str = std::str::from_utf8(&data[..header_end])
-            .map_err(|e| MeshError::InvariantFailed(format!("Invalid UTF-8 in PLY header: {}", e)))?;
+        let header_str = std::str::from_utf8(&data[..header_end]).map_err(|e| {
+            MeshError::InvariantFailed(format!("Invalid UTF-8 in PLY header: {}", e))
+        })?;
 
         if header_str.contains("format ascii") {
-            let full_text = std::str::from_utf8(data)
-                .map_err(|e| MeshError::InvariantFailed(format!("Invalid UTF-8 in ASCII PLY: {}", e)))?;
+            let full_text = std::str::from_utf8(data).map_err(|e| {
+                MeshError::InvariantFailed(format!("Invalid UTF-8 in ASCII PLY: {}", e))
+            })?;
             Self::from_ply_ascii(full_text)
         } else {
             Self::from_ply_binary_with_header(data, header_str, header_end)
@@ -134,9 +149,17 @@ impl Mesh {
         for line in lines.by_ref() {
             let line = line.trim();
             if line.starts_with("element vertex") {
-                num_verts = line.split_whitespace().nth(2).and_then(|s| s.parse().ok()).unwrap_or(0);
+                num_verts = line
+                    .split_whitespace()
+                    .nth(2)
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(0);
             } else if line.starts_with("element face") {
-                num_faces = line.split_whitespace().nth(2).and_then(|s| s.parse().ok()).unwrap_or(0);
+                num_faces = line
+                    .split_whitespace()
+                    .nth(2)
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(0);
             } else if line == "end_header" {
                 in_header = false;
                 break;
@@ -193,16 +216,28 @@ impl Mesh {
     }
 
     /// Parse a Binary Little-Endian Stanford PLY buffer into a 2-manifold Half-Edge Mesh
-    pub fn from_ply_binary_with_header(bytes: &[u8], header_str: &str, header_end: usize) -> Result<Self, MeshError> {
+    pub fn from_ply_binary_with_header(
+        bytes: &[u8],
+        header_str: &str,
+        header_end: usize,
+    ) -> Result<Self, MeshError> {
         let mut num_verts = 0;
         let mut num_faces = 0;
 
         for line in header_str.lines() {
             let line = line.trim();
             if line.starts_with("element vertex") {
-                num_verts = line.split_whitespace().nth(2).and_then(|s| s.parse().ok()).unwrap_or(0);
+                num_verts = line
+                    .split_whitespace()
+                    .nth(2)
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(0);
             } else if line.starts_with("element face") {
-                num_faces = line.split_whitespace().nth(2).and_then(|s| s.parse().ok()).unwrap_or(0);
+                num_faces = line
+                    .split_whitespace()
+                    .nth(2)
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(0);
             }
         }
 
@@ -229,7 +264,8 @@ impl Mesh {
                 let mut face_vks = Vec::with_capacity(count);
                 for _ in 0..count {
                     if offset + 4 <= bytes.len() {
-                        let idx = i32::from_le_bytes(bytes[offset..offset + 4].try_into().unwrap()) as usize;
+                        let idx = i32::from_le_bytes(bytes[offset..offset + 4].try_into().unwrap())
+                            as usize;
                         offset += 4;
                         if idx < v_keys.len() {
                             face_vks.push(v_keys[idx]);

@@ -39,7 +39,11 @@ pub struct LatticeModifier {
 
 impl LatticeModifier {
     pub fn new(resolution: (usize, usize, usize), bbox_min: Vec3, bbox_max: Vec3) -> Self {
-        let (rx, ry, rz) = (resolution.0.max(2), resolution.1.max(2), resolution.2.max(2));
+        let (rx, ry, rz) = (
+            resolution.0.max(2),
+            resolution.1.max(2),
+            resolution.2.max(2),
+        );
         let mut control_points = Vec::with_capacity(rx * ry * rz);
         let extent = bbox_max - bbox_min;
 
@@ -118,15 +122,34 @@ impl Modifier for LatticeModifier {
     fn apply(&self, input: &Mesh) -> Result<Mesh, MeshError> {
         let mut output = input.clone();
         let (rx, ry, rz) = self.resolution;
-        let (deg_x, deg_y, deg_z) = (rx.saturating_sub(1), ry.saturating_sub(1), rz.saturating_sub(1));
+        let (deg_x, deg_y, deg_z) = (
+            rx.saturating_sub(1),
+            ry.saturating_sub(1),
+            rz.saturating_sub(1),
+        );
         let extent = self.bbox_max - self.bbox_min;
         let inv_extent = Vec3::new(
-            if extent.x.abs() > 1e-5 { 1.0 / extent.x } else { 1.0 },
-            if extent.y.abs() > 1e-5 { 1.0 / extent.y } else { 1.0 },
-            if extent.z.abs() > 1e-5 { 1.0 / extent.z } else { 1.0 },
+            if extent.x.abs() > 1e-5 {
+                1.0 / extent.x
+            } else {
+                1.0
+            },
+            if extent.y.abs() > 1e-5 {
+                1.0 / extent.y
+            } else {
+                1.0
+            },
+            if extent.z.abs() > 1e-5 {
+                1.0 / extent.z
+            } else {
+                1.0
+            },
         );
 
-        let vg = self.vertex_group.as_ref().and_then(|name| input.get_vertex_group(name));
+        let vg = self
+            .vertex_group
+            .as_ref()
+            .and_then(|name| input.get_vertex_group(name));
 
         for (vk, v) in &mut output.vertices {
             let s = ((v.position.x - self.bbox_min.x) * inv_extent.x).clamp(0.0, 1.0);

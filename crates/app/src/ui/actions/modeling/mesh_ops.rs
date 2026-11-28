@@ -136,7 +136,12 @@ pub fn handle_mesh_ops_actions(state: &mut AppState, actions: &mut UiActions) {
     if actions.trigger_auto_smooth {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     base_mesh.auto_smooth_normals(state.auto_smooth_angle_degrees.to_radians());
                     *cached_render_mesh = None;
                     state.scene.mark_dirty(sel_id);
@@ -284,7 +289,8 @@ pub fn handle_mesh_ops_actions(state: &mut AppState, actions: &mut UiActions) {
     if actions.trigger_shortest_path {
         if let Some(sel_id) = state.selected_node {
             if state.selected_vertices.len() >= 2 {
-                let verts: Vec<VertexKey> = state.selected_vertices.iter().copied().take(2).collect();
+                let verts: Vec<VertexKey> =
+                    state.selected_vertices.iter().copied().take(2).collect();
                 let start = verts[0];
                 let end = verts[1];
                 if let Some(node) = state.scene.nodes.get(sel_id) {
@@ -371,7 +377,12 @@ pub fn handle_mesh_ops_actions(state: &mut AppState, actions: &mut UiActions) {
     if actions.trigger_invert_sculpt_mask {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     base_mesh.invert_sculpt_mask();
                     *cached_render_mesh = None;
                     state.scene.mark_dirty(sel_id);
@@ -383,7 +394,12 @@ pub fn handle_mesh_ops_actions(state: &mut AppState, actions: &mut UiActions) {
     if actions.trigger_clear_sculpt_mask {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     base_mesh.clear_sculpt_mask();
                     *cached_render_mesh = None;
                     state.scene.mark_dirty(sel_id);
@@ -395,7 +411,12 @@ pub fn handle_mesh_ops_actions(state: &mut AppState, actions: &mut UiActions) {
     if actions.trigger_smooth_sculpt_mask {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     base_mesh.smooth_sculpt_mask(0.5);
                     *cached_render_mesh = None;
                     state.scene.mark_dirty(sel_id);

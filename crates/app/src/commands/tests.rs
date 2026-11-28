@@ -67,7 +67,6 @@ fn test_set_edge_crease_command_execute_undo_redo() {
     }
 }
 
-
 #[test]
 fn test_mark_sharp_command_execute_undo() {
     let (mut scene, node_id) = create_test_scene();
@@ -105,7 +104,6 @@ fn test_mark_sharp_command_execute_undo() {
     }
 }
 
-
 #[test]
 fn test_extrude_command_undo_redo() {
     let (mut scene, node_id) = create_test_scene();
@@ -139,7 +137,6 @@ fn test_extrude_command_undo_redo() {
         }
     }
 }
-
 
 #[test]
 fn test_set_vertex_crease_command_execute_undo_redo() {
@@ -197,7 +194,6 @@ fn test_set_vertex_crease_command_execute_undo_redo() {
     }
 }
 
-
 #[test]
 fn test_inset_command_individual_and_region() {
     let (mut scene, node_id) = create_test_scene();
@@ -237,7 +233,6 @@ fn test_inset_command_individual_and_region() {
         }
     }
 }
-
 
 #[test]
 fn test_group_nodes_command_execute_and_undo() {
@@ -340,7 +335,15 @@ fn test_camera_spawn_and_view_matrix() {
 
     let retrieved = scene.nodes.get(cam_id).expect("Camera node must exist");
     assert_eq!(retrieved.name, "SceneCamera");
-    if let NodeData::Camera { fov_y_radians, z_near, z_far, aspect_ratio, orthographic, .. } = &retrieved.data {
+    if let NodeData::Camera {
+        fov_y_radians,
+        z_near,
+        z_far,
+        aspect_ratio,
+        orthographic,
+        ..
+    } = &retrieved.data
+    {
         assert!(!orthographic);
         assert!((fov_y_radians - std::f32::consts::FRAC_PI_4).abs() < 1e-4);
         assert!((z_near - 0.1).abs() < 1e-4);
@@ -350,7 +353,6 @@ fn test_camera_spawn_and_view_matrix() {
         panic!("Node should be a Camera");
     }
 }
-
 
 #[test]
 fn test_flip_and_recalculate_normals_commands() {
@@ -465,7 +467,9 @@ fn test_bridge_edge_loops_command_execution_and_undo() {
         1, // 1 intermediate cut -> 2 rings of 4 quads = 8 quads
     );
 
-    bridge_cmd.execute(&mut scene).expect("Bridge command should execute");
+    bridge_cmd
+        .execute(&mut scene)
+        .expect("Bridge command should execute");
     {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -473,7 +477,9 @@ fn test_bridge_edge_loops_command_execution_and_undo() {
         }
     }
 
-    bridge_cmd.undo(&mut scene).expect("Bridge command should undo");
+    bridge_cmd
+        .undo(&mut scene)
+        .expect("Bridge command should undo");
     {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -553,7 +559,11 @@ fn test_delete_faces_command_and_undo() {
     let cube = Primitives::create_cube(2.0);
     assert_eq!(cube.faces.len(), 6);
 
-    let node_id = scene.add_node(SceneNode::new_mesh("TestCube", core_math::Transform::IDENTITY, cube));
+    let node_id = scene.add_node(SceneNode::new_mesh(
+        "TestCube",
+        core_math::Transform::IDENTITY,
+        cube,
+    ));
     let face_to_delete = {
         let node = scene.nodes.get(node_id).unwrap();
         if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -594,6 +604,3 @@ fn test_delete_faces_command_and_undo() {
     };
     assert_eq!(count_undone, 6);
 }
-
-
-

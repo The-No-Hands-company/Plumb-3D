@@ -54,12 +54,20 @@ impl CableGenerator {
                 (spine_points[i + 1] - spine_points[i - 1]).normalize_or_zero()
             };
 
-            let up = if tangent.y.abs() < 0.9 { Vec3::Y } else { Vec3::Z };
+            let up = if tangent.y.abs() < 0.9 {
+                Vec3::Y
+            } else {
+                Vec3::Z
+            };
             let binormal = tangent.cross(up).normalize_or_zero();
             let normal = binormal.cross(tangent).normalize_or_zero();
 
             // Slight corrugated rib oscillation for braided industrial texture
-            let rib_mod = if i % 2 == 1 && i > 0 && i < segs { 1.08 } else { 1.0 };
+            let rib_mod = if i % 2 == 1 && i > 0 && i < segs {
+                1.08
+            } else {
+                1.0
+            };
             let cur_r = r * rib_mod;
 
             let mut ring = Vec::with_capacity(radial);
@@ -92,8 +100,20 @@ impl CableGenerator {
         let _ = mesh.add_face(&rings[segs]);
 
         // 5. Hex Fitting Couplings at Port A and Port B
-        Self::add_hex_fitting(&mut mesh, port_a, (spine_points[1] - port_a).normalize_or_zero(), r * 1.5, r * 1.8);
-        Self::add_hex_fitting(&mut mesh, port_b, (spine_points[segs - 1] - port_b).normalize_or_zero(), r * 1.5, r * 1.8);
+        Self::add_hex_fitting(
+            &mut mesh,
+            port_a,
+            (spine_points[1] - port_a).normalize_or_zero(),
+            r * 1.5,
+            r * 1.8,
+        );
+        Self::add_hex_fitting(
+            &mut mesh,
+            port_b,
+            (spine_points[segs - 1] - port_b).normalize_or_zero(),
+            r * 1.5,
+            r * 1.8,
+        );
 
         mesh.update_face_weighted_normals(true);
         mesh
@@ -112,7 +132,8 @@ impl CableGenerator {
 
         for i in 0..6 {
             let theta = (i as f32) * 2.0 * PI / 6.0;
-            let offset = binormal * (theta.cos() * nut_radius) + normal * (theta.sin() * nut_radius);
+            let offset =
+                binormal * (theta.cos() * nut_radius) + normal * (theta.sin() * nut_radius);
             ring_start.push(mesh.add_vertex(origin + offset));
             ring_end.push(mesh.add_vertex(end + offset));
         }

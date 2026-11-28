@@ -12,23 +12,32 @@
 //! - [`animation`]: Keyframed parameter and transform tracks with linear and step interpolation.
 
 pub mod animation;
+pub mod collab;
 pub mod constraint;
 pub mod history;
 pub mod ik;
 pub mod material;
+pub mod motion_matching;
+pub mod nla;
 pub mod node;
 pub mod physics;
 pub mod scene;
 pub mod usda;
-pub mod collab;
-pub mod motion_matching;
-pub mod nla;
 
-pub use animation::{AnimationManager, AnimationTrack, InterpolationMode, Keyframe, TransformTrack};
-pub use constraint::{AimConstraint, Constraint, ConstraintStack, ParentConstraint, PathConstraint};
+pub use animation::{
+    AnimationManager, AnimationTrack, InterpolationMode, Keyframe, TransformTrack,
+};
+pub use collab::{CollabChatEntry, CollabMessage, CollabSession, CollabUser};
+pub use constraint::{
+    AimConstraint, Constraint, ConstraintStack, ParentConstraint, PathConstraint,
+};
 pub use history::{Command, HistoryManager};
 pub use ik::{solve_two_bone_ik, CcdIkSolver, IkConstraint, TwoBoneIkResult};
 pub use material::{LightType, Material};
+pub use motion_matching::{
+    InertializationBlend, MotionDatabase, MotionFeatureWeights, MotionMatchingController,
+    MotionPose, TrajectorySample,
+};
 pub use nla::{AudioScrubTrack, NlaBlendMode, NlaClip, NlaMixer, NlaTrack};
 pub use node::{NodeData, NodeId, SceneNode};
 pub use physics::{CollisionShape, PhysicsWorld, RigidBodyComponent, RigidBodyType};
@@ -36,11 +45,6 @@ pub use scene::SceneGraph;
 pub use usda::{
     export_scene_to_usda, export_scene_to_usda_file, import_scene_from_usda,
     import_scene_from_usda_file,
-};
-pub use collab::{CollabChatEntry, CollabMessage, CollabSession, CollabUser};
-pub use motion_matching::{
-    InertializationBlend, MotionDatabase, MotionFeatureWeights, MotionMatchingController,
-    MotionPose, TrajectorySample,
 };
 
 #[cfg(test)]

@@ -8,9 +8,7 @@
 //! - **Spatial Transforms**: [`Transform`] supporting hierarchical PRS (Position, Rotation, Scale) decomposition and affine matrix conversions.
 //! - **Raycasting & Intersections**: [`Ray`], [`Aabb`], ray-box slab intersections, and Möller-Trumbore ray-triangle intersection tests.
 
-pub use glam::{
-    self, vec2, vec3, vec4, EulerRot, Mat3, Mat4, Quat, Vec2, Vec3, Vec3A, Vec4,
-};
+pub use glam::{self, vec2, vec3, vec4, EulerRot, Mat3, Mat4, Quat, Vec2, Vec3, Vec3A, Vec4};
 
 use serde::{Deserialize, Serialize};
 

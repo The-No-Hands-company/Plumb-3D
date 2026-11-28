@@ -79,7 +79,12 @@ pub fn create_cylinder(radius: f32, height: f32, segments: u32) -> Mesh {
     create_cylinder_parametric(radius, height, segments, CapFillType::Ngon)
 }
 
-pub fn create_cylinder_parametric(radius: f32, height: f32, segments: u32, cap_fill: CapFillType) -> Mesh {
+pub fn create_cylinder_parametric(
+    radius: f32,
+    height: f32,
+    segments: u32,
+    cap_fill: CapFillType,
+) -> Mesh {
     let mut mesh = Mesh::new();
     let segs = segments.max(3);
     let half_h = height * 0.5;
@@ -103,7 +108,12 @@ pub fn create_cylinder_parametric(radius: f32, height: f32, segments: u32, cap_f
     // Side quad faces
     for s in 0..segs as usize {
         let next_s = (s + 1) % (segs as usize);
-        let _ = mesh.add_face(&[top_ring[s], bottom_ring[s], bottom_ring[next_s], top_ring[next_s]]);
+        let _ = mesh.add_face(&[
+            top_ring[s],
+            bottom_ring[s],
+            bottom_ring[next_s],
+            top_ring[next_s],
+        ]);
     }
 
     match cap_fill {
@@ -133,7 +143,13 @@ pub fn create_cone(radius: f32, height: f32, segments: u32) -> Mesh {
     create_cone_parametric(radius, 0.0, height, segments, CapFillType::Ngon)
 }
 
-pub fn create_cone_parametric(radius_bottom: f32, radius_top: f32, height: f32, segments: u32, cap_fill: CapFillType) -> Mesh {
+pub fn create_cone_parametric(
+    radius_bottom: f32,
+    radius_top: f32,
+    height: f32,
+    segments: u32,
+    cap_fill: CapFillType,
+) -> Mesh {
     let mut mesh = Mesh::new();
     let segs = segments.max(3) as usize;
     let half_h = height * 0.5;
@@ -147,11 +163,17 @@ pub fn create_cone_parametric(radius_bottom: f32, radius_top: f32, height: f32, 
         let sin_t = theta.sin();
         let u = (s as f32) / (segs as f32);
 
-        let vb = mesh.add_vertex_with_uv(vec3(radius_bottom * cos_t, -half_h, radius_bottom * sin_t), vec2(u, 0.0));
+        let vb = mesh.add_vertex_with_uv(
+            vec3(radius_bottom * cos_t, -half_h, radius_bottom * sin_t),
+            vec2(u, 0.0),
+        );
         base_ring.push(vb);
 
         if radius_top > 1e-4 {
-            let vt = mesh.add_vertex_with_uv(vec3(radius_top * cos_t, half_h, radius_top * sin_t), vec2(u, 1.0));
+            let vt = mesh.add_vertex_with_uv(
+                vec3(radius_top * cos_t, half_h, radius_top * sin_t),
+                vec2(u, 1.0),
+            );
             top_ring.push(vt);
         }
     }
@@ -165,7 +187,12 @@ pub fn create_cone_parametric(radius_bottom: f32, radius_top: f32, height: f32, 
     } else {
         for s in 0..segs {
             let next_s = (s + 1) % segs;
-            let _ = mesh.add_face(&[top_ring[s], base_ring[s], base_ring[next_s], top_ring[next_s]]);
+            let _ = mesh.add_face(&[
+                top_ring[s],
+                base_ring[s],
+                base_ring[next_s],
+                top_ring[next_s],
+            ]);
         }
         if cap_fill == CapFillType::Ngon {
             let _ = mesh.add_face(&top_ring);
@@ -194,7 +221,12 @@ pub fn create_cone_parametric(radius_bottom: f32, radius_top: f32, height: f32, 
     mesh
 }
 
-pub fn create_torus(major_radius: f32, minor_radius: f32, major_segments: u32, minor_segments: u32) -> Mesh {
+pub fn create_torus(
+    major_radius: f32,
+    minor_radius: f32,
+    major_segments: u32,
+    minor_segments: u32,
+) -> Mesh {
     let mut mesh = Mesh::new();
     let maj_segs = major_segments.max(3) as usize;
     let min_segs = minor_segments.max(3) as usize;
@@ -239,7 +271,12 @@ pub fn create_torus(major_radius: f32, minor_radius: f32, major_segments: u32, m
     mesh
 }
 
-pub fn create_capsule(radius: f32, cylinder_height: f32, segments: u32, hemisphere_rings: u32) -> Mesh {
+pub fn create_capsule(
+    radius: f32,
+    cylinder_height: f32,
+    segments: u32,
+    hemisphere_rings: u32,
+) -> Mesh {
     let mut mesh = Mesh::new();
     let segs = segments.max(3) as usize;
     let h_rings = hemisphere_rings.max(2) as usize;
@@ -257,7 +294,10 @@ pub fn create_capsule(radius: f32, cylinder_height: f32, segments: u32, hemisphe
         let mut ring = Vec::with_capacity(segs);
         for s in 0..segs {
             let theta = 2.0 * PI * (s as f32) / (segs as f32);
-            let vk = mesh.add_vertex_with_uv(vec3(ring_r * theta.cos(), y, ring_r * theta.sin()), vec2(s as f32 / segs as f32, v_coord));
+            let vk = mesh.add_vertex_with_uv(
+                vec3(ring_r * theta.cos(), y, ring_r * theta.sin()),
+                vec2(s as f32 / segs as f32, v_coord),
+            );
             ring.push(vk);
         }
         all_rings.push(ring);
@@ -267,7 +307,10 @@ pub fn create_capsule(radius: f32, cylinder_height: f32, segments: u32, hemisphe
         let mut ring = Vec::with_capacity(segs);
         for s in 0..segs {
             let theta = 2.0 * PI * (s as f32) / (segs as f32);
-            let vk = mesh.add_vertex_with_uv(vec3(radius * theta.cos(), h_offset, radius * theta.sin()), vec2(s as f32 / segs as f32, 0.5));
+            let vk = mesh.add_vertex_with_uv(
+                vec3(radius * theta.cos(), h_offset, radius * theta.sin()),
+                vec2(s as f32 / segs as f32, 0.5),
+            );
             ring.push(vk);
         }
         all_rings.push(ring);
@@ -282,7 +325,10 @@ pub fn create_capsule(radius: f32, cylinder_height: f32, segments: u32, hemisphe
         let mut ring = Vec::with_capacity(segs);
         for s in 0..segs {
             let theta = 2.0 * PI * (s as f32) / (segs as f32);
-            let vk = mesh.add_vertex_with_uv(vec3(ring_r * theta.cos(), y, ring_r * theta.sin()), vec2(s as f32 / segs as f32, v_coord));
+            let vk = mesh.add_vertex_with_uv(
+                vec3(ring_r * theta.cos(), y, ring_r * theta.sin()),
+                vec2(s as f32 / segs as f32, v_coord),
+            );
             ring.push(vk);
         }
         all_rings.push(ring);
@@ -320,17 +366,42 @@ pub fn create_icosphere(radius: f32, subdivisions: u32) -> Mesh {
     let phi = (1.0 + (5.0_f32).sqrt()) * 0.5;
 
     let raw_verts = [
-        vec3(-1.0, phi, 0.0), vec3(1.0, phi, 0.0), vec3(-1.0, -phi, 0.0), vec3(1.0, -phi, 0.0),
-        vec3(0.0, -1.0, phi), vec3(0.0, 1.0, phi), vec3(0.0, -1.0, -phi), vec3(0.0, 1.0, -phi),
-        vec3(phi, 0.0, -1.0), vec3(phi, 0.0, 1.0), vec3(-phi, 0.0, -1.0), vec3(-phi, 0.0, 1.0),
+        vec3(-1.0, phi, 0.0),
+        vec3(1.0, phi, 0.0),
+        vec3(-1.0, -phi, 0.0),
+        vec3(1.0, -phi, 0.0),
+        vec3(0.0, -1.0, phi),
+        vec3(0.0, 1.0, phi),
+        vec3(0.0, -1.0, -phi),
+        vec3(0.0, 1.0, -phi),
+        vec3(phi, 0.0, -1.0),
+        vec3(phi, 0.0, 1.0),
+        vec3(-phi, 0.0, -1.0),
+        vec3(-phi, 0.0, 1.0),
     ];
     let mut positions: Vec<Vec3> = raw_verts.iter().map(|v| v.normalize() * radius).collect();
 
     let mut faces: Vec<[usize; 3]> = vec![
-        [0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11],
-        [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8],
-        [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9],
-        [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1],
+        [0, 11, 5],
+        [0, 5, 1],
+        [0, 1, 7],
+        [0, 7, 10],
+        [0, 10, 11],
+        [1, 5, 9],
+        [5, 11, 4],
+        [11, 10, 2],
+        [10, 7, 6],
+        [7, 1, 8],
+        [3, 9, 4],
+        [3, 4, 2],
+        [3, 2, 6],
+        [3, 6, 8],
+        [3, 8, 9],
+        [4, 9, 5],
+        [2, 4, 11],
+        [6, 2, 10],
+        [8, 6, 7],
+        [9, 8, 1],
     ];
 
     let mut midpoint_cache = std::collections::HashMap::new();
@@ -376,7 +447,11 @@ pub fn create_icosphere(radius: f32, subdivisions: u32) -> Mesh {
         .collect();
 
     for tri in faces {
-        let _ = mesh.add_face(&[vertex_keys[tri[0]], vertex_keys[tri[1]], vertex_keys[tri[2]]]);
+        let _ = mesh.add_face(&[
+            vertex_keys[tri[0]],
+            vertex_keys[tri[1]],
+            vertex_keys[tri[2]],
+        ]);
     }
 
     mesh.update_normals();

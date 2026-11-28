@@ -46,7 +46,10 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
                     let node_name = if !meta.model_name.is_empty() {
                         meta.model_name
                     } else {
-                        path.file_stem().and_then(|s| s.to_str()).unwrap_or("PlumbModel").to_string()
+                        path.file_stem()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or("PlumbModel")
+                            .to_string()
                     };
 
                     let id = state.scene.add_node(SceneNode::new_mesh(
@@ -145,7 +148,10 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
                 .save_file()
             {
                 if mesh.export_step_file(&path).is_ok() {
-                    state.set_status_message(format!("Exported CAD Solid STEP to: {}", path.display()));
+                    state.set_status_message(format!(
+                        "Exported CAD Solid STEP to: {}",
+                        path.display()
+                    ));
                 }
             }
         }
@@ -155,12 +161,18 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
     if actions.export_subd_nurbs_step {
         if let Some((name, mesh)) = get_active_mesh(state) {
             if let Some(path) = rfd::FileDialog::new()
-                .add_filter("SubD-to-NURBS CAD STEP Solid (*.step, *.stp)", &["step", "stp"])
+                .add_filter(
+                    "SubD-to-NURBS CAD STEP Solid (*.step, *.stp)",
+                    &["step", "stp"],
+                )
                 .set_file_name(format!("{}_nurbs.step", name))
                 .save_file()
             {
                 if mesh.export_subd_nurbs_step_file(&path).is_ok() {
-                    state.set_status_message(format!("Exported Continuous SubD-to-NURBS STEP Solid to: {}", path.display()));
+                    state.set_status_message(format!(
+                        "Exported Continuous SubD-to-NURBS STEP Solid to: {}",
+                        path.display()
+                    ));
                 }
             }
         }
@@ -174,7 +186,10 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
             .save_file()
         {
             if graph_engine::export_scene_to_usda_file(&state.scene, &path).is_ok() {
-                state.set_status_message(format!("Exported Pixar OpenUSD Scene to: {}", path.display()));
+                state.set_status_message(format!(
+                    "Exported Pixar OpenUSD Scene to: {}",
+                    path.display()
+                ));
             }
         }
     }
@@ -191,7 +206,11 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
                         state.selected_node = Some(first);
                     }
                     state.sync_gpu_meshes();
-                    state.set_status_message(format!("Imported {} nodes from USDA: {}", nodes.len(), path.display()));
+                    state.set_status_message(format!(
+                        "Imported {} nodes from USDA: {}",
+                        nodes.len(),
+                        path.display()
+                    ));
                 }
                 Err(err) => {
                     state.set_status_message(format!("Failed to import USDA: {}", err));
@@ -210,7 +229,10 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
             {
                 let settings = geo_kernel::SlicerSettings::default();
                 if mesh.export_gcode_file(&path, &settings).is_ok() {
-                    state.set_status_message(format!("Exported 3D Print G-code to: {}", path.display()));
+                    state.set_status_message(format!(
+                        "Exported 3D Print G-code to: {}",
+                        path.display()
+                    ));
                 }
             }
         }
@@ -239,7 +261,10 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
         {
             match geo_kernel::mesh::Mesh::load_fbx(&path) {
                 Ok(mesh) => {
-                    let node_name = path.file_stem().and_then(|s| s.to_str()).unwrap_or("ImportedFBX");
+                    let node_name = path
+                        .file_stem()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or("ImportedFBX");
                     insert_mesh_into_scene(state, node_name, mesh);
                     state.set_status_message(format!("Imported FBX model: {}", path.display()));
                 }
@@ -265,7 +290,10 @@ pub fn handle_io_ops(state: &mut AppState, actions: &mut UiActions) {
                     vec![mesh.vertices.values().map(|v| v.position).collect()],
                 );
                 if cache.save(&path).is_ok() {
-                    state.set_status_message(format!("Exported Alembic Point Cache to: {}", path.display()));
+                    state.set_status_message(format!(
+                        "Exported Alembic Point Cache to: {}",
+                        path.display()
+                    ));
                 }
             }
         }
@@ -311,8 +339,15 @@ fn get_active_model_name(state: &AppState) -> String {
 }
 
 pub fn import_model_from_file(state: &mut AppState, path: &Path) {
-    let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("").to_lowercase();
-    let file_stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("ImportedMesh");
+    let ext = path
+        .extension()
+        .and_then(|s| s.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    let file_stem = path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("ImportedMesh");
 
     match ext.as_str() {
         "plmb" => {
@@ -365,11 +400,9 @@ fn insert_mesh_into_scene(state: &mut AppState, name: &str, mesh: Mesh) {
     state.selected_vertices.clear();
     state.selected_edges.clear();
     state.selected_faces.clear();
-    let id = state.scene.add_node(SceneNode::new_mesh(
-        name,
-        Transform::IDENTITY,
-        mesh,
-    ));
+    let id = state
+        .scene
+        .add_node(SceneNode::new_mesh(name, Transform::IDENTITY, mesh));
     state.selected_node = Some(id);
     state.sync_gpu_meshes();
 }

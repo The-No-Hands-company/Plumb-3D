@@ -136,7 +136,10 @@ impl Mesh {
 
                 while !remaining_hes.is_empty() {
                     boundary_cycle.push(current_target);
-                    if let Some(&next_he) = remaining_hes.iter().find(|&&h| self.half_edges[h].origin == current_target) {
+                    if let Some(&next_he) = remaining_hes
+                        .iter()
+                        .find(|&&h| self.half_edges[h].origin == current_target)
+                    {
                         remaining_hes.remove(&next_he);
                         current_target = self.half_edges[next_he].target;
                     } else {
@@ -148,7 +151,9 @@ impl Mesh {
 
         // If a valid boundary loop with >= 3 vertices was found, use Tutte harmonic embedding
         let boundary_set: HashSet<VertexKey> = boundary_cycle.iter().copied().collect();
-        let use_tutte = boundary_cycle.len() >= 3 && boundary_set.len() >= 3 && boundary_set.len() < chart_verts.len();
+        let use_tutte = boundary_cycle.len() >= 3
+            && boundary_set.len() >= 3
+            && boundary_set.len() < chart_verts.len();
 
         if use_tutte {
             // Measure cumulative perimeter lengths

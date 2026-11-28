@@ -1,5 +1,8 @@
 use super::UiActions;
-use crate::commands::{AlignObjectsCommand, DeleteFacesCommand, DeleteVerticesCommand, DissolveEdgeCommand, GroupNodesCommand, SetParentCommand};
+use crate::commands::{
+    AlignObjectsCommand, DeleteFacesCommand, DeleteVerticesCommand, DissolveEdgeCommand,
+    GroupNodesCommand, SetParentCommand,
+};
 use crate::state::AppState;
 use crate::types::{InteractionMode, SubElementLevel};
 use graph_engine::NodeData;
@@ -16,7 +19,12 @@ pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
         };
 
         if !targets.is_empty() {
-            let count = state.scene.nodes.values().filter(|n| matches!(n.data, NodeData::Transform)).count();
+            let count = state
+                .scene
+                .nodes
+                .values()
+                .filter(|n| matches!(n.data, NodeData::Transform))
+                .count();
             let group_name = format!("Group_{}", count + 1);
             let cmd = Box::new(GroupNodesCommand {
                 node_ids: targets,
@@ -53,12 +61,19 @@ pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
 
     // Handle Precision CAD / Plasticity-style Boolean Difference Carve
     if actions.trigger_boolean_carve {
-        if let (Some(target_id), Some(cutter_id)) = (state.selected_node, state.previous_selected_node) {
+        if let (Some(target_id), Some(cutter_id)) =
+            (state.selected_node, state.previous_selected_node)
+        {
             if target_id != cutter_id {
                 let cutter_name = state.scene.nodes.get(cutter_id).map(|n| n.name.clone());
                 if let Some(c_name) = cutter_name {
                     if let Some(target_node) = state.scene.nodes.get_mut(target_id) {
-                        if let NodeData::Mesh { modifier_stack, cached_render_mesh, .. } = &mut target_node.data {
+                        if let NodeData::Mesh {
+                            modifier_stack,
+                            cached_render_mesh,
+                            ..
+                        } = &mut target_node.data
+                        {
                             let bool_mod = geo_kernel::BooleanModifier::with_target(
                                 geo_kernel::Mesh::new(),
                                 geo_kernel::BooleanOp::Difference,
@@ -76,9 +91,18 @@ pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
     }
     // Handle Precision CAD / Plasticity-style Loft Curves
     if actions.trigger_loft_curves {
-        let curve_ids: Vec<_> = state.selected_nodes.iter().copied().filter(|&id| {
-            state.scene.nodes.get(id).is_some_and(|n| matches!(n.data, NodeData::Curve { .. }))
-        }).collect();
+        let curve_ids: Vec<_> = state
+            .selected_nodes
+            .iter()
+            .copied()
+            .filter(|&id| {
+                state
+                    .scene
+                    .nodes
+                    .get(id)
+                    .is_some_and(|n| matches!(n.data, NodeData::Curve { .. }))
+            })
+            .collect();
         if curve_ids.len() >= 2 {
             let cmd = Box::new(crate::commands::LoftCurvesCommand {
                 curve_node_ids: curve_ids,
@@ -116,7 +140,9 @@ pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
 
     // Handle Maya Hierarchy Parenting
     if actions.trigger_parent {
-        if let (Some(child_id), Some(parent_id)) = (state.selected_node, state.previous_selected_node) {
+        if let (Some(child_id), Some(parent_id)) =
+            (state.selected_node, state.previous_selected_node)
+        {
             if child_id != parent_id {
                 let cmd = Box::new(SetParentCommand {
                     child_id,
@@ -150,8 +176,11 @@ pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
     if actions.delete_selected {
         if state.interaction_mode == InteractionMode::Edit {
             if let Some(sel_id) = state.selected_node {
-                if state.sub_element_level == SubElementLevel::Face && !state.selected_faces.is_empty() {
-                    let faces: Vec<geo_kernel::FaceKey> = state.selected_faces.iter().copied().collect();
+                if state.sub_element_level == SubElementLevel::Face
+                    && !state.selected_faces.is_empty()
+                {
+                    let faces: Vec<geo_kernel::FaceKey> =
+                        state.selected_faces.iter().copied().collect();
                     let cmd = Box::new(DeleteFacesCommand {
                         node_id: sel_id,
                         faces,
@@ -162,8 +191,11 @@ pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
                         state.selected_vertices.clear();
                         state.selected_edges.clear();
                     }
-                } else if state.sub_element_level == SubElementLevel::Edge && !state.selected_edges.is_empty() {
-                    let edges: Vec<geo_kernel::EdgeKey> = state.selected_edges.iter().copied().collect();
+                } else if state.sub_element_level == SubElementLevel::Edge
+                    && !state.selected_edges.is_empty()
+                {
+                    let edges: Vec<geo_kernel::EdgeKey> =
+                        state.selected_edges.iter().copied().collect();
                     for ek in edges {
                         let cmd = Box::new(DissolveEdgeCommand {
                             node_id: sel_id,
@@ -175,8 +207,11 @@ pub fn handle_scene_ops(state: &mut AppState, actions: &mut UiActions) {
                     state.selected_edges.clear();
                     state.selected_vertices.clear();
                     state.selected_faces.clear();
-                } else if state.sub_element_level == SubElementLevel::Vertex && !state.selected_vertices.is_empty() {
-                    let verts: Vec<geo_kernel::VertexKey> = state.selected_vertices.iter().copied().collect();
+                } else if state.sub_element_level == SubElementLevel::Vertex
+                    && !state.selected_vertices.is_empty()
+                {
+                    let verts: Vec<geo_kernel::VertexKey> =
+                        state.selected_vertices.iter().copied().collect();
                     let cmd = Box::new(DeleteVerticesCommand {
                         node_id: sel_id,
                         vertices: verts,

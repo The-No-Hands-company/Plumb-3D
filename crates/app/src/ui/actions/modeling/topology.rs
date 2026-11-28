@@ -108,11 +108,7 @@ pub fn handle_topology_actions(state: &mut AppState, actions: &mut UiActions) {
     if actions.trigger_loop_cut {
         if let Some(sel_id) = state.selected_node {
             if let Some(&ek) = state.selected_edges.iter().next() {
-                let cmd = Box::new(LoopCutCommand::new(
-                    sel_id,
-                    ek,
-                    state.loop_cut_ratio,
-                ));
+                let cmd = Box::new(LoopCutCommand::new(sel_id, ek, state.loop_cut_ratio));
                 if let Err(e) = state.history.execute(cmd, &mut state.scene) {
                     eprintln!("Loop cut failed: {}", e);
                 }
@@ -124,7 +120,8 @@ pub fn handle_topology_actions(state: &mut AppState, actions: &mut UiActions) {
     if actions.trigger_connect_vertices {
         if let Some(sel_id) = state.selected_node {
             if state.selected_vertices.len() >= 2 {
-                let verts: Vec<VertexKey> = state.selected_vertices.iter().copied().take(2).collect();
+                let verts: Vec<VertexKey> =
+                    state.selected_vertices.iter().copied().take(2).collect();
                 if let Some(node) = state.scene.nodes.get(sel_id) {
                     if let NodeData::Mesh { base_mesh, .. } = &node.data {
                         let f0 = base_mesh.vertex_faces(verts[0]);
@@ -366,7 +363,10 @@ pub fn handle_topology_actions(state: &mut AppState, actions: &mut UiActions) {
                 });
                 if state.history.execute(cmd, &mut state.scene).is_ok() {
                     state.sync_gpu_meshes();
-                    state.set_status_message(format!("Un-Beveled {} chamfer face(s) back to crisp edge! (Ctrl+Z to Undo)", target_faces.len()));
+                    state.set_status_message(format!(
+                        "Un-Beveled {} chamfer face(s) back to crisp edge! (Ctrl+Z to Undo)",
+                        target_faces.len()
+                    ));
                     state.selected_faces.clear();
                 }
             } else {
@@ -388,7 +388,10 @@ pub fn handle_topology_actions(state: &mut AppState, actions: &mut UiActions) {
                 match state.history.execute(cmd, &mut state.scene) {
                     Ok(()) => {
                         state.sync_gpu_meshes();
-                        state.set_status_message(format!("Dissolved {} faces into single n-gon (Ctrl+Z to Undo)", target_faces.len()));
+                        state.set_status_message(format!(
+                            "Dissolved {} faces into single n-gon (Ctrl+Z to Undo)",
+                            target_faces.len()
+                        ));
                         state.selected_faces.clear();
                     }
                     Err(e) => {

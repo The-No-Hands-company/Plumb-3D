@@ -198,8 +198,10 @@ impl Spline {
                 } else {
                     idx + 1
                 };
-                self.points[idx].handle_in = (self.points[prev_idx].position - self.points[idx].position) / 3.0;
-                self.points[idx].handle_out = (self.points[next_idx].position - self.points[idx].position) / 3.0;
+                self.points[idx].handle_in =
+                    (self.points[prev_idx].position - self.points[idx].position) / 3.0;
+                self.points[idx].handle_out =
+                    (self.points[next_idx].position - self.points[idx].position) / 3.0;
             }
             HandleType::Auto => {
                 self.update_auto_handles();

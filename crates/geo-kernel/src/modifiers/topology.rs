@@ -19,7 +19,10 @@ pub struct MirrorModifier {
 
 impl MirrorModifier {
     pub fn new(axis: MirrorAxis) -> Self {
-        Self { axis, enabled: true }
+        Self {
+            axis,
+            enabled: true,
+        }
     }
 }
 
@@ -55,10 +58,8 @@ impl Modifier for MirrorModifier {
         // Add mirrored faces with reversed winding so normals point outwards
         for (fk, _) in &input.faces {
             let v_keys = input.face_vertices(fk);
-            let mut mirrored_v_keys: Vec<VertexKey> = v_keys
-                .iter()
-                .map(|vk| old_to_mirrored_v[vk])
-                .collect();
+            let mut mirrored_v_keys: Vec<VertexKey> =
+                v_keys.iter().map(|vk| old_to_mirrored_v[vk]).collect();
             mirrored_v_keys.reverse(); // Reverse winding for reflection
 
             mirrored.add_face(&mirrored_v_keys)?;
@@ -71,8 +72,6 @@ impl Modifier for MirrorModifier {
 
 /// Non-destructive Procedural Displacement Modifier (displaces vertices along normals)
 #[derive(Debug, Clone)]
-
-
 
 pub struct BooleanModifier {
     pub operand: Mesh,
@@ -91,7 +90,11 @@ impl BooleanModifier {
         }
     }
 
-    pub fn with_target(operand: Mesh, operation: BooleanOp, target_node_name: impl Into<String>) -> Self {
+    pub fn with_target(
+        operand: Mesh,
+        operation: BooleanOp,
+        target_node_name: impl Into<String>,
+    ) -> Self {
         Self {
             operand,
             operation,
@@ -129,7 +132,6 @@ impl Modifier for BooleanModifier {
 
 /// Non-destructive Vertex Weld Modifier (3ds Max Vertex Weld / Blender Merge by Distance)
 #[derive(Debug, Clone)]
-
 
 pub struct WeldModifier {
     pub distance: f32,

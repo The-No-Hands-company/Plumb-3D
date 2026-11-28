@@ -77,7 +77,11 @@ impl RtaoKernel {
 
         // Build tangent-space orthonormal basis (T, B, N)
         let n = normal.normalize();
-        let up = if n.y.abs() < 0.9 { vec3(0.0, 1.0, 0.0) } else { vec3(1.0, 0.0, 0.0) };
+        let up = if n.y.abs() < 0.9 {
+            vec3(0.0, 1.0, 0.0)
+        } else {
+            vec3(1.0, 0.0, 0.0)
+        };
         let tangent = n.cross(up).normalize();
         let bitangent = n.cross(tangent).normalize();
 
@@ -103,7 +107,8 @@ impl RtaoKernel {
             if nearest_sq < r_sq {
                 let dist = nearest_sq.sqrt();
                 let falloff = (1.0 - dist / r).clamp(0.0, 1.0);
-                let cos_theta = (world_sample_dir.normalize().dot(n) - settings.bias).clamp(0.0, 1.0);
+                let cos_theta =
+                    (world_sample_dir.normalize().dot(n) - settings.bias).clamp(0.0, 1.0);
                 occlusion_accum += falloff * cos_theta;
             }
         }
@@ -183,7 +188,8 @@ mod tests {
             vec3(0.0, 0.1, 0.05),
             vec3(0.0, 0.1, -0.05),
         ];
-        let ao_crevice = kernel.compute_ambient_occlusion(flat_point, normal, &crevice_geom, &settings);
+        let ao_crevice =
+            kernel.compute_ambient_occlusion(flat_point, normal, &crevice_geom, &settings);
         assert!(ao_crevice < ao_open);
     }
 

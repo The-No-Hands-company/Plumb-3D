@@ -52,16 +52,21 @@ pub fn render(state: &mut AppState) {
             }
         }
 
-        let banner_rect = egui::Rect::from_center_size(
-            egui::pos2(width * 0.5, 45.0),
-            egui::vec2(540.0, 28.0),
-        );
+        let banner_rect =
+            egui::Rect::from_center_size(egui::pos2(width * 0.5, 45.0), egui::vec2(540.0, 28.0));
         painter.rect_filled(banner_rect, 5.0, egui::Color32::from_black_alpha(220));
-        painter.rect_stroke(banner_rect, 5.0, egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(0, 255, 200)));
+        painter.rect_stroke(
+            banner_rect,
+            5.0,
+            egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(0, 255, 200)),
+        );
         painter.text(
             banner_rect.center(),
             egui::Align2::CENTER_CENTER,
-            format!("KNIFE MULTI-CUT: {} points | Click: Add Point | Enter: Confirm | Esc: Cancel", state.knife_points.len()),
+            format!(
+                "KNIFE MULTI-CUT: {} points | Click: Add Point | Enter: Confirm | Esc: Cancel",
+                state.knife_points.len()
+            ),
             egui::FontId::proportional(12.5),
             egui::Color32::from_rgb(240, 255, 255),
         );
@@ -105,10 +110,8 @@ pub fn render(state: &mut AppState) {
             }
         }
 
-        let banner_rect = egui::Rect::from_center_size(
-            egui::pos2(width * 0.5, 45.0),
-            egui::vec2(580.0, 28.0),
-        );
+        let banner_rect =
+            egui::Rect::from_center_size(egui::pos2(width * 0.5, 45.0), egui::vec2(580.0, 28.0));
         painter.rect_filled(banner_rect, 5.0, egui::Color32::from_black_alpha(220));
         let border_color = if state.loop_cut_sliding {
             egui::Color32::from_rgb(255, 150, 0)
@@ -117,9 +120,15 @@ pub fn render(state: &mut AppState) {
         };
         painter.rect_stroke(banner_rect, 5.0, egui::Stroke::new(1.0_f32, border_color));
         let banner_text = if !state.loop_cut_sliding {
-            format!("LOOP CUT: Hover edge | Scroll: Cuts ({}) | Left-Click: Slide | Esc: Cancel", state.loop_cut_num_cuts)
+            format!(
+                "LOOP CUT: Hover edge | Scroll: Cuts ({}) | Left-Click: Slide | Esc: Cancel",
+                state.loop_cut_num_cuts
+            )
         } else {
-            format!("SLIDE LOOP: Factor: {:.1}% | Left-Click / Enter: Confirm | Esc: Cancel", state.loop_cut_factor * 100.0)
+            format!(
+                "SLIDE LOOP: Factor: {:.1}% | Left-Click / Enter: Confirm | Esc: Cancel",
+                state.loop_cut_factor * 100.0
+            )
         };
         painter.text(
             banner_rect.center(),
@@ -142,7 +151,9 @@ pub fn render(state: &mut AppState) {
                 if let NodeData::Mesh { base_mesh, .. } = &node.data {
                     for &fk in &state.extrude_modal_faces {
                         if let Some(face) = base_mesh.faces.get(fk) {
-                            let c = node.world_matrix.transform_point3(base_mesh.face_centroid(fk));
+                            let c = node
+                                .world_matrix
+                                .transform_point3(base_mesh.face_centroid(fk));
                             let dir = match state.extrude_modal_axis_constraint {
                                 Some(GizmoAxis::X) => Vec3::X,
                                 Some(GizmoAxis::Y) => Vec3::Y,
@@ -151,7 +162,10 @@ pub fn render(state: &mut AppState) {
                                 Some(GizmoAxis::XZ) => (Vec3::X + Vec3::Z).normalize(),
                                 Some(GizmoAxis::YZ) => (Vec3::Y + Vec3::Z).normalize(),
                                 Some(GizmoAxis::Screen) => state.camera.right(),
-                                None => node.world_matrix.transform_vector3(face.normal).normalize_or_zero(),
+                                None => node
+                                    .world_matrix
+                                    .transform_vector3(face.normal)
+                                    .normalize_or_zero(),
                             };
                             let target_p = c + dir * state.extrude_modal_distance;
                             if let (Some(s_c), Some(s_t)) = (
@@ -160,7 +174,10 @@ pub fn render(state: &mut AppState) {
                             ) {
                                 painter.line_segment(
                                     [egui::pos2(s_c.x, s_c.y), egui::pos2(s_t.x, s_t.y)],
-                                    egui::Stroke::new(2.5_f32, egui::Color32::from_rgb(255, 215, 0)),
+                                    egui::Stroke::new(
+                                        2.5_f32,
+                                        egui::Color32::from_rgb(255, 215, 0),
+                                    ),
                                 );
                                 painter.circle_filled(
                                     egui::pos2(s_t.x, s_t.y),
@@ -183,33 +200,79 @@ pub fn render(state: &mut AppState) {
             .show(&ctx, |ui| {
                 egui::Frame::window(ui.style())
                     .fill(egui::Color32::from_rgba_premultiplied(20, 24, 30, 240))
-                    .stroke(egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(255, 215, 0)))
+                    .stroke(egui::Stroke::new(
+                        1.5_f32,
+                        egui::Color32::from_rgb(255, 215, 0),
+                    ))
                     .rounding(egui::Rounding::same(6.0))
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("EXTRUDE").strong().color(egui::Color32::from_rgb(255, 215, 0)));
+                            ui.label(
+                                egui::RichText::new("EXTRUDE")
+                                    .strong()
+                                    .color(egui::Color32::from_rgb(255, 215, 0)),
+                            );
                             ui.separator();
                             ui.label("Distance:");
-                            if ui.add(egui::DragValue::new(&mut state.extrude_modal_distance).speed(0.02).suffix(" m")).changed() {
+                            if ui
+                                .add(
+                                    egui::DragValue::new(&mut state.extrude_modal_distance)
+                                        .speed(0.02)
+                                        .suffix(" m"),
+                                )
+                                .changed()
+                            {
                                 state.modal_numeric_buffer.clear();
                             }
                             ui.separator();
                             ui.label("Axis:");
-                            if ui.selectable_label(state.extrude_modal_axis_constraint.is_none(), "Normal (C)").clicked() {
+                            if ui
+                                .selectable_label(
+                                    state.extrude_modal_axis_constraint.is_none(),
+                                    "Normal (C)",
+                                )
+                                .clicked()
+                            {
                                 state.extrude_modal_axis_constraint = None;
                             }
-                            if ui.selectable_label(state.extrude_modal_axis_constraint == Some(GizmoAxis::X), "X").clicked() {
+                            if ui
+                                .selectable_label(
+                                    state.extrude_modal_axis_constraint == Some(GizmoAxis::X),
+                                    "X",
+                                )
+                                .clicked()
+                            {
                                 state.extrude_modal_axis_constraint = Some(GizmoAxis::X);
                             }
-                            if ui.selectable_label(state.extrude_modal_axis_constraint == Some(GizmoAxis::Y), "Y").clicked() {
+                            if ui
+                                .selectable_label(
+                                    state.extrude_modal_axis_constraint == Some(GizmoAxis::Y),
+                                    "Y",
+                                )
+                                .clicked()
+                            {
                                 state.extrude_modal_axis_constraint = Some(GizmoAxis::Y);
                             }
-                            if ui.selectable_label(state.extrude_modal_axis_constraint == Some(GizmoAxis::Z), "Z").clicked() {
+                            if ui
+                                .selectable_label(
+                                    state.extrude_modal_axis_constraint == Some(GizmoAxis::Z),
+                                    "Z",
+                                )
+                                .clicked()
+                            {
                                 state.extrude_modal_axis_constraint = Some(GizmoAxis::Z);
                             }
                             if !state.modal_numeric_buffer.is_empty() {
-                                ui.label(egui::RichText::new(format!("Input: [{}]", state.modal_numeric_buffer)).monospace().strong().color(egui::Color32::YELLOW));
+                                ui.label(
+                                    egui::RichText::new(format!(
+                                        "Input: [{}]",
+                                        state.modal_numeric_buffer
+                                    ))
+                                    .monospace()
+                                    .strong()
+                                    .color(egui::Color32::YELLOW),
+                                );
                             }
                             ui.separator();
                             if ui.button("Confirm (Enter)").clicked() {
@@ -245,15 +308,22 @@ pub fn render(state: &mut AppState) {
                     for &ek in &state.bevel_modal_edges {
                         if let Some(edge) = base_mesh.edges.get(ek) {
                             let h = &base_mesh.half_edges[edge.half_edge];
-                            let p0 = node.world_matrix.transform_point3(base_mesh.vertices[h.origin].position);
-                            let p1 = node.world_matrix.transform_point3(base_mesh.vertices[h.target].position);
+                            let p0 = node
+                                .world_matrix
+                                .transform_point3(base_mesh.vertices[h.origin].position);
+                            let p1 = node
+                                .world_matrix
+                                .transform_point3(base_mesh.vertices[h.target].position);
                             if let (Some(s0), Some(s1)) = (
                                 state.camera.world_to_screen(p0, width, height),
                                 state.camera.world_to_screen(p1, width, height),
                             ) {
                                 painter.line_segment(
                                     [egui::pos2(s0.x, s0.y), egui::pos2(s1.x, s1.y)],
-                                    egui::Stroke::new(3.5_f32, egui::Color32::from_rgb(0, 230, 255)),
+                                    egui::Stroke::new(
+                                        3.5_f32,
+                                        egui::Color32::from_rgb(0, 230, 255),
+                                    ),
                                 );
                             }
                         }
@@ -271,21 +341,46 @@ pub fn render(state: &mut AppState) {
             .show(&ctx, |ui| {
                 egui::Frame::window(ui.style())
                     .fill(egui::Color32::from_rgba_premultiplied(20, 24, 30, 240))
-                    .stroke(egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(0, 230, 255)))
+                    .stroke(egui::Stroke::new(
+                        1.5_f32,
+                        egui::Color32::from_rgb(0, 230, 255),
+                    ))
                     .rounding(egui::Rounding::same(6.0))
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("BEVEL").strong().color(egui::Color32::from_rgb(0, 230, 255)));
+                            ui.label(
+                                egui::RichText::new("BEVEL")
+                                    .strong()
+                                    .color(egui::Color32::from_rgb(0, 230, 255)),
+                            );
                             ui.separator();
                             ui.label("Width:");
-                            if ui.add(egui::DragValue::new(&mut state.bevel_modal_width).speed(0.005).suffix(" m").range(0.001..=5.0)).changed() {
+                            if ui
+                                .add(
+                                    egui::DragValue::new(&mut state.bevel_modal_width)
+                                        .speed(0.005)
+                                        .suffix(" m")
+                                        .range(0.001..=5.0),
+                                )
+                                .changed()
+                            {
                                 state.modal_numeric_buffer.clear();
                             }
                             ui.label("Segments:");
-                            ui.add(egui::DragValue::new(&mut state.bevel_modal_segments).range(1..=16));
+                            ui.add(
+                                egui::DragValue::new(&mut state.bevel_modal_segments).range(1..=16),
+                            );
                             if !state.modal_numeric_buffer.is_empty() {
-                                ui.label(egui::RichText::new(format!("Input: [{}]", state.modal_numeric_buffer)).monospace().strong().color(egui::Color32::YELLOW));
+                                ui.label(
+                                    egui::RichText::new(format!(
+                                        "Input: [{}]",
+                                        state.modal_numeric_buffer
+                                    ))
+                                    .monospace()
+                                    .strong()
+                                    .color(egui::Color32::YELLOW),
+                                );
                             }
                             ui.separator();
                             if ui.button("Confirm (Enter)").clicked() {
@@ -309,7 +404,9 @@ pub fn render(state: &mut AppState) {
     }
 
     // 5. Weight Gradient Overlay
-    if state.interaction_mode == InteractionMode::WeightPaint && state.weight_paint_tool == WeightPaintTool::LinearGradient {
+    if state.interaction_mode == InteractionMode::WeightPaint
+        && state.weight_paint_tool == WeightPaintTool::LinearGradient
+    {
         if let (Some(start), Some(end)) = (state.weight_gradient_start, state.weight_gradient_end) {
             let painter = state.egui_ctx.layer_painter(egui::LayerId::new(
                 egui::Order::Foreground,
@@ -330,22 +427,40 @@ pub fn render(state: &mut AppState) {
                     let seg_p0 = p0 + (p1 - p0) * t0;
                     let seg_p1 = p0 + (p1 - p0) * t1;
 
-                    let w = state.weight_gradient_start_w + (state.weight_gradient_end_w - state.weight_gradient_start_w) * ((t0 + t1) * 0.5);
+                    let w = state.weight_gradient_start_w
+                        + (state.weight_gradient_end_w - state.weight_gradient_start_w)
+                            * ((t0 + t1) * 0.5);
                     let col = if w <= 0.5 {
                         let f = w * 2.0;
-                        egui::Color32::from_rgb((f * 30.0) as u8, (f * 220.0) as u8, ((1.0 - f) * 255.0) as u8)
+                        egui::Color32::from_rgb(
+                            (f * 30.0) as u8,
+                            (f * 220.0) as u8,
+                            ((1.0 - f) * 255.0) as u8,
+                        )
                     } else {
                         let f = (w - 0.5) * 2.0;
-                        egui::Color32::from_rgb(((0.5 + 0.5 * f) * 255.0) as u8, ((1.0 - f) * 220.0) as u8, 20)
+                        egui::Color32::from_rgb(
+                            ((0.5 + 0.5 * f) * 255.0) as u8,
+                            ((1.0 - f) * 220.0) as u8,
+                            20,
+                        )
                     };
 
                     painter.line_segment([seg_p0, seg_p1], egui::Stroke::new(3.5_f32, col));
                 }
 
                 painter.circle_filled(p0, 6.0_f32, egui::Color32::from_rgb(255, 50, 50));
-                painter.circle_stroke(p0, 6.0_f32, egui::Stroke::new(1.5_f32, egui::Color32::WHITE));
+                painter.circle_stroke(
+                    p0,
+                    6.0_f32,
+                    egui::Stroke::new(1.5_f32, egui::Color32::WHITE),
+                );
                 painter.circle_filled(p1, 6.0_f32, egui::Color32::from_rgb(50, 100, 255));
-                painter.circle_stroke(p1, 6.0_f32, egui::Stroke::new(1.5_f32, egui::Color32::WHITE));
+                painter.circle_stroke(
+                    p1,
+                    6.0_f32,
+                    egui::Stroke::new(1.5_f32, egui::Color32::WHITE),
+                );
 
                 painter.text(
                     p0 + egui::vec2(0.0, -12.0),
@@ -368,7 +483,11 @@ pub fn render(state: &mut AppState) {
                 egui::vec2(600.0, 28.0),
             );
             painter.rect_filled(banner_rect, 5.0, egui::Color32::from_black_alpha(220));
-            painter.rect_stroke(banner_rect, 5.0, egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(255, 180, 50)));
+            painter.rect_stroke(
+                banner_rect,
+                5.0,
+                egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(255, 180, 50)),
+            );
             let banner_text = format!(
                 "LINEAR WEIGHT GRADIENT: Drag Start -> End | W: {:.2} -> {:.2} | Release to Apply",
                 state.weight_gradient_start_w, state.weight_gradient_end_w
@@ -396,32 +515,60 @@ pub fn render(state: &mut AppState) {
                     for &fk in &state.inset_modal_faces {
                         let fverts = base_mesh.face_vertices(fk);
                         let c = base_mesh.face_centroid(fk);
-                        let pts: Vec<egui::Pos2> = fverts.iter().filter_map(|&vk| {
-                            let orig = base_mesh.vertices[vk].position;
-                            let inset_pos = c + (orig - c) * state.inset_modal_factor;
-                            let w = node.world_matrix.transform_point3(inset_pos);
-                            state.camera.world_to_screen(w, width, height).map(|s| egui::pos2(s.x, s.y))
-                        }).collect();
+                        let pts: Vec<egui::Pos2> = fverts
+                            .iter()
+                            .filter_map(|&vk| {
+                                let orig = base_mesh.vertices[vk].position;
+                                let inset_pos = c + (orig - c) * state.inset_modal_factor;
+                                let w = node.world_matrix.transform_point3(inset_pos);
+                                state
+                                    .camera
+                                    .world_to_screen(w, width, height)
+                                    .map(|s| egui::pos2(s.x, s.y))
+                            })
+                            .collect();
 
                         if pts.len() >= 3 {
                             for i in 0..pts.len() {
-                                painter.line_segment([pts[i], pts[(i + 1) % pts.len()]], egui::Stroke::new(2.5_f32, egui::Color32::from_rgb(255, 180, 0)));
+                                painter.line_segment(
+                                    [pts[i], pts[(i + 1) % pts.len()]],
+                                    egui::Stroke::new(
+                                        2.5_f32,
+                                        egui::Color32::from_rgb(255, 180, 0),
+                                    ),
+                                );
                             }
 
                             if state.inset_modal_depth.abs() > 0.001 {
-                                let norm = node.world_matrix.transform_vector3(base_mesh.faces[fk].normal).normalize_or_zero();
-                                let recessed_pts: Vec<egui::Pos2> = fverts.iter().filter_map(|&vk| {
-                                    let orig = base_mesh.vertices[vk].position;
-                                    let inset_pos = c + (orig - c) * state.inset_modal_factor;
-                                    let w = node.world_matrix.transform_point3(inset_pos) - norm * state.inset_modal_depth;
-                                    state.camera.world_to_screen(w, width, height).map(|s| egui::pos2(s.x, s.y))
-                                }).collect();
+                                let norm = node
+                                    .world_matrix
+                                    .transform_vector3(base_mesh.faces[fk].normal)
+                                    .normalize_or_zero();
+                                let recessed_pts: Vec<egui::Pos2> = fverts
+                                    .iter()
+                                    .filter_map(|&vk| {
+                                        let orig = base_mesh.vertices[vk].position;
+                                        let inset_pos = c + (orig - c) * state.inset_modal_factor;
+                                        let w = node.world_matrix.transform_point3(inset_pos)
+                                            - norm * state.inset_modal_depth;
+                                        state
+                                            .camera
+                                            .world_to_screen(w, width, height)
+                                            .map(|s| egui::pos2(s.x, s.y))
+                                    })
+                                    .collect();
 
                                 if recessed_pts.len() == pts.len() {
                                     let bore_color = egui::Color32::from_rgb(255, 120, 20);
                                     for i in 0..pts.len() {
-                                        painter.line_segment([recessed_pts[i], recessed_pts[(i + 1) % pts.len()]], egui::Stroke::new(1.5_f32, bore_color));
-                                        painter.line_segment([pts[i], recessed_pts[i]], egui::Stroke::new(1.0_f32, bore_color));
+                                        painter.line_segment(
+                                            [recessed_pts[i], recessed_pts[(i + 1) % pts.len()]],
+                                            egui::Stroke::new(1.5_f32, bore_color),
+                                        );
+                                        painter.line_segment(
+                                            [pts[i], recessed_pts[i]],
+                                            egui::Stroke::new(1.0_f32, bore_color),
+                                        );
                                     }
                                 }
                             }
@@ -440,35 +587,77 @@ pub fn render(state: &mut AppState) {
             .show(&ctx, |ui| {
                 egui::Frame::window(ui.style())
                     .fill(egui::Color32::from_rgba_premultiplied(20, 24, 30, 240))
-                    .stroke(egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(255, 180, 0)))
+                    .stroke(egui::Stroke::new(
+                        1.5_f32,
+                        egui::Color32::from_rgb(255, 180, 0),
+                    ))
                     .rounding(egui::Rounding::same(6.0))
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("INSET").strong().color(egui::Color32::from_rgb(255, 180, 0)));
+                            ui.label(
+                                egui::RichText::new("INSET")
+                                    .strong()
+                                    .color(egui::Color32::from_rgb(255, 180, 0)),
+                            );
                             ui.separator();
                             ui.label("Thickness:");
                             let r = state.inset_modal_initial_radius.max(0.001);
-                            if ui.add(egui::DragValue::new(&mut state.inset_modal_thickness).speed(0.01).suffix(" m").range(0.0..=r * 0.99)).changed() {
-                                state.inset_modal_factor = (1.0 - state.inset_modal_thickness / r).clamp(0.01, 0.99);
+                            if ui
+                                .add(
+                                    egui::DragValue::new(&mut state.inset_modal_thickness)
+                                        .speed(0.01)
+                                        .suffix(" m")
+                                        .range(0.0..=r * 0.99),
+                                )
+                                .changed()
+                            {
+                                state.inset_modal_factor =
+                                    (1.0 - state.inset_modal_thickness / r).clamp(0.01, 0.99);
                                 state.modal_numeric_buffer.clear();
                             }
                             ui.label("Factor:");
                             let mut pct = state.inset_modal_factor * 100.0;
-                            if ui.add(egui::DragValue::new(&mut pct).speed(0.5).suffix(" %").range(1.0..=99.0)).changed() {
+                            if ui
+                                .add(
+                                    egui::DragValue::new(&mut pct)
+                                        .speed(0.5)
+                                        .suffix(" %")
+                                        .range(1.0..=99.0),
+                                )
+                                .changed()
+                            {
                                 state.inset_modal_factor = (pct / 100.0).clamp(0.01, 0.99);
                                 state.inset_modal_thickness = (1.0 - state.inset_modal_factor) * r;
                                 state.modal_numeric_buffer.clear();
                             }
-                            if ui.checkbox(&mut state.inset_modal_individual, "Individual (I)").changed() {
+                            if ui
+                                .checkbox(&mut state.inset_modal_individual, "Individual (I)")
+                                .changed()
+                            {
                                 state.window.request_redraw();
                             }
                             ui.label("Depth (Ctrl):");
-                            if ui.add(egui::DragValue::new(&mut state.inset_modal_depth).speed(0.01).suffix(" m")).changed() {
+                            if ui
+                                .add(
+                                    egui::DragValue::new(&mut state.inset_modal_depth)
+                                        .speed(0.01)
+                                        .suffix(" m"),
+                                )
+                                .changed()
+                            {
                                 state.window.request_redraw();
                             }
                             if !state.modal_numeric_buffer.is_empty() {
-                                ui.label(egui::RichText::new(format!("Input: [{}]", state.modal_numeric_buffer)).monospace().strong().color(egui::Color32::YELLOW));
+                                ui.label(
+                                    egui::RichText::new(format!(
+                                        "Input: [{}]",
+                                        state.modal_numeric_buffer
+                                    ))
+                                    .monospace()
+                                    .strong()
+                                    .color(egui::Color32::YELLOW),
+                                );
                             }
                             ui.separator();
                             if ui.button("Confirm (Enter)").clicked() {
@@ -502,27 +691,52 @@ pub fn render(state: &mut AppState) {
             .show(&ctx, |ui| {
                 egui::Frame::window(ui.style())
                     .fill(egui::Color32::from_rgba_premultiplied(20, 24, 30, 240))
-                    .stroke(egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(217, 70, 239)))
+                    .stroke(egui::Stroke::new(
+                        1.5_f32,
+                        egui::Color32::from_rgb(217, 70, 239),
+                    ))
                     .rounding(egui::Rounding::same(6.0))
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("EDGE CREASE").strong().color(egui::Color32::from_rgb(217, 70, 239)));
+                            ui.label(
+                                egui::RichText::new("EDGE CREASE")
+                                    .strong()
+                                    .color(egui::Color32::from_rgb(217, 70, 239)),
+                            );
                             ui.separator();
                             ui.label("Weight:");
                             let mut pct = state.edge_crease_modal_weight * 100.0;
-                            if ui.add(egui::DragValue::new(&mut pct).speed(1.0).suffix(" %").range(0.0..=100.0)).changed() {
+                            if ui
+                                .add(
+                                    egui::DragValue::new(&mut pct)
+                                        .speed(1.0)
+                                        .suffix(" %")
+                                        .range(0.0..=100.0),
+                                )
+                                .changed()
+                            {
                                 state.edge_crease_modal_weight = (pct / 100.0).clamp(0.0, 1.0);
                             }
                             ui.separator();
-                            if ui.button("Confirm (Enter)").clicked() { commit_edge_crease = true; }
-                            if ui.button("Cancel (Esc)").clicked() { cancel_edge_crease = true; }
+                            if ui.button("Confirm (Enter)").clicked() {
+                                commit_edge_crease = true;
+                            }
+                            if ui.button("Cancel (Esc)").clicked() {
+                                cancel_edge_crease = true;
+                            }
                         });
                     });
             });
 
-        if commit_edge_crease { crate::modals::edge_crease::commit(state); return; }
-        if cancel_edge_crease { crate::modals::edge_crease::cancel(state); return; }
+        if commit_edge_crease {
+            crate::modals::edge_crease::commit(state);
+            return;
+        }
+        if cancel_edge_crease {
+            crate::modals::edge_crease::cancel(state);
+            return;
+        }
     }
 
     // 8. Interactive Vertex Crease Modal Banner (Blender Shift+V / OpenSubdiv Semi-Sharp Corners)
@@ -536,27 +750,49 @@ pub fn render(state: &mut AppState) {
             .show(&ctx, |ui| {
                 egui::Frame::window(ui.style())
                     .fill(egui::Color32::from_rgba_premultiplied(20, 24, 30, 240))
-                    .stroke(egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(56, 189, 248)))
+                    .stroke(egui::Stroke::new(
+                        1.5_f32,
+                        egui::Color32::from_rgb(56, 189, 248),
+                    ))
                     .rounding(egui::Rounding::same(6.0))
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("VERTEX CREASE").strong().color(egui::Color32::from_rgb(56, 189, 248)));
+                            ui.label(
+                                egui::RichText::new("VERTEX CREASE")
+                                    .strong()
+                                    .color(egui::Color32::from_rgb(56, 189, 248)),
+                            );
                             ui.separator();
                             ui.label("Weight:");
                             let mut pct = state.vertex_crease_modal_weight * 100.0;
-                            if ui.add(egui::DragValue::new(&mut pct).speed(1.0).suffix(" %").range(0.0..=100.0)).changed() {
+                            if ui
+                                .add(
+                                    egui::DragValue::new(&mut pct)
+                                        .speed(1.0)
+                                        .suffix(" %")
+                                        .range(0.0..=100.0),
+                                )
+                                .changed()
+                            {
                                 state.vertex_crease_modal_weight = (pct / 100.0).clamp(0.0, 1.0);
                             }
                             ui.separator();
-                            if ui.button("Confirm (Enter)").clicked() { commit_vertex_crease = true; }
-                            if ui.button("Cancel (Esc)").clicked() { cancel_vertex_crease = true; }
+                            if ui.button("Confirm (Enter)").clicked() {
+                                commit_vertex_crease = true;
+                            }
+                            if ui.button("Cancel (Esc)").clicked() {
+                                cancel_vertex_crease = true;
+                            }
                         });
                     });
             });
 
-        if commit_vertex_crease { crate::modals::vertex_crease::commit(state); }
-        else if cancel_vertex_crease { crate::modals::vertex_crease::cancel(state); }
+        if commit_vertex_crease {
+            crate::modals::vertex_crease::commit(state);
+        } else if cancel_vertex_crease {
+            crate::modals::vertex_crease::cancel(state);
+        }
     }
 
     // 9. Hardware Kitbash / Insert Mesh HUD
@@ -574,26 +810,47 @@ pub fn render(state: &mut AppState) {
             .show(&ctx, |ui| {
                 egui::Frame::window(ui.style())
                     .fill(egui::Color32::from_rgba_premultiplied(20, 24, 30, 245))
-                    .stroke(egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(255, 180, 50)))
+                    .stroke(egui::Stroke::new(
+                        1.5_f32,
+                        egui::Color32::from_rgb(255, 180, 50),
+                    ))
                     .rounding(egui::Rounding::same(6.0))
                     .inner_margin(egui::Margin::symmetric(14.0, 7.0))
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("HARDWARE INSERT").strong().color(egui::Color32::from_rgb(255, 180, 50)));
+                            ui.label(
+                                egui::RichText::new("HARDWARE INSERT")
+                                    .strong()
+                                    .color(egui::Color32::from_rgb(255, 180, 50)),
+                            );
                             ui.separator();
                             ui.label(egui::RichText::new(hw_label).strong());
                             ui.label(format!("Scale: {:.2}x", scale));
-                            let mode_txt = if is_sub { "Socket Cut (B)" } else { "Union (B)" };
-                            if ui.button(mode_txt).clicked() { toggle_sub = true; }
+                            let mode_txt = if is_sub {
+                                "Socket Cut (B)"
+                            } else {
+                                "Union (B)"
+                            };
+                            if ui.button(mode_txt).clicked() {
+                                toggle_sub = true;
+                            }
                             ui.separator();
-                            ui.label(egui::RichText::new("LMB: Drop | Wheel: Scale | Tab: Cycle").weak().small());
-                            if ui.button("Exit (Esc)").clicked() { exit_kb = true; }
+                            ui.label(
+                                egui::RichText::new("LMB: Drop | Wheel: Scale | Tab: Cycle")
+                                    .weak()
+                                    .small(),
+                            );
+                            if ui.button("Exit (Esc)").clicked() {
+                                exit_kb = true;
+                            }
                         });
                     });
             });
 
         if toggle_sub {
-            if let Some(kb) = &mut state.kitbash_modal { kb.is_subtractive = !kb.is_subtractive; }
+            if let Some(kb) = &mut state.kitbash_modal {
+                kb.is_subtractive = !kb.is_subtractive;
+            }
         }
         if exit_kb {
             state.kitbash_modal = None;

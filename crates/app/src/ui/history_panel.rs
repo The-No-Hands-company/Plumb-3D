@@ -6,12 +6,20 @@ pub fn draw_history_inner(state: &mut AppState, ui: &mut egui::Ui) {
         ui.heading("Action History");
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             let redo_enabled = state.history.can_redo();
-            if ui.add_enabled(redo_enabled, egui::Button::new("Redo >")).on_hover_text("Redo next action (Ctrl+Y)").clicked() {
+            if ui
+                .add_enabled(redo_enabled, egui::Button::new("Redo >"))
+                .on_hover_text("Redo next action (Ctrl+Y)")
+                .clicked()
+            {
                 let _ = state.history.redo(&mut state.scene);
                 state.window.request_redraw();
             }
             let undo_enabled = state.history.can_undo();
-            if ui.add_enabled(undo_enabled, egui::Button::new("< Undo")).on_hover_text("Undo previous action (Ctrl+Z)").clicked() {
+            if ui
+                .add_enabled(undo_enabled, egui::Button::new("< Undo"))
+                .on_hover_text("Undo previous action (Ctrl+Z)")
+                .clicked()
+            {
                 let _ = state.history.undo(&mut state.scene);
                 state.window.request_redraw();
             }
@@ -24,7 +32,11 @@ pub fn draw_history_inner(state: &mut AppState, ui: &mut egui::Ui) {
     let total_undo = undo_names.len();
 
     if total_undo == 0 && redo_names.is_empty() {
-        ui.label(egui::RichText::new("No history recorded yet.").weak().italics());
+        ui.label(
+            egui::RichText::new("No history recorded yet.")
+                .weak()
+                .italics(),
+        );
         ui.label(egui::RichText::new("Actions such as adding primitives, extruding, insetting, or beveling will appear here.").small().weak());
         return;
     }
@@ -39,11 +51,17 @@ pub fn draw_history_inner(state: &mut AppState, ui: &mut egui::Ui) {
             // 1. Initial Scene State
             let is_at_start = total_undo == 0;
             let start_label = if is_at_start {
-                egui::RichText::new("[0] Initial Scene State (Current)").strong().color(egui::Color32::from_rgb(226, 179, 87))
+                egui::RichText::new("[0] Initial Scene State (Current)")
+                    .strong()
+                    .color(egui::Color32::from_rgb(226, 179, 87))
             } else {
                 egui::RichText::new("[0] Initial Scene State").color(egui::Color32::LIGHT_GRAY)
             };
-            if ui.selectable_label(is_at_start, start_label).on_hover_text("Roll back entire scene to initial state").clicked() {
+            if ui
+                .selectable_label(is_at_start, start_label)
+                .on_hover_text("Roll back entire scene to initial state")
+                .clicked()
+            {
                 if total_undo > 0 {
                     jump_initial = true;
                 }
@@ -59,12 +77,18 @@ pub fn draw_history_inner(state: &mut AppState, ui: &mut egui::Ui) {
                 };
 
                 let label = if is_current {
-                    egui::RichText::new(text).strong().color(egui::Color32::from_rgb(100, 200, 255))
+                    egui::RichText::new(text)
+                        .strong()
+                        .color(egui::Color32::from_rgb(100, 200, 255))
                 } else {
                     egui::RichText::new(text).color(egui::Color32::from_rgb(220, 225, 235))
                 };
 
-                if ui.selectable_label(is_current, label).on_hover_text(format!("Click to jump directly back to step {}", i + 1)).clicked() {
+                if ui
+                    .selectable_label(is_current, label)
+                    .on_hover_text(format!("Click to jump directly back to step {}", i + 1))
+                    .clicked()
+                {
                     if i + 1 < total_undo || !redo_names.is_empty() {
                         jump_target = Some(i);
                     }
@@ -75,13 +99,23 @@ pub fn draw_history_inner(state: &mut AppState, ui: &mut egui::Ui) {
             if !redo_names.is_empty() {
                 ui.add_space(4.0);
                 ui.separator();
-                ui.label(egui::RichText::new("Undone Actions (Click to Redo):").small().weak());
+                ui.label(
+                    egui::RichText::new("Undone Actions (Click to Redo):")
+                        .small()
+                        .weak(),
+                );
 
                 for (j, name) in redo_names.iter().enumerate() {
                     let text = format!("[+{}] {}", j + 1, name);
-                    let label = egui::RichText::new(text).italics().color(egui::Color32::from_rgb(140, 150, 165));
+                    let label = egui::RichText::new(text)
+                        .italics()
+                        .color(egui::Color32::from_rgb(140, 150, 165));
 
-                    if ui.button(label).on_hover_text("Click to redo forward to this step").clicked() {
+                    if ui
+                        .button(label)
+                        .on_hover_text("Click to redo forward to this step")
+                        .clicked()
+                    {
                         redo_steps = Some(j + 1);
                     }
                 }

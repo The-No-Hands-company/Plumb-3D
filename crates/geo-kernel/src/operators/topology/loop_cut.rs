@@ -17,34 +17,35 @@ impl Mesh {
         let mut faces_to_split: Vec<(FaceKey, EdgeKey)> = Vec::new();
         let mut visited_faces = HashSet::new();
 
-        let explore_direction = |start_he: HalfEdgeKey,
-                                     faces_to_split: &mut Vec<(FaceKey, EdgeKey)>,
-                                     visited_faces: &mut HashSet<FaceKey>| {
-            let mut curr_he = start_he;
-            loop {
-                let f_key = match self.half_edges[curr_he].face {
-                    Some(fk) => fk,
-                    None => break,
-                };
+        let explore_direction =
+            |start_he: HalfEdgeKey,
+             faces_to_split: &mut Vec<(FaceKey, EdgeKey)>,
+             visited_faces: &mut HashSet<FaceKey>| {
+                let mut curr_he = start_he;
+                loop {
+                    let f_key = match self.half_edges[curr_he].face {
+                        Some(fk) => fk,
+                        None => break,
+                    };
 
-                if visited_faces.contains(&f_key) {
-                    break;
+                    if visited_faces.contains(&f_key) {
+                        break;
+                    }
+
+                    let verts = self.face_vertices(f_key);
+                    if verts.len() != 4 {
+                        break;
+                    }
+
+                    visited_faces.insert(f_key);
+                    faces_to_split.push((f_key, self.half_edges[curr_he].edge));
+
+                    let next1 = self.half_edges[curr_he].next;
+                    let opp_he = self.half_edges[next1].next;
+                    let twin_he = self.half_edges[opp_he].twin;
+                    curr_he = twin_he;
                 }
-
-                let verts = self.face_vertices(f_key);
-                if verts.len() != 4 {
-                    break;
-                }
-
-                visited_faces.insert(f_key);
-                faces_to_split.push((f_key, self.half_edges[curr_he].edge));
-
-                let next1 = self.half_edges[curr_he].next;
-                let opp_he = self.half_edges[next1].next;
-                let twin_he = self.half_edges[opp_he].twin;
-                curr_he = twin_he;
-            }
-        };
+            };
 
         explore_direction(h1_key, &mut faces_to_split, &mut visited_faces);
         explore_direction(h2_key, &mut faces_to_split, &mut visited_faces);
@@ -71,7 +72,12 @@ impl Mesh {
     }
 
     /// Insert multiple evenly spaced or slide-biased edge loops (Blender Loop Cut N-cuts).
-    pub fn loop_cut_multi(&mut self, edge_key: EdgeKey, cuts: usize, factor: f32) -> Result<Vec<FaceKey>, MeshError> {
+    pub fn loop_cut_multi(
+        &mut self,
+        edge_key: EdgeKey,
+        cuts: usize,
+        factor: f32,
+    ) -> Result<Vec<FaceKey>, MeshError> {
         if cuts <= 1 {
             return self.loop_cut(edge_key, factor);
         }
@@ -96,7 +102,12 @@ impl Mesh {
 
             // Find the continuing quad edge in the remaining right half
             if let Some(&f2) = new_faces.last() {
-                if let Some(next_ek) = self.face_half_edges(f2).iter().map(|&h| self.half_edges[h].edge).find(|&ek| ek != curr_edge) {
+                if let Some(next_ek) = self
+                    .face_half_edges(f2)
+                    .iter()
+                    .map(|&h| self.half_edges[h].edge)
+                    .find(|&ek| ek != curr_edge)
+                {
                     curr_edge = next_ek;
                 }
             }
@@ -183,7 +194,12 @@ impl Mesh {
     }
 
     /// Computes multi-cut preview lines for all N cuts simultaneously.
-    pub fn get_loop_cut_multi_preview(&self, edge_key: EdgeKey, cuts: usize, factor: f32) -> Vec<(Vec3, Vec3)> {
+    pub fn get_loop_cut_multi_preview(
+        &self,
+        edge_key: EdgeKey,
+        cuts: usize,
+        factor: f32,
+    ) -> Vec<(Vec3, Vec3)> {
         if cuts <= 1 {
             return self.get_loop_cut_preview(edge_key, factor);
         }

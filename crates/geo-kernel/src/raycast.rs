@@ -63,7 +63,12 @@ impl Mesh {
     }
 
     /// Perform a raycast with optional backface culling.
-    pub fn raycast_backface_culled(&self, world_ray: &Ray, model_matrix: &Mat4, cull_backfaces: bool) -> Option<RaycastHit> {
+    pub fn raycast_backface_culled(
+        &self,
+        world_ray: &Ray,
+        model_matrix: &Mat4,
+        cull_backfaces: bool,
+    ) -> Option<RaycastHit> {
         let inv_model = model_matrix.inverse();
         let local_origin = inv_model.transform_point3(world_ray.origin);
         let local_dir = inv_model.transform_vector3(world_ray.direction).normalize();
@@ -90,7 +95,9 @@ impl Mesh {
                 let p1 = self.vertices[v_keys[i]].position;
                 let p2 = self.vertices[v_keys[i + 1]].position;
 
-                if let Some(t_local) = Self::ray_triangle_intersect(local_origin, local_dir, p0, p1, p2) {
+                if let Some(t_local) =
+                    Self::ray_triangle_intersect(local_origin, local_dir, p0, p1, p2)
+                {
                     let hit_point_local = local_origin + local_dir * t_local;
                     let hit_point_world = model_matrix.transform_point3(hit_point_local);
                     let dist = (hit_point_world - world_ray.origin).length();
@@ -117,12 +124,23 @@ impl Mesh {
     }
 
     /// Pick the closest vertex to a 3D ray within a screen/world threshold
-    pub fn pick_vertex(&self, world_ray: &Ray, model_matrix: &Mat4, max_distance: f32) -> Option<VertexKey> {
+    pub fn pick_vertex(
+        &self,
+        world_ray: &Ray,
+        model_matrix: &Mat4,
+        max_distance: f32,
+    ) -> Option<VertexKey> {
         self.pick_vertex_occluded(world_ray, model_matrix, max_distance, false)
     }
 
     /// Pick the closest vertex with optional depth occlusion and backface culling.
-    pub fn pick_vertex_occluded(&self, world_ray: &Ray, model_matrix: &Mat4, max_distance: f32, occlude: bool) -> Option<VertexKey> {
+    pub fn pick_vertex_occluded(
+        &self,
+        world_ray: &Ray,
+        model_matrix: &Mat4,
+        max_distance: f32,
+        occlude: bool,
+    ) -> Option<VertexKey> {
         let inv_model = model_matrix.inverse();
         let local_origin = inv_model.transform_point3(world_ray.origin);
         let local_dir = inv_model.transform_vector3(world_ray.direction).normalize();
@@ -153,7 +171,9 @@ impl Mesh {
                 if occlude {
                     // Ensure vertex belongs to at least one front-facing polygon
                     let has_front_face = self.vertex_faces(vk).iter().any(|&fk| {
-                        self.faces.get(fk).is_some_and(|f| f.normal.dot(local_dir) < 0.0)
+                        self.faces
+                            .get(fk)
+                            .is_some_and(|f| f.normal.dot(local_dir) < 0.0)
                     });
                     if !has_front_face {
                         continue;
@@ -173,12 +193,23 @@ impl Mesh {
     }
 
     /// Pick the closest edge to a 3D ray within a distance threshold
-    pub fn pick_edge(&self, world_ray: &Ray, model_matrix: &Mat4, max_distance: f32) -> Option<EdgeKey> {
+    pub fn pick_edge(
+        &self,
+        world_ray: &Ray,
+        model_matrix: &Mat4,
+        max_distance: f32,
+    ) -> Option<EdgeKey> {
         self.pick_edge_occluded(world_ray, model_matrix, max_distance, false)
     }
 
     /// Pick the closest edge with optional depth occlusion and backface culling.
-    pub fn pick_edge_occluded(&self, world_ray: &Ray, model_matrix: &Mat4, max_distance: f32, occlude: bool) -> Option<EdgeKey> {
+    pub fn pick_edge_occluded(
+        &self,
+        world_ray: &Ray,
+        model_matrix: &Mat4,
+        max_distance: f32,
+        occlude: bool,
+    ) -> Option<EdgeKey> {
         let inv_model = model_matrix.inverse();
         let local_origin = inv_model.transform_point3(world_ray.origin);
         let local_dir = inv_model.transform_vector3(world_ray.direction).normalize();
@@ -215,8 +246,12 @@ impl Mesh {
                     // Check if either adjacent face of this edge is front-facing
                     let f_left = he.face;
                     let f_right = self.half_edges.get(he.twin).and_then(|th| th.face);
-                    let left_front = f_left.and_then(|fk| self.faces.get(fk)).is_some_and(|f| f.normal.dot(local_dir) < 0.0);
-                    let right_front = f_right.and_then(|fk| self.faces.get(fk)).is_some_and(|f| f.normal.dot(local_dir) < 0.0);
+                    let left_front = f_left
+                        .and_then(|fk| self.faces.get(fk))
+                        .is_some_and(|f| f.normal.dot(local_dir) < 0.0);
+                    let right_front = f_right
+                        .and_then(|fk| self.faces.get(fk))
+                        .is_some_and(|f| f.normal.dot(local_dir) < 0.0);
 
                     if !left_front && !right_front {
                         continue; // Both faces back-facing

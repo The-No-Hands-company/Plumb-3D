@@ -28,14 +28,22 @@ pub fn handle_view_camera_key(state: &mut AppState, key_code: KeyCode) -> bool {
         }
         KeyCode::Numpad1 => {
             state.camera.projection = CameraProjection::Orthographic;
-            state.camera.yaw = if state.ctrl_pressed { std::f32::consts::PI } else { 0.0 };
+            state.camera.yaw = if state.ctrl_pressed {
+                std::f32::consts::PI
+            } else {
+                0.0
+            };
             state.camera.pitch = 0.0;
             state.window.request_redraw();
             true
         }
         KeyCode::Numpad3 => {
             state.camera.projection = CameraProjection::Orthographic;
-            state.camera.yaw = if state.ctrl_pressed { std::f32::consts::FRAC_PI_2 } else { -std::f32::consts::FRAC_PI_2 };
+            state.camera.yaw = if state.ctrl_pressed {
+                std::f32::consts::FRAC_PI_2
+            } else {
+                -std::f32::consts::FRAC_PI_2
+            };
             state.camera.pitch = 0.0;
             state.window.request_redraw();
             true
@@ -43,7 +51,11 @@ pub fn handle_view_camera_key(state: &mut AppState, key_code: KeyCode) -> bool {
         KeyCode::Numpad7 => {
             state.camera.projection = CameraProjection::Orthographic;
             state.camera.yaw = 0.0;
-            state.camera.pitch = if state.ctrl_pressed { -std::f32::consts::FRAC_PI_2 + 0.001 } else { std::f32::consts::FRAC_PI_2 - 0.001 };
+            state.camera.pitch = if state.ctrl_pressed {
+                -std::f32::consts::FRAC_PI_2 + 0.001
+            } else {
+                std::f32::consts::FRAC_PI_2 - 0.001
+            };
             state.window.request_redraw();
             true
         }
@@ -58,9 +70,15 @@ pub fn handle_view_camera_key(state: &mut AppState, key_code: KeyCode) -> bool {
         KeyCode::Numpad0 => {
             if state.ctrl_pressed {
                 // Ctrl + Numpad 0: Align Active Camera to Current View
-                let cam = state.active_camera_node
+                let cam = state
+                    .active_camera_node
                     .or_else(|| {
-                        state.selected_node.filter(|&id| matches!(state.scene.nodes.get(id).map(|n| &n.data), Some(graph_engine::NodeData::Camera { .. })))
+                        state.selected_node.filter(|&id| {
+                            matches!(
+                                state.scene.nodes.get(id).map(|n| &n.data),
+                                Some(graph_engine::NodeData::Camera { .. })
+                            )
+                        })
                     })
                     .or_else(|| {
                         state.scene.nodes.iter().find_map(|(id, node)| {
@@ -93,8 +111,14 @@ pub fn handle_view_camera_key(state: &mut AppState, key_code: KeyCode) -> bool {
                 if state.active_camera_node.is_some() {
                     state.active_camera_node = None;
                 } else {
-                    let cam = state.selected_node
-                        .filter(|&id| matches!(state.scene.nodes.get(id).map(|n| &n.data), Some(graph_engine::NodeData::Camera { .. })))
+                    let cam = state
+                        .selected_node
+                        .filter(|&id| {
+                            matches!(
+                                state.scene.nodes.get(id).map(|n| &n.data),
+                                Some(graph_engine::NodeData::Camera { .. })
+                            )
+                        })
                         .or_else(|| {
                             state.scene.nodes.iter().find_map(|(id, node)| {
                                 if matches!(node.data, graph_engine::NodeData::Camera { .. }) {

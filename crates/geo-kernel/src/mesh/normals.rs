@@ -271,7 +271,10 @@ mod tests {
         // Stash the pristine cylindrical curvature normals
         cylinder.stash_normals();
         assert!(cylinder.stashed_normals.is_some());
-        assert_eq!(cylinder.stashed_normals.as_ref().unwrap().len(), cylinder.vertices.len());
+        assert_eq!(
+            cylinder.stashed_normals.as_ref().unwrap().len(),
+            cylinder.vertices.len()
+        );
 
         // Corrupt one vertex normal (simulating a messy boolean cut)
         let vk = cylinder.vertices.keys().next().unwrap();

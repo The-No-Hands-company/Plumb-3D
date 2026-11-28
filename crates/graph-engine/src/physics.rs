@@ -6,11 +6,11 @@
 //!
 //! Can be stepped interactively in real-time or baked directly into DCC keyframe tracks.
 
-use std::collections::HashMap;
-use core_math::{Quat, Transform, Vec3};
 use crate::animation::{AnimationManager, InterpolationMode};
 use crate::node::NodeId;
 use crate::scene::SceneGraph;
+use core_math::{Quat, Transform, Vec3};
+use std::collections::HashMap;
 
 /// Classification of rigid bodies in simulation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -45,7 +45,10 @@ impl CollisionShape {
                 let z = m.col(2).abs() * half_extents.z;
                 x + y + z
             }
-            CollisionShape::Cylinder { radius, half_height } => {
+            CollisionShape::Cylinder {
+                radius,
+                half_height,
+            } => {
                 let m = core_math::Mat3::from_quat(q);
                 let dy = m.col(1);
                 let h_contrib = dy.abs() * half_height;
@@ -241,7 +244,8 @@ impl PhysicsWorld {
                 if ang_speed > 1e-4 {
                     let axis = body.angular_velocity / ang_speed;
                     let delta_rot = Quat::from_axis_angle(axis, ang_speed * dt);
-                    node.local_transform.rotation = (delta_rot * node.local_transform.rotation).normalize();
+                    node.local_transform.rotation =
+                        (delta_rot * node.local_transform.rotation).normalize();
                 }
                 scene.mark_dirty(node_id);
             }
@@ -252,8 +256,16 @@ impl PhysicsWorld {
             for &node_id in &active_keys {
                 let (half_extents, restitution, friction) = {
                     let body = &self.bodies[&node_id];
-                    let rot = scene.nodes.get(node_id).map(|n| n.local_transform.rotation).unwrap_or(Quat::IDENTITY);
-                    (body.shape.half_extents_rotated(rot), body.restitution, body.friction)
+                    let rot = scene
+                        .nodes
+                        .get(node_id)
+                        .map(|n| n.local_transform.rotation)
+                        .unwrap_or(Quat::IDENTITY);
+                    (
+                        body.shape.half_extents_rotated(rot),
+                        body.restitution,
+                        body.friction,
+                    )
                 };
 
                 if let Some(node) = scene.nodes.get_mut(node_id) {

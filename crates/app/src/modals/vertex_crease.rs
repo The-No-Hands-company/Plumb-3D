@@ -64,7 +64,11 @@ pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>
         return false;
     }
     let dx = (position.x - state.vertex_crease_modal_start_mouse.0) as f32;
-    let start_w = state.vertex_crease_modal_original_weights.first().map(|&(_, w)| w).unwrap_or(0.0);
+    let start_w = state
+        .vertex_crease_modal_original_weights
+        .first()
+        .map(|&(_, w)| w)
+        .unwrap_or(0.0);
     state.vertex_crease_modal_weight = (start_w + dx * 0.005).clamp(0.0, 1.0);
     if let Some(sel_id) = state.selected_node {
         if let Some(node) = state.scene.nodes.get_mut(sel_id) {

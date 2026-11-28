@@ -24,16 +24,29 @@ pub fn draw_render_menu(state: &mut AppState, ui: &mut egui::Ui) {
             state.bake_state.show_dialog = true;
             ui.close_menu();
         }
-        if ui.button("Evaluate Hardware RT Core Acceleration...").clicked() {
+        if ui
+            .button("Evaluate Hardware RT Core Acceleration...")
+            .clicked()
+        {
             let report = render_pathtracer::evaluate_hardware_rt_speedup(150_000, (1920, 1080), 1);
             state.set_status_message(format!(
                 "RT Cores: {:.1}x Speedup (Est: {:.1} FPS @ 1080p, {:.0} MRays/s)",
-                report.speedup_factor, report.hardware_rt_fps_estimate, report.hardware_mrays_per_sec
+                report.speedup_factor,
+                report.hardware_rt_fps_estimate,
+                report.hardware_mrays_per_sec
             ));
             ui.close_menu();
         }
         ui.separator();
-        ui.label(egui::RichText::new("Dual Engines: Direct PBR & Path Tracer").size(11.0).color(egui::Color32::GRAY));
-        ui.label(egui::RichText::new("Pure Safe Rust + Rayon BVH").size(10.0).color(egui::Color32::DARK_GRAY));
+        ui.label(
+            egui::RichText::new("Dual Engines: Direct PBR & Path Tracer")
+                .size(11.0)
+                .color(egui::Color32::GRAY),
+        );
+        ui.label(
+            egui::RichText::new("Pure Safe Rust + Rayon BVH")
+                .size(10.0)
+                .color(egui::Color32::DARK_GRAY),
+        );
     });
 }

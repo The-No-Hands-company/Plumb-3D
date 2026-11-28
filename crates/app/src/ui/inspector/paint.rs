@@ -24,10 +24,26 @@ pub fn draw_vertex_paint_tools(ui: &mut egui::Ui, state: &mut AppState, actions:
     egui::ComboBox::from_id_salt("vp_falloff_combo")
         .selected_text(format!("{:?}", state.vertex_paint_falloff))
         .show_ui(ui, |ui| {
-            ui.selectable_value(&mut state.vertex_paint_falloff, BrushFalloff::Smooth, "Smooth");
-            ui.selectable_value(&mut state.vertex_paint_falloff, BrushFalloff::Spherical, "Spherical");
-            ui.selectable_value(&mut state.vertex_paint_falloff, BrushFalloff::Linear, "Linear");
-            ui.selectable_value(&mut state.vertex_paint_falloff, BrushFalloff::Sharp, "Sharp");
+            ui.selectable_value(
+                &mut state.vertex_paint_falloff,
+                BrushFalloff::Smooth,
+                "Smooth",
+            );
+            ui.selectable_value(
+                &mut state.vertex_paint_falloff,
+                BrushFalloff::Spherical,
+                "Spherical",
+            );
+            ui.selectable_value(
+                &mut state.vertex_paint_falloff,
+                BrushFalloff::Linear,
+                "Linear",
+            );
+            ui.selectable_value(
+                &mut state.vertex_paint_falloff,
+                BrushFalloff::Sharp,
+                "Sharp",
+            );
         });
 
     if ui.button("Fill Mesh with Color").clicked() {
@@ -42,19 +58,55 @@ pub fn draw_texture_paint_tools(ui: &mut egui::Ui, state: &mut AppState) {
 
     ui.horizontal(|ui| {
         ui.label("Channel:");
-        ui.selectable_value(&mut state.texture_paint_brush.channel, PaintChannel::Albedo, "Albedo");
-        ui.selectable_value(&mut state.texture_paint_brush.channel, PaintChannel::Roughness, "Roughness");
-        ui.selectable_value(&mut state.texture_paint_brush.channel, PaintChannel::Metallic, "Metallic");
-        ui.selectable_value(&mut state.texture_paint_brush.channel, PaintChannel::Height, "Height");
+        ui.selectable_value(
+            &mut state.texture_paint_brush.channel,
+            PaintChannel::Albedo,
+            "Albedo",
+        );
+        ui.selectable_value(
+            &mut state.texture_paint_brush.channel,
+            PaintChannel::Roughness,
+            "Roughness",
+        );
+        ui.selectable_value(
+            &mut state.texture_paint_brush.channel,
+            PaintChannel::Metallic,
+            "Metallic",
+        );
+        ui.selectable_value(
+            &mut state.texture_paint_brush.channel,
+            PaintChannel::Height,
+            "Height",
+        );
     });
 
     ui.horizontal(|ui| {
         ui.label("Blend:");
-        ui.selectable_value(&mut state.texture_paint_brush.blend_mode, PaintBlendMode::Mix, "Mix");
-        ui.selectable_value(&mut state.texture_paint_brush.blend_mode, PaintBlendMode::Add, "Add");
-        ui.selectable_value(&mut state.texture_paint_brush.blend_mode, PaintBlendMode::Multiply, "Multiply");
-        ui.selectable_value(&mut state.texture_paint_brush.blend_mode, PaintBlendMode::Screen, "Screen");
-        ui.selectable_value(&mut state.texture_paint_brush.blend_mode, PaintBlendMode::Erase, "Erase");
+        ui.selectable_value(
+            &mut state.texture_paint_brush.blend_mode,
+            PaintBlendMode::Mix,
+            "Mix",
+        );
+        ui.selectable_value(
+            &mut state.texture_paint_brush.blend_mode,
+            PaintBlendMode::Add,
+            "Add",
+        );
+        ui.selectable_value(
+            &mut state.texture_paint_brush.blend_mode,
+            PaintBlendMode::Multiply,
+            "Multiply",
+        );
+        ui.selectable_value(
+            &mut state.texture_paint_brush.blend_mode,
+            PaintBlendMode::Screen,
+            "Screen",
+        );
+        ui.selectable_value(
+            &mut state.texture_paint_brush.blend_mode,
+            PaintBlendMode::Erase,
+            "Erase",
+        );
     });
 
     let mut rgb = [
@@ -73,7 +125,10 @@ pub fn draw_texture_paint_tools(ui: &mut egui::Ui, state: &mut AppState) {
 
     ui.add(egui::Slider::new(&mut state.texture_paint_brush.radius, 0.02..=2.0).text("Radius"));
     ui.add(egui::Slider::new(&mut state.texture_paint_brush.strength, 0.01..=1.0).text("Strength"));
-    ui.add(egui::Slider::new(&mut state.texture_paint_brush.bleed_pixels, 0..=8).text("Seam Bleed (px)"));
+    ui.add(
+        egui::Slider::new(&mut state.texture_paint_brush.bleed_pixels, 0..=8)
+            .text("Seam Bleed (px)"),
+    );
 
     ui.horizontal(|ui| {
         ui.label("Symmetry:");
@@ -87,10 +142,16 @@ pub fn draw_texture_paint_tools(ui: &mut egui::Ui, state: &mut AppState) {
         ui.horizontal(|ui| {
             if !has_canvas {
                 if ui.button("Create 1024 Canvas").clicked() {
-                    state.paint_textures.insert(sel_id, geo_kernel::PaintTexture::new(1024, 1024, [220, 220, 220, 255]));
+                    state.paint_textures.insert(
+                        sel_id,
+                        geo_kernel::PaintTexture::new(1024, 1024, [220, 220, 220, 255]),
+                    );
                 }
                 if ui.button("Create 2048 Canvas").clicked() {
-                    state.paint_textures.insert(sel_id, geo_kernel::PaintTexture::new(2048, 2048, [220, 220, 220, 255]));
+                    state.paint_textures.insert(
+                        sel_id,
+                        geo_kernel::PaintTexture::new(2048, 2048, [220, 220, 220, 255]),
+                    );
                 }
             } else if let Some(tex) = state.paint_textures.get_mut(&sel_id) {
                 ui.label(format!("Canvas: {}x{}", tex.width, tex.height));

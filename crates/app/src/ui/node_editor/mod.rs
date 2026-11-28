@@ -41,13 +41,22 @@ pub fn draw_node_editor_inner(state: &mut AppState, ui: &mut egui::Ui) {
 
         ui.separator();
 
-        if ui.button("Evaluate to Viewport").on_hover_text("Evaluate geometry DAG and sync into active scene mesh").clicked() {
+        if ui
+            .button("Evaluate to Viewport")
+            .on_hover_text("Evaluate geometry DAG and sync into active scene mesh")
+            .clicked()
+        {
             match state.geo_node_graph.evaluate() {
                 Ok(Some(mesh)) => {
                     state.node_canvas_state.eval_error = None;
                     if let Some(sel_id) = state.selected_node {
                         if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                            if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                            if let NodeData::Mesh {
+                                base_mesh,
+                                cached_render_mesh,
+                                ..
+                            } = &mut node.data
+                            {
                                 *base_mesh = mesh;
                                 *cached_render_mesh = None;
                             }
@@ -64,15 +73,21 @@ pub fn draw_node_editor_inner(state: &mut AppState, ui: &mut egui::Ui) {
                     state.sync_gpu_meshes();
                 }
                 Ok(None) => {
-                    state.node_canvas_state.eval_error = Some("Graph has no output geometry".to_string());
+                    state.node_canvas_state.eval_error =
+                        Some("Graph has no output geometry".to_string());
                 }
                 Err(err) => {
-                    state.node_canvas_state.eval_error = Some(format!("Evaluation failed: {:?}", err));
+                    state.node_canvas_state.eval_error =
+                        Some(format!("Evaluation failed: {:?}", err));
                 }
             }
         }
 
-        if ui.button("Reset Graph").on_hover_text("Reset to standard procedural starter graph").clicked() {
+        if ui
+            .button("Reset Graph")
+            .on_hover_text("Reset to standard procedural starter graph")
+            .clicked()
+        {
             state.geo_node_graph = geo_nodes::GeoNodeGraph::default();
             state.node_canvas_state = NodeCanvasState::default();
         }
@@ -85,7 +100,10 @@ pub fn draw_node_editor_inner(state: &mut AppState, ui: &mut egui::Ui) {
         ui.label(format!("Nodes: {} | Links: {}", node_count, link_count));
 
         if let Some(ref err) = state.node_canvas_state.eval_error {
-            ui.colored_label(egui::Color32::from_rgb(255, 100, 100), format!("Error: {}", err));
+            ui.colored_label(
+                egui::Color32::from_rgb(255, 100, 100),
+                format!("Error: {}", err),
+            );
         }
     });
 

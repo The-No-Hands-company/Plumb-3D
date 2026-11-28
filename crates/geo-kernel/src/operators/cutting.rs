@@ -25,17 +25,15 @@ impl Mesh {
         let mut cut_cache: HashMap<(VertexKey, VertexKey), (Vec3, Vec2)> = HashMap::new();
         let mut cut_edges_for_cap: Vec<(VertexKey, VertexKey)> = Vec::new();
 
-        let dist = |pos: Vec3| -> f32 {
-            (pos - plane_point).dot(normal)
-        };
+        let dist = |pos: Vec3| -> f32 { (pos - plane_point).dot(normal) };
 
         let get_or_calc_cut = |mesh: &Mesh,
-                                   u: VertexKey,
-                                   v: VertexKey,
-                                   d_u: f32,
-                                   d_v: f32,
-                                   cut_cache: &mut HashMap<(VertexKey, VertexKey), (Vec3, Vec2)>,
-                                   cap_edges: &mut Vec<(VertexKey, VertexKey)>|
+                               u: VertexKey,
+                               v: VertexKey,
+                               d_u: f32,
+                               d_v: f32,
+                               cut_cache: &mut HashMap<(VertexKey, VertexKey), (Vec3, Vec2)>,
+                               cap_edges: &mut Vec<(VertexKey, VertexKey)>|
          -> PolyVert {
             let key = if u < v { (u, v) } else { (v, u) };
             if let std::collections::hash_map::Entry::Vacant(e) = cut_cache.entry(key) {
@@ -195,14 +193,21 @@ impl Mesh {
                     let pos_b = cut_cache[&b].0 - centroid;
                     let angle_a = (pos_a.dot(v_axis)).atan2(pos_a.dot(u_axis));
                     let angle_b = (pos_b.dot(v_axis)).atan2(pos_b.dot(u_axis));
-                    angle_a.partial_cmp(&angle_b).unwrap_or(std::cmp::Ordering::Equal)
+                    angle_a
+                        .partial_cmp(&angle_b)
+                        .unwrap_or(std::cmp::Ordering::Equal)
                 });
 
                 if clear_negative {
                     unique_cut_keys.reverse();
                 }
 
-                cap_poly = Some(unique_cut_keys.into_iter().map(|k| PolyVert::Cut(k.0, k.1)).collect());
+                cap_poly = Some(
+                    unique_cut_keys
+                        .into_iter()
+                        .map(|k| PolyVert::Cut(k.0, k.1))
+                        .collect(),
+                );
             }
         }
 
@@ -270,7 +275,10 @@ impl Mesh {
         start: CutPoint,
         end: CutPoint,
     ) -> Result<(FaceKey, FaceKey, VertexKey, VertexKey), MeshError> {
-        let _ = self.faces.get(face_key).ok_or(MeshError::InvalidFace(face_key))?;
+        let _ = self
+            .faces
+            .get(face_key)
+            .ok_or(MeshError::InvalidFace(face_key))?;
 
         // 1. Resolve start vertex
         let v_start = match start {
@@ -280,9 +288,7 @@ impl Mesh {
                 }
                 vk
             }
-            CutPoint::Edge(ek, t) => {
-                self.split_edge(ek, t.clamp(0.01, 0.99))?
-            }
+            CutPoint::Edge(ek, t) => self.split_edge(ek, t.clamp(0.01, 0.99))?,
         };
 
         // 2. Resolve end vertex
@@ -293,24 +299,32 @@ impl Mesh {
                 }
                 vk
             }
-            CutPoint::Edge(ek, t) => {
-                self.split_edge(ek, t.clamp(0.01, 0.99))?
-            }
+            CutPoint::Edge(ek, t) => self.split_edge(ek, t.clamp(0.01, 0.99))?,
         };
 
         if v_start == v_end {
-            return Err(MeshError::InvariantFailed("Cannot knife cut to the same vertex".into()));
+            return Err(MeshError::InvariantFailed(
+                "Cannot knife cut to the same vertex".into(),
+            ));
         }
 
         // 3. Find the face that contains both v_start and v_end
-        let target_face = self.faces.iter().find_map(|(fk, _)| {
-            let verts = self.face_vertices(fk);
-            if verts.contains(&v_start) && verts.contains(&v_end) {
-                Some(fk)
-            } else {
-                None
-            }
-        }).ok_or_else(|| MeshError::InvariantFailed("Could not find common face containing both cut vertices".into()))?;
+        let target_face = self
+            .faces
+            .iter()
+            .find_map(|(fk, _)| {
+                let verts = self.face_vertices(fk);
+                if verts.contains(&v_start) && verts.contains(&v_end) {
+                    Some(fk)
+                } else {
+                    None
+                }
+            })
+            .ok_or_else(|| {
+                MeshError::InvariantFailed(
+                    "Could not find common face containing both cut vertices".into(),
+                )
+            })?;
 
         // 4. Connect vertices to split the face
         let (f1, f2) = self.connect_vertices(target_face, v_start, v_end)?;

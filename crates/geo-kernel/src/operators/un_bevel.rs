@@ -102,7 +102,9 @@ mod tests {
     fn test_un_bevel_chamfer_face() {
         let mut cube = Primitives::create_cube(2.0);
         let edge = cube.edges.keys().next().unwrap();
-        let bevel_faces = cube.bevel_edge_with_segments(edge, 0.2, 1).expect("bevel edge");
+        let bevel_faces = cube
+            .bevel_edge_with_segments(edge, 0.2, 1)
+            .expect("bevel edge");
         assert_eq!(bevel_faces.len(), 1);
 
         let un_beveled = cube.un_bevel_faces(&bevel_faces).expect("un-bevel faces");

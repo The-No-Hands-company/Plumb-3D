@@ -17,14 +17,17 @@ pub fn toggle_workplane_align(state: &mut AppState) {
         if let Some(node) = state.scene.nodes.get(sel_id) {
             if let NodeData::Mesh { base_mesh, .. } = &node.data {
                 // If a face is selected in Edit mode, align directly to that face
-                if state.interaction_mode == InteractionMode::Edit && !state.selected_faces.is_empty() {
+                if state.interaction_mode == InteractionMode::Edit
+                    && !state.selected_faces.is_empty()
+                {
                     let &fk = state.selected_faces.iter().next().unwrap();
                     let local_centroid = base_mesh.face_centroid(fk);
                     let local_normal = base_mesh.faces[fk].normal;
 
                     let world_mat = node.local_transform.to_matrix();
                     let world_pos = world_mat.transform_point3(local_centroid);
-                    let world_normal = (node.local_transform.rotation * local_normal).normalize_or_zero();
+                    let world_normal =
+                        (node.local_transform.rotation * local_normal).normalize_or_zero();
 
                     state.workplane = Workplane::from_point_and_normal(world_pos, world_normal);
                     state.set_status_message("Workplane aligned to selected Face (Alt+W to reset)");
@@ -63,7 +66,8 @@ pub fn symmetrize_active(state: &mut AppState) {
         if let Some(node) = state.scene.nodes.get(sel_id) {
             let inv_mat = node.local_transform.to_matrix().inverse();
             let local_orig = inv_mat.transform_point3(state.workplane.origin);
-            let local_norm = (node.local_transform.rotation.conjugate() * state.workplane.normal).normalize_or_zero();
+            let local_norm = (node.local_transform.rotation.conjugate() * state.workplane.normal)
+                .normalize_or_zero();
             (local_orig, local_norm)
         } else {
             (Vec3::ZERO, Vec3::X)

@@ -1,5 +1,7 @@
 use crate::ui::actions::UiActions;
-use geo_kernel::{BrushAlphaTexture, BrushFalloff, DyntopoMode, SculptBrush, SculptSettings, DyntopoSettings};
+use geo_kernel::{
+    BrushAlphaTexture, BrushFalloff, DyntopoMode, DyntopoSettings, SculptBrush, SculptSettings,
+};
 
 pub fn draw_sculpt_tools(
     ui: &mut egui::Ui,
@@ -13,22 +15,78 @@ pub fn draw_sculpt_tools(
     ui.heading("Sculpt Brushes (Blender / ZBrush)");
     ui.horizontal_wrapped(|ui| {
         let b = sculpt_settings.brush;
-        if ui.selectable_label(b == SculptBrush::Draw, "Draw").clicked() { sculpt_settings.brush = SculptBrush::Draw; }
-        if ui.selectable_label(b == SculptBrush::Clay, "Clay").clicked() { sculpt_settings.brush = SculptBrush::Clay; }
-        if ui.selectable_label(b == SculptBrush::Smooth, "Smooth").clicked() { sculpt_settings.brush = SculptBrush::Smooth; }
-        if ui.selectable_label(b == SculptBrush::Inflate, "Inflate").clicked() { sculpt_settings.brush = SculptBrush::Inflate; }
-        if ui.selectable_label(b == SculptBrush::Flatten, "Flatten").clicked() { sculpt_settings.brush = SculptBrush::Flatten; }
-        if ui.selectable_label(b == SculptBrush::Grab, "Grab").clicked() { sculpt_settings.brush = SculptBrush::Grab; }
-        if ui.selectable_label(b == SculptBrush::Pinch, "Pinch").clicked() { sculpt_settings.brush = SculptBrush::Pinch; }
-        if ui.selectable_label(b == SculptBrush::Crease, "Crease").clicked() { sculpt_settings.brush = SculptBrush::Crease; }
-        if ui.selectable_label(b == SculptBrush::SnakeHook, "Snake").clicked() { sculpt_settings.brush = SculptBrush::SnakeHook; }
-        if ui.selectable_label(b == SculptBrush::Mask, "Mask (M)").clicked() { sculpt_settings.brush = SculptBrush::Mask; }
+        if ui
+            .selectable_label(b == SculptBrush::Draw, "Draw")
+            .clicked()
+        {
+            sculpt_settings.brush = SculptBrush::Draw;
+        }
+        if ui
+            .selectable_label(b == SculptBrush::Clay, "Clay")
+            .clicked()
+        {
+            sculpt_settings.brush = SculptBrush::Clay;
+        }
+        if ui
+            .selectable_label(b == SculptBrush::Smooth, "Smooth")
+            .clicked()
+        {
+            sculpt_settings.brush = SculptBrush::Smooth;
+        }
+        if ui
+            .selectable_label(b == SculptBrush::Inflate, "Inflate")
+            .clicked()
+        {
+            sculpt_settings.brush = SculptBrush::Inflate;
+        }
+        if ui
+            .selectable_label(b == SculptBrush::Flatten, "Flatten")
+            .clicked()
+        {
+            sculpt_settings.brush = SculptBrush::Flatten;
+        }
+        if ui
+            .selectable_label(b == SculptBrush::Grab, "Grab")
+            .clicked()
+        {
+            sculpt_settings.brush = SculptBrush::Grab;
+        }
+        if ui
+            .selectable_label(b == SculptBrush::Pinch, "Pinch")
+            .clicked()
+        {
+            sculpt_settings.brush = SculptBrush::Pinch;
+        }
+        if ui
+            .selectable_label(b == SculptBrush::Crease, "Crease")
+            .clicked()
+        {
+            sculpt_settings.brush = SculptBrush::Crease;
+        }
+        if ui
+            .selectable_label(b == SculptBrush::SnakeHook, "Snake")
+            .clicked()
+        {
+            sculpt_settings.brush = SculptBrush::SnakeHook;
+        }
+        if ui
+            .selectable_label(b == SculptBrush::Mask, "Mask (M)")
+            .clicked()
+        {
+            sculpt_settings.brush = SculptBrush::Mask;
+        }
     });
 
     ui.horizontal(|ui| {
-        if ui.button("Invert Mask (Ctrl+I)").clicked() { actions.trigger_invert_sculpt_mask = true; }
-        if ui.button("Clear Mask (Alt+M)").clicked() { actions.trigger_clear_sculpt_mask = true; }
-        if ui.button("Smooth Mask").clicked() { actions.trigger_smooth_sculpt_mask = true; }
+        if ui.button("Invert Mask (Ctrl+I)").clicked() {
+            actions.trigger_invert_sculpt_mask = true;
+        }
+        if ui.button("Clear Mask (Alt+M)").clicked() {
+            actions.trigger_clear_sculpt_mask = true;
+        }
+        if ui.button("Smooth Mask").clicked() {
+            actions.trigger_smooth_sculpt_mask = true;
+        }
     });
 
     ui.add(egui::Slider::new(&mut sculpt_settings.radius, 0.05..=3.0).text("Radius"));
@@ -39,7 +97,11 @@ pub fn draw_sculpt_tools(
         .selected_text(format!("{:?}", sculpt_settings.falloff))
         .show_ui(ui, |ui| {
             ui.selectable_value(&mut sculpt_settings.falloff, BrushFalloff::Smooth, "Smooth");
-            ui.selectable_value(&mut sculpt_settings.falloff, BrushFalloff::Spherical, "Spherical");
+            ui.selectable_value(
+                &mut sculpt_settings.falloff,
+                BrushFalloff::Spherical,
+                "Spherical",
+            );
             ui.selectable_value(&mut sculpt_settings.falloff, BrushFalloff::Linear, "Linear");
             ui.selectable_value(&mut sculpt_settings.falloff, BrushFalloff::Sharp, "Sharp");
         });
@@ -48,9 +110,21 @@ pub fn draw_sculpt_tools(
         .selected_text(format!("{:?}", sculpt_settings.alpha))
         .show_ui(ui, |ui| {
             ui.selectable_value(&mut sculpt_settings.alpha, BrushAlphaTexture::None, "None");
-            ui.selectable_value(&mut sculpt_settings.alpha, BrushAlphaTexture::Tile, "Tile / Grid");
-            ui.selectable_value(&mut sculpt_settings.alpha, BrushAlphaTexture::Scales, "Scales / Cells");
-            ui.selectable_value(&mut sculpt_settings.alpha, BrushAlphaTexture::Noise, "Micro Noise");
+            ui.selectable_value(
+                &mut sculpt_settings.alpha,
+                BrushAlphaTexture::Tile,
+                "Tile / Grid",
+            );
+            ui.selectable_value(
+                &mut sculpt_settings.alpha,
+                BrushAlphaTexture::Scales,
+                "Scales / Cells",
+            );
+            ui.selectable_value(
+                &mut sculpt_settings.alpha,
+                BrushAlphaTexture::Noise,
+                "Micro Noise",
+            );
         });
 
     ui.horizontal(|ui| {
@@ -68,13 +142,29 @@ pub fn draw_sculpt_tools(
         if dyntopo.enabled {
             ui.horizontal(|ui| {
                 ui.label("Detail Size:");
-                ui.add(egui::DragValue::new(&mut dyntopo.detail_size).speed(0.01).range(0.01..=2.0));
+                ui.add(
+                    egui::DragValue::new(&mut dyntopo.detail_size)
+                        .speed(0.01)
+                        .range(0.01..=2.0),
+                );
             });
             ui.horizontal(|ui| {
                 ui.label("Refine Mode:");
-                ui.selectable_value(&mut dyntopo.mode, DyntopoMode::SubdivideCollapse, "Subdivide & Collapse");
-                ui.selectable_value(&mut dyntopo.mode, DyntopoMode::SubdivideOnly, "Subdivide Only");
-                ui.selectable_value(&mut dyntopo.mode, DyntopoMode::CollapseOnly, "Collapse Only");
+                ui.selectable_value(
+                    &mut dyntopo.mode,
+                    DyntopoMode::SubdivideCollapse,
+                    "Subdivide & Collapse",
+                );
+                ui.selectable_value(
+                    &mut dyntopo.mode,
+                    DyntopoMode::SubdivideOnly,
+                    "Subdivide Only",
+                );
+                ui.selectable_value(
+                    &mut dyntopo.mode,
+                    DyntopoMode::CollapseOnly,
+                    "Collapse Only",
+                );
             });
             ui.horizontal(|ui| {
                 ui.label("Collapse Ratio:");

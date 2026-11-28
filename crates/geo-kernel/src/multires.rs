@@ -43,7 +43,8 @@ impl MultiresMesh {
         // Pre-subdivide up to max_levels
         for l in 1..=max_l {
             let prev_mesh = &multires.levels[l - 1].mesh;
-            let sub_mesh = CatmullClarkModifier::subdivide_once(prev_mesh).unwrap_or_else(|_| prev_mesh.clone());
+            let sub_mesh = CatmullClarkModifier::subdivide_once(prev_mesh)
+                .unwrap_or_else(|_| prev_mesh.clone());
             multires.levels.push(MultiresLevel {
                 level: l,
                 mesh: sub_mesh,
@@ -57,7 +58,9 @@ impl MultiresMesh {
     /// Sets the active multi-resolution level for sculpting or viewport display
     pub fn set_active_level(&mut self, target_level: usize) -> Result<(), MeshError> {
         if target_level >= self.levels.len() {
-            return Err(MeshError::InvariantFailed("Requested multires level exceeds allocated depth".into()));
+            return Err(MeshError::InvariantFailed(
+                "Requested multires level exceeds allocated depth".into(),
+            ));
         }
 
         // 1. Cache displacement deltas from current level before switching
@@ -86,7 +89,8 @@ impl MultiresMesh {
         motion_delta: Option<Vec3>,
     ) -> usize {
         let active = &mut self.levels[self.current_level].mesh;
-        let affected = active.apply_sculpt_brush(hit_point, hit_normal, sculpt_settings, motion_delta);
+        let affected =
+            active.apply_sculpt_brush(hit_point, hit_normal, sculpt_settings, motion_delta);
         self.extract_current_deltas();
         affected
     }
@@ -136,7 +140,11 @@ impl MultiresMesh {
 
                 // Project delta into local tangent space
                 let n = v.normal;
-                let arbitrary = if n.y.abs() < 0.9 { vec3(0.0, 1.0, 0.0) } else { vec3(1.0, 0.0, 0.0) };
+                let arbitrary = if n.y.abs() < 0.9 {
+                    vec3(0.0, 1.0, 0.0)
+                } else {
+                    vec3(1.0, 0.0, 0.0)
+                };
                 let tangent = n.cross(arbitrary).normalize();
                 let bitangent = n.cross(tangent).normalize();
 
@@ -230,7 +238,9 @@ mod tests {
         assert!(!multires.levels[2].displacement_deltas.is_empty());
 
         // Drop back to Level 0 (base low-poly mesh preserved for rigging/animation)
-        multires.set_active_level(0).expect("Switch back to Level 0");
+        multires
+            .set_active_level(0)
+            .expect("Switch back to Level 0");
         assert_eq!(multires.current_level, 0);
         assert_eq!(multires.active_mesh().vertices.len(), 8);
     }

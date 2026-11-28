@@ -19,15 +19,22 @@ pub fn render(state: &mut AppState) {
                     for (_ek, edge) in &base_mesh.edges {
                         if edge.is_seam {
                             let he = &base_mesh.half_edges[edge.half_edge];
-                            let p0 = node.world_matrix.transform_point3(base_mesh.vertices[he.origin].position);
-                            let p1 = node.world_matrix.transform_point3(base_mesh.vertices[he.target].position);
+                            let p0 = node
+                                .world_matrix
+                                .transform_point3(base_mesh.vertices[he.origin].position);
+                            let p1 = node
+                                .world_matrix
+                                .transform_point3(base_mesh.vertices[he.target].position);
                             if let (Some(s0), Some(s1)) = (
                                 state.camera.world_to_screen(p0, width, height),
                                 state.camera.world_to_screen(p1, width, height),
                             ) {
                                 painter.line_segment(
                                     [egui::pos2(s0.x, s0.y), egui::pos2(s1.x, s1.y)],
-                                    egui::Stroke::new(2.8_f32, egui::Color32::from_rgb(255, 50, 50)),
+                                    egui::Stroke::new(
+                                        2.8_f32,
+                                        egui::Color32::from_rgb(255, 50, 50),
+                                    ),
                                 );
                             }
                         }
@@ -52,14 +59,21 @@ pub fn render(state: &mut AppState) {
                     for (_ek, edge) in &base_mesh.edges {
                         if edge.crease_weight > 0.0 || edge.is_sharp {
                             let he = &base_mesh.half_edges[edge.half_edge];
-                            let p0 = node.world_matrix.transform_point3(base_mesh.vertices[he.origin].position);
-                            let p1 = node.world_matrix.transform_point3(base_mesh.vertices[he.target].position);
+                            let p0 = node
+                                .world_matrix
+                                .transform_point3(base_mesh.vertices[he.origin].position);
+                            let p1 = node
+                                .world_matrix
+                                .transform_point3(base_mesh.vertices[he.target].position);
                             if let (Some(s0), Some(s1)) = (
                                 state.camera.world_to_screen(p0, width, height),
                                 state.camera.world_to_screen(p1, width, height),
                             ) {
                                 let (color, stroke_w) = if edge.crease_weight > 0.0 {
-                                    (egui::Color32::from_rgb(217, 70, 239), 1.8 + edge.crease_weight * 2.5)
+                                    (
+                                        egui::Color32::from_rgb(217, 70, 239),
+                                        1.8 + edge.crease_weight * 2.5,
+                                    )
                                 } else {
                                     (egui::Color32::from_rgb(6, 182, 212), 2.2)
                                 };
@@ -81,7 +95,10 @@ pub fn render(state: &mut AppState) {
                                 painter.circle_stroke(
                                     pos,
                                     halo_r,
-                                    egui::Stroke::new(1.8_f32, egui::Color32::from_rgb(56, 189, 248)),
+                                    egui::Stroke::new(
+                                        1.8_f32,
+                                        egui::Color32::from_rgb(56, 189, 248),
+                                    ),
                                 );
                             }
                         }
@@ -95,7 +112,12 @@ pub fn render(state: &mut AppState) {
     if state.show_subd_cage && state.interaction_mode == InteractionMode::Edit {
         if let Some(sel_id) = state.selected_node {
             if let Some(node) = state.scene.nodes.get(sel_id) {
-                if let NodeData::Mesh { base_mesh, modifier_stack, .. } = &node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    modifier_stack,
+                    ..
+                } = &node.data
+                {
                     let has_subdiv = modifier_stack.modifiers().iter().any(|m| {
                         m.is_enabled() && (m.name() == "Subdivide" || m.name() == "Catmull-Clark")
                     });
@@ -111,8 +133,12 @@ pub fn render(state: &mut AppState) {
                         // 1. Draw control cage edges
                         for (ek, edge) in &base_mesh.edges {
                             let he = &base_mesh.half_edges[edge.half_edge];
-                            let p0 = node.world_matrix.transform_point3(base_mesh.vertices[he.origin].position);
-                            let p1 = node.world_matrix.transform_point3(base_mesh.vertices[he.target].position);
+                            let p0 = node
+                                .world_matrix
+                                .transform_point3(base_mesh.vertices[he.origin].position);
+                            let p1 = node
+                                .world_matrix
+                                .transform_point3(base_mesh.vertices[he.target].position);
                             if let (Some(s0), Some(s1)) = (
                                 state.camera.world_to_screen(p0, width, height),
                                 state.camera.world_to_screen(p1, width, height),
@@ -137,11 +163,27 @@ pub fn render(state: &mut AppState) {
                                 let pos = egui::pos2(s.x, s.y);
                                 let is_selected = state.selected_vertices.contains(&vk);
                                 if is_selected {
-                                    painter.circle_filled(pos, 4.5_f32, egui::Color32::from_rgb(255, 230, 80));
-                                    painter.circle_stroke(pos, 4.5_f32, egui::Stroke::new(1.5_f32, egui::Color32::WHITE));
+                                    painter.circle_filled(
+                                        pos,
+                                        4.5_f32,
+                                        egui::Color32::from_rgb(255, 230, 80),
+                                    );
+                                    painter.circle_stroke(
+                                        pos,
+                                        4.5_f32,
+                                        egui::Stroke::new(1.5_f32, egui::Color32::WHITE),
+                                    );
                                 } else {
-                                    painter.circle_filled(pos, 3.0_f32, egui::Color32::from_rgb(255, 150, 40));
-                                    painter.circle_stroke(pos, 3.0_f32, egui::Stroke::new(1.0_f32, egui::Color32::BLACK));
+                                    painter.circle_filled(
+                                        pos,
+                                        3.0_f32,
+                                        egui::Color32::from_rgb(255, 150, 40),
+                                    );
+                                    painter.circle_stroke(
+                                        pos,
+                                        3.0_f32,
+                                        egui::Stroke::new(1.0_f32, egui::Color32::BLACK),
+                                    );
                                 }
                             }
                         }
@@ -151,12 +193,23 @@ pub fn render(state: &mut AppState) {
                             egui::pos2(width - 290.0, 45.0),
                             egui::vec2(275.0, 24.0),
                         );
-                        painter.rect_filled(cage_pill_rect, 4.0, egui::Color32::from_black_alpha(200));
-                        painter.rect_stroke(cage_pill_rect, 4.0, egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(255, 150, 40)));
+                        painter.rect_filled(
+                            cage_pill_rect,
+                            4.0,
+                            egui::Color32::from_black_alpha(200),
+                        );
+                        painter.rect_stroke(
+                            cage_pill_rect,
+                            4.0,
+                            egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(255, 150, 40)),
+                        );
                         painter.text(
                             cage_pill_rect.center(),
                             egui::Align2::CENTER_CENTER,
-                            format!("SUBD CONTROL CAGE | Optimal: {}", if state.optimal_display { "ON" } else { "OFF" }),
+                            format!(
+                                "SUBD CONTROL CAGE | Optimal: {}",
+                                if state.optimal_display { "ON" } else { "OFF" }
+                            ),
                             egui::FontId::proportional(11.0),
                             egui::Color32::from_rgb(255, 220, 160),
                         );
@@ -183,7 +236,9 @@ pub fn render(state: &mut AppState) {
                     for (fk, face) in &base_mesh.faces {
                         let local_c = base_mesh.face_centroid(fk);
                         let world_c = node.world_matrix.transform_point3(local_c);
-                        let world_n = normal_mat.transform_vector3(face.normal).normalize_or_zero();
+                        let world_n = normal_mat
+                            .transform_vector3(face.normal)
+                            .normalize_or_zero();
                         let world_tip = world_c + world_n * len;
 
                         if let (Some(s0), Some(s1)) = (
@@ -194,7 +249,11 @@ pub fn render(state: &mut AppState) {
                                 [egui::pos2(s0.x, s0.y), egui::pos2(s1.x, s1.y)],
                                 egui::Stroke::new(1.6_f32, egui::Color32::from_rgb(6, 182, 212)),
                             );
-                            painter.circle_filled(egui::pos2(s1.x, s1.y), 2.2_f32, egui::Color32::from_rgb(34, 211, 238));
+                            painter.circle_filled(
+                                egui::pos2(s1.x, s1.y),
+                                2.2_f32,
+                                egui::Color32::from_rgb(34, 211, 238),
+                            );
                         }
                     }
                 }
@@ -218,7 +277,9 @@ pub fn render(state: &mut AppState) {
                     let len = state.normal_display_length;
                     for (_vk, vertex) in &base_mesh.vertices {
                         let world_p = node.world_matrix.transform_point3(vertex.position);
-                        let world_n = normal_mat.transform_vector3(vertex.normal).normalize_or_zero();
+                        let world_n = normal_mat
+                            .transform_vector3(vertex.normal)
+                            .normalize_or_zero();
                         let world_tip = world_p + world_n * len;
 
                         if let (Some(s0), Some(s1)) = (
@@ -244,7 +305,9 @@ pub fn render(state: &mut AppState) {
                     let mut iter = state.selected_vertices.iter();
                     let v0 = *iter.next().unwrap();
                     let v1 = *iter.next().unwrap();
-                    if let (Some(vert0), Some(vert1)) = (base_mesh.vertices.get(v0), base_mesh.vertices.get(v1)) {
+                    if let (Some(vert0), Some(vert1)) =
+                        (base_mesh.vertices.get(v0), base_mesh.vertices.get(v1))
+                    {
                         let w0 = node.world_matrix.transform_point3(vert0.position);
                         let w1 = node.world_matrix.transform_point3(vert1.position);
                         let width = state.surface_config.width as f32;
@@ -261,7 +324,8 @@ pub fn render(state: &mut AppState) {
 
                             let p_a = egui::pos2(s0.x, s0.y);
                             let p_b = egui::pos2(s1.x, s1.y);
-                            let stroke = egui::Stroke::new(2.0_f32, egui::Color32::from_rgb(255, 215, 100));
+                            let stroke =
+                                egui::Stroke::new(2.0_f32, egui::Color32::from_rgb(255, 215, 100));
 
                             // Main dimension line
                             painter.line_segment([p_a, p_b], stroke);
@@ -283,10 +347,15 @@ pub fn render(state: &mut AppState) {
 
                             let text_galley = painter.layout_no_wrap(text, font_id, text_color);
                             let pad = egui::vec2(6.0_f32, 3.0_f32);
-                            let badge_rect = egui::Rect::from_center_size(mid, text_galley.size() + pad);
+                            let badge_rect =
+                                egui::Rect::from_center_size(mid, text_galley.size() + pad);
 
                             painter.rect_filled(badge_rect, 4.0_f32, bg_color);
-                            painter.rect_stroke(badge_rect, 4.0_f32, egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(255, 215, 100)));
+                            painter.rect_stroke(
+                                badge_rect,
+                                4.0_f32,
+                                egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(255, 215, 100)),
+                            );
                             painter.galley(badge_rect.min + pad * 0.5_f32, text_galley, text_color);
                         }
                     }

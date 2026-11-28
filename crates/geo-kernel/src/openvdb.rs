@@ -187,7 +187,8 @@ impl VdbGrid {
                 let step_transmittance = (-step_optical_depth).exp();
 
                 // In-scattered light accumulated along the segment
-                let scatter = light_color * (density * light_transmittance * (1.0 - step_transmittance));
+                let scatter =
+                    light_color * (density * light_transmittance * (1.0 - step_transmittance));
                 inscatter_radiance += scatter * transmittance;
                 transmittance *= step_transmittance;
             }
@@ -221,7 +222,12 @@ pub struct VolumeGenerators;
 
 impl VolumeGenerators {
     /// Generates atmospheric ground fog with exponential height falloff
-    pub fn create_ground_fog(radius: f32, height: f32, base_density: f32, voxel_size: f32) -> VdbGrid {
+    pub fn create_ground_fog(
+        radius: f32,
+        height: f32,
+        base_density: f32,
+        voxel_size: f32,
+    ) -> VdbGrid {
         let mut grid = VdbGrid::new("GroundFog", voxel_size);
         let steps_r = (radius / voxel_size).ceil() as i32;
         let steps_h = (height / voxel_size).ceil() as i32;
@@ -246,7 +252,12 @@ impl VolumeGenerators {
     }
 
     /// Generates a procedural cumulus puff cloud volume
-    pub fn create_cumulus_cloud(center: Vec3, radius: f32, density: f32, voxel_size: f32) -> VdbGrid {
+    pub fn create_cumulus_cloud(
+        center: Vec3,
+        radius: f32,
+        density: f32,
+        voxel_size: f32,
+    ) -> VdbGrid {
         let mut grid = VdbGrid::new("CumulusCloud", voxel_size);
         let steps = (radius / voxel_size).ceil() as i32;
 
@@ -262,7 +273,10 @@ impl VolumeGenerators {
                         let sphere_falloff = 1.0 - (dist / radius);
                         // Procedural harmonic turbulence perturbation
                         let freq = 1.5 / radius;
-                        let noise = ((dx as f32 * freq).sin() * (dy as f32 * freq).cos() * (dz as f32 * freq).sin()).abs();
+                        let noise = ((dx as f32 * freq).sin()
+                            * (dy as f32 * freq).cos()
+                            * (dz as f32 * freq).sin())
+                        .abs();
                         let d = density * sphere_falloff * (0.6 + 0.4 * noise);
                         if d > 1e-4 {
                             grid.set_grid_voxel(cx + dx, cy + dy, cz + dz, d);

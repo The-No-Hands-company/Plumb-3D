@@ -5,7 +5,12 @@ use graph_engine::NodeData;
 use std::collections::HashSet;
 
 impl AppState {
-    pub fn find_closest_snap_vertex(&self, world_pos: Vec3, max_dist: f32, exclude_verts: &HashSet<VertexKey>) -> Option<Vec3> {
+    pub fn find_closest_snap_vertex(
+        &self,
+        world_pos: Vec3,
+        max_dist: f32,
+        exclude_verts: &HashSet<VertexKey>,
+    ) -> Option<Vec3> {
         let mut best: Option<(Vec3, f32)> = None;
         for (node_id, node) in &self.scene.nodes {
             if let NodeData::Mesh { base_mesh, .. } = &node.data {
@@ -17,10 +22,9 @@ impl AppState {
                     }
                     let w_v = wmat.transform_point3(v.position);
                     let d = (w_v - world_pos).length();
-                    if d < max_dist
-                        && (best.is_none() || d < best.as_ref().unwrap().1) {
-                            best = Some((w_v, d));
-                        }
+                    if d < max_dist && (best.is_none() || d < best.as_ref().unwrap().1) {
+                        best = Some((w_v, d));
+                    }
                 }
             }
         }
@@ -41,10 +45,9 @@ impl AppState {
                             let mid = 0.5 * (v1.position + v2.position);
                             let w_mid = wmat.transform_point3(mid);
                             let d = (w_mid - world_pos).length();
-                            if d < max_dist
-                                && (best.is_none() || d < best.as_ref().unwrap().1) {
-                                    best = Some((w_mid, d));
-                                }
+                            if d < max_dist && (best.is_none() || d < best.as_ref().unwrap().1) {
+                                best = Some((w_mid, d));
+                            }
                         }
                     }
                 }
@@ -62,10 +65,9 @@ impl AppState {
                     let center = base_mesh.face_centroid(face_key);
                     let w_center = wmat.transform_point3(center);
                     let d = (w_center - world_pos).length();
-                    if d < max_dist
-                        && (best.is_none() || d < best.as_ref().unwrap().1) {
-                            best = Some((w_center, d));
-                        }
+                    if d < max_dist && (best.is_none() || d < best.as_ref().unwrap().1) {
+                        best = Some((w_center, d));
+                    }
                 }
             }
         }

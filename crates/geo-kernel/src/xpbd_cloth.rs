@@ -133,8 +133,11 @@ impl XpbdClothSimulator {
         // 1. Edge Stretch Constraints
         for edge in mesh.edges.values() {
             if let Some(he) = mesh.half_edges.get(edge.half_edge) {
-                if let (Some(&i0), Some(&i1)) = (key_to_idx.get(&he.origin), key_to_idx.get(&he.target)) {
-                    let rest_len = (self.particles[i0].position - self.particles[i1].position).length();
+                if let (Some(&i0), Some(&i1)) =
+                    (key_to_idx.get(&he.origin), key_to_idx.get(&he.target))
+                {
+                    let rest_len =
+                        (self.particles[i0].position - self.particles[i1].position).length();
                     self.distance_constraints.push(XpbdDistanceConstraint {
                         p0: i0,
                         p1: i1,
@@ -161,12 +164,20 @@ impl XpbdClothSimulator {
                 let verts_a = mesh.face_vertices(fa);
                 let verts_b = mesh.face_vertices(fb);
 
-                let opp_a = verts_a.iter().copied().find(|&v| v != he_a.origin && v != he_a.target);
-                let opp_b = verts_b.iter().copied().find(|&v| v != he_b.origin && v != he_b.target);
+                let opp_a = verts_a
+                    .iter()
+                    .copied()
+                    .find(|&v| v != he_a.origin && v != he_a.target);
+                let opp_b = verts_b
+                    .iter()
+                    .copied()
+                    .find(|&v| v != he_b.origin && v != he_b.target);
 
                 if let (Some(va), Some(vb)) = (opp_a, opp_b) {
                     if let (Some(&i_oa), Some(&i_ob)) = (key_to_idx.get(&va), key_to_idx.get(&vb)) {
-                        let rest_dist = (self.particles[i_oa].position - self.particles[i_ob].position).length();
+                        let rest_dist = (self.particles[i_oa].position
+                            - self.particles[i_ob].position)
+                            .length();
                         self.bending_constraints.push(XpbdBendingConstraint {
                             p0: i_oa,
                             p1: i_ob,
@@ -204,7 +215,10 @@ impl XpbdClothSimulator {
                 }
                 let mut ext_force = self.gravity;
                 if self.wind.length_squared() > 1e-4 {
-                    let phase = self.time * 2.8 + (i as f32) * 0.35 + p.position.x * 0.5 + p.position.z * 0.7;
+                    let phase = self.time * 2.8
+                        + (i as f32) * 0.35
+                        + p.position.x * 0.5
+                        + p.position.z * 0.7;
                     let turb_offset = vec3(
                         (phase * 1.3).sin() * self.turbulence,
                         (phase * 0.9).cos() * (self.turbulence * 0.5),
@@ -337,7 +351,8 @@ impl XpbdClothSimulator {
         let cell_size = diam.max(0.01);
         let inv_cell = 1.0 / cell_size;
 
-        let mut grid: HashMap<(i32, i32, i32), Vec<usize>> = HashMap::with_capacity(self.particles.len());
+        let mut grid: HashMap<(i32, i32, i32), Vec<usize>> =
+            HashMap::with_capacity(self.particles.len());
         for (i, p) in self.particles.iter().enumerate() {
             let cx = (p.position.x * inv_cell).floor() as i32;
             let cy = (p.position.y * inv_cell).floor() as i32;
@@ -440,7 +455,10 @@ mod tests {
         sim.step(1.0 / 30.0);
 
         // Pinned vertex should not move
-        assert_eq!(sim.particles[0].position, sim.particles[0].previous_position);
+        assert_eq!(
+            sim.particles[0].position,
+            sim.particles[0].previous_position
+        );
         // Unpinned vertex should fall under gravity
         assert!(sim.particles[1].position.y < initial_y);
     }
@@ -488,7 +506,11 @@ mod tests {
         sim.resolve_self_collisions();
 
         let dist = (sim.particles[0].position - sim.particles[1].position).length();
-        assert!(dist >= 0.199, "Expected particles pushed apart to ~0.20, got {}", dist);
+        assert!(
+            dist >= 0.199,
+            "Expected particles pushed apart to ~0.20, got {}",
+            dist
+        );
     }
 
     #[test]
@@ -511,6 +533,9 @@ mod tests {
                 break;
             }
         }
-        assert!(moved_in_wind, "Cloth particles must be displaced in positive wind direction");
+        assert!(
+            moved_in_wind,
+            "Cloth particles must be displaced in positive wind direction"
+        );
     }
 }

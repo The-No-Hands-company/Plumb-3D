@@ -64,7 +64,11 @@ impl Mesh {
 
     /// Tessellate the Half-Edge mesh into GPU-ready vertex and index buffers,
     /// optionally evaluating heatmap vertex colors from a named VertexGroup.
-    pub fn to_render_mesh_with_weights(&self, shading: ShadingMode, weight_group: Option<&str>) -> RenderMesh {
+    pub fn to_render_mesh_with_weights(
+        &self,
+        shading: ShadingMode,
+        weight_group: Option<&str>,
+    ) -> RenderMesh {
         let mut render_mesh = RenderMesh::default();
         let mut first_vk_idx: std::collections::HashMap<crate::mesh::VertexKey, u32> =
             std::collections::HashMap::new();

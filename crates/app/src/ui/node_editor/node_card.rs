@@ -33,10 +33,20 @@ pub fn draw_node_card(
     node_to_delete: &mut Option<NodeKey>,
     socket_hits: &mut Vec<SocketHit>,
 ) -> Option<Pos2> {
-    let screen_origin = Pos2::new(node.position[0] * zoom + pan.x, node.position[1] * zoom + pan.y);
-    let rows = node.input_sockets.len().max(node.output_sockets.len()).max(1);
+    let screen_origin = Pos2::new(
+        node.position[0] * zoom + pan.x,
+        node.position[1] * zoom + pan.y,
+    );
+    let rows = node
+        .input_sockets
+        .len()
+        .max(node.output_sockets.len())
+        .max(1);
     let card_height = HEADER_HEIGHT + (rows as f32) * SOCKET_ROW_HEIGHT + 8.0;
-    let card_rect = Rect::from_min_size(screen_origin, Vec2::new(NODE_WIDTH * zoom, card_height * zoom));
+    let card_rect = Rect::from_min_size(
+        screen_origin,
+        Vec2::new(NODE_WIDTH * zoom, card_height * zoom),
+    );
 
     let painter = ui.painter().clone();
 
@@ -102,7 +112,10 @@ pub fn draw_node_card(
 
     // Header Delete Button
     let delete_rect = Rect::from_min_size(
-        Pos2::new(screen_origin.x + (NODE_WIDTH - 20.0) * zoom, screen_origin.y + 4.0 * zoom),
+        Pos2::new(
+            screen_origin.x + (NODE_WIDTH - 20.0) * zoom,
+            screen_origin.y + 4.0 * zoom,
+        ),
         Vec2::splat(16.0 * zoom),
     );
     let del_id = Id::new(node_key).with("del");
@@ -133,7 +146,8 @@ pub fn draw_node_card(
 
     // A. Input Sockets (Left Side)
     for (i, in_socket) in node.input_sockets.iter_mut().enumerate() {
-        let row_center_y = body_start_y + (i as f32 * SOCKET_ROW_HEIGHT + SOCKET_ROW_HEIGHT * 0.5) * zoom;
+        let row_center_y =
+            body_start_y + (i as f32 * SOCKET_ROW_HEIGHT + SOCKET_ROW_HEIGHT * 0.5) * zoom;
         let socket_center = Pos2::new(screen_origin.x, row_center_y);
         let col = socket_color(&in_socket.socket_type);
 
@@ -167,7 +181,9 @@ pub fn draw_node_card(
                     let mut temp = *val;
                     let resp = ui.put(
                         input_widget_rect,
-                        egui::DragValue::new(&mut temp).speed(0.05).range(0.0_f32..=100.0_f32),
+                        egui::DragValue::new(&mut temp)
+                            .speed(0.05)
+                            .range(0.0_f32..=100.0_f32),
                     );
                     if resp.changed() {
                         *val = temp;
@@ -177,7 +193,9 @@ pub fn draw_node_card(
                     let mut temp = *val;
                     let resp = ui.put(
                         input_widget_rect,
-                        egui::DragValue::new(&mut temp).speed(1.0).range(0_i64..=128_i64),
+                        egui::DragValue::new(&mut temp)
+                            .speed(1.0)
+                            .range(0_i64..=128_i64),
                     );
                     if resp.changed() {
                         *val = temp;
@@ -190,7 +208,8 @@ pub fn draw_node_card(
 
     // B. Output Sockets (Right Side)
     for (i, out_socket) in node.output_sockets.iter().enumerate() {
-        let row_center_y = body_start_y + (i as f32 * SOCKET_ROW_HEIGHT + SOCKET_ROW_HEIGHT * 0.5) * zoom;
+        let row_center_y =
+            body_start_y + (i as f32 * SOCKET_ROW_HEIGHT + SOCKET_ROW_HEIGHT * 0.5) * zoom;
         let socket_center = Pos2::new(screen_origin.x + NODE_WIDTH * zoom, row_center_y);
         let col = socket_color(&out_socket.socket_type);
 
@@ -227,7 +246,11 @@ fn draw_socket_dot(
     let r = SOCKET_RADIUS * zoom;
     if is_connected {
         painter.circle_filled(center, r, color);
-        painter.circle_stroke(center, r, Stroke::new(1.0_f32, Color32::from_black_alpha(150)));
+        painter.circle_stroke(
+            center,
+            r,
+            Stroke::new(1.0_f32, Color32::from_black_alpha(150)),
+        );
     } else {
         painter.circle_filled(center, r * 0.7_f32, Color32::from_rgb(22, 24, 28));
         painter.circle_stroke(center, r, Stroke::new(1.8_f32 * zoom, color));
@@ -236,12 +259,12 @@ fn draw_socket_dot(
 
 fn category_color(cat: NodeCategory) -> Color32 {
     match cat {
-        NodeCategory::Primitives => Color32::from_rgb(38, 92, 140),   // Blue slate
-        NodeCategory::GeometryOps => Color32::from_rgb(32, 115, 80),   // Teal / Green
-        NodeCategory::CurveOps => Color32::from_rgb(110, 48, 140),     // Purple
-        NodeCategory::PointOps => Color32::from_rgb(170, 50, 190),     // Magenta
-        NodeCategory::Math => Color32::from_rgb(130, 85, 30),         // Amber / Orange
-        NodeCategory::Inputs => Color32::from_rgb(60, 65, 75),        // Grey
-        NodeCategory::Output => Color32::from_rgb(140, 40, 40),       // Deep Red / Crimson
+        NodeCategory::Primitives => Color32::from_rgb(38, 92, 140), // Blue slate
+        NodeCategory::GeometryOps => Color32::from_rgb(32, 115, 80), // Teal / Green
+        NodeCategory::CurveOps => Color32::from_rgb(110, 48, 140),  // Purple
+        NodeCategory::PointOps => Color32::from_rgb(170, 50, 190),  // Magenta
+        NodeCategory::Math => Color32::from_rgb(130, 85, 30),       // Amber / Orange
+        NodeCategory::Inputs => Color32::from_rgb(60, 65, 75),      // Grey
+        NodeCategory::Output => Color32::from_rgb(140, 40, 40),     // Deep Red / Crimson
     }
 }

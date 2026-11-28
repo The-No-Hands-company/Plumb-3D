@@ -58,19 +58,25 @@ impl<T: Copy + PartialEq> AnimationTrack<T> {
 
     /// Insert or replace a keyframe at `frame` maintaining sorted order.
     pub fn insert_keyframe(&mut self, frame: f32, value: T, interpolation: InterpolationMode) {
-        if let Some(pos) = self.keyframes.iter().position(|k| (k.frame - frame).abs() < 1e-3) {
+        if let Some(pos) = self
+            .keyframes
+            .iter()
+            .position(|k| (k.frame - frame).abs() < 1e-3)
+        {
             self.keyframes[pos].value = value;
             self.keyframes[pos].interpolation = interpolation;
         } else {
             let pos = self.keyframes.partition_point(|k| k.frame < frame);
-            self.keyframes.insert(pos, Keyframe::new(frame, value, interpolation));
+            self.keyframes
+                .insert(pos, Keyframe::new(frame, value, interpolation));
         }
     }
 
     /// Remove a keyframe matching `frame` within tolerance.
     pub fn remove_keyframe(&mut self, frame: f32, tolerance: f32) -> bool {
         let initial_len = self.keyframes.len();
-        self.keyframes.retain(|k| (k.frame - frame).abs() > tolerance);
+        self.keyframes
+            .retain(|k| (k.frame - frame).abs() > tolerance);
         self.keyframes.len() != initial_len
     }
 
@@ -205,9 +211,18 @@ impl TransformTrack {
 
     pub fn evaluate(&self, frame: f32, default_transform: Transform) -> Transform {
         Transform {
-            translation: self.translation.evaluate(frame).unwrap_or(default_transform.translation),
-            rotation: self.rotation.evaluate(frame).unwrap_or(default_transform.rotation),
-            scale: self.scale.evaluate(frame).unwrap_or(default_transform.scale),
+            translation: self
+                .translation
+                .evaluate(frame)
+                .unwrap_or(default_transform.translation),
+            rotation: self
+                .rotation
+                .evaluate(frame)
+                .unwrap_or(default_transform.rotation),
+            scale: self
+                .scale
+                .evaluate(frame)
+                .unwrap_or(default_transform.scale),
         }
     }
 
@@ -275,9 +290,15 @@ impl AnimationManager {
         interpolation: InterpolationMode,
     ) {
         let track = self.tracks.entry(node_id).or_default();
-        track.translation.insert_keyframe(frame, transform.translation, interpolation);
-        track.rotation.insert_keyframe(frame, transform.rotation, interpolation);
-        track.scale.insert_keyframe(frame, transform.scale, interpolation);
+        track
+            .translation
+            .insert_keyframe(frame, transform.translation, interpolation);
+        track
+            .rotation
+            .insert_keyframe(frame, transform.rotation, interpolation);
+        track
+            .scale
+            .insert_keyframe(frame, transform.scale, interpolation);
     }
 
     /// Insert a scalar keyframe (e.g. for Morpher target weights or material channels)
@@ -289,14 +310,20 @@ impl AnimationManager {
         value: f32,
         interpolation: InterpolationMode,
     ) {
-        let track = self.scalar_tracks.entry((node_id, channel.into())).or_default();
+        let track = self
+            .scalar_tracks
+            .entry((node_id, channel.into()))
+            .or_default();
         track.insert_keyframe(frame, value, interpolation);
     }
 
     /// Check if a scalar channel has a keyframe at `frame` within tolerance
     pub fn has_scalar_keyframe(&self, node_id: NodeId, channel: &str, frame: f32) -> bool {
         if let Some(track) = self.scalar_tracks.get(&(node_id, channel.to_string())) {
-            track.keyframes.iter().any(|k| (k.frame - frame).abs() < 1e-3)
+            track
+                .keyframes
+                .iter()
+                .any(|k| (k.frame - frame).abs() < 1e-3)
         } else {
             false
         }
@@ -313,7 +340,9 @@ impl AnimationManager {
 
     /// Evaluate scalar channel value at the specified frame
     pub fn evaluate_scalar(&self, node_id: NodeId, channel: &str, frame: f32) -> Option<f32> {
-        self.scalar_tracks.get(&(node_id, channel.to_string())).and_then(|t| t.evaluate(frame))
+        self.scalar_tracks
+            .get(&(node_id, channel.to_string()))
+            .and_then(|t| t.evaluate(frame))
     }
 
     /// Advance time during real-time playback by `delta_seconds` and update scene transforms.
@@ -354,7 +383,9 @@ impl AnimationManager {
             }
             if let Some(node) = scene.nodes.get_mut(node_id) {
                 let mut new_transform = track.evaluate(frame, node.local_transform);
-                new_transform = self.nla_mixer.blend_transforms(node_id, frame, new_transform);
+                new_transform = self
+                    .nla_mixer
+                    .blend_transforms(node_id, frame, new_transform);
                 node.local_transform = new_transform;
                 scene.mark_dirty(node_id);
             }
@@ -366,7 +397,11 @@ impl AnimationManager {
                 for &node_id in clip.node_tracks.keys() {
                     if !self.tracks.contains_key(&node_id) {
                         if let Some(node) = scene.nodes.get_mut(node_id) {
-                            let new_transform = self.nla_mixer.blend_transforms(node_id, frame, node.local_transform);
+                            let new_transform = self.nla_mixer.blend_transforms(
+                                node_id,
+                                frame,
+                                node.local_transform,
+                            );
                             node.local_transform = new_transform;
                             scene.mark_dirty(node_id);
                         }
@@ -380,15 +415,19 @@ impl AnimationManager {
             if let Some(val) = track.evaluate(frame) {
                 if let Some(target_name) = channel.strip_prefix("morph:") {
                     if let Some(node) = scene.nodes.get_mut(*node_id) {
-                        if let crate::NodeData::Mesh { modifier_stack, cached_render_mesh, .. } = &mut node.data {
+                        if let crate::NodeData::Mesh {
+                            modifier_stack,
+                            cached_render_mesh,
+                            ..
+                        } = &mut node.data
+                        {
                             for modifier in modifier_stack.modifiers_mut() {
                                 if let Some(morpher) = modifier.as_morpher_mut() {
                                     for t in &mut morpher.targets {
-                                        if t.name == target_name
-                                            && (t.weight - val).abs() > 1e-4 {
-                                                t.weight = val;
-                                                *cached_render_mesh = None;
-                                            }
+                                        if t.name == target_name && (t.weight - val).abs() > 1e-4 {
+                                            t.weight = val;
+                                            *cached_render_mesh = None;
+                                        }
                                     }
                                 }
                             }
@@ -440,7 +479,10 @@ mod tests {
     #[test]
     fn test_animation_manager_playback_and_scrub() {
         let mut scene = SceneGraph::new();
-        let node_id = scene.add_node(crate::SceneNode::new_transform("AnimatedBox", Transform::IDENTITY));
+        let node_id = scene.add_node(crate::SceneNode::new_transform(
+            "AnimatedBox",
+            Transform::IDENTITY,
+        ));
 
         let mut anim = AnimationManager::new();
         anim.start_frame = 0.0;
@@ -477,12 +519,18 @@ mod tests {
     fn test_scalar_and_morph_animation() {
         let mut scene = SceneGraph::new();
         let cube = geo_kernel::Primitives::create_cube(1.0);
-        let node_id = scene.add_node(crate::SceneNode::new_mesh("Cube", Transform::IDENTITY, cube));
+        let node_id = scene.add_node(crate::SceneNode::new_mesh(
+            "Cube",
+            Transform::IDENTITY,
+            cube,
+        ));
 
         // Add Morpher modifier with a "Smile" shape target
         let mut morpher = geo_kernel::MorpherModifier::new();
         morpher.add_target(geo_kernel::MorphTarget::new("Smile"));
-        if let crate::NodeData::Mesh { modifier_stack, .. } = &mut scene.nodes.get_mut(node_id).unwrap().data {
+        if let crate::NodeData::Mesh { modifier_stack, .. } =
+            &mut scene.nodes.get_mut(node_id).unwrap().data
+        {
             modifier_stack.add_modifier(Box::new(morpher));
         }
 

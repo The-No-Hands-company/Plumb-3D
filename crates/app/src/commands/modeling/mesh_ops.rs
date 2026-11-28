@@ -10,7 +10,6 @@ pub struct SymmetrizeCommand {
     pub old_mesh: Option<Mesh>,
 }
 
-
 impl Command for SymmetrizeCommand {
     fn name(&self) -> &str {
         "Symmetrize Mesh"
@@ -19,11 +18,16 @@ impl Command for SymmetrizeCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.symmetrize(self.axis, self.direction)
+                base_mesh
+                    .symmetrize(self.axis, self.direction)
                     .map_err(|e| format!("Symmetrize failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -37,7 +41,11 @@ impl Command for SymmetrizeCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -51,9 +59,6 @@ impl Command for SymmetrizeCommand {
     }
 }
 
-
-
-
 #[derive(Debug)]
 pub struct CleanDegenerateCommand {
     pub node_id: NodeId,
@@ -61,7 +66,6 @@ pub struct CleanDegenerateCommand {
     pub min_edge_len: f32,
     pub old_mesh: Option<Mesh>,
 }
-
 
 impl Command for CleanDegenerateCommand {
     fn name(&self) -> &str {
@@ -71,11 +75,16 @@ impl Command for CleanDegenerateCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.clean_degenerate_geometry(self.min_area, self.min_edge_len)
+                base_mesh
+                    .clean_degenerate_geometry(self.min_area, self.min_edge_len)
                     .map_err(|e| format!("Clean geometry failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -89,7 +98,11 @@ impl Command for CleanDegenerateCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -103,9 +116,6 @@ impl Command for CleanDegenerateCommand {
     }
 }
 
-
-
-
 #[derive(Debug)]
 pub struct SpinCommand {
     pub node_id: NodeId,
@@ -117,7 +127,6 @@ pub struct SpinCommand {
     pub old_mesh: Option<Mesh>,
 }
 
-
 impl Command for SpinCommand {
     fn name(&self) -> &str {
         "Spin Revolve"
@@ -126,11 +135,22 @@ impl Command for SpinCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.spin(&self.faces, self.axis, self.center, self.angle_radians, self.steps)
+                base_mesh
+                    .spin(
+                        &self.faces,
+                        self.axis,
+                        self.center,
+                        self.angle_radians,
+                        self.steps,
+                    )
                     .map_err(|e| format!("Spin failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -144,7 +164,11 @@ impl Command for SpinCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -158,16 +182,12 @@ impl Command for SpinCommand {
     }
 }
 
-
-
-
 #[derive(Debug)]
 pub struct CapHolesCommand {
     pub node_id: NodeId,
     pub triangulate: bool,
     pub old_mesh: Option<Mesh>,
 }
-
 
 impl Command for CapHolesCommand {
     fn name(&self) -> &str {
@@ -177,11 +197,16 @@ impl Command for CapHolesCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.cap_holes(self.triangulate)
+                base_mesh
+                    .cap_holes(self.triangulate)
                     .map_err(|e| format!("Cap holes failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -195,7 +220,11 @@ impl Command for CapHolesCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -209,9 +238,6 @@ impl Command for CapHolesCommand {
     }
 }
 
-
-
-
 #[derive(Debug)]
 pub struct GridFillCommand {
     pub node_id: NodeId,
@@ -219,7 +245,6 @@ pub struct GridFillCommand {
     pub span_count: usize,
     pub old_mesh: Option<Mesh>,
 }
-
 
 impl Command for GridFillCommand {
     fn name(&self) -> &str {
@@ -229,11 +254,16 @@ impl Command for GridFillCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.grid_fill(&self.boundary, self.span_count)
+                base_mesh
+                    .grid_fill(&self.boundary, self.span_count)
                     .map_err(|e| format!("Grid fill failed: {:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -247,7 +277,11 @@ impl Command for GridFillCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -261,16 +295,12 @@ impl Command for GridFillCommand {
     }
 }
 
-
-
-
 #[derive(Debug)]
 pub struct FlipNormalsCommand {
     pub node_id: NodeId,
     pub faces: Vec<FaceKey>,
     pub old_mesh: Option<Mesh>,
 }
-
 
 impl Command for FlipNormalsCommand {
     fn name(&self) -> &str {
@@ -280,11 +310,16 @@ impl Command for FlipNormalsCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.flip_face_normals(&self.faces)
+                base_mesh
+                    .flip_face_normals(&self.faces)
                     .map_err(|e| format!("Flip normals failed: {:?}", e))?;
                 base_mesh.update_normals();
                 *cached_render_mesh = None;
@@ -299,7 +334,11 @@ impl Command for FlipNormalsCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -313,9 +352,6 @@ impl Command for FlipNormalsCommand {
     }
 }
 
-
-
-
 #[derive(Debug)]
 pub struct BisectCommand {
     pub node_id: NodeId,
@@ -327,7 +363,6 @@ pub struct BisectCommand {
     pub old_mesh: Option<Mesh>,
 }
 
-
 impl Command for BisectCommand {
     fn name(&self) -> &str {
         "Bisect / Plane Cut"
@@ -336,17 +371,23 @@ impl Command for BisectCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.bisect(
-                    self.plane_point,
-                    self.plane_normal,
-                    self.clear_positive,
-                    self.clear_negative,
-                    self.fill_cut,
-                ).map_err(|e| format!("Bisect failed: {:?}", e))?;
+                base_mesh
+                    .bisect(
+                        self.plane_point,
+                        self.plane_normal,
+                        self.clear_positive,
+                        self.clear_negative,
+                        self.fill_cut,
+                    )
+                    .map_err(|e| format!("Bisect failed: {:?}", e))?;
                 base_mesh.update_normals();
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
@@ -360,7 +401,11 @@ impl Command for BisectCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -374,9 +419,6 @@ impl Command for BisectCommand {
     }
 }
 
-
-
-
 #[derive(Debug)]
 pub struct MarkSharpCommand {
     pub node_id: NodeId,
@@ -384,7 +426,6 @@ pub struct MarkSharpCommand {
     pub sharp: bool,
     pub old_mesh: Option<Mesh>,
 }
-
 
 impl Command for MarkSharpCommand {
     fn name(&self) -> &str {
@@ -398,7 +439,11 @@ impl Command for MarkSharpCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -418,7 +463,11 @@ impl Command for MarkSharpCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -431,7 +480,6 @@ impl Command for MarkSharpCommand {
         }
     }
 }
-
 
 #[derive(Debug)]
 pub struct SetEdgeCreaseCommand {
@@ -449,7 +497,11 @@ impl Command for SetEdgeCreaseCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -468,7 +520,11 @@ impl Command for SetEdgeCreaseCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -481,8 +537,6 @@ impl Command for SetEdgeCreaseCommand {
         }
     }
 }
-
-
 
 #[derive(Debug)]
 pub struct SetVertexCreaseCommand {
@@ -500,7 +554,11 @@ impl Command for SetVertexCreaseCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
@@ -519,7 +577,11 @@ impl Command for SetVertexCreaseCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);
@@ -532,7 +594,6 @@ impl Command for SetVertexCreaseCommand {
         }
     }
 }
-
 
 #[derive(Debug)]
 pub struct RecalculateNormalsCommand {
@@ -553,11 +614,17 @@ impl Command for RecalculateNormalsCommand {
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
         match &mut node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_mesh.is_none() {
                     self.old_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.recalculate_face_normals(self.inside).map_err(|e| format!("{:?}", e))?;
+                base_mesh
+                    .recalculate_face_normals(self.inside)
+                    .map_err(|e| format!("{:?}", e))?;
                 *cached_render_mesh = None;
                 scene.mark_dirty(self.node_id);
                 Ok(())
@@ -570,7 +637,11 @@ impl Command for RecalculateNormalsCommand {
         if let Some(old) = &self.old_mesh {
             let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
             match &mut node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     *base_mesh = old.clone();
                     *cached_render_mesh = None;
                     scene.mark_dirty(self.node_id);

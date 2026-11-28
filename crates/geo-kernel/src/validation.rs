@@ -10,7 +10,10 @@ impl Mesh {
         for (he_key, he) in &self.half_edges {
             // 1. Next/prev cycle symmetry
             let next_he = self.half_edges.get(he.next).ok_or_else(|| {
-                MeshError::InvariantFailed(format!("Half-edge {:?} next points to non-existent key {:?}", he_key, he.next))
+                MeshError::InvariantFailed(format!(
+                    "Half-edge {:?} next points to non-existent key {:?}",
+                    he_key, he.next
+                ))
             })?;
             if next_he.prev != he_key {
                 return Err(MeshError::InvariantFailed(format!(
@@ -20,7 +23,10 @@ impl Mesh {
             }
 
             let prev_he = self.half_edges.get(he.prev).ok_or_else(|| {
-                MeshError::InvariantFailed(format!("Half-edge {:?} prev points to non-existent key {:?}", he_key, he.prev))
+                MeshError::InvariantFailed(format!(
+                    "Half-edge {:?} prev points to non-existent key {:?}",
+                    he_key, he.prev
+                ))
             })?;
             if prev_he.next != he_key {
                 return Err(MeshError::InvariantFailed(format!(
@@ -31,7 +37,10 @@ impl Mesh {
 
             // 2. Twin symmetry
             let twin_he = self.half_edges.get(he.twin).ok_or_else(|| {
-                MeshError::InvariantFailed(format!("Half-edge {:?} twin points to non-existent key {:?}", he_key, he.twin))
+                MeshError::InvariantFailed(format!(
+                    "Half-edge {:?} twin points to non-existent key {:?}",
+                    he_key, he.twin
+                ))
             })?;
             if twin_he.twin != he_key {
                 return Err(MeshError::InvariantFailed(format!(
@@ -64,7 +73,10 @@ impl Mesh {
             let mut count = 0;
             loop {
                 let he = self.half_edges.get(curr).ok_or_else(|| {
-                    MeshError::InvariantFailed(format!("Face {:?} contains invalid half-edge {:?}", f_key, curr))
+                    MeshError::InvariantFailed(format!(
+                        "Face {:?} contains invalid half-edge {:?}",
+                        f_key, curr
+                    ))
                 })?;
                 if he.face != Some(f_key) {
                     return Err(MeshError::InvariantFailed(format!(

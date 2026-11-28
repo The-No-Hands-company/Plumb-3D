@@ -16,7 +16,8 @@ impl Mesh {
 
         for (other_fk, _) in &other.faces {
             let other_verts = other.face_vertices(other_fk);
-            let self_verts: Vec<VertexKey> = other_verts.iter().map(|k| other_to_self_v[k]).collect();
+            let self_verts: Vec<VertexKey> =
+                other_verts.iter().map(|k| other_to_self_v[k]).collect();
             self.add_face(&self_verts)?;
         }
 
@@ -24,7 +25,10 @@ impl Mesh {
         for (_, other_edge) in &other.edges {
             if other_edge.crease_weight > 0.0 || other_edge.is_sharp {
                 let he = &other.half_edges[other_edge.half_edge];
-                if let (Some(&v0), Some(&v1)) = (other_to_self_v.get(&he.origin), other_to_self_v.get(&he.target)) {
+                if let (Some(&v0), Some(&v1)) = (
+                    other_to_self_v.get(&he.origin),
+                    other_to_self_v.get(&he.target),
+                ) {
                     if let Some(self_ek) = self.find_edge(v0, v1) {
                         self.set_edge_crease(self_ek, other_edge.crease_weight);
                         self.set_edge_sharp(self_ek, other_edge.is_sharp);
@@ -34,7 +38,11 @@ impl Mesh {
         }
 
         for other_vg in &other.vertex_groups {
-            let self_vg_idx = if let Some(existing_idx) = self.vertex_groups.iter().position(|vg| vg.name == other_vg.name) {
+            let self_vg_idx = if let Some(existing_idx) = self
+                .vertex_groups
+                .iter()
+                .position(|vg| vg.name == other_vg.name)
+            {
                 existing_idx
             } else {
                 self.add_vertex_group(&other_vg.name)
@@ -67,7 +75,9 @@ impl Mesh {
         for &fk in faces_to_extract {
             if self.faces.contains_key(fk) {
                 for vk in self.face_vertices(fk) {
-                    if let std::collections::hash_map::Entry::Vacant(e) = self_to_extracted_v.entry(vk) {
+                    if let std::collections::hash_map::Entry::Vacant(e) =
+                        self_to_extracted_v.entry(vk)
+                    {
                         let v = &self.vertices[vk];
                         let new_vk = extracted_mesh.add_vertex_with_uv(v.position, v.uv);
                         e.insert(new_vk);
@@ -79,7 +89,8 @@ impl Mesh {
         for &fk in faces_to_extract {
             if self.faces.contains_key(fk) {
                 let verts = self.face_vertices(fk);
-                let new_verts: Vec<VertexKey> = verts.iter().map(|k| self_to_extracted_v[k]).collect();
+                let new_verts: Vec<VertexKey> =
+                    verts.iter().map(|k| self_to_extracted_v[k]).collect();
                 extracted_mesh.add_face(&new_verts)?;
             }
         }
@@ -247,13 +258,16 @@ impl Mesh {
             }
 
             // Transfer edge creases & sharpness
-            let new_to_old_v: HashMap<VertexKey, VertexKey> = old_to_new_v.iter().map(|(&o, &n)| (n, o)).collect();
+            let new_to_old_v: HashMap<VertexKey, VertexKey> =
+                old_to_new_v.iter().map(|(&o, &n)| (n, o)).collect();
             let mut edge_updates = Vec::new();
             for (ek, edge) in &sub_mesh.edges {
                 let he = &sub_mesh.half_edges[edge.half_edge];
                 let v0_new = he.origin;
                 let v1_new = he.target;
-                if let (Some(&v0_old), Some(&v1_old)) = (new_to_old_v.get(&v0_new), new_to_old_v.get(&v1_new)) {
+                if let (Some(&v0_old), Some(&v1_old)) =
+                    (new_to_old_v.get(&v0_new), new_to_old_v.get(&v1_new))
+                {
                     if let Some(old_ek) = self.find_edge(v0_old, v1_old) {
                         if let Some(old_edge) = self.edges.get(old_ek) {
                             edge_updates.push((ek, old_edge.crease_weight, old_edge.is_sharp));
@@ -342,13 +356,16 @@ impl Mesh {
             }
 
             // Transfer edge creases & sharpness
-            let new_to_old_v: HashMap<VertexKey, VertexKey> = old_to_new_v.iter().map(|(&o, &n)| (n, o)).collect();
+            let new_to_old_v: HashMap<VertexKey, VertexKey> =
+                old_to_new_v.iter().map(|(&o, &n)| (n, o)).collect();
             let mut edge_updates = Vec::new();
             for (ek, edge) in &sub_mesh.edges {
                 let he = &sub_mesh.half_edges[edge.half_edge];
                 let v0_new = he.origin;
                 let v1_new = he.target;
-                if let (Some(&v0_old), Some(&v1_old)) = (new_to_old_v.get(&v0_new), new_to_old_v.get(&v1_new)) {
+                if let (Some(&v0_old), Some(&v1_old)) =
+                    (new_to_old_v.get(&v0_new), new_to_old_v.get(&v1_new))
+                {
                     if let Some(old_ek) = self.find_edge(v0_old, v1_old) {
                         if let Some(old_edge) = self.edges.get(old_ek) {
                             edge_updates.push((ek, old_edge.crease_weight, old_edge.is_sharp));

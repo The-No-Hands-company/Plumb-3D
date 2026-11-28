@@ -77,7 +77,13 @@ impl SsrRaymarcher {
 
             let ndc = p_clip.truncate() / p_clip.w;
             // Check if ray exited screen bounds [-1.0, 1.0]
-            if ndc.x < -1.0 || ndc.x > 1.0 || ndc.y < -1.0 || ndc.y > 1.0 || ndc.z < 0.0 || ndc.z > 1.0 {
+            if ndc.x < -1.0
+                || ndc.x > 1.0
+                || ndc.y < -1.0
+                || ndc.y > 1.0
+                || ndc.z < 0.0
+                || ndc.z > 1.0
+            {
                 break;
             }
 
@@ -85,8 +91,10 @@ impl SsrRaymarcher {
             let u = ndc.x * 0.5 + 0.5;
             let v = 1.0 - (ndc.y * 0.5 + 0.5);
 
-            let px = (u * (buffer_width as f32 - 1.0)).clamp(0.0, buffer_width as f32 - 1.0) as usize;
-            let py = (v * (buffer_height as f32 - 1.0)).clamp(0.0, buffer_height as f32 - 1.0) as usize;
+            let px =
+                (u * (buffer_width as f32 - 1.0)).clamp(0.0, buffer_width as f32 - 1.0) as usize;
+            let py =
+                (v * (buffer_height as f32 - 1.0)).clamp(0.0, buffer_height as f32 - 1.0) as usize;
             let buf_idx = py * buffer_width + px;
 
             if buf_idx < depth_buffer.len() {
@@ -94,7 +102,10 @@ impl SsrRaymarcher {
                 let ray_depth = ndc.z;
 
                 // Intersection test: ray is behind sampled depth, within surface thickness
-                if ray_depth >= sampled_depth && (ray_depth - sampled_depth) < (settings.thickness / current_pos.z.abs()).max(1e-4) {
+                if ray_depth >= sampled_depth
+                    && (ray_depth - sampled_depth)
+                        < (settings.thickness / current_pos.z.abs()).max(1e-4)
+                {
                     // Screen edge fade calculation
                     let edge_dist_x = (ndc.x.abs() - 0.7).max(0.0) / 0.3;
                     let edge_dist_y = (ndc.y.abs() - 0.7).max(0.0) / 0.3;
@@ -166,7 +177,9 @@ impl DofKernel {
             offsets.push(vec2(r * theta.cos(), r * theta.sin()));
         }
 
-        Self { bokeh_offsets: offsets }
+        Self {
+            bokeh_offsets: offsets,
+        }
     }
 
     /// Calculates thin-lens optical Circle of Confusion (CoC) diameter in pixels.
@@ -192,7 +205,13 @@ impl DofKernel {
     }
 
     /// Evaluates blurred color at a pixel given a depth map and neighbor sampling function
-    pub fn convolve_bokeh<F>(&self, uv: Vec2, depth: f32, settings: &DofSettings, mut sample_color_depth: F) -> [f32; 3]
+    pub fn convolve_bokeh<F>(
+        &self,
+        uv: Vec2,
+        depth: f32,
+        settings: &DofSettings,
+        mut sample_color_depth: F,
+    ) -> [f32; 3]
     where
         F: FnMut(Vec2) -> ([f32; 3], f32),
     {
@@ -258,15 +277,8 @@ mod tests {
         // Dummy depth buffer (4x4)
         let depth_buffer = vec![0.5; 16];
 
-        let result = raymarcher.march_ray(
-            view_pos,
-            view_normal,
-            &proj,
-            &depth_buffer,
-            4,
-            4,
-            &settings,
-        );
+        let result =
+            raymarcher.march_ray(view_pos, view_normal, &proj, &depth_buffer, 4, 4, &settings);
 
         // Ray reflected upwards towards camera view cone
         assert!(result.is_some() || result.is_none()); // Valid evaluation without panic

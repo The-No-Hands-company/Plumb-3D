@@ -10,7 +10,6 @@ pub struct TransformCommand {
     pub new_transform: Transform,
 }
 
-
 impl Command for TransformCommand {
     fn name(&self) -> &str {
         "Transform Object"
@@ -37,14 +36,12 @@ impl Command for TransformCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct SetParentCommand {
     pub child_id: NodeId,
     pub new_parent: Option<NodeId>,
     pub old_parent: Option<NodeId>,
 }
-
 
 impl Command for SetParentCommand {
     fn name(&self) -> &str {
@@ -69,7 +66,6 @@ impl Command for SetParentCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct JoinMeshesCommand {
     pub target_id: NodeId,
@@ -80,7 +76,6 @@ pub struct JoinMeshesCommand {
     pub source_base_mesh: Option<Mesh>,
 }
 
-
 impl Command for JoinMeshesCommand {
     fn name(&self) -> &str {
         "Join Meshes (Ctrl+J)"
@@ -90,7 +85,10 @@ impl Command for JoinMeshesCommand {
         scene.update_transforms();
 
         let (src_name, src_trans, src_mesh, src_world) = {
-            let source_node = scene.nodes.get(self.source_id).ok_or("Source node not found")?;
+            let source_node = scene
+                .nodes
+                .get(self.source_id)
+                .ok_or("Source node not found")?;
             match &source_node.data {
                 NodeData::Mesh { base_mesh, .. } => (
                     source_node.name.clone(),
@@ -106,15 +104,24 @@ impl Command for JoinMeshesCommand {
         self.source_transform = src_trans;
         self.source_base_mesh = Some(src_mesh.clone());
 
-        let target_node = scene.nodes.get_mut(self.target_id).ok_or("Target node not found")?;
+        let target_node = scene
+            .nodes
+            .get_mut(self.target_id)
+            .ok_or("Target node not found")?;
         let rel_transform = target_node.world_matrix.inverse() * src_world;
 
         match &mut target_node.data {
-            NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+            NodeData::Mesh {
+                base_mesh,
+                cached_render_mesh,
+                ..
+            } => {
                 if self.old_target_mesh.is_none() {
                     self.old_target_mesh = Some(base_mesh.clone());
                 }
-                base_mesh.join(&src_mesh, rel_transform).map_err(|e| format!("Join failed: {:?}", e))?;
+                base_mesh
+                    .join(&src_mesh, rel_transform)
+                    .map_err(|e| format!("Join failed: {:?}", e))?;
                 *cached_render_mesh = None;
             }
             _ => return Err("Target node is not a mesh".into()),
@@ -128,7 +135,12 @@ impl Command for JoinMeshesCommand {
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old_mesh) = &self.old_target_mesh {
             if let Some(target_node) = scene.nodes.get_mut(self.target_id) {
-                if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut target_node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } = &mut target_node.data
+                {
                     *base_mesh = old_mesh.clone();
                     *cached_render_mesh = None;
                 }
@@ -137,7 +149,8 @@ impl Command for JoinMeshesCommand {
         }
 
         if let Some(src_mesh) = self.source_base_mesh.clone() {
-            let restored_node = SceneNode::new_mesh(&self.source_name, self.source_transform, src_mesh);
+            let restored_node =
+                SceneNode::new_mesh(&self.source_name, self.source_transform, src_mesh);
             let id = scene.add_node(restored_node);
             self.source_id = id;
         }
@@ -146,14 +159,12 @@ impl Command for JoinMeshesCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct SeparateLoosePartsCommand {
     pub source_id: NodeId,
     pub created_node_ids: Vec<NodeId>,
     pub old_source_mesh: Option<Mesh>,
 }
-
 
 impl Command for SeparateLoosePartsCommand {
     fn name(&self) -> &str {
@@ -162,19 +173,33 @@ impl Command for SeparateLoosePartsCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let (source_name, source_trans, parent_id, parts) = {
-            let source_node = scene.nodes.get_mut(self.source_id).ok_or("Source node not found")?;
+            let source_node = scene
+                .nodes
+                .get_mut(self.source_id)
+                .ok_or("Source node not found")?;
             match &mut source_node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     if self.old_source_mesh.is_none() {
                         self.old_source_mesh = Some(base_mesh.clone());
                     }
-                    let parts = base_mesh.separate_loose_parts().map_err(|e| format!("Separate loose parts failed: {:?}", e))?;
+                    let parts = base_mesh
+                        .separate_loose_parts()
+                        .map_err(|e| format!("Separate loose parts failed: {:?}", e))?;
                     if parts.len() <= 1 {
                         return Ok(());
                     }
                     *base_mesh = parts[0].clone();
                     *cached_render_mesh = None;
-                    (source_node.name.clone(), source_node.local_transform, source_node.parent, parts[1..].to_vec())
+                    (
+                        source_node.name.clone(),
+                        source_node.local_transform,
+                        source_node.parent,
+                        parts[1..].to_vec(),
+                    )
                 }
                 _ => return Err("Source node is not a mesh".into()),
             }
@@ -202,7 +227,12 @@ impl Command for SeparateLoosePartsCommand {
 
         if let Some(old_mesh) = &self.old_source_mesh {
             if let Some(node) = scene.nodes.get_mut(self.source_id) {
-                if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     *base_mesh = old_mesh.clone();
                     *cached_render_mesh = None;
                 }
@@ -213,14 +243,12 @@ impl Command for SeparateLoosePartsCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct SeparateByMaterialCommand {
     pub source_id: NodeId,
     pub created_node_ids: Vec<NodeId>,
     pub old_source_mesh: Option<Mesh>,
 }
-
 
 impl Command for SeparateByMaterialCommand {
     fn name(&self) -> &str {
@@ -229,19 +257,33 @@ impl Command for SeparateByMaterialCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let (source_name, source_trans, parent_id, parts) = {
-            let source_node = scene.nodes.get_mut(self.source_id).ok_or("Source node not found")?;
+            let source_node = scene
+                .nodes
+                .get_mut(self.source_id)
+                .ok_or("Source node not found")?;
             match &mut source_node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     if self.old_source_mesh.is_none() {
                         self.old_source_mesh = Some(base_mesh.clone());
                     }
-                    let parts = base_mesh.separate_by_material().map_err(|e| format!("Separate by material failed: {:?}", e))?;
+                    let parts = base_mesh
+                        .separate_by_material()
+                        .map_err(|e| format!("Separate by material failed: {:?}", e))?;
                     if parts.len() <= 1 {
                         return Ok(());
                     }
                     *base_mesh = parts[0].1.clone();
                     *cached_render_mesh = None;
-                    (source_node.name.clone(), source_node.local_transform, source_node.parent, parts)
+                    (
+                        source_node.name.clone(),
+                        source_node.local_transform,
+                        source_node.parent,
+                        parts,
+                    )
                 }
                 _ => return Err("Source node is not a mesh".into()),
             }
@@ -269,7 +311,12 @@ impl Command for SeparateByMaterialCommand {
 
         if let Some(old_mesh) = &self.old_source_mesh {
             if let Some(node) = scene.nodes.get_mut(self.source_id) {
-                if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     *base_mesh = old_mesh.clone();
                     *cached_render_mesh = None;
                 }
@@ -280,7 +327,6 @@ impl Command for SeparateByMaterialCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct SeparateFacesCommand {
     pub source_id: NodeId,
@@ -289,7 +335,6 @@ pub struct SeparateFacesCommand {
     pub old_source_mesh: Option<Mesh>,
 }
 
-
 impl Command for SeparateFacesCommand {
     fn name(&self) -> &str {
         "Separate Faces (P)"
@@ -297,15 +342,28 @@ impl Command for SeparateFacesCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let (source_name, source_trans, extracted_mesh) = {
-            let source_node = scene.nodes.get_mut(self.source_id).ok_or("Source node not found")?;
+            let source_node = scene
+                .nodes
+                .get_mut(self.source_id)
+                .ok_or("Source node not found")?;
             match &mut source_node.data {
-                NodeData::Mesh { base_mesh, cached_render_mesh, .. } => {
+                NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } => {
                     if self.old_source_mesh.is_none() {
                         self.old_source_mesh = Some(base_mesh.clone());
                     }
-                    let extracted = base_mesh.separate_faces(&self.faces_to_extract).map_err(|e| format!("Separate failed: {:?}", e))?;
+                    let extracted = base_mesh
+                        .separate_faces(&self.faces_to_extract)
+                        .map_err(|e| format!("Separate failed: {:?}", e))?;
                     *cached_render_mesh = None;
-                    (source_node.name.clone(), source_node.local_transform, extracted)
+                    (
+                        source_node.name.clone(),
+                        source_node.local_transform,
+                        extracted,
+                    )
                 }
                 _ => return Err("Source node is not a mesh".into()),
             }
@@ -328,7 +386,12 @@ impl Command for SeparateFacesCommand {
 
         if let Some(old_mesh) = &self.old_source_mesh {
             if let Some(node) = scene.nodes.get_mut(self.source_id) {
-                if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+                if let NodeData::Mesh {
+                    base_mesh,
+                    cached_render_mesh,
+                    ..
+                } = &mut node.data
+                {
                     *base_mesh = old_mesh.clone();
                     *cached_render_mesh = None;
                 }
@@ -339,7 +402,6 @@ impl Command for SeparateFacesCommand {
         Ok(())
     }
 }
-
 
 #[derive(Debug)]
 pub struct AlignObjectsCommand {
@@ -358,7 +420,6 @@ pub struct AlignObjectsCommand {
     pub old_transform: Option<Transform>,
 }
 
-
 impl Command for AlignObjectsCommand {
     fn name(&self) -> &str {
         "Align Objects (Alt+A)"
@@ -366,18 +427,30 @@ impl Command for AlignObjectsCommand {
 
     fn execute(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let (tgt_trans, tgt_box) = {
-            let tgt_node = scene.nodes.get(self.target_id).ok_or("Target node not found")?;
+            let tgt_node = scene
+                .nodes
+                .get(self.target_id)
+                .ok_or("Target node not found")?;
             let b_box = match &tgt_node.data {
                 NodeData::Mesh { base_mesh, .. } => {
                     let (min, max) = base_mesh.bounding_box();
-                    (tgt_node.world_matrix.transform_point3(min), tgt_node.world_matrix.transform_point3(max))
+                    (
+                        tgt_node.world_matrix.transform_point3(min),
+                        tgt_node.world_matrix.transform_point3(max),
+                    )
                 }
-                _ => (tgt_node.local_transform.translation, tgt_node.local_transform.translation),
+                _ => (
+                    tgt_node.local_transform.translation,
+                    tgt_node.local_transform.translation,
+                ),
             };
             (tgt_node.local_transform, b_box)
         };
 
-        let src_node = scene.nodes.get_mut(self.source_id).ok_or("Source node not found")?;
+        let src_node = scene
+            .nodes
+            .get_mut(self.source_id)
+            .ok_or("Source node not found")?;
         if self.old_transform.is_none() {
             self.old_transform = Some(src_node.local_transform);
         }
@@ -385,9 +458,15 @@ impl Command for AlignObjectsCommand {
         let src_box = match &src_node.data {
             NodeData::Mesh { base_mesh, .. } => {
                 let (min, max) = base_mesh.bounding_box();
-                (src_node.world_matrix.transform_point3(min), src_node.world_matrix.transform_point3(max))
+                (
+                    src_node.world_matrix.transform_point3(min),
+                    src_node.world_matrix.transform_point3(max),
+                )
             }
-            _ => (src_node.local_transform.translation, src_node.local_transform.translation),
+            _ => (
+                src_node.local_transform.translation,
+                src_node.local_transform.translation,
+            ),
         };
 
         let src_ref = match self.align_pos_mode {
@@ -417,12 +496,18 @@ impl Command for AlignObjectsCommand {
         if self.align_rot_x && self.align_rot_y && self.align_rot_z {
             src_node.local_transform.rotation = tgt_trans.rotation;
         } else if self.align_rot_x || self.align_rot_y || self.align_rot_z {
-            let (src_yaw, src_pitch, src_roll) = src_node.local_transform.rotation.to_euler(EulerRot::YXZ);
+            let (src_yaw, src_pitch, src_roll) =
+                src_node.local_transform.rotation.to_euler(EulerRot::YXZ);
             let (tgt_yaw, tgt_pitch, tgt_roll) = tgt_trans.rotation.to_euler(EulerRot::YXZ);
             let new_yaw = if self.align_rot_y { tgt_yaw } else { src_yaw };
-            let new_pitch = if self.align_rot_x { tgt_pitch } else { src_pitch };
+            let new_pitch = if self.align_rot_x {
+                tgt_pitch
+            } else {
+                src_pitch
+            };
             let new_roll = if self.align_rot_z { tgt_roll } else { src_roll };
-            src_node.local_transform.rotation = Quat::from_euler(EulerRot::YXZ, new_yaw, new_pitch, new_roll);
+            src_node.local_transform.rotation =
+                Quat::from_euler(EulerRot::YXZ, new_yaw, new_pitch, new_roll);
         }
 
         if self.align_scale_x {
@@ -441,7 +526,10 @@ impl Command for AlignObjectsCommand {
 
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         if let Some(old) = self.old_transform {
-            let src_node = scene.nodes.get_mut(self.source_id).ok_or("Source node not found")?;
+            let src_node = scene
+                .nodes
+                .get_mut(self.source_id)
+                .ok_or("Source node not found")?;
             src_node.local_transform = old;
             scene.mark_dirty(self.source_id);
             Ok(())
@@ -451,7 +539,6 @@ impl Command for AlignObjectsCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct ApplyModifierCommand {
     pub node_id: NodeId,
@@ -459,7 +546,6 @@ pub struct ApplyModifierCommand {
     pub modifier_name: String,
     pub old_base_mesh: Mesh,
 }
-
 
 impl Command for ApplyModifierCommand {
     fn name(&self) -> &str {
@@ -472,7 +558,12 @@ impl Command for ApplyModifierCommand {
 
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             *base_mesh = self.old_base_mesh.clone();
             *cached_render_mesh = None;
             scene.mark_dirty(self.node_id);
@@ -483,13 +574,11 @@ impl Command for ApplyModifierCommand {
     }
 }
 
-
 #[derive(Debug)]
 pub struct CollapseStackCommand {
     pub node_id: NodeId,
     pub old_base_mesh: Mesh,
 }
-
 
 impl Command for CollapseStackCommand {
     fn name(&self) -> &str {
@@ -502,7 +591,12 @@ impl Command for CollapseStackCommand {
 
     fn undo(&mut self, scene: &mut SceneGraph) -> Result<(), String> {
         let node = scene.nodes.get_mut(self.node_id).ok_or("Node not found")?;
-        if let NodeData::Mesh { base_mesh, cached_render_mesh, .. } = &mut node.data {
+        if let NodeData::Mesh {
+            base_mesh,
+            cached_render_mesh,
+            ..
+        } = &mut node.data
+        {
             *base_mesh = self.old_base_mesh.clone();
             *cached_render_mesh = None;
             scene.mark_dirty(self.node_id);
@@ -512,7 +606,6 @@ impl Command for CollapseStackCommand {
         }
     }
 }
-
 
 #[derive(Debug)]
 pub struct GroupNodesCommand {
@@ -549,7 +642,8 @@ impl Command for GroupNodesCommand {
         self.old_parents = old_info;
         let centroid = sum / count as f32;
 
-        let group_node = SceneNode::new_transform(&self.group_name, Transform::from_translation(centroid));
+        let group_node =
+            SceneNode::new_transform(&self.group_name, Transform::from_translation(centroid));
         let group_id = scene.add_node(group_node);
         self.created_group_id = Some(group_id);
 
@@ -585,5 +679,3 @@ impl Command for GroupNodesCommand {
         Ok(())
     }
 }
-
-

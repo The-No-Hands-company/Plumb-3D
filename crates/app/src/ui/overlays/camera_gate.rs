@@ -39,7 +39,8 @@ pub fn render(state: &AppState) {
 
     let gate_x = (screen_w - gate_w) * 0.5;
     let gate_y = (screen_h - gate_h) * 0.5;
-    let gate_rect = egui::Rect::from_min_size(egui::pos2(gate_x, gate_y), egui::vec2(gate_w, gate_h));
+    let gate_rect =
+        egui::Rect::from_min_size(egui::pos2(gate_x, gate_y), egui::vec2(gate_w, gate_h));
 
     let mask_color = egui::Color32::from_black_alpha(175);
 
@@ -52,7 +53,10 @@ pub fn render(state: &AppState) {
     );
     // Bottom bar
     painter.rect_filled(
-        egui::Rect::from_min_max(egui::pos2(0.0, gate_y + gate_h), egui::pos2(screen_w, screen_h)),
+        egui::Rect::from_min_max(
+            egui::pos2(0.0, gate_y + gate_h),
+            egui::pos2(screen_w, screen_h),
+        ),
         0.0,
         mask_color,
     );
@@ -64,7 +68,10 @@ pub fn render(state: &AppState) {
     );
     // Right bar
     painter.rect_filled(
-        egui::Rect::from_min_max(egui::pos2(gate_x + gate_w, gate_y), egui::pos2(screen_w, gate_y + gate_h)),
+        egui::Rect::from_min_max(
+            egui::pos2(gate_x + gate_w, gate_y),
+            egui::pos2(screen_w, gate_y + gate_h),
+        ),
         0.0,
         mask_color,
     );
@@ -77,25 +84,67 @@ pub fn render(state: &AppState) {
     );
 
     // 3. Rule of Thirds Composition Lines
-    let guide_stroke = egui::Stroke::new(1.0_f32, egui::Color32::from_rgba_unmultiplied(255, 255, 255, 45));
+    let guide_stroke = egui::Stroke::new(
+        1.0_f32,
+        egui::Color32::from_rgba_unmultiplied(255, 255, 255, 45),
+    );
     // Vertical thirds
     let v_third1 = gate_x + gate_w * (1.0 / 3.0);
     let v_third2 = gate_x + gate_w * (2.0 / 3.0);
-    painter.line_segment([egui::pos2(v_third1, gate_y), egui::pos2(v_third1, gate_y + gate_h)], guide_stroke);
-    painter.line_segment([egui::pos2(v_third2, gate_y), egui::pos2(v_third2, gate_y + gate_h)], guide_stroke);
+    painter.line_segment(
+        [
+            egui::pos2(v_third1, gate_y),
+            egui::pos2(v_third1, gate_y + gate_h),
+        ],
+        guide_stroke,
+    );
+    painter.line_segment(
+        [
+            egui::pos2(v_third2, gate_y),
+            egui::pos2(v_third2, gate_y + gate_h),
+        ],
+        guide_stroke,
+    );
 
     // Horizontal thirds
     let h_third1 = gate_y + gate_h * (1.0 / 3.0);
     let h_third2 = gate_y + gate_h * (2.0 / 3.0);
-    painter.line_segment([egui::pos2(gate_x, h_third1), egui::pos2(gate_x + gate_w, h_third1)], guide_stroke);
-    painter.line_segment([egui::pos2(gate_x, h_third2), egui::pos2(gate_x + gate_w, h_third2)], guide_stroke);
+    painter.line_segment(
+        [
+            egui::pos2(gate_x, h_third1),
+            egui::pos2(gate_x + gate_w, h_third1),
+        ],
+        guide_stroke,
+    );
+    painter.line_segment(
+        [
+            egui::pos2(gate_x, h_third2),
+            egui::pos2(gate_x + gate_w, h_third2),
+        ],
+        guide_stroke,
+    );
 
     // 4. Center Crosshair
     let center = gate_rect.center();
     let cross_len = 8.0_f32;
-    let cross_stroke = egui::Stroke::new(1.0_f32, egui::Color32::from_rgba_unmultiplied(255, 255, 255, 80));
-    painter.line_segment([egui::pos2(center.x - cross_len, center.y), egui::pos2(center.x + cross_len, center.y)], cross_stroke);
-    painter.line_segment([egui::pos2(center.x, center.y - cross_len), egui::pos2(center.x, center.y + cross_len)], cross_stroke);
+    let cross_stroke = egui::Stroke::new(
+        1.0_f32,
+        egui::Color32::from_rgba_unmultiplied(255, 255, 255, 80),
+    );
+    painter.line_segment(
+        [
+            egui::pos2(center.x - cross_len, center.y),
+            egui::pos2(center.x + cross_len, center.y),
+        ],
+        cross_stroke,
+    );
+    painter.line_segment(
+        [
+            egui::pos2(center.x, center.y - cross_len),
+            egui::pos2(center.x, center.y + cross_len),
+        ],
+        cross_stroke,
+    );
 
     // 5. Camera Badge & HUD Label
     let badge_pos = egui::pos2(gate_x + 8.0, (gate_y - 18.0).max(35.0));

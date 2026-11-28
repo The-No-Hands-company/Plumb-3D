@@ -51,7 +51,11 @@ pub fn apply_post_processing(
     let w = width as usize;
     let h = height as usize;
     let size = w * h;
-    let inv_samples = if samples > 0 { 1.0 / samples as f32 } else { 1.0 };
+    let inv_samples = if samples > 0 {
+        1.0 / samples as f32
+    } else {
+        1.0
+    };
 
     let mut linear_colors: Vec<Vec3> = radiance
         .iter()
@@ -60,7 +64,12 @@ pub fn apply_post_processing(
 
     // 0. Wavelet Denoising (OIDN / Edge-Avoiding Â-Trous Bilateral filter)
     if settings.enabled && settings.denoise_enabled {
-        linear_colors = crate::denoiser::denoise_radiance(&linear_colors, width, height, &settings.denoise_settings);
+        linear_colors = crate::denoiser::denoise_radiance(
+            &linear_colors,
+            width,
+            height,
+            &settings.denoise_settings,
+        );
     }
 
     // 1. Bloom Extraction & Multi-pass Separable Gaussian Blur
@@ -132,13 +141,21 @@ pub fn apply_post_processing(
             let mut color = if settings.enabled && settings.chromatic_aberration > 0.001 {
                 let r_norm = (dist_sq / max_dist_sq).sqrt();
                 let shift = settings.chromatic_aberration * 4.0 * r_norm;
-                let inv_dist = if dist_sq > 1e-4 { 1.0 / dist_sq.sqrt() } else { 0.0 };
+                let inv_dist = if dist_sq > 1e-4 {
+                    1.0 / dist_sq.sqrt()
+                } else {
+                    0.0
+                };
                 let dir_x = dx * inv_dist;
                 let dir_y = dy * inv_dist;
-                let rx = ((x as f32 + dir_x * shift).round() as isize).clamp(0, w as isize - 1) as usize;
-                let ry = ((y as f32 + dir_y * shift).round() as isize).clamp(0, h as isize - 1) as usize;
-                let bx = ((x as f32 - dir_x * shift).round() as isize).clamp(0, w as isize - 1) as usize;
-                let by = ((y as f32 - dir_y * shift).round() as isize).clamp(0, h as isize - 1) as usize;
+                let rx =
+                    ((x as f32 + dir_x * shift).round() as isize).clamp(0, w as isize - 1) as usize;
+                let ry =
+                    ((y as f32 + dir_y * shift).round() as isize).clamp(0, h as isize - 1) as usize;
+                let bx =
+                    ((x as f32 - dir_x * shift).round() as isize).clamp(0, w as isize - 1) as usize;
+                let by =
+                    ((y as f32 - dir_y * shift).round() as isize).clamp(0, h as isize - 1) as usize;
 
                 let r_sample = linear_colors[ry * w + rx].x;
                 let g_sample = linear_colors[y * w + x].y;

@@ -38,7 +38,10 @@ impl AppState {
                             for &ek in &self.selected_edges {
                                 if let Some(e) = base_mesh.edges.get(ek) {
                                     let he = &base_mesh.half_edges[e.half_edge];
-                                    if let (Some(v0), Some(v1)) = (base_mesh.vertices.get(he.origin), base_mesh.vertices.get(he.target)) {
+                                    if let (Some(v0), Some(v1)) = (
+                                        base_mesh.vertices.get(he.origin),
+                                        base_mesh.vertices.get(he.target),
+                                    ) {
                                         sum += (v0.position + v1.position) * 0.5;
                                         count += 1;
                                     }
@@ -72,7 +75,8 @@ impl AppState {
                             }
                         }
                         let scale = node.local_transform.scale.max_element().max(0.1);
-                        self.camera.focus_on(world_center, (max_dist * scale).max(0.5));
+                        self.camera
+                            .focus_on(world_center, (max_dist * scale).max(0.5));
                         self.window.request_redraw();
                         return;
                     }

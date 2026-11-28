@@ -1,6 +1,6 @@
-use std::f32::consts::PI;
-use core_math::{vec2, vec3, Vec2, Vec3};
 use crate::mesh::{Mesh, MeshError, VertexKey};
+use core_math::{vec2, vec3, Vec2, Vec3};
+use std::f32::consts::PI;
 
 use super::types::Spline;
 
@@ -9,7 +9,11 @@ impl Spline {
     /// `profile_points`: list of (radius, height / Y) coordinates along profile.
     /// `segments`: number of radial slices around the revolution axis.
     /// `angle_radians`: total sweep angle (2*PI for full 360-degree closed revolution).
-    pub fn lathe(profile_points: &[(f32, f32)], segments: u32, angle_radians: f32) -> Result<Mesh, MeshError> {
+    pub fn lathe(
+        profile_points: &[(f32, f32)],
+        segments: u32,
+        angle_radians: f32,
+    ) -> Result<Mesh, MeshError> {
         if profile_points.len() < 2 {
             return Err(MeshError::DegenerateFace(profile_points.len()));
         }
@@ -83,7 +87,12 @@ impl Spline {
 
     /// Revolve (Lathe) a 3D Bézier Spline around the Y-axis.
     /// Samples the spline into 2D profile points `(radius, y)` and executes `Spline::lathe`.
-    pub fn lathe_spline(&self, samples_per_segment: usize, segments: u32, angle_radians: f32) -> Result<Mesh, MeshError> {
+    pub fn lathe_spline(
+        &self,
+        samples_per_segment: usize,
+        segments: u32,
+        angle_radians: f32,
+    ) -> Result<Mesh, MeshError> {
         let sampled = self.sample(samples_per_segment.max(3));
         let profile_pts: Vec<(f32, f32)> = sampled
             .iter()
@@ -97,7 +106,11 @@ impl Spline {
 
     /// Extrudes/Sweeps a 2D cross-section along a 3D path using Rotation Minimizing Frames (RMF / Bishop Frame).
     /// Prevents artificial twisting, gimbal lock, and distortion common with standard Frenet-Serret frames.
-    pub fn sweep(cross_section: &[Vec2], path_points: &[Vec3], is_path_closed: bool) -> Result<Mesh, MeshError> {
+    pub fn sweep(
+        cross_section: &[Vec2],
+        path_points: &[Vec3],
+        is_path_closed: bool,
+    ) -> Result<Mesh, MeshError> {
         let k = cross_section.len();
         let m = path_points.len();
 
@@ -128,7 +141,11 @@ impl Spline {
             } else {
                 (path_points[i + 1] - path_points[i - 1]).normalize_or_zero()
             };
-            tangents.push(if t.length_squared() > 1e-4 { t } else { Vec3::Z });
+            tangents.push(if t.length_squared() > 1e-4 {
+                t
+            } else {
+                Vec3::Z
+            });
         }
 
         // Initial reference frame at index 0
@@ -265,16 +282,30 @@ impl Spline {
         let mut ring_verts = Vec::with_capacity(m);
 
         // Normalize profile width to [-0.5, 0.5] if needed, or assume [0, 1] across rails
-        let min_x = profile_shape.iter().map(|p| p.x).fold(f32::INFINITY, f32::min);
-        let max_x = profile_shape.iter().map(|p| p.x).fold(f32::NEG_INFINITY, f32::max);
-        let span_x = if (max_x - min_x).abs() > 1e-4 { max_x - min_x } else { 1.0 };
+        let min_x = profile_shape
+            .iter()
+            .map(|p| p.x)
+            .fold(f32::INFINITY, f32::min);
+        let max_x = profile_shape
+            .iter()
+            .map(|p| p.x)
+            .fold(f32::NEG_INFINITY, f32::max);
+        let span_x = if (max_x - min_x).abs() > 1e-4 {
+            max_x - min_x
+        } else {
+            1.0
+        };
 
         for i in 0..m {
             let p1 = rail1_points[i];
             let p2 = rail2_points[i];
             let across = p2 - p1;
             let width = across.length();
-            let x_axis = if width > 1e-5 { across / width } else { Vec3::X };
+            let x_axis = if width > 1e-5 {
+                across / width
+            } else {
+                Vec3::X
+            };
 
             let t = if i == 0 {
                 if is_closed {
@@ -292,7 +323,11 @@ impl Spline {
                 (rail1_points[i + 1] - rail1_points[i - 1]).normalize_or_zero()
             };
 
-            let tangent = if t.length_squared() > 1e-4 { t } else { Vec3::Z };
+            let tangent = if t.length_squared() > 1e-4 {
+                t
+            } else {
+                Vec3::Z
+            };
             let mut y_axis = tangent.cross(x_axis).normalize_or_zero();
             if y_axis.length_squared() < 1e-4 {
                 y_axis = Vec3::Y;
@@ -348,17 +383,17 @@ impl Spline {
     /// Each profile curve must contain the same number of vertices K >= 2.
     /// `closed_u`: whether the cross sections themselves are closed loops.
     /// `closed_v`: whether the loft loops back from the last profile to the first profile.
-    pub fn loft(
-        profiles: &[Vec<Vec3>],
-        closed_u: bool,
-        closed_v: bool,
-    ) -> Result<Mesh, MeshError> {
+    pub fn loft(profiles: &[Vec<Vec3>], closed_u: bool, closed_v: bool) -> Result<Mesh, MeshError> {
         if profiles.len() < 2 {
-            return Err(MeshError::InvariantFailed("Loft requires at least 2 profile curves".into()));
+            return Err(MeshError::InvariantFailed(
+                "Loft requires at least 2 profile curves".into(),
+            ));
         }
         let k = profiles[0].len();
         if k < 2 {
-            return Err(MeshError::InvariantFailed("Loft profiles must contain at least 2 points".into()));
+            return Err(MeshError::InvariantFailed(
+                "Loft profiles must contain at least 2 points".into(),
+            ));
         }
         for (idx, p) in profiles.iter().enumerate() {
             if p.len() != k {
@@ -388,7 +423,11 @@ impl Spline {
         }
 
         // 2. Generate quad patches between adjacent profiles
-        let num_v_segments = if closed_v { num_profiles } else { num_profiles - 1 };
+        let num_v_segments = if closed_v {
+            num_profiles
+        } else {
+            num_profiles - 1
+        };
         let num_u_segments = if closed_u { k } else { k - 1 };
 
         for i in 0..num_v_segments {
@@ -471,7 +510,8 @@ impl Spline {
                 let n2 = normals[i];
                 let bisector = (n1 + n2).normalize_or_zero();
                 let cos_half = bisector.dot(n1).max(0.1);
-                let miter_len = (distance / cos_half).clamp(-distance.abs() * 3.0, distance.abs() * 3.0);
+                let miter_len =
+                    (distance / cos_half).clamp(-distance.abs() * 3.0, distance.abs() * 3.0);
                 result.push(points[i] + bisector * miter_len);
             }
         } else {
@@ -483,7 +523,8 @@ impl Spline {
                 let n2 = normals[i];
                 let bisector = (n1 + n2).normalize_or_zero();
                 let cos_half = bisector.dot(n1).max(0.1);
-                let miter_len = (distance / cos_half).clamp(-distance.abs() * 3.0, distance.abs() * 3.0);
+                let miter_len =
+                    (distance / cos_half).clamp(-distance.abs() * 3.0, distance.abs() * 3.0);
                 result.push(points[i] + bisector * miter_len);
             }
             // Last point

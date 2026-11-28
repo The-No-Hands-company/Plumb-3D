@@ -20,17 +20,24 @@ impl AppState {
                                     let p_world = node.world_matrix.transform_point3(v.position);
                                     if !self.show_wireframe {
                                         let view_dir = p_world - self.camera.eye_position();
-                                        let has_front = base_mesh.vertex_faces(vk).iter().any(|&fk| {
-                                            base_mesh.faces.get(fk).is_some_and(|f| {
-                                                node.world_matrix.transform_vector3(f.normal).dot(view_dir) < 0.0
-                                            })
-                                        });
+                                        let has_front =
+                                            base_mesh.vertex_faces(vk).iter().any(|&fk| {
+                                                base_mesh.faces.get(fk).is_some_and(|f| {
+                                                    node.world_matrix
+                                                        .transform_vector3(f.normal)
+                                                        .dot(view_dir)
+                                                        < 0.0
+                                                })
+                                            });
                                         if !has_front {
                                             continue;
                                         }
                                     }
-                                    if let Some(sp) = self.camera.world_to_screen(p_world, width, height) {
-                                        let d_sq = (sp.x - center.0).powi(2) + (sp.y - center.1).powi(2);
+                                    if let Some(sp) =
+                                        self.camera.world_to_screen(p_world, width, height)
+                                    {
+                                        let d_sq =
+                                            (sp.x - center.0).powi(2) + (sp.y - center.1).powi(2);
                                         if d_sq <= r_sq {
                                             if subtract {
                                                 self.selected_vertices.remove(&vk);
@@ -51,19 +58,35 @@ impl AppState {
                                     if !self.show_wireframe {
                                         let view_dir = p_world - self.camera.eye_position();
                                         let f_left = he.face;
-                                        let f_right = base_mesh.half_edges.get(he.twin).and_then(|th| th.face);
-                                        let left_front = f_left.and_then(|fk| base_mesh.faces.get(fk)).is_some_and(|f| {
-                                            node.world_matrix.transform_vector3(f.normal).dot(view_dir) < 0.0
-                                        });
-                                        let right_front = f_right.and_then(|fk| base_mesh.faces.get(fk)).is_some_and(|f| {
-                                            node.world_matrix.transform_vector3(f.normal).dot(view_dir) < 0.0
-                                        });
+                                        let f_right = base_mesh
+                                            .half_edges
+                                            .get(he.twin)
+                                            .and_then(|th| th.face);
+                                        let left_front = f_left
+                                            .and_then(|fk| base_mesh.faces.get(fk))
+                                            .is_some_and(|f| {
+                                                node.world_matrix
+                                                    .transform_vector3(f.normal)
+                                                    .dot(view_dir)
+                                                    < 0.0
+                                            });
+                                        let right_front = f_right
+                                            .and_then(|fk| base_mesh.faces.get(fk))
+                                            .is_some_and(|f| {
+                                                node.world_matrix
+                                                    .transform_vector3(f.normal)
+                                                    .dot(view_dir)
+                                                    < 0.0
+                                            });
                                         if !left_front && !right_front {
                                             continue;
                                         }
                                     }
-                                    if let Some(sp) = self.camera.world_to_screen(p_world, width, height) {
-                                        let d_sq = (sp.x - center.0).powi(2) + (sp.y - center.1).powi(2);
+                                    if let Some(sp) =
+                                        self.camera.world_to_screen(p_world, width, height)
+                                    {
+                                        let d_sq =
+                                            (sp.x - center.0).powi(2) + (sp.y - center.1).powi(2);
                                         if d_sq <= r_sq {
                                             if subtract {
                                                 self.selected_edges.remove(&ek);
@@ -85,14 +108,18 @@ impl AppState {
                                         let centroid = sum / vks.len() as f32;
                                         let p_world = node.world_matrix.transform_point3(centroid);
                                         if !self.show_wireframe {
-                                            let world_normal = node.world_matrix.transform_vector3(face.normal);
+                                            let world_normal =
+                                                node.world_matrix.transform_vector3(face.normal);
                                             let view_dir = p_world - self.camera.eye_position();
                                             if world_normal.dot(view_dir) >= 0.0 {
                                                 continue;
                                             }
                                         }
-                                        if let Some(sp) = self.camera.world_to_screen(p_world, width, height) {
-                                            let d_sq = (sp.x - center.0).powi(2) + (sp.y - center.1).powi(2);
+                                        if let Some(sp) =
+                                            self.camera.world_to_screen(p_world, width, height)
+                                        {
+                                            let d_sq = (sp.x - center.0).powi(2)
+                                                + (sp.y - center.1).powi(2);
                                             if d_sq <= r_sq {
                                                 if subtract {
                                                     self.selected_faces.remove(&fk);

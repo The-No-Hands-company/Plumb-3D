@@ -59,9 +59,9 @@ pub const MAX_SCENE_LIGHTS: usize = 8;
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable, Debug)]
 pub struct GpuLight {
-    pub position: [f32; 4],    // xyz = position, w = light_type (0: Directional, 1: Point, 2: Spot)
-    pub direction: [f32; 4],   // xyz = normalized direction, w = range
-    pub color: [f32; 4],       // rgb = color, w = intensity
+    pub position: [f32; 4], // xyz = position, w = light_type (0: Directional, 1: Point, 2: Spot)
+    pub direction: [f32; 4], // xyz = normalized direction, w = range
+    pub color: [f32; 4],    // rgb = color, w = intensity
     pub spot_params: [f32; 4], // x = cos(inner_angle), y = cos(outer_angle), z = enabled (1.0/0.0), w = unused
 }
 

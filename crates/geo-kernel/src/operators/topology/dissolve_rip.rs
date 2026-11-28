@@ -11,7 +11,11 @@ impl Mesh {
             return Err(MeshError::DegenerateFace(n));
         }
 
-        let normal = self.faces.get(face_key).map(|f| f.normal).unwrap_or(Vec3::Y);
+        let normal = self
+            .faces
+            .get(face_key)
+            .map(|f| f.normal)
+            .unwrap_or(Vec3::Y);
 
         // Compute face centroid and UV
         let mut center_pos = Vec3::ZERO;
@@ -49,7 +53,10 @@ impl Mesh {
 
     /// Dissolve an edge shared by two faces, merging them into a single polygon (Blender Dissolve Edge).
     pub fn dissolve_edge(&mut self, edge_key: EdgeKey) -> Result<FaceKey, MeshError> {
-        let edge = self.edges.get(edge_key).ok_or(MeshError::InvariantFailed("Invalid edge".into()))?;
+        let edge = self
+            .edges
+            .get(edge_key)
+            .ok_or(MeshError::InvariantFailed("Invalid edge".into()))?;
         let he0_key = edge.half_edge;
         let he0 = &self.half_edges[he0_key];
         let he1_key = he0.twin;
@@ -57,15 +64,25 @@ impl Mesh {
 
         let f0 = match he0.face {
             Some(f) => f,
-            None => return Err(MeshError::InvariantFailed("Cannot dissolve boundary edge".into())),
+            None => {
+                return Err(MeshError::InvariantFailed(
+                    "Cannot dissolve boundary edge".into(),
+                ))
+            }
         };
         let f1 = match he1.face {
             Some(f) => f,
-            None => return Err(MeshError::InvariantFailed("Cannot dissolve boundary edge".into())),
+            None => {
+                return Err(MeshError::InvariantFailed(
+                    "Cannot dissolve boundary edge".into(),
+                ))
+            }
         };
 
         if f0 == f1 {
-            return Err(MeshError::InvariantFailed("Edge belongs to the same face twice".into()));
+            return Err(MeshError::InvariantFailed(
+                "Edge belongs to the same face twice".into(),
+            ));
         }
 
         let (v0, v1) = (he0.origin, he0.target);
@@ -73,10 +90,16 @@ impl Mesh {
         let verts_f0 = self.face_vertices(f0);
         let verts_f1 = self.face_vertices(f1);
 
-        let idx0_f0 = verts_f0.iter().position(|&v| v == v0).ok_or(MeshError::InvalidVertex(v0))?;
+        let idx0_f0 = verts_f0
+            .iter()
+            .position(|&v| v == v0)
+            .ok_or(MeshError::InvalidVertex(v0))?;
         let len0 = verts_f0.len();
 
-        let idx1_f1 = verts_f1.iter().position(|&v| v == v1).ok_or(MeshError::InvalidVertex(v1))?;
+        let idx1_f1 = verts_f1
+            .iter()
+            .position(|&v| v == v1)
+            .ok_or(MeshError::InvalidVertex(v1))?;
         let len1 = verts_f1.len();
 
         let mut combined = Vec::with_capacity(len0 + len1 - 2);
@@ -230,7 +253,8 @@ impl Mesh {
         let face_set: HashSet<FaceKey> = faces.iter().copied().collect();
 
         // 1. Collect all directed boundary edges (origin -> target) of the face selection
-        let mut next_vertex: std::collections::HashMap<VertexKey, VertexKey> = std::collections::HashMap::new();
+        let mut next_vertex: std::collections::HashMap<VertexKey, VertexKey> =
+            std::collections::HashMap::new();
         let mut boundary_origins = Vec::new();
 
         for &fk in faces {
@@ -246,7 +270,9 @@ impl Mesh {
         }
 
         if boundary_origins.is_empty() {
-            return Err(MeshError::InvariantFailed("No boundary edges found for face set".into()));
+            return Err(MeshError::InvariantFailed(
+                "No boundary edges found for face set".into(),
+            ));
         }
 
         // 2. Trace the outer boundary loop
@@ -262,7 +288,9 @@ impl Mesh {
                 }
                 current_vk = nxt;
             } else {
-                return Err(MeshError::InvariantFailed("Discontinuous boundary loop in dissolve_faces".into()));
+                return Err(MeshError::InvariantFailed(
+                    "Discontinuous boundary loop in dissolve_faces".into(),
+                ));
             }
         }
 

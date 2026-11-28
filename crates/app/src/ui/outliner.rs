@@ -16,7 +16,11 @@ pub fn draw_outliner(state: &mut AppState, actions: &mut UiActions) {
             ui.horizontal(|ui| {
                 ui.heading("Scene Outliner");
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.small_button("<").on_hover_text("Collapse Outliner").clicked() {
+                    if ui
+                        .small_button("<")
+                        .on_hover_text("Collapse Outliner")
+                        .clicked()
+                    {
                         state.show_outliner = false;
                     }
                 });
@@ -28,11 +32,17 @@ pub fn draw_outliner(state: &mut AppState, actions: &mut UiActions) {
 
 pub fn draw_outliner_inner(state: &mut AppState, actions: &mut UiActions, ui: &mut egui::Ui) {
     ui.horizontal(|ui| {
-        if ui.selectable_label(state.outliner_tab == 0, "Scene Tree").clicked() {
+        if ui
+            .selectable_label(state.outliner_tab == 0, "Scene Tree")
+            .clicked()
+        {
             state.outliner_tab = 0;
         }
         let history_title = format!("Action History ({})", state.history.undo_count());
-        if ui.selectable_label(state.outliner_tab == 1, history_title).clicked() {
+        if ui
+            .selectable_label(state.outliner_tab == 1, history_title)
+            .clicked()
+        {
             state.outliner_tab = 1;
         }
     });
@@ -44,7 +54,9 @@ pub fn draw_outliner_inner(state: &mut AppState, actions: &mut UiActions, ui: &m
     }
 
     ui.horizontal(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut state.outliner_filter).hint_text("Search outliner..."));
+        ui.add(
+            egui::TextEdit::singleline(&mut state.outliner_filter).hint_text("Search outliner..."),
+        );
         if !state.outliner_filter.is_empty() && ui.small_button("X").clicked() {
             state.outliner_filter.clear();
         }
@@ -57,7 +69,12 @@ pub fn draw_outliner_inner(state: &mut AppState, actions: &mut UiActions, ui: &m
 
     ui.collapsing("Hierarchy & Parenting", |ui| {
         if let Some(prev) = state.previous_selected_node {
-            let prev_name = state.scene.nodes.get(prev).map(|n| n.name.as_str()).unwrap_or("None");
+            let prev_name = state
+                .scene
+                .nodes
+                .get(prev)
+                .map(|n| n.name.as_str())
+                .unwrap_or("None");
             ui.label(format!("Parent Target: {}", prev_name));
         } else {
             ui.label("Parent Target: None");
@@ -67,13 +84,25 @@ pub fn draw_outliner_inner(state: &mut AppState, actions: &mut UiActions, ui: &m
             let can_parent = state.selected_node.is_some()
                 && state.previous_selected_node.is_some()
                 && state.selected_node != state.previous_selected_node;
-            if ui.add_enabled(can_parent, egui::Button::new("Parent (P)")).clicked() {
+            if ui
+                .add_enabled(can_parent, egui::Button::new("Parent (P)"))
+                .clicked()
+            {
                 actions.trigger_parent = true;
             }
-            if ui.add_enabled(state.selected_node.is_some(), egui::Button::new("Unparent (Shift+P)")).clicked() {
+            if ui
+                .add_enabled(
+                    state.selected_node.is_some(),
+                    egui::Button::new("Unparent (Shift+P)"),
+                )
+                .clicked()
+            {
                 actions.trigger_unparent = true;
             }
-            if ui.add_enabled(can_parent, egui::Button::new("Join (Ctrl+J)")).clicked() {
+            if ui
+                .add_enabled(can_parent, egui::Button::new("Join (Ctrl+J)"))
+                .clicked()
+            {
                 actions.trigger_join_meshes = true;
             }
         });
@@ -174,11 +203,7 @@ fn draw_outliner_tree_node(
         let is_active = selected_node == Some(node_id);
         let is_selected = is_active || selected_nodes.contains(&node_id);
         let indent = "  ".repeat(depth);
-        let branch = if node.children.is_empty() {
-            " "
-        } else {
-            "v"
-        };
+        let branch = if node.children.is_empty() { " " } else { "v" };
         let kind_badge = match &node.data {
             NodeData::Mesh { .. } => "[M]",
             NodeData::Light { light_type, .. } => match light_type {
@@ -194,7 +219,11 @@ fn draw_outliner_tree_node(
 
         ui.horizontal(|ui| {
             let eye_text = if node.visible { "[o]" } else { "[-]" };
-            if ui.small_button(eye_text).on_hover_text("Toggle Visibility").clicked() {
+            if ui
+                .small_button(eye_text)
+                .on_hover_text("Toggle Visibility")
+                .clicked()
+            {
                 *toggle_vis = Some(node_id);
             }
 
@@ -233,4 +262,3 @@ fn draw_outliner_tree_node(
         }
     }
 }
-

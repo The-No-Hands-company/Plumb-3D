@@ -36,7 +36,9 @@ pub fn execute_multi_script(
 /// Executes Python-style DCC modeling scripts with standard `plumb.*` API bindings
 pub fn execute_python_script(script: &str) -> Result<ScriptExecutionOutput, String> {
     let mut output = ScriptExecutionOutput::default();
-    output.logs.push("Python 3 embedded bridge runtime initialized.".to_string());
+    output
+        .logs
+        .push("Python 3 embedded bridge runtime initialized.".to_string());
 
     let mut mesh_vars: HashMap<String, Mesh> = HashMap::new();
 
@@ -47,23 +49,37 @@ pub fn execute_python_script(script: &str) -> Result<ScriptExecutionOutput, Stri
         }
 
         // 1. print(...) statement
-        if let Some(msg) = trimmed.strip_prefix("print(").and_then(|s| s.strip_suffix(')')) {
+        if let Some(msg) = trimmed
+            .strip_prefix("print(")
+            .and_then(|s| s.strip_suffix(')'))
+        {
             let clean_msg = msg.trim().trim_matches('"').trim_matches('\'');
             output.logs.push(clean_msg.to_string());
             continue;
         }
 
         // 2. plumb.add_mesh(name, mesh_var)
-        if let Some(args) = trimmed.strip_prefix("plumb.add_mesh(").and_then(|s| s.strip_suffix(')')) {
+        if let Some(args) = trimmed
+            .strip_prefix("plumb.add_mesh(")
+            .and_then(|s| s.strip_suffix(')'))
+        {
             let parts: Vec<&str> = args.split(',').map(|s| s.trim()).collect();
             if parts.len() == 2 {
                 let name = parts[0].trim_matches('"').trim_matches('\'');
                 let var_name = parts[1];
                 if let Some(m) = mesh_vars.get(var_name) {
                     output.meshes_to_add.push((name.to_string(), m.clone()));
-                    output.logs.push(format!("Python added mesh '{}' ({} faces)", name, m.faces.len()));
+                    output.logs.push(format!(
+                        "Python added mesh '{}' ({} faces)",
+                        name,
+                        m.faces.len()
+                    ));
                 } else {
-                    return Err(format!("Line {}: Undefined mesh variable '{}'", line_num + 1, var_name));
+                    return Err(format!(
+                        "Line {}: Undefined mesh variable '{}'",
+                        line_num + 1,
+                        var_name
+                    ));
                 }
             }
             continue;
@@ -77,14 +93,20 @@ pub fn execute_python_script(script: &str) -> Result<ScriptExecutionOutput, Stri
             if let Some(mesh) = parse_dcc_expression(e, &mesh_vars) {
                 mesh_vars.insert(v_name, mesh);
             } else {
-                return Err(format!("Line {}: Unrecognized Python DCC expression: {}", line_num + 1, e));
+                return Err(format!(
+                    "Line {}: Unrecognized Python DCC expression: {}",
+                    line_num + 1,
+                    e
+                ));
             }
             continue;
         }
 
         // Direct function calls without assignment
         if let Some(mesh) = parse_dcc_expression(trimmed, &mesh_vars) {
-            output.meshes_to_add.push(("PythonObject".to_string(), mesh));
+            output
+                .meshes_to_add
+                .push(("PythonObject".to_string(), mesh));
         }
     }
 
@@ -94,7 +116,9 @@ pub fn execute_python_script(script: &str) -> Result<ScriptExecutionOutput, Stri
 /// Executes Lua-style DCC modeling scripts with standard `plumb.*` API bindings
 pub fn execute_lua_script(script: &str) -> Result<ScriptExecutionOutput, String> {
     let mut output = ScriptExecutionOutput::default();
-    output.logs.push("Lua embedded bridge runtime initialized.".to_string());
+    output
+        .logs
+        .push("Lua embedded bridge runtime initialized.".to_string());
 
     let mut mesh_vars: HashMap<String, Mesh> = HashMap::new();
 
@@ -105,23 +129,37 @@ pub fn execute_lua_script(script: &str) -> Result<ScriptExecutionOutput, String>
         }
 
         // 1. print(...) statement
-        if let Some(msg) = trimmed.strip_prefix("print(").and_then(|s| s.strip_suffix(')')) {
+        if let Some(msg) = trimmed
+            .strip_prefix("print(")
+            .and_then(|s| s.strip_suffix(')'))
+        {
             let clean_msg = msg.trim().trim_matches('"').trim_matches('\'');
             output.logs.push(clean_msg.to_string());
             continue;
         }
 
         // 2. plumb.add_mesh(name, mesh_var)
-        if let Some(args) = trimmed.strip_prefix("plumb.add_mesh(").and_then(|s| s.strip_suffix(')')) {
+        if let Some(args) = trimmed
+            .strip_prefix("plumb.add_mesh(")
+            .and_then(|s| s.strip_suffix(')'))
+        {
             let parts: Vec<&str> = args.split(',').map(|s| s.trim()).collect();
             if parts.len() == 2 {
                 let name = parts[0].trim_matches('"').trim_matches('\'');
                 let var_name = parts[1];
                 if let Some(m) = mesh_vars.get(var_name) {
                     output.meshes_to_add.push((name.to_string(), m.clone()));
-                    output.logs.push(format!("Lua added mesh '{}' ({} faces)", name, m.faces.len()));
+                    output.logs.push(format!(
+                        "Lua added mesh '{}' ({} faces)",
+                        name,
+                        m.faces.len()
+                    ));
                 } else {
-                    return Err(format!("Line {}: Undefined mesh variable '{}'", line_num + 1, var_name));
+                    return Err(format!(
+                        "Line {}: Undefined mesh variable '{}'",
+                        line_num + 1,
+                        var_name
+                    ));
                 }
             }
             continue;
@@ -136,7 +174,11 @@ pub fn execute_lua_script(script: &str) -> Result<ScriptExecutionOutput, String>
             if let Some(mesh) = parse_dcc_expression(e, &mesh_vars) {
                 mesh_vars.insert(v_name, mesh);
             } else {
-                return Err(format!("Line {}: Unrecognized Lua DCC expression: {}", line_num + 1, e));
+                return Err(format!(
+                    "Line {}: Unrecognized Lua DCC expression: {}",
+                    line_num + 1,
+                    e
+                ));
             }
         }
     }
@@ -177,8 +219,8 @@ fn parse_dcc_expression(expr: &str, vars: &HashMap<String, Mesh>) -> Option<Mesh
     if clean.starts_with("subdivide") {
         if let Some(v_name) = extract_single_var_arg(clean) {
             if let Some(source) = vars.get(&v_name) {
-                let res = CatmullClarkModifier::subdivide_once(source)
-                    .unwrap_or_else(|_| source.clone());
+                let res =
+                    CatmullClarkModifier::subdivide_once(source).unwrap_or_else(|_| source.clone());
                 return Some(res);
             }
         }
@@ -240,7 +282,10 @@ print("Python execution success")
         let out = execute_multi_script(script, ScriptLanguage::Python).expect("Python execution");
         assert_eq!(out.meshes_to_add.len(), 1);
         assert_eq!(out.meshes_to_add[0].0, "PyCube");
-        assert!(out.logs.iter().any(|l| l.contains("Python execution success")));
+        assert!(out
+            .logs
+            .iter()
+            .any(|l| l.contains("Python execution success")));
     }
 
     #[test]

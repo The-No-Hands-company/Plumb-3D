@@ -14,7 +14,12 @@ pub struct BridgeEdgeLoopsCommand {
 }
 
 impl BridgeEdgeLoopsCommand {
-    pub fn from_edges(node_id: NodeId, selected_edges: Vec<EdgeKey>, twist: i32, cuts: usize) -> Self {
+    pub fn from_edges(
+        node_id: NodeId,
+        selected_edges: Vec<EdgeKey>,
+        twist: i32,
+        cuts: usize,
+    ) -> Self {
         Self {
             node_id,
             selected_edges,

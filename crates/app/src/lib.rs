@@ -112,7 +112,11 @@ impl ApplicationHandler for App {
                 state.ctrl_pressed = modifiers.state().control_key();
                 state.alt_pressed = modifiers.state().alt_key();
             }
-            WindowEvent::MouseInput { state: elem_state, button, .. } => {
+            WindowEvent::MouseInput {
+                state: elem_state,
+                button,
+                ..
+            } => {
                 input::handle_mouse_input(state, button, elem_state == ElementState::Pressed);
             }
             WindowEvent::CursorMoved { position, .. } => {

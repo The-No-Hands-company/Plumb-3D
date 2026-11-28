@@ -97,7 +97,11 @@ impl Mesh {
             let bump_0 = if seg_count > 1 {
                 match profile {
                     BevelProfile::Stepped => {
-                        if i % 2 == 1 { outward_dir_0 * (r1 * 0.25) } else { Vec3::ZERO }
+                        if i % 2 == 1 {
+                            outward_dir_0 * (r1 * 0.25)
+                        } else {
+                            Vec3::ZERO
+                        }
                     }
                     _ => outward_dir_0 * (r1 * bump_factor * (t * PI).sin()),
                 }
@@ -108,7 +112,11 @@ impl Mesh {
             let bump_1 = if seg_count > 1 {
                 match profile {
                     BevelProfile::Stepped => {
-                        if i % 2 == 1 { outward_dir_1 * (r2 * 0.25) } else { Vec3::ZERO }
+                        if i % 2 == 1 {
+                            outward_dir_1 * (r2 * 0.25)
+                        } else {
+                            Vec3::ZERO
+                        }
                     }
                     _ => outward_dir_1 * (r2 * bump_factor * (t * PI).sin()),
                 }
@@ -173,12 +181,8 @@ impl Mesh {
         // Add the new variable chamfer/fillet quad faces
         let mut created_faces = Vec::with_capacity(seg_count);
         for s in 0..seg_count {
-            let fk = self.add_face(&[
-                v1_strip[s],
-                v0_strip[s],
-                v0_strip[s + 1],
-                v1_strip[s + 1],
-            ])?;
+            let fk =
+                self.add_face(&[v1_strip[s], v0_strip[s], v0_strip[s + 1], v1_strip[s + 1]])?;
             created_faces.push(fk);
         }
 
@@ -213,14 +217,9 @@ impl Mesh {
             let cur_r1 = r1 + (r2 - r1) * blend_start;
             let cur_r2 = r1 + (r2 - r1) * blend_end;
 
-            if let Ok(faces) = self.bevel_edge_variable_radius(
-                edge_key,
-                cur_r1,
-                cur_r2,
-                segments,
-                continuity,
-                profile,
-            ) {
+            if let Ok(faces) = self
+                .bevel_edge_variable_radius(edge_key, cur_r1, cur_r2, segments, continuity, profile)
+            {
                 all_created.extend(faces);
             }
         }

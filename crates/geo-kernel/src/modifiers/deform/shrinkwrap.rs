@@ -75,7 +75,10 @@ impl Modifier for ShrinkwrapModifier {
         };
 
         let mut output = input.clone();
-        let vg = self.vertex_group.as_ref().and_then(|g| input.get_vertex_group(g));
+        let vg = self
+            .vertex_group
+            .as_ref()
+            .and_then(|g| input.get_vertex_group(g));
 
         for (vk, v) in &mut output.vertices {
             let weight = vg.map(|g| g.get_weight(vk)).unwrap_or(1.0);

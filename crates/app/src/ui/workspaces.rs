@@ -122,7 +122,9 @@ impl WorkspaceTemplate {
         match self {
             Self::General => "General 3D scene composition and object layout",
             Self::HardSurface => "Polygon & sub-d modeling with edge/face tools and wireframe",
-            Self::CadPrecision => "Precision CAD drafting with grid snapping, dimensions, and calipers",
+            Self::CadPrecision => {
+                "Precision CAD drafting with grid snapping, dimensions, and calipers"
+            }
             Self::Sculpting => "High-detail digital sculpting canvas with MatCap clay shading",
             Self::UvRetopo => "Side-by-side UV unwrapping, seam tagging, and retopology",
             Self::LookDev => "Physically-based materials, lighting lookdev, and path tracing",
@@ -134,7 +136,10 @@ impl WorkspaceTemplate {
 /// Applies a declarative workspace template to the active application state.
 pub fn apply_workspace(state: &mut AppState, workspace: WorkspaceTemplate) {
     state.current_workspace = workspace;
-    if workspace != WorkspaceTemplate::Animation && (state.inspector_tab == InspectorTab::Constraints || state.inspector_tab == InspectorTab::Physics) {
+    if workspace != WorkspaceTemplate::Animation
+        && (state.inspector_tab == InspectorTab::Constraints
+            || state.inspector_tab == InspectorTab::Physics)
+    {
         state.inspector_tab = InspectorTab::Transform;
     }
     match workspace {
@@ -260,7 +265,10 @@ pub fn draw_workspace_bar(state: &mut AppState, ui: &mut egui::Ui) {
             .selected_text(state.studio_domain.label())
             .show_ui(ui, |ui| {
                 for domain in StudioDomain::ALL {
-                    if ui.selectable_label(state.studio_domain == domain, domain.label()).clicked() {
+                    if ui
+                        .selectable_label(state.studio_domain == domain, domain.label())
+                        .clicked()
+                    {
                         apply_studio_domain(state, domain);
                     }
                 }
@@ -281,7 +289,11 @@ pub fn draw_workspace_bar(state: &mut AppState, ui: &mut egui::Ui) {
             ui.separator();
             for idx in 0..state.custom_workspaces.len() {
                 let name = state.custom_workspaces[idx].name.clone();
-                if ui.button(format!("[W] {}", name)).on_hover_text("Load personalized custom workspace").clicked() {
+                if ui
+                    .button(format!("[W] {}", name))
+                    .on_hover_text("Load personalized custom workspace")
+                    .clicked()
+                {
                     apply_custom_workspace(state, idx);
                 }
             }

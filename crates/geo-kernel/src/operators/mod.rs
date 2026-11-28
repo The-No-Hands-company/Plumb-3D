@@ -8,8 +8,8 @@ pub mod extrude;
 pub mod field_remesh;
 pub mod flow_guide;
 pub mod generation;
-pub mod remesh_tables;
 pub mod remesh;
+pub mod remesh_tables;
 pub mod selection;
 pub mod separate_join;
 pub mod skin_envelope;
@@ -22,7 +22,7 @@ pub mod variable_bevel;
 pub mod weld_bead;
 pub mod weld_clean;
 
-pub use types::*;
 pub use cable::CableGenerator;
+pub use types::*;
 pub use variable_bevel::FilletContinuity;
 pub use weld_bead::WeldStyle;

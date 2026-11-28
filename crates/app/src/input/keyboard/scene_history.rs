@@ -87,7 +87,12 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
             };
 
             if !targets.is_empty() {
-                let count = state.scene.nodes.values().filter(|n| matches!(n.data, NodeData::Transform)).count();
+                let count = state
+                    .scene
+                    .nodes
+                    .values()
+                    .filter(|n| matches!(n.data, NodeData::Transform))
+                    .count();
                 let group_name = format!("Group_{}", count + 1);
                 let cmd = Box::new(GroupNodesCommand {
                     node_ids: targets,
@@ -142,7 +147,9 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
                         let _ = state.history.execute(cmd, &mut state.scene);
                     }
                 }
-            } else if state.interaction_mode == InteractionMode::Edit && !state.selected_faces.is_empty() {
+            } else if state.interaction_mode == InteractionMode::Edit
+                && !state.selected_faces.is_empty()
+            {
                 // Blender P: Separate Selected Faces
                 if let Some(sel_id) = state.selected_node {
                     let faces: Vec<FaceKey> = state.selected_faces.iter().copied().collect();
@@ -168,7 +175,9 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
                 }
             } else {
                 // Maya P: Parent selected child to parent target
-                if let (Some(child_id), Some(parent_id)) = (state.selected_node, state.previous_selected_node) {
+                if let (Some(child_id), Some(parent_id)) =
+                    (state.selected_node, state.previous_selected_node)
+                {
                     if child_id != parent_id {
                         let cmd = Box::new(SetParentCommand {
                             child_id,
@@ -185,7 +194,9 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
         KeyCode::KeyJ => {
             if state.ctrl_pressed {
                 // Blender Ctrl+J / Maya Combine: Join Meshes
-                if let (Some(target_id), Some(source_id)) = (state.selected_node, state.previous_selected_node) {
+                if let (Some(target_id), Some(source_id)) =
+                    (state.selected_node, state.previous_selected_node)
+                {
                     if target_id != source_id {
                         let cmd = Box::new(JoinMeshesCommand {
                             target_id,
@@ -232,7 +243,9 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
             }
             if state.interaction_mode == InteractionMode::Edit {
                 if let Some(sel_id) = state.selected_node {
-                    if state.sub_element_level == SubElementLevel::Face && !state.selected_faces.is_empty() {
+                    if state.sub_element_level == SubElementLevel::Face
+                        && !state.selected_faces.is_empty()
+                    {
                         let faces: Vec<FaceKey> = state.selected_faces.iter().copied().collect();
                         let cmd = Box::new(DeleteFacesCommand {
                             node_id: sel_id,
@@ -244,8 +257,11 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
                             state.selected_vertices.clear();
                             state.selected_edges.clear();
                         }
-                    } else if state.sub_element_level == SubElementLevel::Edge && !state.selected_edges.is_empty() {
-                        let edges_to_dissolve: Vec<geo_kernel::EdgeKey> = state.selected_edges.iter().copied().collect();
+                    } else if state.sub_element_level == SubElementLevel::Edge
+                        && !state.selected_edges.is_empty()
+                    {
+                        let edges_to_dissolve: Vec<geo_kernel::EdgeKey> =
+                            state.selected_edges.iter().copied().collect();
                         for ek in edges_to_dissolve {
                             let cmd = Box::new(DissolveEdgeCommand {
                                 node_id: sel_id,
@@ -257,8 +273,11 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
                         state.selected_edges.clear();
                         state.selected_vertices.clear();
                         state.selected_faces.clear();
-                    } else if state.sub_element_level == SubElementLevel::Vertex && !state.selected_vertices.is_empty() {
-                        let verts: Vec<geo_kernel::VertexKey> = state.selected_vertices.iter().copied().collect();
+                    } else if state.sub_element_level == SubElementLevel::Vertex
+                        && !state.selected_vertices.is_empty()
+                    {
+                        let verts: Vec<geo_kernel::VertexKey> =
+                            state.selected_vertices.iter().copied().collect();
                         let cmd = Box::new(DeleteVerticesCommand {
                             node_id: sel_id,
                             vertices: verts,
@@ -274,11 +293,17 @@ pub fn handle_scene_history_key(state: &mut AppState, key_code: KeyCode) -> bool
             } else if state.interaction_mode == InteractionMode::CurveEdit {
                 if let Some(sel_id) = state.selected_node {
                     if let Some(node) = state.scene.nodes.get_mut(sel_id) {
-                        if let NodeData::Curve { spline, cached_render_mesh, .. } = &mut node.data {
+                        if let NodeData::Curve {
+                            spline,
+                            cached_render_mesh,
+                            ..
+                        } = &mut node.data
+                        {
                             if spline.points.len() > 2 {
                                 if let Some(k_idx) = state.selected_curve_knot {
                                     spline.points.remove(k_idx);
-                                    state.selected_curve_knot = Some(k_idx.min(spline.points.len() - 1));
+                                    state.selected_curve_knot =
+                                        Some(k_idx.min(spline.points.len() - 1));
                                     *cached_render_mesh = None;
                                     state.scene.mark_dirty(sel_id);
                                 }

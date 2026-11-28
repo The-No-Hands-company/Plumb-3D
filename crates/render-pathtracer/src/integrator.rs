@@ -50,7 +50,8 @@ pub fn trace_path(
             let light_dir = to_light / dist.max(1e-4);
 
             let cos_theta = hit.normal.dot(light_dir);
-            let light_normal = (light_tri.n0 * u + light_tri.n1 * v + light_tri.n2 * w).normalize_or_zero();
+            let light_normal =
+                (light_tri.n0 * u + light_tri.n1 * v + light_tri.n2 * w).normalize_or_zero();
             let cos_light = (-light_dir).dot(light_normal);
 
             if cos_theta > 0.0 && cos_light > 0.0 {
@@ -58,7 +59,8 @@ pub fn trace_path(
                 // Test shadow occlusion
                 if let Some(shadow_hit) = scene.intersect(&shadow_ray, 1e-4, dist - 1e-3) {
                     if shadow_hit.material_id == light_tri.material_id {
-                        let light_mat = &scene.materials[light_tri.material_id % scene.materials.len()];
+                        let light_mat =
+                            &scene.materials[light_tri.material_id % scene.materials.len()];
                         let light_emission = light_mat.emission();
 
                         // Geometry term: G = cos_theta * cos_light / dist_sq weighted by triangle area
@@ -69,7 +71,8 @@ pub fn trace_path(
                         let g = (cos_theta * cos_light / dist_sq.max(1e-4)).min(2.0);
                         let light_pdf = 1.0 / scene.emissive_triangles.len() as f32;
                         let albedo = material.albedo(hit.uv, hit.position, hit.normal);
-                        accumulated_radiance += throughput * albedo * light_emission * (g * area) / light_pdf.max(1e-4);
+                        accumulated_radiance +=
+                            throughput * albedo * light_emission * (g * area) / light_pdf.max(1e-4);
                     }
                 }
             }
@@ -98,19 +101,29 @@ pub fn trace_path(
                         let view_dir = -ray.direction.normalize();
                         let v_dot_n = hit.normal.dot(view_dir).max(0.0);
                         let l_dot_n = cos_theta;
-                        let cos_phi = (view_dir - hit.normal * v_dot_n).normalize_or_zero()
+                        let cos_phi = (view_dir - hit.normal * v_dot_n)
+                            .normalize_or_zero()
                             .dot((dir_light.to_light - hit.normal * l_dot_n).normalize_or_zero());
                         let (sin_alpha, tan_beta) = if l_dot_n < v_dot_n {
-                            ((1.0 - l_dot_n * l_dot_n).max(0.0).sqrt(), (1.0 - v_dot_n * v_dot_n).max(0.0).sqrt() / v_dot_n.max(1e-4))
+                            (
+                                (1.0 - l_dot_n * l_dot_n).max(0.0).sqrt(),
+                                (1.0 - v_dot_n * v_dot_n).max(0.0).sqrt() / v_dot_n.max(1e-4),
+                            )
                         } else {
-                            ((1.0 - v_dot_n * v_dot_n).max(0.0).sqrt(), (1.0 - l_dot_n * l_dot_n).max(0.0).sqrt() / l_dot_n.max(1e-4))
+                            (
+                                (1.0 - v_dot_n * v_dot_n).max(0.0).sqrt(),
+                                (1.0 - l_dot_n * l_dot_n).max(0.0).sqrt() / l_dot_n.max(1e-4),
+                            )
                         };
                         cos_theta * (a + b * cos_phi.max(0.0) * sin_alpha * tan_beta)
                     } else {
                         cos_theta
                     };
 
-                    accumulated_radiance += throughput * albedo * dir_light.color * (dir_light.intensity * diffuse_term);
+                    accumulated_radiance += throughput
+                        * albedo
+                        * dir_light.color
+                        * (dir_light.intensity * diffuse_term);
                 }
             }
         }
@@ -129,7 +142,10 @@ pub fn trace_path(
                     let win = (1.0 - d_over_r * d_over_r * d_over_r * d_over_r).clamp(0.0, 1.0);
                     let att = (win * win) / (dist_sq + 1.0);
                     let albedo = material.albedo(hit.uv, hit.position, eff_normal);
-                    accumulated_radiance += throughput * albedo * pt_light.color * (pt_light.intensity * att * cos_theta);
+                    accumulated_radiance += throughput
+                        * albedo
+                        * pt_light.color
+                        * (pt_light.intensity * att * cos_theta);
                 }
             }
         }
@@ -144,7 +160,11 @@ pub fn trace_path(
 
         // 4. Russian Roulette termination after 3 bounces
         if bounce >= 3 {
-            let p = throughput.x.max(throughput.y).max(throughput.z).clamp(0.05, 0.95);
+            let p = throughput
+                .x
+                .max(throughput.y)
+                .max(throughput.z)
+                .clamp(0.05, 0.95);
             if rng() > p {
                 break;
             }
