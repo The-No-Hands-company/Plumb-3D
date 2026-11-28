@@ -5,6 +5,7 @@ pub mod hud;
 pub mod mesh_features;
 pub mod modals;
 pub mod operator_panel;
+pub mod pie_menu_overlay;
 pub mod push_pull_overlay;
 pub mod selection_overlay;
 pub mod sketch_overlay;

@@ -207,6 +207,18 @@ pub fn draw_topology_cad_panel(
                     }
                 }
             }
+
+            if ui.button("Import STEP Solid (.step)")
+                .on_hover_text("Parses ISO 10303-21 STEP B-Rep solid into watertight 2-manifold BMesh")
+                .clicked()
+            {
+                if let Some(path) = rfd::FileDialog::new()
+                    .add_filter("STEP CAD Solid (*.step, *.stp)", &["step", "stp"])
+                    .pick_file()
+                {
+                    crate::ui::actions::import_model_from_file(state, &path);
+                }
+            }
         });
     });
 

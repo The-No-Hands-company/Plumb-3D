@@ -7,6 +7,8 @@ mod selection;
 mod spawning;
 mod uv_ops;
 
+pub use io_ops::import_model_from_file;
+
 use geo_kernel::{Mesh, MirrorAxis};
 use graph_engine::{LightType, NodeId};
 

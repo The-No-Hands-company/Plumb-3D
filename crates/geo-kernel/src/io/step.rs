@@ -9,6 +9,18 @@ use std::io::{self, Write};
 use std::path::Path;
 
 impl Mesh {
+    /// Imports a mesh from a standard ISO 10303-21 STEP CAD string.
+    pub fn from_step_str(step_content: &str) -> Result<Self, crate::mesh::MeshError> {
+        super::step_import::import_step_str(step_content)
+    }
+
+    /// Imports a mesh from a standard ISO 10303-21 STEP CAD file on disk.
+    pub fn from_step_file(path: impl AsRef<Path>) -> io::Result<Self> {
+        let content = std::fs::read_to_string(path)?;
+        Self::from_step_str(&content)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, format!("{:?}", e)))
+    }
+
     /// Exports the mesh to a standard ISO 10303-21 STEP AP214 solid CAD file.
     pub fn export_step_file(&self, path: impl AsRef<Path>) -> io::Result<()> {
         let file = std::fs::File::create(path)?;

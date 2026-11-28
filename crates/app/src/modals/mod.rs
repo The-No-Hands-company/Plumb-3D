@@ -6,6 +6,7 @@ pub mod inset;
 pub mod kitbash;
 pub mod knife;
 pub mod loop_cut;
+pub mod pie_menu;
 pub mod push_pull;
 pub mod vertex_crease;
 
@@ -16,7 +17,8 @@ use winit::keyboard::KeyCode;
 use crate::state::AppState;
 
 pub fn is_any_modal_active(state: &AppState) -> bool {
-    state.extrude_modal_active
+    state.pie_menu_active
+        || state.extrude_modal_active
         || state.push_pull_modal_active
         || state.bevel_modal_active
         || state.inset_modal_active
@@ -63,6 +65,10 @@ pub fn handle_mouse_input(state: &mut AppState, button: MouseButton, is_pressed:
 }
 
 pub fn handle_cursor_moved(state: &mut AppState, position: PhysicalPosition<f64>) -> bool {
+    if state.pie_menu_active {
+        pie_menu::update_cursor(state, (position.x, position.y));
+        return true;
+    }
     if state.cutter_modal.is_some() {
         return cutter::handle_cursor_moved(state, position);
     }
@@ -119,6 +125,10 @@ pub fn handle_mouse_wheel(state: &mut AppState, scroll: f32) -> bool {
 }
 
 pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) -> bool {
+    if state.pie_menu_active && key_code == KeyCode::Escape {
+        pie_menu::cancel(state);
+        return true;
+    }
     if state.cutter_modal.is_some() {
         return cutter::handle_keyboard_input(state, key_code);
     }

@@ -100,6 +100,9 @@ pub struct AppState {
     pub push_pull_modal_start_mouse: (f64, f64),
     pub push_pull_modal_distance: f32,
     pub push_pull_modal_face: Option<FaceKey>,
+    pub pie_menu_active: bool,
+    pub pie_menu_center: (f64, f64),
+    pub pie_menu_hovered_slice: Option<usize>,
 
     // Interactive Bevel Modal (Blender Ctrl+B / Maya Bevel)
     pub bevel_modal_active: bool,
@@ -564,6 +567,9 @@ impl AppState {
             push_pull_modal_start_mouse: (0.0, 0.0),
             push_pull_modal_distance: 0.0,
             push_pull_modal_face: None,
+            pie_menu_active: false,
+            pie_menu_center: (0.0, 0.0),
+            pie_menu_hovered_slice: None,
             bevel_modal_active: false,
             bevel_modal_start_mouse: (0.0, 0.0),
             bevel_modal_width: 0.15,

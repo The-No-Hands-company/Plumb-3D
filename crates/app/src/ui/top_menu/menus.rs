@@ -40,7 +40,7 @@ pub fn draw_file_menu(state: &mut AppState, actions: &mut UiActions, ui: &mut eg
             ui.close_menu();
         }
         if ui
-            .button("Import 3D Model... (plmb, obj, stl, ply, gltf)")
+            .button("Import 3D Model... (plmb, obj, stl, ply, gltf, glb, step)")
             .clicked()
         {
             actions.trigger_import_dialog = true;

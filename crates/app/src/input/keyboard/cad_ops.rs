@@ -152,6 +152,16 @@ pub fn handle_mesh_key(state: &mut AppState, key_code: KeyCode) -> bool {
             state.window.request_redraw();
             true
         }
+        KeyCode::KeyV => {
+            let mouse_pos = state.last_mouse_pos.unwrap_or((
+                state.surface_config.width as f64 * 0.5,
+                state.surface_config.height as f64 * 0.5,
+            ));
+            crate::modals::pie_menu::open(state, mouse_pos);
+            state.set_status_message("Radial Pie Menu: Gesture toward tool slice to select");
+            state.window.request_redraw();
+            true
+        }
         KeyCode::F9 => {
             state.show_last_operator_panel = !state.show_last_operator_panel;
             state.window.request_redraw();

@@ -82,6 +82,7 @@ pub fn draw_ui(state: &mut AppState) {
     welcome_hub::draw_welcome_hub(state, &mut actions);
     preferences::draw_preferences_dialog(state);
 
+    overlays::pie_menu_overlay::render(state, &mut actions);
     actions::execute_ui_actions(state, actions);
     overlays::draw_overlays(state);
 }

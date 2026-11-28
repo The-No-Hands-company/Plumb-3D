@@ -67,6 +67,21 @@ pub const MODELING_COMMANDS: &[PaletteItem] = &[
         }),
     },
     PaletteItem {
+        name: "Radial Pie Menu: Quick Actions",
+        category: "Modeling",
+        shortcut: "V",
+        keywords: &[
+            "pie", "radial", "menu", "quick", "gesture", "flick", "speed", "blender", "maya",
+        ],
+        action: PaletteAction::TriggerAction(|state, _| {
+            let mouse_pos = (
+                state.surface_config.width as f64 * 0.5,
+                state.surface_config.height as f64 * 0.5,
+            );
+            crate::modals::pie_menu::open(state, mouse_pos);
+        }),
+    },
+    PaletteItem {
         name: "Bevel Edges / Vertices",
         category: "Modeling",
         shortcut: "Ctrl+B",

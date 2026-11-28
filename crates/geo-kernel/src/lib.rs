@@ -39,6 +39,7 @@ pub mod subd_nurbs;
 pub mod subdivision;
 pub mod texture_paint;
 pub mod triangulation;
+pub mod trimmed_nurbs;
 pub mod uv;
 pub mod validation;
 pub mod xpbd_cloth;
@@ -93,6 +94,7 @@ pub use subd_nurbs::{convert_mesh_to_nurbs_patches, export_subd_nurbs_step, Bicu
 pub use subdivision::CatmullClarkModifier;
 pub use texture_paint::{PaintBlendMode, PaintChannel, PaintTexture, TexturePaintBrush};
 pub use triangulation::{GpuVertex, RenderMesh, ShadingMode, SubMeshRange};
+pub use trimmed_nurbs::{SurfaceIntersectionPoint, TrimmedNurbsPatch};
 pub use uv::ProjectionAxis;
 pub use xpbd_cloth::{
     SphereCollider, XpbdBendingConstraint, XpbdClothSimulator, XpbdDistanceConstraint, XpbdParticle,
