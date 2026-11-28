@@ -101,11 +101,14 @@ pub fn draw_transform_panel(ui: &mut egui::Ui, state: &mut AppState, sel_id: Nod
             ui.checkbox(&mut state.snap_enabled, "Enable (Shift+Tab)");
         });
         if state.snap_enabled {
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 ui.label("Target:");
                 ui.selectable_value(&mut state.snap_target, SnapTarget::Vertex, "Vert (V)");
                 ui.selectable_value(&mut state.snap_target, SnapTarget::EdgeMidpoint, "Mid");
                 ui.selectable_value(&mut state.snap_target, SnapTarget::FaceCenter, "Face");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::Perpendicular, "⟂ Perp");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::Tangent, "⌖ Tan");
+                ui.selectable_value(&mut state.snap_target, SnapTarget::ObjectCenter, "◯ Obj");
                 ui.selectable_value(&mut state.snap_target, SnapTarget::Grid, "Grid");
             });
             if state.snap_target == SnapTarget::Grid {

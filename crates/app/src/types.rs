@@ -11,6 +11,7 @@ pub enum InteractionMode {
     TexturePaint,
     Pose,
     CurveEdit,
+    Sketch,
 }
 
 /// Sub-element selection level in Mesh Edit Mode.
@@ -29,6 +30,9 @@ pub enum SnapTarget {
     Vertex,
     EdgeMidpoint,
     FaceCenter,
+    Perpendicular,
+    Tangent,
+    ObjectCenter,
 }
 
 /// Active drafting tool in 2D CAD Constraint Sketcher mode.

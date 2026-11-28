@@ -7,6 +7,7 @@ pub mod surface;
 pub mod trim;
 pub mod types;
 
+pub use eval::*;
 pub use multi_rail::*;
 pub use profiles::*;
 pub use trim::*;

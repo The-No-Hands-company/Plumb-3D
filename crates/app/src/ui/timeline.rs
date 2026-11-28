@@ -63,6 +63,9 @@ pub fn draw_status_bar(state: &mut AppState) {
                 InteractionMode::CurveEdit => egui::RichText::new("CURVE EDIT MODE")
                     .strong()
                     .color(egui::Color32::from_rgb(100, 220, 255)),
+                InteractionMode::Sketch => egui::RichText::new("2D CAD SKETCH MODE")
+                    .strong()
+                    .color(egui::Color32::from_rgb(0, 240, 255)),
             };
             ui.label(mode_label);
             ui.separator();

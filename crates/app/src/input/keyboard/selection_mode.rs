@@ -24,6 +24,15 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
                         state.window.request_redraw();
                         return true;
                     }
+                    if matches!(node.data, NodeData::Sketch { .. }) {
+                        state.interaction_mode = match state.interaction_mode {
+                            InteractionMode::Sketch => InteractionMode::Object,
+                            _ => InteractionMode::Sketch,
+                        };
+                        state.scene.mark_dirty(sel_id);
+                        state.window.request_redraw();
+                        return true;
+                    }
                 }
             }
             state.interaction_mode = match state.interaction_mode {
@@ -35,6 +44,7 @@ pub fn handle_selection_mode_key(state: &mut AppState, key_code: KeyCode) -> boo
                 InteractionMode::TexturePaint => InteractionMode::Pose,
                 InteractionMode::Pose => InteractionMode::Object,
                 InteractionMode::CurveEdit => InteractionMode::Object,
+                InteractionMode::Sketch => InteractionMode::Object,
             };
             if let Some(sel_id) = state.selected_node {
                 state.scene.mark_dirty(sel_id);

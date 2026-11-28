@@ -72,6 +72,32 @@ pub fn handle_gizmo_drag(state: &mut AppState, axis: GizmoAxis, dx: f32, dy: f32
                             hit_info = Some((hit, "Face Center"));
                         }
                     }
+                    SnapTarget::Perpendicular => {
+                        if let Some(hit) = state.find_closest_snap_perpendicular(
+                            proposed_pos,
+                            state.snap_distance_threshold,
+                        ) {
+                            snapped_pos = hit;
+                            hit_info = Some((hit, "⟂ Perpendicular"));
+                        }
+                    }
+                    SnapTarget::Tangent => {
+                        if let Some(hit) = state
+                            .find_closest_snap_tangent(proposed_pos, state.snap_distance_threshold)
+                        {
+                            snapped_pos = hit;
+                            hit_info = Some((hit, "⌖ Tangent"));
+                        }
+                    }
+                    SnapTarget::ObjectCenter => {
+                        if let Some(hit) = state.find_closest_snap_object_center(
+                            proposed_pos,
+                            state.snap_distance_threshold,
+                        ) {
+                            snapped_pos = hit;
+                            hit_info = Some((hit, "◯ Object Center"));
+                        }
+                    }
                 }
                 if let Some((hit_pos, label)) = hit_info {
                     state.last_snap_hit = Some((hit_pos, label));

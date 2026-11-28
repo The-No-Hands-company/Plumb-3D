@@ -52,6 +52,9 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
                             if ui.selectable_label(state.interaction_mode == InteractionMode::CurveEdit, "Curve").clicked() {
                                 state.interaction_mode = InteractionMode::CurveEdit;
                             }
+                            if ui.selectable_label(state.interaction_mode == InteractionMode::Sketch, "✏ Sketch").on_hover_text("2D CAD Constraint Sketcher Mode").clicked() {
+                                state.interaction_mode = InteractionMode::Sketch;
+                            }
 
                             ui.separator();
 
@@ -150,6 +153,9 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
                             if ui.selectable_label(state.show_wireframe, "Wire").clicked() {
                                 state.show_wireframe = !state.show_wireframe;
                             }
+                            if ui.selectable_label(state.show_curvature_combs, "Comb").on_hover_text("Curvature Combs: Porcupine analysis needles for G1/G2 continuity").clicked() {
+                                state.show_curvature_combs = !state.show_curvature_combs;
+                            }
                             if ui.selectable_label(state.show_grid, "Grid").clicked() {
                                 state.show_grid = !state.show_grid;
                             }
@@ -174,6 +180,9 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
                                     SnapTarget::Vertex => "Vert",
                                     SnapTarget::EdgeMidpoint => "Mid",
                                     SnapTarget::FaceCenter => "Face",
+                                    SnapTarget::Perpendicular => "⟂ Perp",
+                                    SnapTarget::Tangent => "⌖ Tan",
+                                    SnapTarget::ObjectCenter => "◯ Obj",
                                     SnapTarget::Grid => match state.grid_snap_size {
                                         s if (s - 0.001).abs() < 1e-4 => "1mm",
                                         s if (s - 0.01).abs() < 1e-4 => "10mm",
@@ -182,7 +191,7 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
                                         _ => "Grid",
                                     },
                                 })
-                                .width(55.0)
+                                .width(65.0)
                                 .show_ui(ui, |ui| {
                                     if ui.selectable_label(state.snap_target == SnapTarget::Vertex, "Vertex (V)").clicked() {
                                         state.snap_target = SnapTarget::Vertex;
@@ -194,6 +203,18 @@ pub fn draw_quick_controls(state: &mut AppState, ui: &mut egui::Ui) {
                                     }
                                     if ui.selectable_label(state.snap_target == SnapTarget::FaceCenter, "Face Center").clicked() {
                                         state.snap_target = SnapTarget::FaceCenter;
+                                        state.snap_enabled = true;
+                                    }
+                                    if ui.selectable_label(state.snap_target == SnapTarget::Perpendicular, "⟂ Perpendicular").clicked() {
+                                        state.snap_target = SnapTarget::Perpendicular;
+                                        state.snap_enabled = true;
+                                    }
+                                    if ui.selectable_label(state.snap_target == SnapTarget::Tangent, "⌖ Tangent").clicked() {
+                                        state.snap_target = SnapTarget::Tangent;
+                                        state.snap_enabled = true;
+                                    }
+                                    if ui.selectable_label(state.snap_target == SnapTarget::ObjectCenter, "◯ Object Center").clicked() {
+                                        state.snap_target = SnapTarget::ObjectCenter;
                                         state.snap_enabled = true;
                                     }
                                     ui.separator();

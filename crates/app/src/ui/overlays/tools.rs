@@ -249,6 +249,18 @@ pub fn render(state: &mut AppState) {
                     egui::Color32::from_rgb(255, 200, 50),
                     egui::Color32::from_rgba_premultiplied(255, 200, 50, 40),
                 ),
+                "⟂ Perpendicular" => (
+                    egui::Color32::from_rgb(255, 150, 40),
+                    egui::Color32::from_rgba_premultiplied(255, 150, 40, 40),
+                ),
+                "⌖ Tangent" => (
+                    egui::Color32::from_rgb(180, 100, 255),
+                    egui::Color32::from_rgba_premultiplied(180, 100, 255, 40),
+                ),
+                "◯ Object Center" => (
+                    egui::Color32::from_rgb(255, 70, 120),
+                    egui::Color32::from_rgba_premultiplied(255, 70, 120, 40),
+                ),
                 "Angle" => (
                     egui::Color32::from_rgb(255, 100, 220),
                     egui::Color32::from_rgba_premultiplied(255, 100, 220, 40),

@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod cad_ops;
 pub mod modeling_ops;
 pub mod scene_history;
 pub mod selection_mode;
@@ -27,6 +28,10 @@ pub fn handle_keyboard_input(state: &mut AppState, key_code: KeyCode) {
     }
 
     if scene_history::handle_scene_history_key(state, key_code) {
+        return;
+    }
+
+    if cad_ops::handle_mesh_key(state, key_code) {
         return;
     }
 

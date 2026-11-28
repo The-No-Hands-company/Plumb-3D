@@ -1,4 +1,5 @@
 pub mod camera_gate;
+pub mod curvature_comb_overlay;
 pub mod cutter_overlay;
 pub mod hud;
 pub mod mesh_features;
@@ -23,6 +24,7 @@ pub fn draw_overlays(state: &mut AppState) {
     modals::render(state);
     operator_panel::render(state);
     sketch_overlay::render(state);
+    curvature_comb_overlay::render(state);
     mesh_features::render(state);
     hud::render(state);
     walkthrough::render(state);
