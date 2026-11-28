@@ -225,6 +225,13 @@ fn draw_sidebar_controls(state: &mut AppState, ui: &mut egui::Ui) {
                     ui.add(egui::Slider::new(&mut state.production_render.post_process.saturation, 0.0..=2.0));
                 });
                 ui.checkbox(&mut state.production_render.post_process.filmic_tonemap, "ACES Filmic Tone Mapping");
+                ui.checkbox(&mut state.production_render.post_process.denoise_enabled, "✨ Wavelet Denoiser (OIDN-Style)");
+                if state.production_render.post_process.denoise_enabled {
+                    ui.horizontal(|ui| {
+                        ui.label("Denoise Passes:");
+                        ui.add(egui::Slider::new(&mut state.production_render.post_process.denoise_settings.passes, 1..=4));
+                    });
+                }
             }
         });
 
@@ -428,14 +435,15 @@ pub fn start_production_render(state: &mut AppState) {
     // 4. Initialize render buffer / execute Direct PBR if selected
     if state.production_render.engine == super::types::RenderEngine::DirectPbr {
         let mut buffer = RenderBuffer::new(width, height);
-        buffer.render_sample_pass(&scene, &camera, 1, None);
-        buffer.samples_rendered = state.production_render.settings.target_samples;
+        // Multi-pass stratified sampling (4 passes) with active wavelet denoising for instant, silky-smooth beauty shot
+        for _ in 0..4 {
+            buffer.render_sample_pass(&scene, &camera, 1, None);
+        }
+        buffer.samples_rendered = 4;
 
-        let rgba = if state.production_render.post_process.enabled {
-            buffer.to_rgba8_post_processed(&state.production_render.post_process)
-        } else {
-            buffer.to_rgba8_filmic()
-        };
+        let mut post = state.production_render.post_process;
+        post.denoise_enabled = true;
+        let rgba = buffer.to_rgba8_post_processed(&post);
         let color_image = egui::ColorImage::from_rgba_unmultiplied(
             [width as usize, height as usize],
             &rgba,

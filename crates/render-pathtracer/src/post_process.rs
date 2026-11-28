@@ -34,7 +34,7 @@ impl Default for PostProcessSettings {
             contrast: 1.08,
             saturation: 1.12,
             filmic_tonemap: true,
-            denoise_enabled: false,
+            denoise_enabled: true,
             denoise_settings: crate::denoiser::DenoiseSettings::default(),
         }
     }

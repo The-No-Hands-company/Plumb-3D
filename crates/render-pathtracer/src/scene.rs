@@ -278,6 +278,66 @@ impl PathTracerScene {
             triangles.push(Triangle::new(p0, p2, p3, n_down, n_down, n_down, Vec2::ZERO, Vec2::ONE, Vec2::Y, mat_light));
         }
 
+        // Automatic celestial night-sky detection for lunar or nocturnal scenes
+        let is_night_scene = scene.nodes.values().any(|n| {
+            let name = n.name.to_lowercase();
+            name.contains("moon") || name.contains("lunar") || name.contains("space") || name.contains("night")
+        });
+
+        // 3-Point Studio Lighting Rig & Shadow Catcher Floor
+        if !is_night_scene {
+            if !has_illumination {
+                directional_lights.push(DirectionalLightSource {
+                    to_light: Vec3::new(0.55, 0.75, 0.45).normalize(),
+                    color: Vec3::new(1.0, 0.96, 0.90),
+                    intensity: 2.8,
+                });
+                directional_lights.push(DirectionalLightSource {
+                    to_light: Vec3::new(-0.65, 0.35, 0.55).normalize(),
+                    color: Vec3::new(0.78, 0.86, 1.0),
+                    intensity: 1.1,
+                });
+                directional_lights.push(DirectionalLightSource {
+                    to_light: Vec3::new(0.0, 0.65, -0.85).normalize(),
+                    color: Vec3::new(1.0, 1.0, 1.0),
+                    intensity: 2.2,
+                });
+                if sun_direction.is_none() {
+                    sun_direction = Some(directional_lights[0].to_light);
+                    sun_color = directional_lights[0].color;
+                    sun_intensity = directional_lights[0].intensity;
+                }
+            }
+
+            // Studio Ground Shadow-Catcher Floor Pedestal
+            let min_y = triangles.iter().flat_map(|t| [t.v0.y, t.v1.y, t.v2.y]).fold(f32::INFINITY, f32::min);
+            let max_r = triangles.iter().flat_map(|t| [t.v0.x.hypot(t.v0.z), t.v1.x.hypot(t.v1.z), t.v2.x.hypot(t.v2.z)]).fold(0.0_f32, f32::max);
+            let has_ground = triangles.iter().any(|t| t.n0.y > 0.95 && (t.v0.y - min_y).abs() < 0.05 && t.v0.x.abs() > 5.0);
+
+            if min_y.is_finite() && !triangles.is_empty() && !has_ground {
+                let floor_y = min_y - 0.005;
+                let floor_size = (max_r * 3.5).clamp(15.0, 100.0);
+                let mat_floor = materials.len();
+                materials.push(Material::principled(
+                    TextureSource::Constant(Vec3::new(0.18, 0.20, 0.23)),
+                    0.05,
+                    0.72,
+                    1.5,
+                    0.0,
+                    Vec3::ZERO,
+                ));
+
+                let p0 = Vec3::new(-floor_size, floor_y, -floor_size);
+                let p1 = Vec3::new( floor_size, floor_y, -floor_size);
+                let p2 = Vec3::new( floor_size, floor_y,  floor_size);
+                let p3 = Vec3::new(-floor_size, floor_y,  floor_size);
+                let n_up = Vec3::Y;
+
+                triangles.push(Triangle::new(p0, p1, p2, n_up, n_up, n_up, Vec2::ZERO, Vec2::X, Vec2::ONE, mat_floor));
+                triangles.push(Triangle::new(p0, p2, p3, n_up, n_up, n_up, Vec2::ZERO, Vec2::ONE, Vec2::Y, mat_floor));
+            }
+        }
+
         let mut pt_scene = Self::new(triangles, materials);
         pt_scene.directional_lights = directional_lights;
         pt_scene.point_lights = point_lights;
@@ -285,11 +345,6 @@ impl PathTracerScene {
             pt_scene = pt_scene.with_sun(sun_dir, sun_color, sun_intensity);
         }
 
-        // Automatic celestial night-sky detection for lunar or nocturnal scenes
-        let is_night_scene = scene.nodes.values().any(|n| {
-            let name = n.name.to_lowercase();
-            name.contains("moon") || name.contains("lunar") || name.contains("space") || name.contains("night")
-        });
         if is_night_scene {
             pt_scene = pt_scene.with_night_sky();
         }
