@@ -183,6 +183,8 @@ pub struct WeightedNormalModifier {
     pub mode: WeightedNormalMode,
     pub weight: f32,
     pub keep_sharp: bool,
+    pub area_power: f32,
+    pub sharp_threshold: f32,
 }
 
 impl WeightedNormalModifier {
@@ -193,7 +195,14 @@ impl WeightedNormalModifier {
             mode,
             weight: 1.0,
             keep_sharp: true,
+            area_power: 1.0,
+            sharp_threshold: std::f32::consts::PI / 6.0,
         }
+    }
+
+    pub fn with_area_power(mut self, power: f32) -> Self {
+        self.area_power = power;
+        self
     }
 }
 
@@ -218,7 +227,17 @@ impl Modifier for WeightedNormalModifier {
 
     fn apply(&self, input: &Mesh) -> Result<Mesh, MeshError> {
         let mut output = input.clone();
-        output.compute_weighted_normals(self.mode, self.weight);
+        output.compute_weighted_normals_advanced(
+            self.mode,
+            self.weight,
+            self.keep_sharp,
+            self.area_power,
+            if self.keep_sharp {
+                Some(self.sharp_threshold)
+            } else {
+                None
+            },
+        );
         Ok(output)
     }
 

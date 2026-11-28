@@ -56,6 +56,30 @@ impl Mesh {
     /// Large planar polygons dominate adjacent vertex normals, ensuring 100% flat shading
     /// on machine panels while maintaining smooth curvature on beveled edge strips.
     pub fn update_face_weighted_normals(&mut self, keep_sharp: bool) {
+        self.update_face_weighted_normals_power(keep_sharp, 1.0);
+    }
+
+    /// Recalculates vertex normals weighted by face area with custom area bias power exponent.
+    /// Higher power values (e.g. 2.0 - 4.0) allow large planar polygons to exponentially overpower
+    /// thin chamfer/bevel strips, eliminating flat-surface specular pinching.
+    pub fn update_face_weighted_normals_power(&mut self, keep_sharp: bool, area_power: f32) {
+        self.update_face_weighted_normals_advanced(keep_sharp, area_power, None);
+    }
+
+    /// Advanced Face-Weighted Normal update with sharp edge preservation, area power,
+    /// and optional automatic dihedral angle threshold detection.
+    pub fn update_face_weighted_normals_advanced(
+        &mut self,
+        keep_sharp: bool,
+        area_power: f32,
+        sharp_angle_threshold: Option<f32>,
+    ) {
+        if keep_sharp {
+            if let Some(threshold) = sharp_angle_threshold {
+                self.auto_smooth_normals(threshold);
+            }
+        }
+
         let face_keys: Vec<FaceKey> = self.faces.keys().collect();
         for fk in face_keys {
             let v_keys = self.face_vertices(fk);
@@ -72,6 +96,12 @@ impl Mesh {
         for (f_key, face) in &self.faces {
             let f_normal = face.normal;
             let f_area = self.face_area(f_key).max(1e-6);
+            let p_area = if (area_power - 1.0).abs() < 1e-4 {
+                f_area
+            } else {
+                f_area.powf(area_power)
+            };
+
             let start = face.half_edge;
             let mut curr = start;
             loop {
@@ -84,7 +114,7 @@ impl Mesh {
                 let e1 = (p_next - p_curr).normalize_or_zero();
                 let angle = e0.dot(e1).clamp(-1.0, 1.0).acos();
 
-                let weight = f_area * angle;
+                let weight = p_area * angle;
                 self.vertices[he.origin].normal += f_normal * weight;
 
                 curr = he.next;
@@ -97,19 +127,35 @@ impl Mesh {
         for (_, v) in &mut self.vertices {
             v.normal = v.normal.normalize_or_zero();
         }
+    }
 
-        if keep_sharp {
-            for (_, edge) in &self.edges {
-                if edge.is_sharp {
-                    // Mark sharp edges so corner_normal isolates their smoothing
-                }
+    /// Computes the interior corner angle of face `fk` at vertex `vk` in radians.
+    pub fn face_corner_angle(&self, fk: FaceKey, vk: VertexKey) -> f32 {
+        let hes = self.face_half_edges(fk);
+        for &he_k in &hes {
+            let he = &self.half_edges[he_k];
+            if he.origin == vk {
+                let p_curr = self.vertices[vk].position;
+                let p_prev = self.vertices[self.half_edges[he.prev].origin].position;
+                let p_next = self.vertices[he.target].position;
+                let e0 = (p_prev - p_curr).normalize_or_zero();
+                let e1 = (p_next - p_curr).normalize_or_zero();
+                return e0.dot(e1).clamp(-1.0, 1.0).acos();
             }
         }
+        1.0
     }
 
     /// Evaluates the split corner normal for face `f_key` at vertex `vk`,
     /// respecting sharp edges (`edge.is_sharp`).
     pub fn corner_normal(&self, f_key: FaceKey, vk: VertexKey) -> Vec3 {
+        self.corner_weighted_normal(f_key, vk, 1.0)
+    }
+
+    /// Evaluates the split corner normal for face `f_key` at vertex `vk`,
+    /// respecting sharp edges (`edge.is_sharp`) and applying area-and-angle weighting
+    /// with customizable `area_power` bias (e.g. 1.0 = standard FWN, 2.0 = strong flat bias).
+    pub fn corner_weighted_normal(&self, f_key: FaceKey, vk: VertexKey, area_power: f32) -> Vec3 {
         let f_normal = self.faces[f_key].normal;
         let mut accum = Vec3::ZERO;
 
@@ -119,7 +165,14 @@ impl Mesh {
 
         while let Some(curr_f) = queue.pop() {
             let n = self.faces[curr_f].normal;
-            accum += n;
+            let f_area = self.face_area(curr_f).max(1e-6);
+            let p_area = if (area_power - 1.0).abs() < 1e-4 {
+                f_area
+            } else {
+                f_area.powf(area_power)
+            };
+            let angle = self.face_corner_angle(curr_f, vk);
+            accum += n * (p_area * angle);
 
             let f_hes = self.face_half_edges(curr_f);
             for &he_key in &f_hes {
@@ -261,6 +314,29 @@ mod tests {
         for v in cube.vertices.values() {
             assert!(v.normal.length() > 0.99 && v.normal.length() < 1.01);
         }
+    }
+
+    #[test]
+    fn test_face_weighted_normals_power_and_sharp() {
+        let mut cube = Primitives::create_cube(2.0);
+        // Mark all edges sharp
+        for e in cube.edges.values_mut() {
+            e.is_sharp = true;
+        }
+
+        cube.update_face_weighted_normals_power(true, 2.0);
+        for v in cube.vertices.values() {
+            assert!(v.normal.length() > 0.99 && v.normal.length() < 1.01);
+        }
+
+        // Check corner split normal respects sharp edges
+        let fk = cube.faces.keys().next().unwrap();
+        let f_normal = cube.faces[fk].normal;
+        let vk = cube.face_vertices(fk)[0];
+        let corner_n = cube.corner_weighted_normal(fk, vk, 2.0);
+
+        // When edges are sharp, corner normal equals face normal exactly
+        assert!((corner_n - f_normal).length() < 1e-4);
     }
 
     #[test]

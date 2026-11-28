@@ -28,12 +28,27 @@ impl Mesh {
         (min + max) * 0.5
     }
 
-    /// Bisects the mesh along a plane defined by `plane_point` and `plane_normal`.
-    /// - `clear_positive`: Deletes all geometry on the positive half-space (dot(pos - pt, n) > 0)
-    /// - `clear_negative`: Deletes all geometry on the negative half-space (dot(pos - pt, n) < 0)
-    /// - `fill_cut`: When one side is cleared, creates a planar cap polygon covering the cut boundary
-
+    /// Computes face-weighted normals using standard mode and weight.
     pub fn compute_weighted_normals(&mut self, mode: WeightedNormalMode, weight: f32) {
+        self.compute_weighted_normals_advanced(mode, weight, true, 1.0, None);
+    }
+
+    /// Computes face-weighted normals with sharp edge preservation, area power exponent bias,
+    /// and optional automatic dihedral angle threshold splitting.
+    pub fn compute_weighted_normals_advanced(
+        &mut self,
+        mode: WeightedNormalMode,
+        weight: f32,
+        keep_sharp: bool,
+        area_power: f32,
+        sharp_angle_threshold: Option<f32>,
+    ) {
+        if keep_sharp {
+            if let Some(thresh) = sharp_angle_threshold {
+                self.auto_smooth_normals(thresh);
+            }
+        }
+
         let face_keys: Vec<FaceKey> = self.faces.keys().collect();
         for fk in face_keys {
             let v_keys = self.face_vertices(fk);
@@ -49,7 +64,12 @@ impl Mesh {
 
         for (f_key, face) in &self.faces {
             let f_normal = face.normal;
-            let f_area = self.face_area(f_key);
+            let f_area = self.face_area(f_key).max(1e-6);
+            let p_area = if (area_power - 1.0).abs() < 1e-4 {
+                f_area
+            } else {
+                f_area.powf(area_power)
+            };
 
             let start = face.half_edge;
             let mut curr = start;
@@ -64,9 +84,9 @@ impl Mesh {
                 let angle = e0.dot(e1).clamp(-1.0, 1.0).acos();
 
                 let w = match mode {
-                    WeightedNormalMode::FaceArea => f_area,
+                    WeightedNormalMode::FaceArea => p_area,
                     WeightedNormalMode::CornerAngle => angle,
-                    WeightedNormalMode::AreaAndAngle => f_area * angle,
+                    WeightedNormalMode::AreaAndAngle => p_area * angle,
                 } * weight;
 
                 self.vertices[he.origin].normal += f_normal * w;

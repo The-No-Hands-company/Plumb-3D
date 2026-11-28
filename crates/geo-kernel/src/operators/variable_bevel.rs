@@ -2,7 +2,7 @@
 //! Enables smooth tapered chamfers ($R_1 \to R_2$) along edge chains
 //! with $G^1$ (tangent) and $G^2$ (curvature continuous) profile transitions.
 
-use crate::mesh::{EdgeKey, FaceKey, Mesh, MeshError};
+use crate::mesh::{EdgeKey, FaceKey, Mesh, MeshError, VertexKey};
 use crate::operators::bevel::BevelProfile;
 use core_math::Vec3;
 use std::f32::consts::PI;
@@ -190,7 +190,8 @@ impl Mesh {
         Ok(created_faces)
     }
 
-    /// Bevels an ordered chain of edges with smoothly varying radius $R_1 \to R_2$.
+    /// Bevels an ordered chain of edges with smoothly varying radius $R_1 \to R_2$
+    /// parameterized by cumulative arc-length.
     pub fn bevel_edge_chain_variable(
         &mut self,
         edge_chain: &[EdgeKey],
@@ -200,16 +201,89 @@ impl Mesh {
         continuity: FilletContinuity,
         profile: BevelProfile,
     ) -> Result<Vec<FaceKey>, MeshError> {
+        self.bevel_edge_chain_variable_mitered(
+            edge_chain, r1, r2, segments, continuity, profile, false,
+        )
+    }
+
+    /// Bevels an ordered chain of edges with smoothly varying radius $R_1 \to R_2$,
+    /// with optional corner setback mitering at multi-edge junctions.
+    pub fn bevel_edge_chain_variable_mitered(
+        &mut self,
+        edge_chain: &[EdgeKey],
+        r1: f32,
+        r2: f32,
+        segments: usize,
+        continuity: FilletContinuity,
+        profile: BevelProfile,
+        miter_junctions: bool,
+    ) -> Result<Vec<FaceKey>, MeshError> {
         if edge_chain.is_empty() {
             return Ok(Vec::new());
         }
 
-        let total = edge_chain.len();
+        // 1. Calculate cumulative edge lengths for true arc-length parameterization
+        let mut edge_lengths = Vec::with_capacity(edge_chain.len());
+        let mut total_length = 0.0f32;
+        for &ek in edge_chain {
+            if let Some(edge) = self.edges.get(ek) {
+                let he = &self.half_edges[edge.half_edge];
+                let p0 = self.vertices[he.origin].position;
+                let p1 = self.vertices[he.target].position;
+                let len = (p1 - p0).length();
+                edge_lengths.push(len);
+                total_length += len;
+            } else {
+                edge_lengths.push(1.0);
+                total_length += 1.0;
+            }
+        }
+
         let mut all_created = Vec::new();
 
+        // 2. Corner setback mitering if requested
+        if miter_junctions {
+            // Find vertices that touch >= 3 incident edges or multiple edges in the chain
+            let mut corner_candidates = Vec::new();
+            for &ek in edge_chain {
+                if let Some(edge) = self.edges.get(ek) {
+                    let he = &self.half_edges[edge.half_edge];
+                    for &vk in &[he.origin, he.target] {
+                        if let Some(v) = self.vertices.get(vk) {
+                            if v.half_edges.len() >= 3 && !corner_candidates.contains(&vk) {
+                                corner_candidates.push(vk);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if !corner_candidates.is_empty() {
+                let max_r = r1.max(r2);
+                if let Ok(caps) = self.bevel_vertices(&corner_candidates, max_r * 1.2) {
+                    all_created.extend(caps);
+                }
+            }
+        }
+
+        // 3. Process each edge in the chain with smoothly blended radius
+        let mut accumulated_dist = 0.0f32;
         for (i, &edge_key) in edge_chain.iter().enumerate() {
-            let t_start = i as f32 / total as f32;
-            let t_end = (i + 1) as f32 / total as f32;
+            if !self.edges.contains_key(edge_key) {
+                continue;
+            }
+            let seg_len = edge_lengths[i];
+            let t_start = if total_length > 1e-6 {
+                accumulated_dist / total_length
+            } else {
+                i as f32 / edge_chain.len() as f32
+            };
+            let t_end = if total_length > 1e-6 {
+                (accumulated_dist + seg_len) / total_length
+            } else {
+                (i + 1) as f32 / edge_chain.len() as f32
+            };
+            accumulated_dist += seg_len;
 
             let blend_start = continuity.blend(t_start);
             let blend_end = continuity.blend(t_end);
@@ -224,7 +298,20 @@ impl Mesh {
             }
         }
 
+        self.update_face_weighted_normals(true);
         Ok(all_created)
+    }
+
+    /// CAD Corner Setback Mitering (Rhino / Catia style):
+    /// Miters a vertex junction where multiple beveled edges converge,
+    /// creating a smooth transitional corner cap polygon that prevents self-intersection
+    /// and topological pinching.
+    pub fn bevel_corner_setback_miter(
+        &mut self,
+        corner_vertex: VertexKey,
+        setback_distance: f32,
+    ) -> Result<Vec<FaceKey>, MeshError> {
+        self.bevel_vertices(&[corner_vertex], setback_distance)
     }
 }
 
@@ -266,5 +353,38 @@ mod tests {
         assert!((g2.blend(0.0) - 0.0).abs() < 1e-4);
         assert!((g2.blend(1.0) - 1.0).abs() < 1e-4);
         assert!((g2.blend(0.5) - 0.5).abs() < 1e-4);
+    }
+
+    #[test]
+    fn test_corner_setback_miter_cube() {
+        let mut cube = Primitives::create_cube(2.0);
+        let corner_vk = cube.vertices.keys().next().unwrap();
+        let miter_faces = cube
+            .bevel_corner_setback_miter(corner_vk, 0.25)
+            .expect("corner setback miter");
+
+        assert!(!miter_faces.is_empty());
+        assert!(cube.validate().is_ok());
+    }
+
+    #[test]
+    fn test_edge_chain_variable_mitered() {
+        let mut cube = Primitives::create_cube(2.0);
+        let edge_keys: Vec<EdgeKey> = cube.edges.keys().take(2).collect();
+
+        let faces = cube
+            .bevel_edge_chain_variable_mitered(
+                &edge_keys,
+                0.05,
+                0.2,
+                1,
+                FilletContinuity::G1Tangent,
+                BevelProfile::default(),
+                true,
+            )
+            .expect("edge chain variable with miter");
+
+        assert!(!faces.is_empty());
+        assert!(cube.validate().is_ok());
     }
 }
